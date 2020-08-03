@@ -40,9 +40,11 @@ void Reader::LoadImage( wxString path )
 
 void Reader::OnDraw( wxDC& dc )
 {
+    int i=0;
     for ( const auto& it : this->image->Get() )
     {
-        dc.DrawBitmap( *(it), 0,0 );
+        dc.DrawBitmap( *(it), this->image->GetPosition(i) );
+        i++;
     }
 }
 
