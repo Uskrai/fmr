@@ -30,6 +30,7 @@ class Traverser :
         int IndexFilename( wxString path ) { return this->Index(  path.AfterLast( wxFileName::GetPathSeparator() )  ); }
         wxString Item( int index ) { return this->dir->GetNameWithSep() + this->files.Item(index); }
         int Size() { return this->files.size(); }
+        bool IsExist(int index ) { return index > 0 && index < int(this->files.size()) ;}
     
     private:
         wxDirTraverseResult OnDir( const wxString& name );

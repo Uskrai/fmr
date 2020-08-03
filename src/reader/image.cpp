@@ -50,75 +50,90 @@ void Image::Load( wxString path )
     {
         this->LoadBitmap( this->image.back() ); // load first opened file
     }
-    this->isLoadBitmap = true;
+    this->isThreadLoadBitmap = true;
     this->CreateThread();
     this->GetThread()->Run();
 }
 
+void Image::ThreadLoadBitmap()
+{
+    // checking whether to load the next index or not
+    bool isShowNext =   this->files->IsExist(this->next) 
+                        && this->showNext < this->config->Read("showNext", 10 );
+
+    // checking whether to load the previous index or not
+    bool isShowPrev =   this->files->IsExist( this->prev ) 
+                        && this->showPrev < this->config->Read("showPrev",10);
+
+    // loading the next index if there is no Thread Destroy Testing
+    if ( isShowNext && !this->TestDestroy() )
+    {
+        if ( this->LoadAt( this->next, VECTOR_PUSH ) )
+        {
+            this->LoadBitmap( this->image.back(), VECTOR_PUSH );
+            this->showNext++;
+        }
+        this->next++;
+    }
+
+    // loading the next index if there is no Thread Destroy Testing
+    if ( isShowPrev && !this->TestDestroy() )
+    {
+        if ( this->LoadAt( this->prev, VECTOR_BEGIN ) )
+        {
+            this->LoadBitmap( this->image.front(), VECTOR_BEGIN );
+            this->showPrev++;
+        }
+        this->prev--;
+    }
+
+    // check whether the loading already done or not if true would disable loadBitmap;
+    if ( (!isShowNext && !isShowPrev) )
+    { 
+        this->isThreadLoadBitmap = false; 
+    } 
+}
+
+void Image::ThreadPreLoadImage()
+{
+    if ( !this->isThreadLoadBitmap )
+    {
+
+    if ( this->files->IsExist( this->next ) && this->config->Read("CacheNext",10) ) 
+    {
+        this->LoadAt( this->next, VECTOR_PUSH );
+        this->next++;
+        this->cacheNext++;
+    }
+
+    if ( this->files->IsExist( this->prev ) && this->config->Read("CachePrev", 10)  )
+    {
+        this->LoadAt( this->prev, VECTOR_PUSH );
+        this->prev--;
+        this->cachePrev++;
+    }
+
+    } // end of conditional isThreadLoadBitmap
+}
+
 wxThread::ExitCode Image::Entry() // might need to refactor
 {
-    int size = this->files->Size();
-
-    auto isNotOutOfIndex = [&]( int index ) -> bool
+    while ( this->isThreadLoadBitmap || this->isThreadPreLoadImage )
     {
-        return index > 0 && index < size && !this->TestDestroy(); // need to move to Traverser class
-    };
-
-    while ( this->isLoadBitmap || this->isPreLoadImage )
-    {
-        if ( this->isLoadBitmap && !this->TestDestroy()) // used when loading bitmap after opening file
+        if ( this->isThreadLoadBitmap && !this->TestDestroy())
         {
-            // checking whether to load the next index or not
-            bool isShowNext =   isNotOutOfIndex(this->next) 
-                                && this->showNext < this->config->Read("showNext", 10 );
+            this->ThreadLoadBitmap();
+        }
 
-            // checking whether to load the previous index or not
-            bool isShowPrev =   isNotOutOfIndex( this->prev ) 
-                                && this->showPrev < this->config->Read("showPrev",10);
-
-            // loading the next index if there is no Thread Destroy Testing
-            if ( isShowNext && !this->TestDestroy() )
-            {
-                if ( this->LoadAt( this->next++, VECTOR_PUSH ) )
-                {
-                    this->LoadBitmap( this->image.back(), VECTOR_PUSH );
-                    this->showNext++;
-                }
-            }
-
-            // loading the next index if there is no Thread Destroy Testing
-            if ( isShowPrev && !this->TestDestroy() )
-            {
-                if ( this->LoadAt( this->prev--, VECTOR_BEGIN ) )
-                {
-                    this->LoadBitmap( this->image.front(), VECTOR_BEGIN );
-                    this->showPrev++;
-                }
-            }
-
-            // check whether the loading already done or not if true would disable loadBitmap;
-            if ( (!isShowNext && !isShowPrev) || this->TestDestroy())
-            { 
-                this->isLoadBitmap = false; 
-            } 
-        } // end of loadBitmap 
-
-        if ( this->isPreLoadImage && !this->TestDestroy() )
+        if ( this->isThreadPreLoadImage && !this->TestDestroy() )
         {
-            if ( isNotOutOfIndex( this->next ) && this->config->Read("CacheNext",10) ) 
-            {
-
-            }
-            if ( isNotOutOfIndex( this->prev ) && this->config->Read("CachePrev", 10)  )
-            {
-
-            }
+            this->ThreadPreLoadImage();
         } 
 
         if ( this->TestDestroy() )
         {
-            this->isLoadBitmap = false;
-            this->isPreLoadImage = false;
+            this->isThreadLoadBitmap = false;
+            this->isThreadPreLoadImage = false;
         }
     }
     return (wxThread::ExitCode)0;
@@ -218,6 +233,7 @@ void Image::AddPosition( const BitmapPtr& bmp )
 {
     this->AddPosition( bmp, this->imagePosX, this->imagePosY);
 }
+
 
 void Image::Clear()
 {
