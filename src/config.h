@@ -15,32 +15,47 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef FMR_CONFIG
+#define FMR_CONFIG
+
 #include <wx/fileconf.h>
 
 class Config :
     private wxFileConfig
 {
+    private:
         static Config* global;
     public:
-        Config() : wxFileConfig( "fmr", "uskrai", "config.ini", "config.ini" ) {};
+        using wxFileConfig::wxFileConfig;
+        using wxFileConfig::GetPath;
+
+        
+        wxString Read( wxString name, const char* defaultValue )
+        {
+            wxString string = wxString(defaultValue);
+            return this->Read( name, string );
+        }
+
         template<typename T>
         T Read( wxString name, T defaultValue )
         {
-            if ( wxFileConfig::Read( name, &defaultValue )
+            if ( wxFileConfig::Read( name, &defaultValue ) )
             {
                 return defaultValue;
             }
             else
             {
-                wxFileConfig::Write(name, defaultValue);
+                this->Write(name, defaultValue);
                 return defaultValue;
             }
         }
-        template<typename T>
-        bool Write( const wxString name, const T value ) 
-        {
-            return wxFileConfig::Write(name,value);
-        }
-        static void Set( Config* global ) { Config::global = global; }
-        static Config* Get() { return Config::global; }
+
+        using wxFileConfig::Write;
+        using wxFileConfig::Flush;
+
+        static Config* Get();
+        static void Set( Config* pConfig );
 };
+
+
+#endif
