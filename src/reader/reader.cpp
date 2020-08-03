@@ -40,6 +40,10 @@ void Reader::LoadImage( wxString path )
 
 void Reader::OnDraw( wxDC& dc )
 {
+    for ( const auto& it : this->image->Get() )
+    {
+        dc.DrawBitmap( *(it), 0,0 );
+    }
 }
 
 void Reader::Error( wxSize size )
