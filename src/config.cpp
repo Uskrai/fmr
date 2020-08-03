@@ -17,7 +17,7 @@
 
 #include "config.h"
 
-// Config* Config::global = __null;
+Config* Config::global = __null;
 
 void Config::Set( Config* global ) { Config::global = global; }
 Config* Config::Get() { return Config::global; }
