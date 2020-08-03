@@ -26,9 +26,9 @@ class Traverser :
 {
     public:
         void Open( wxString path );
-        int Index( wxString name ) { return this->files.Index( name ); }
-        int IndexFilename( wxString path ) { return this->Index( this->dir.GetNameWithSep() + path  ); }
-        wxString Item( int index ) { return this->files.Item(index); }
+        int Index( wxString name ) { return this->files.Index( name.AfterLast( wxFileName::GetPathSeparator() ) ); }
+        int IndexFilename( wxString path ) { return this->Index(  path.AfterLast( wxFileName::GetPathSeparator() )  ); }
+        wxString Item( int index ) { return this->dir->GetNameWithSep() + this->files.Item(index); }
         int Size() { return this->files.size(); }
     
     private:
@@ -38,7 +38,7 @@ class Traverser :
        
         wxArrayString files;
         wxArrayString directory;
-        wxDir dir;
+        wxDir* dir = new wxDir();
 
 };
 
