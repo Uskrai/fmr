@@ -66,8 +66,10 @@ class Image :
         bool LoadAt( int index, VectorPos vectorPos = VECTOR_PUSH ); // load image at given index and whether to push or insert
         void LoadBitmap( ImagePtr img, VectorPos pos = VECTOR_PUSH ); // load bitmap from given image and whether to push or insert
 
-        bool isLoadBitmap = false; // turned on when loading Bitmap immediately in multi-thread
-        bool isPreLoadImage = false; // turned on when preLoading Image in multi-thread
+        bool isThreadLoadBitmap = false; // turned on when loading Bitmap immediately in multi-thread
+        bool isThreadPreLoadImage = false; // turned on when preLoading Image in multi-thread
+        void ThreadLoadBitmap();
+        void ThreadPreLoadImage();
 
         void RefreshImagePosition(); // recalculate all image position
         void AddPosition( const BitmapPtr& bmp, wxVector<int>& x, wxVector<int>& y); // calculate position from given bitmap
