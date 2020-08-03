@@ -15,21 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "frame.h"
 #include "config.h"
 
-#include <wx/wxprec.h>
-#include <wx/app.h>
-#include <wx/display.h>
+// Config* Config::global = __null;
 
-
-class App : 
-    public wxApp
-{   
-        wxFrame *frame;
-        Config* config;
-            bool OnInit();
-            int OnExit();
-        public:
-            void OpenFile(wxString Path);
-};
+void Config::Set( Config* global ) { Config::global = global; }
+Config* Config::Get() { return Config::global; }
