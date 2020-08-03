@@ -21,7 +21,12 @@ exe			:= fmr.exe
 soext		:= dll
 endif
 
-src			:= traverser reader/image reader/reader panel frame
+RELEASE 	:= DEBUG
+ifeq ($(RELEASE), DEBUG)
+CXXFLAGS 	+= -g
+endif
+
+src			:= config traverser reader/image reader/reader panel frame
 header		:= $(addsuffix .h, $(src) )
 VPATH		:= src:build
 so			:= $(addsuffix .$(soext), $(src) )
@@ -47,8 +52,8 @@ $(exe) 		: app.cpp frame.h
 $(so) 		: FLAGS := -Isrc $(CXXFLAGS) $(wxLIBS)
 $(obj)		: FLAGS	:= -Isrc -c $(CXXFLAGS) $(wxFLAGS)
 
-RELEASE := SHARED
-ifeq ($(RELEASE), SHARED)
+LINK := SHARED
+ifeq ($(LINK), SHARED)
 $(obj)		: FLAGS += -fPIC
 $(so)		: FLAGS += -shared
 endif
@@ -56,11 +61,12 @@ endif
 $(src) : % : %.o %.$(soext)
 
 link : $(so)
-
 frame.$(soext) : lib += panel
 panel.$(soext) : lib += reader/reader
 reader/reader.$(soext) : lib += reader/image
 reader/image.$(soext) : lib += traverser
+
+$(filter-out config.$(soext), $(so)) : libs += config
 
 # building Shared Object
 $(addprefix build/, $(so) ) : build/%.$(soext): %.o
@@ -74,6 +80,7 @@ panel.o : reader/reader.h
 frame.o : panel.h
 app.o : frame.h
 
+$(filter-out config.o, $(obj) ) : config.h
 obj : $(obj)
 
 $(addprefix build/, $(obj) ): build/%.o : %.cpp %.h 
