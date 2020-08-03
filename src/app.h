@@ -22,6 +22,8 @@
 #include <wx/app.h>
 #include <wx/display.h>
 
+#include <wx/stdpaths.h>
+
 
 class App : 
     public wxApp
