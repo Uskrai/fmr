@@ -34,6 +34,7 @@ class Reader : public wxScrolledWindow
     public:
         Reader( wxWindow* parent, wxSize size );
         Reader( wxWindow* parent, wxSize size, wxString path);
+        ~Reader();
         void LoadImage( wxString path );
 
     private:

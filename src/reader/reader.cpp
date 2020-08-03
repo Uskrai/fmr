@@ -56,4 +56,9 @@ void Reader::Error( wxSize size )
     this->SetSizer(sizer);
 }
 
+Reader::~Reader()
+{
+    delete this->image;
+}
+
 } // end of namespace Reader
