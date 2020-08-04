@@ -20,6 +20,12 @@
 namespace Reader 
 {
 
+wxBEGIN_EVENT_TABLE( Reader, wxScrolledWindow )
+    EVT_SCROLLWIN_LINEUP(Reader::OnLineUp)
+    EVT_SCROLLWIN_LINEDOWN(Reader::OnLineDown)
+    EVT_MOUSEWHEEL(Reader::OnMouseWheel)
+wxEND_EVENT_TABLE()
+
 Reader::Reader( wxWindow* parent, wxSize size ) :
     wxScrolledWindow( parent, wxID_ANY, wxDefaultPosition, size ) 
 {
@@ -31,6 +37,11 @@ Reader::Reader( wxWindow* parent, wxSize size, wxString path ):
     Reader(parent, size)
 {
     this->LoadImage(path);
+}
+
+Reader::~Reader()
+{
+    delete this->image;
 }
 
 void Reader::LoadImage( wxString path )
@@ -58,9 +69,33 @@ void Reader::Error( wxSize size )
     this->SetSizer(sizer);
 }
 
-Reader::~Reader()
+void Reader::OnLineChange( wxScrollWinEvent& event, int step )
 {
-    delete this->image;
+    if ( event.GetOrientation() == wxVERTICAL )
+    {
+        this->Scroll(-1, this->GetViewStart().y + step );
+    }
+    else
+    {
+        this->Scroll( this->GetViewStart().x + step, -1 );
+    }
+}
+
+void Reader::OnLineUp( wxScrollWinEvent& event )
+{
+    this->OnLineChange( event, -(this->config->Read("ScrollArrow",300)) );
+}
+
+void Reader::OnLineDown( wxScrollWinEvent& event )
+{
+    this->OnLineChange( event, this->config->Read("ScrollArrow",300) );
+}
+
+void Reader::OnMouseWheel( wxMouseEvent& event )
+{
+    int scrolling = -(event.GetWheelDelta()/event.GetWheelRotation()) * (this->config->Read("ScrollWheel",300)) ;
+    this->Scroll( -1, this->GetViewStart().y + scrolling);
+    event.Skip();
 }
 
 } // end of namespace Reader
