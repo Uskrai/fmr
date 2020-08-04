@@ -76,18 +76,17 @@ wxMenu* Frame::MenuHelp()
 
 void Frame::OpenFile(wxCommandEvent& event)
 {  
-    wxFileDialog* OpenDialog = new wxFileDialog(
+    wxFileDialog* openDialog = new wxFileDialog(
         this,_("Choose a file to open"),wxEmptyString,wxEmptyString,
-        _("Images Files(*.jpg;*.png)|*.jpg;*.png|Archive Files (*.zip)|*.zip"),wxFD_OPEN,wxDefaultPosition
+        _("All Files(*)|*|Images Files(*.jpg;*.png)|*.jpg;*.png|Archive Files (*.zip)|*.zip"),wxFD_OPEN,wxDefaultPosition
     );
 
-    if(OpenDialog->ShowModal() == wxID_OK)
+    if(openDialog->ShowModal() == wxID_OK)
     {
-        std::string path = std::string(OpenDialog->GetPath().mb_str());
-        this->panel->LoadFile( path );
+        this->panel->LoadFile( openDialog->GetPath() );
     }
     event.Skip();
-    OpenDialog->Destroy();
+    openDialog->Destroy();
 }
 
 void Frame::SetPanel()
