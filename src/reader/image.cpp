@@ -175,10 +175,10 @@ void Image::LoadBitmap( ImagePtr img, VectorPos vectorPos )
 
 bool Image::LoadAt( int index, VectorPos vecPos )
 {
-    wxString filename = this->files->Item(index); // get filename from given index
-    if ( wxImage::CanRead(filename) ) // check whether the handler can Read the filename
+    wxInputStream* filename = this->files->Item(index); // get filename from given index
+    if ( wxImage::CanRead( *(filename) ) ) // check whether the handler can Read the filename
     {
-        ImagePtr img = ImagePtr( new wxImage(filename) );
+        ImagePtr img = ImagePtr( new wxImage( *(filename) ) );
         switch ( vecPos )
         {
             case VECTOR_PUSH:
