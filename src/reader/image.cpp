@@ -175,22 +175,25 @@ void Image::LoadBitmap( ImagePtr img, VectorPos vectorPos )
 
 bool Image::LoadAt( int index, VectorPos vecPos )
 {
-    wxInputStream* filename = this->files->Item(index); // get filename from given index
-    if ( wxImage::CanRead( *(filename) ) ) // check whether the handler can Read the filename
+    if ( this->files->IsExist(index))
     {
-        ImagePtr img = ImagePtr( new wxImage( *(filename) ) );
-        switch ( vecPos )
+        wxInputStream* filename = this->files->Item(index); // get filename from given index
+        if ( wxImage::CanRead( *(filename) ) ) // check whether the handler can Read the filename
         {
-            case VECTOR_PUSH:
+            ImagePtr img = ImagePtr( new wxImage( *(filename) ) );
+            switch ( vecPos )
             {
-                this->image.push_back( img ); // push image to the end
+                case VECTOR_PUSH:
+                {
+                    this->image.push_back( img ); // push image to the end
+                }
+                case VECTOR_BEGIN:
+                {
+                    this->image.insert( this->image.begin(), img ); // insert image in the beginning
+                }
             }
-            case VECTOR_BEGIN:
-            {
-                this->image.insert( this->image.begin(), img ); // insert image in the beginning
-            }
+            return true; // to determinate whether the image can be loaded or not
         }
-        return true; // to determinate whether the image can be loaded or not
     }
     return false;
 }
