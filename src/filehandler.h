@@ -22,9 +22,12 @@
 
 #include <wx/dir.h>
 #include <wx/filename.h>
+#include <wx/image.h>
 #include <wx/archive.h>
 #include <wx/wfstream.h>
 #include <wx/mstream.h>
+#include <wx/zipstrm.h>
+#include <wx/tarstrm.h>
 
 class FileHandler
 {
@@ -35,9 +38,10 @@ class FileHandler
         wxInputStream* Item( int index ) { return this->fstream.at(index); }
         int Size() { return this->files.size(); }
         bool IsExist(int index );
-    
+        
+        void Clear();
     private:
-        void TraverseArchive( const wxArchiveClassFactory* factory, wxString path );
+        void TraverseArchive( const wxArchiveClassFactory* factory, wxInputStream* stream );
         void TraverseDir( wxString path );
 
         wxVector<wxInputStream*> fstream;
