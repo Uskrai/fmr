@@ -26,7 +26,7 @@ ifeq ($(RELEASE), DEBUG)
 CXXFLAGS 	+= -g
 endif
 
-src			:= config traverser reader/image reader/reader panel frame
+src			:= config filehandler reader/image reader/reader panel frame
 header		:= $(addsuffix .h, $(src) )
 VPATH		:= src:build
 so			:= $(addsuffix .$(soext), $(src) )
@@ -64,7 +64,7 @@ link : $(so)
 frame.$(soext) : lib += panel
 panel.$(soext) : lib += reader/reader
 reader/reader.$(soext) : lib += reader/image
-reader/image.$(soext) : lib += traverser
+reader/image.$(soext) : lib += filehandler
 
 $(filter-out config.$(soext), $(so)) : libs += config
 
@@ -74,7 +74,7 @@ $(addprefix build/, $(so) ) : build/%.$(soext): %.o
 
 # $(obj) : FLAGS := $(CXXFLAGS) $(wxFLAGS)
 
-reader/image,o		: traverser.h
+reader/image,o		: filehandler.h
 reader/reader.o 	: reader/image.h
 panel.o : reader/reader.h 
 frame.o : panel.h
