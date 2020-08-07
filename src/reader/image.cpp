@@ -16,6 +16,7 @@
  */
 
 #include "reader/image.h"
+#include <iostream>
 
 namespace Reader
 {
@@ -27,8 +28,12 @@ Image::Image( wxScrolledWindow* parent )
 
 void Image::Open( wxString path )
 {
-    this->Clear();
-    this->files->Open(path);
+    if ( !(this->files) )
+    {
+        delete this->files;
+    }
+    this->files = Handler::Find(path);
+    this->files->Traverse();
     this->file = path;
     this->Load(path);
 }
@@ -50,6 +55,7 @@ void Image::Load( wxString path )
     {
         this->LoadBitmap( this->image.back() ); // load first opened file
     }
+
     this->isThreadLoadBitmap = true;
     this->CreateThread();
     this->GetThread()->Run();
@@ -61,10 +67,6 @@ void Image::ThreadLoadBitmap()
     bool isShowNext =   this->files->IsExist(this->next) 
                         && this->showNext < this->config->Read("showNext", 10 );
 
-    // checking whether to load the previous index or not
-    bool isShowPrev =   this->files->IsExist( this->prev ) 
-                        && this->showPrev < this->config->Read("showPrev",10);
-
     // loading the next index if there is no Thread Destroy Testing
     if ( isShowNext && !this->TestDestroy() )
     {
@@ -75,6 +77,10 @@ void Image::ThreadLoadBitmap()
         }
         this->next++;
     }
+
+    // checking whether to load the previous index or not
+    bool isShowPrev =   this->files->IsExist( this->prev ) 
+                        && this->showPrev < this->config->Read("showPrev",10);
 
     // loading the next index if there is no Thread Destroy Testing
     if ( isShowPrev && !this->TestDestroy() )
@@ -245,6 +251,7 @@ void Image::Clear()
     this->imagePosY.clear();
     this->imagePosX.clear();
     this->maxWidth = 0;
+
     if ( this->GetThread() && this->GetThread()->IsRunning() )
     {
         this->GetThread()->Delete();
@@ -254,7 +261,10 @@ void Image::Clear()
 Image::~Image()
 {
     this->Clear();
-    delete files;
+    if ( !(this->files) )
+    {
+        delete this->files;
+    }
 }
 
 } // end of namespace reader
