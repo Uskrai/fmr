@@ -20,29 +20,35 @@
 
 #include "config.h"
 
+#include "handler/handler.h"
+
 #include <wx/dir.h>
 #include <wx/filename.h>
 #include <wx/image.h>
-#include <wx/archive.h>
 #include <wx/wfstream.h>
-#include <wx/mstream.h>
-#include <wx/zipstrm.h>
-#include <wx/tarstrm.h>
 
 class FileHandler
+    : public Handler
 {
     public:
+        FileHandler( wxString path );
+        ~FileHandler();
         void Open( wxString path );
+        void Traverse( );
+
         int Index( wxString name );
         int IndexFilename( wxString path ) { return this->Index(  path.AfterLast( wxFileName::GetPathSeparator() )  ); }
         wxInputStream* Item( int index ) { return this->fstream.at(index); }
         int Size() { return this->files.size(); }
-        bool IsExist(int index );
-        
+
+        bool IsExist( int index );
+
         void Clear();
+
+        static bool CanHandle( wxString path ) { return wxImage::CanRead( path ); }
+        static void GetAllFiles( const wxString& path, wxVector<wxInputStream*>& stream );
+        
     private:
-        void TraverseArchive( const wxArchiveClassFactory* factory, wxInputStream* stream );
-        void TraverseDir( wxString path );
 
         wxVector<wxInputStream*> fstream;
         int type;
