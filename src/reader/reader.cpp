@@ -21,9 +21,8 @@ namespace Reader
 {
 
 wxBEGIN_EVENT_TABLE( Reader, wxScrolledWindow )
-    EVT_SCROLLWIN_LINEUP(Reader::OnLineUp)
-    EVT_SCROLLWIN_LINEDOWN(Reader::OnLineDown)
     EVT_MOUSEWHEEL(Reader::OnMouseWheel)
+    EVT_KEY_DOWN(Reader::OnKeyDown)
 wxEND_EVENT_TABLE()
 
 Reader::Reader( wxWindow* parent, wxSize size ) :
@@ -46,6 +45,7 @@ Reader::~Reader()
 
 void Reader::LoadImage( wxString path )
 {
+    this->image->Clear();
     this->image->Open(path);
 }
 
@@ -69,33 +69,48 @@ void Reader::Error( wxSize size )
     this->SetSizer(sizer);
 }
 
-void Reader::OnLineChange( wxScrollWinEvent& event, int step )
-{
-    if ( event.GetOrientation() == wxVERTICAL )
-    {
-        this->Scroll(-1, this->GetViewStart().y + step );
-    }
-    else
-    {
-        this->Scroll( this->GetViewStart().x + step, -1 );
-    }
-}
-
-void Reader::OnLineUp( wxScrollWinEvent& event )
-{
-    this->OnLineChange( event, -(this->config->Read("ScrollArrow",300)) );
-}
-
-void Reader::OnLineDown( wxScrollWinEvent& event )
-{
-    this->OnLineChange( event, this->config->Read("ScrollArrow",300) );
-}
-
 void Reader::OnMouseWheel( wxMouseEvent& event )
 {
-    int scrolling = -(event.GetWheelDelta()/event.GetWheelRotation()) * (this->config->Read("ScrollWheel",300)) ;
-    this->Scroll( -1, this->GetViewStart().y + scrolling);
+    int scrolling = event.GetWheelDelta()/event.GetWheelRotation() * this->ConfRead("WheelInvert",-1);
+    this->OnArrow( wxVERTICAL, scrolling );
     event.Skip();
 }
 
-} // end of namespace Reader
+void Reader::OnKeyDown( wxKeyEvent& event )
+{
+    wxEventType key = event.GetKeyCode();
+    int def = this->config->Read("Invert",-1);
+    switch (key)
+    {
+    case WXK_UP:
+        return this->OnArrow( wxVERTICAL, this->ConfRead("ArrowVerticalInvert",def) * 1 );
+        break;
+    case WXK_DOWN:
+        return this->OnArrow( wxVERTICAL, this->ConfRead("ArrowVerticalInvert",def) * -1 );
+        break;
+    case WXK_LEFT:
+        return this->OnArrow( wxHORIZONTAL, this->ConfRead("ArrowHorizontalInvert",def) * 1 );
+        break;
+    case WXK_RIGHT:
+        return this->OnArrow( wxHORIZONTAL, this->ConfRead("ArrowHorizontalInvert",def) * -1 );
+    default:
+    event.Skip();
+    }
+}
+
+void Reader::OnArrow( wxOrientation orient, int modifier  )
+{
+    switch ( orient )
+    {
+        case wxVERTICAL:
+            this->Scroll( -1, this->GetViewStart().y + ( this->ConfRead("ScrollStep",300) * modifier ) );
+            break;
+        case wxHORIZONTAL:
+            this->Scroll( this->GetViewStart().x + ( this->ConfRead("ScrollStep",300) * modifier ), -1 );
+            break;
+        default:
+            break;
+    }
+}
+
+} // end of namespace Reade
