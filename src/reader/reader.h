@@ -41,15 +41,15 @@ class Reader : public wxScrolledWindow
     private:
         Image* image = new Image(this);
         Config* config = Config::Get();
+        template<typename T>
+        T ConfRead( wxString name, T def ) { return this->config->Read( wxString("Reader/") + name, def ); }
         int w,h;
         void Error( wxSize size ); 
         void OnDraw( wxDC& dc );
         wxDECLARE_EVENT_TABLE();
-        void OnLineUp( wxScrollWinEvent& event );
-        void OnLineDown( wxScrollWinEvent& event );
         void OnMouseWheel( wxMouseEvent& event );
-        void OnLineChange( wxScrollWinEvent& event, int step);
-
+        void OnKeyDown( wxKeyEvent& event );
+        void OnArrow( wxOrientation orient, int modifier  );
 };
 
 };
