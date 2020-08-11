@@ -47,6 +47,7 @@ class Reader : public wxScrolledWindow
         void Error( wxSize size ); 
         void OnDraw( wxDC& dc );
         wxDECLARE_EVENT_TABLE();
+        void OnMouseMotion( wxMouseEvent& event );
         void OnMouseWheel( wxMouseEvent& event );
         void OnKeyDown( wxKeyEvent& event );
         void OnArrow( wxOrientation orient, int modifier  );

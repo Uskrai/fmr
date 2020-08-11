@@ -16,7 +16,6 @@
  */
 
 #include "reader/image.h"
-#include <iostream>
 
 namespace Reader
 {

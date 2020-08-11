@@ -21,6 +21,7 @@ namespace Reader
 {
 
 wxBEGIN_EVENT_TABLE( Reader, wxScrolledWindow )
+    EVT_MOTION(Reader::OnMouseMotion)
     EVT_MOUSEWHEEL(Reader::OnMouseWheel)
     EVT_KEY_DOWN(Reader::OnKeyDown)
 wxEND_EVENT_TABLE()
@@ -51,11 +52,11 @@ void Reader::LoadImage( wxString path )
 
 void Reader::OnDraw( wxDC& dc )
 {
-    int i=0;
-    for ( const auto& it : this->image->Get() )
+    dc.SetClippingRegion( this->GetViewStart(), this->GetClientSize() );
+    wxCriticalSectionLocker locker( this->image->GetLock() );
+    for ( const auto& it : this->image->Get( this->GetViewStart(), this->GetClientSize() ) )
     {
-        dc.DrawBitmap( *(it), this->image->GetPosition(i) );
-        i++;
+        dc.DrawBitmap( this->image->Get(it), this->image->GetPosition(it) );
     }
 }
 
@@ -113,4 +114,8 @@ void Reader::OnArrow( wxOrientation orient, int modifier  )
     }
 }
 
+void Reader::OnMouseMotion( wxMouseEvent& event )
+{
+    event.Skip();
+}
 } // end of namespace Reade
