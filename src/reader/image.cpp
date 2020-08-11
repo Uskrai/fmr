@@ -43,6 +43,56 @@ Image::VectorBitmap Image::Get()
     return this->bitmap;
 }
 
+int Image::Get( wxPoint area, wxPoint position )
+{
+    int
+    posY = area.y + position.y,
+    posX = area.x + position.x,
+    bmpPosY, bmpAfterY,
+    bmpPosX, bmpAfterX;
+    for ( size_t i = 0; i < this->bitmap.size(); i++ )
+    {
+        bmpPosY = this->imagePosY.at(i);
+        bmpAfterY = bmpPosY + this->bitmap.at(i)->GetHeight();
+        bmpPosX = this->imagePosX.at(i);
+        bmpAfterX = bmpPosX + this->bitmap.at(i)->GetWidth();
+        if  (    
+                posY >= bmpPosY && posY <= bmpAfterY 
+                && posX >= bmpPosX && posX <= bmpAfterX
+            )
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+wxVector<int> Image::Get( wxPoint position, wxSize size )
+{
+    int
+    top = position.y, bottom = top + size.GetHeight(),
+    left = position.x, right = left + size.GetHeight(),
+    bmpPosY, bmpAfterY, bmpPosX, bmpAfterX;
+
+    wxVector<int> bmp;
+    for ( size_t i = 0; i < this->bitmap.size(); i++ )
+    {
+        bmpPosY = this->imagePosY.at(i);
+        bmpAfterY = bmpPosY + this->bitmap.at(i)->GetHeight();
+        bmpPosX = this->imagePosX.at(i);
+        bmpAfterX = bmpPosY + this->bitmap.at(i)->GetWidth();
+        if  (   (   ( bmpPosY >= top || bmpAfterY >= top )
+                &&  ( bmpPosY <= bottom || bmpAfterY <= bottom )  )
+                &&  ( ( bmpPosX >= left || bmpAfterY >= left )
+                ||  ( bmpPosX <= right || bmpAfterX <= right ) ) 
+            )
+        {
+            bmp.push_back( i );
+        }
+    }
+    return bmp;
+}
+
 void Image::Load( wxString path )
 {
     int i = this->files->Index(path);
