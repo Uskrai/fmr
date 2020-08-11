@@ -51,6 +51,9 @@ class Image :
         ~Image();
         void Open( wxString path );
         VectorBitmap Get(); // return all Loaded Bitmap
+        wxBitmap Get( int index ) { return *(this->bitmap.at(index)); }
+        int Get ( wxPoint area, wxPoint posiion );
+        wxVector<int> Get( wxPoint position, wxSize size );
         void Clear(); // clear all value
         wxScrolledWindow* GetParent() { return this->parent; }
 
