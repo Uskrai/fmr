@@ -49,15 +49,18 @@ class Image :
         ~Image();
         void Open( const wxString& path );
         VectorBitmap Get(); // return all Loaded Bitmap
-        const wxBitmap& Get( int index ) { return this->bitmap.at(index); }
-        int Get ( const wxPoint& area, const wxPoint& posiion );
-        wxVector<int> Get( const wxPoint& position, const wxSize& size );
+        const wxBitmap& Get( int index ) const { return this->bitmap.at(index); }
+        wxBitmap& Get( int index ) { return this->bitmap.at(index); }
+
+        int Get ( const wxPoint& area, const wxPoint& posiion ) const;
+        wxVector<int> Get( const wxPoint& position, const wxSize& size ) const;
         void Clear(); // clear all value
-        wxScrolledWindow* GetParent() { return this->parent; }
+        wxScrolledWindow* GetParent() const { return this->parent; }
 
         // return imagePos X and Y as wxPoint
-        wxPoint GetPosition( int index ) { return wxPoint(this->imagePosX.at(index), this->imagePosY.at(index) );}
+        wxPoint GetPosition( int index ) const { return wxPoint(this->imagePosX.at(index), this->imagePosY.at(index) );}
 
+        wxCriticalSection& GetLock() { return this->gCS; } 
     private:
         wxScrolledWindow* parent;
 
@@ -86,7 +89,7 @@ class Image :
         wxString file;
 
         VectorImage image;
-        int prev, next, showPrev, showNext, cachePrev,cacheNext, maxWidth = 0;
+        int prev, next, showPrev, showNext, cachePrev,cacheNext, maxWidth;
         VectorBitmap bitmap;
         wxVector<int> imagePosY, imagePosX;
         // wxVector<wxPoint> imagePos;
