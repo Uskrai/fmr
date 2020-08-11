@@ -26,7 +26,7 @@ Image::Image( wxScrolledWindow* parent )
     this->parent = parent;
 }
 
-void Image::Open( wxString path )
+void Image::Open( const wxString& path )
 {
     if ( !(this->files) )
     {
@@ -43,7 +43,7 @@ Image::VectorBitmap Image::Get()
     return this->bitmap;
 }
 
-int Image::Get( wxPoint area, wxPoint position )
+int Image::Get( const wxPoint& area, const wxPoint& position )
 {
     int
     posY = area.y + position.y,
@@ -53,9 +53,9 @@ int Image::Get( wxPoint area, wxPoint position )
     for ( size_t i = 0; i < this->bitmap.size(); i++ )
     {
         bmpPosY = this->imagePosY.at(i);
-        bmpAfterY = bmpPosY + this->bitmap.at(i)->GetHeight();
+        bmpAfterY = bmpPosY + this->bitmap.at(i).GetHeight();
         bmpPosX = this->imagePosX.at(i);
-        bmpAfterX = bmpPosX + this->bitmap.at(i)->GetWidth();
+        bmpAfterX = bmpPosX + this->bitmap.at(i).GetWidth();
         if  (    
                 posY >= bmpPosY && posY <= bmpAfterY 
                 && posX >= bmpPosX && posX <= bmpAfterX
@@ -67,7 +67,7 @@ int Image::Get( wxPoint area, wxPoint position )
     return -1;
 }
 
-wxVector<int> Image::Get( wxPoint position, wxSize size )
+wxVector<int> Image::Get( const wxPoint& position, const wxSize& size )
 {
     int
     top = position.y, bottom = top + size.GetHeight(),
@@ -78,9 +78,9 @@ wxVector<int> Image::Get( wxPoint position, wxSize size )
     for ( size_t i = 0; i < this->bitmap.size(); i++ )
     {
         bmpPosY = this->imagePosY.at(i);
-        bmpAfterY = bmpPosY + this->bitmap.at(i)->GetHeight();
+        bmpAfterY = bmpPosY + this->bitmap.at(i).GetHeight();
         bmpPosX = this->imagePosX.at(i);
-        bmpAfterX = bmpPosY + this->bitmap.at(i)->GetWidth();
+        bmpAfterX = bmpPosY + this->bitmap.at(i).GetWidth();
         if  (   (   ( bmpPosY >= top || bmpAfterY >= top )
                 &&  ( bmpPosY <= bottom || bmpAfterY <= bottom )  )
                 &&  ( ( bmpPosX >= left || bmpAfterY >= left )
@@ -93,7 +93,7 @@ wxVector<int> Image::Get( wxPoint position, wxSize size )
     return bmp;
 }
 
-void Image::Load( wxString path )
+void Image::Load( const wxString& path )
 {
     int i = this->files->Index(path);
     this->prev = i - 1;
@@ -195,14 +195,14 @@ wxThread::ExitCode Image::Entry() // might need to refactor
     return (wxThread::ExitCode)0;
 }
 
-void Image::LoadBitmap( ImagePtr img, VectorPos vectorPos )
+void Image::LoadBitmap( const wxImage& img, VectorPos vectorPos )
 {
-    BitmapPtr bmp = BitmapPtr( new wxBitmap( *(img) ) );
+    wxBitmap bmp = wxBitmap( img );
     int viewY = -1, viewX = -1; // changed when insert to beginning so user's visiblity doesnt move
 
-    if ( bmp->GetWidth() > this->maxWidth )
+    if ( bmp.GetWidth() > this->maxWidth )
     {
-        this->maxWidth = bmp->GetWidth();
+        this->maxWidth = bmp.GetWidth();
     }
 
     switch ( vectorPos )
@@ -216,7 +216,7 @@ void Image::LoadBitmap( ImagePtr img, VectorPos vectorPos )
         }
         case VECTOR_BEGIN:
         {
-            viewY = this->GetParent()->GetViewStart().y + bmp->GetHeight();
+            viewY = this->GetParent()->GetViewStart().y + bmp.GetHeight();
             wxCriticalSectionLocker locker(this->gCS);
             this->bitmap.insert( this->bitmap.begin(), bmp );
             this->RefreshImagePosition(); // Recalculate image Position if insert to begining
@@ -233,10 +233,10 @@ bool Image::LoadAt( int index, VectorPos vecPos )
 {
     if ( this->files->IsExist(index))
     {
-        wxInputStream* filename = this->files->Item(index); // get filename from given index
+        wxInputStream* filename = this->files->Item(index); // get InputStream from given index
         if ( wxImage::CanRead( *(filename) ) ) // check whether the handler can Read the filename
         {
-            ImagePtr img = ImagePtr( new wxImage( *(filename) ) );
+            wxImage img = wxImage( *(filename) );
             switch ( vecPos )
             {
                 case VECTOR_PUSH:
@@ -277,18 +277,18 @@ void Image::RefreshImagePosition()
     this->imagePosY = y;
 }
 
-void Image::AddPosition( const BitmapPtr& bmp, wxVector<int>& x, wxVector<int>& y )
+void Image::AddPosition( const wxBitmap& bmp, wxVector<int>& x, wxVector<int>& y )
 {
     wxCriticalSectionLocker locker(this->gCS);
     if ( y.empty() )
     {
         y.push_back(0);
     }
-    x.push_back( this->GetCenteredPosition( bmp->GetWidth() ) );
-    y.push_back( y.back() + bmp->GetHeight() );
+    x.push_back( this->GetCenteredPosition( bmp.GetWidth() ) );
+    y.push_back( y.back() + bmp.GetHeight() );
 }
 
-void Image::AddPosition( const BitmapPtr& bmp )
+void Image::AddPosition( const wxBitmap& bmp )
 {
     this->AddPosition( bmp, this->imagePosX, this->imagePosY);
 }

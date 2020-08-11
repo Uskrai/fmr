@@ -41,33 +41,31 @@ enum VectorPos
 class Image :
     public wxThreadHelper
 {
-        typedef wxSharedPtr<wxBitmap> BitmapPtr;
-        typedef wxSharedPtr<wxImage> ImagePtr;
-        typedef wxVector<BitmapPtr> VectorBitmap;
-        typedef wxVector<ImagePtr> VectorImage;
+        typedef wxVector<wxBitmap> VectorBitmap;
+        typedef wxVector<wxImage> VectorImage;
 
     public:
         Image( wxScrolledWindow* parent );
         ~Image();
-        void Open( wxString path );
+        void Open( const wxString& path );
         VectorBitmap Get(); // return all Loaded Bitmap
-        wxBitmap Get( int index ) { return *(this->bitmap.at(index)); }
-        int Get ( wxPoint area, wxPoint posiion );
-        wxVector<int> Get( wxPoint position, wxSize size );
+        const wxBitmap& Get( int index ) { return this->bitmap.at(index); }
+        int Get ( const wxPoint& area, const wxPoint& posiion );
+        wxVector<int> Get( const wxPoint& position, const wxSize& size );
         void Clear(); // clear all value
         wxScrolledWindow* GetParent() { return this->parent; }
 
         // return imagePos X and Y as wxPoint
-        wxPoint GetPosition( int index) { return wxPoint(this->imagePosX.at(index), this->imagePosY.at(index) );}
+        wxPoint GetPosition( int index ) { return wxPoint(this->imagePosX.at(index), this->imagePosY.at(index) );}
 
     private:
         wxScrolledWindow* parent;
 
         Config* config = Config::Get();
 
-        void Load( wxString path ); // load image and
+        void Load( const wxString& path ); // load image and
         bool LoadAt( int index, VectorPos vectorPos = VECTOR_PUSH ); // load image at given index and whether to push or insert
-        void LoadBitmap( ImagePtr img, VectorPos pos = VECTOR_PUSH ); // load bitmap from given image and whether to push or insert
+        void LoadBitmap( const wxImage& img, VectorPos pos = VECTOR_PUSH ); // load bitmap from given image and whether to push or insert
 
         bool isThreadLoadBitmap = false; // turned on when loading Bitmap immediately in multi-thread
         bool isThreadPreLoadImage = false; // turned on when preLoading Image in multi-thread
@@ -75,8 +73,8 @@ class Image :
         void ThreadPreLoadImage();
 
         void RefreshImagePosition(); // recalculate all image position
-        void AddPosition( const BitmapPtr& bmp, wxVector<int>& x, wxVector<int>& y); // calculate position from given bitmap
-        void AddPosition( const BitmapPtr& bmp ); // overrided function of above used to add position to imagePos X and Y
+        void AddPosition( const wxBitmap& bmp, wxVector<int>& x, wxVector<int>& y); // calculate position from given bitmap
+        void AddPosition( const wxBitmap& bmp ); // overrided function of above used to add position to imagePos X and Y
         int GetCenteredPosition( int width ); // Get Centered Position of given Bitmap
 
 
