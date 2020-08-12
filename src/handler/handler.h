@@ -17,14 +17,15 @@
 #ifndef HANDLER_HANDLER
 #define HANDLER_HANDLER
 
-#include <wx/stream.h>
-#include <wx/sharedptr.h>
+class wxInputStream;
+
+class wxString;
 
 class Handler 
 {
     public:     
         Handler() {};
-        Handler( wxString path ) {};
+        Handler( const wxString& path ) {};
         virtual ~Handler() {};
 
         virtual void Open(wxString path) = 0;
@@ -38,7 +39,7 @@ class Handler
         virtual int Size() = 0;
         virtual void Clear() = 0;
 
-        static Handler* Find( wxString path );
+        static Handler* Find( const wxString& path );
 };
 
 #endif

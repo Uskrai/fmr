@@ -1,4 +1,4 @@
-/* 
+/*
  *  Copyright (c) 2020 Uskrai
  *  
  *  This program is free software: you can redistribute it and/or modify
@@ -15,9 +15,31 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
+#include "reader/bmp.h"
 
-Config* Config::global = __null;
+namespace Reader
+{
 
-void Config::Set( Config* global ) { Config::global = global; }
-Config* Config::Get() { return Config::global; }
+void Bitmap::OnPrepare( const wxImage& image, wxBitmap& bmp )
+{
+    bmp = wxBitmap( image );
+    
+    
+}
+
+void Bitmap::OnExit( wxBitmap& bmp )
+{
+
+}
+
+void Bitmap::AddPosition( const wxBitmap& bmp )
+{
+
+}
+
+void Bitmap::RefreshPosition( const wxBitmap& bmp )
+{
+
+}
+
+} // namespace reader

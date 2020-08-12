@@ -26,7 +26,7 @@ ifeq ($(RELEASE), DEBUG)
 CXXFLAGS 	+= -g
 endif
 
-src			:= config handler/handler handler/filehandler handler/archivehandler reader/image reader/reader panel frame
+src			:= handler/handler handler/filehandler handler/archivehandler reader/image reader/reader gui/panel gui/frame
 header		:= $(addsuffix .h, $(src) )
 VPATH		:= src:build
 so			:= $(addsuffix .$(soext), $(src) )
@@ -44,7 +44,7 @@ $(exe) : FLAGS := -Isrc $(CXXFLAGS) `$(wxCONFIG) --libs --cxxflags base,core`
 
 $(exe) : LIBS := $(src)
 # building executable file
-$(exe) 		: app.cpp frame.h
+$(exe) 		: main/app.cpp gui/frame.h base/config.h
 	$(CXX) $< $(INCLUDE) $(addprefix build/, $(addsuffix .$(soext), $(LIBS) ) ) $(FLAGS)  -o $(addprefix build/, $@ )
 
 
@@ -60,13 +60,13 @@ endif
 $(src) : % : %.o %.$(soext)
 
 link : $(so)
-frame.$(soext) : lib += panel
+frame.$(soext) : lib += gui/panel
 panel.$(soext) : lib += reader/reader
 reader/reader.$(soext) : lib += reader/image
 reader/image.$(soext) : lib += handler/handler
 handler/handler.o	: lib += handler/filehandler handler/archivehandler
 
-$(filter-out config.$(soext), $(so)) : libs += config
+$(filter-out config.$(soext), $(so)) : libs += base/config
 
 # building Shared Object
 $(addprefix build/, $(so) ) : build/%.$(soext): %.o
@@ -81,7 +81,7 @@ panel.o : reader/reader.h
 frame.o : panel.h
 app.o : frame.h
 
-$(filter-out config.o, $(obj) ) : config.h
+$(filter-out config.o, $(obj) ) : base/config.h
 obj : $(obj)
 
 $(addprefix build/, $(obj) ): build/%.o : %.cpp %.h 

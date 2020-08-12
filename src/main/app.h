@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "frame.h"
-#include "config.h"
+#include "gui/frame.h"
+#include "base/config.h"
 
 #include <wx/wxprec.h>
 #include <wx/app.h>

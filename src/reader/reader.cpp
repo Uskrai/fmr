@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <wx/event.h>
 #include "reader/reader.h"
+#include <iostream>
 
 namespace Reader 
 {
@@ -32,12 +34,6 @@ Reader::Reader( wxWindow* parent, wxSize size ) :
     this->SetScrollRate(1,1);
     this->SetVirtualSize(-1,-1);
 };
-
-Reader::Reader( wxWindow* parent, wxSize size, wxString path ):
-    Reader(parent, size)
-{
-    this->LoadImage(path);
-}
 
 Reader::~Reader()
 {
@@ -118,4 +114,5 @@ void Reader::OnMouseMotion( wxMouseEvent& event )
 {
     event.Skip();
 }
+
 } // end of namespace Reade

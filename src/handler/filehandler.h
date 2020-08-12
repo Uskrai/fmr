@@ -18,7 +18,7 @@
 #ifndef TRAVERSER
 #define TRAVERSER
 
-#include "config.h"
+#include "base/config.h"
 
 #include "handler/handler.h"
 

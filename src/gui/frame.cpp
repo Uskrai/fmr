@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "frame.h"
+#include "gui/frame.h"
 
 enum {
     PANEL = wxID_HIGHEST + 1,
