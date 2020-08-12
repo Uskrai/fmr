@@ -295,17 +295,18 @@ void Image::AddPosition( const wxBitmap& bmp )
 
 
 void Image::Clear()
-{
+{    
+    if ( this->GetThread() && this->GetThread()->IsRunning() )
+    {
+        this->GetThread()->Delete();
+    }
     this->bitmap.clear();
     this->image.clear();
     this->imagePosY.clear();
     this->imagePosX.clear();
     this->maxWidth = 0;
 
-    if ( this->GetThread() && this->GetThread()->IsRunning() )
-    {
-        this->GetThread()->Delete();
-    }
+
 }
 
 Image::~Image()

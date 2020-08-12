@@ -15,11 +15,18 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "panel.h"
+#include "gui/panel.h"
+#include "reader/reader.h"
+
+#include "iostream"
 
 Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
     wxPanel( parent, id, position, size )
-{};
+{
+    this->sizer = new wxBoxSizer( wxHORIZONTAL );
+    this->reader = new Reader::Reader( this, this->GetSize() );    
+    this->SetSizer( this->sizer );
+};
 
 void Panel::LoadFile( wxString path )
 {

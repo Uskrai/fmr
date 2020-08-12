@@ -1,4 +1,4 @@
-/* 
+/*
  *  Copyright (c) 2020 Uskrai
  *  
  *  This program is free software: you can redistribute it and/or modify
@@ -15,16 +15,19 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <wx/panel.h>
-#include "reader/reader.h"
+#include "base/bmp.h"
 
-class Panel :
-    public wxPanel
+namespace Reader
 {
-    Reader::Reader* reader = new Reader::Reader( this, GetSize() );
-    wxBoxSizer* sizer = new wxBoxSizer( wxHORIZONTAL );
-    public:
-        Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size );
-        
-        void LoadFile( wxString path );
+
+class Bitmap
+    : public BaseBitmap
+{
+    private:
+        void OnPrepare( const wxImage& image, wxBitmap& bmp );
+        void OnExit( wxBitmap& bmp );
+        void AddPosition( const wxBitmap& bmp );
+        void RefreshPosition( const wxBitmap& bmp );
+};
+
 };
