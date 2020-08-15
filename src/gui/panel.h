@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <wx/sizer.h>
 #include <wx/panel.h>
 
+class wxBoxSizer;
 namespace Reader{
-    class Reader;
+    class Window;
 };
 
 class Panel :
@@ -30,7 +30,7 @@ class Panel :
 
         void LoadFile( wxString path );
     private:
-        Reader::Reader* reader;
+        Reader::Window* m_reader = NULL;
         wxBoxSizer* sizer;
 
 };

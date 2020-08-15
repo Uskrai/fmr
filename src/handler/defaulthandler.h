@@ -1,4 +1,4 @@
-/*
+/* 
  *  Copyright (c) 2020 Uskrai
  *  
  *  This program is free software: you can redistribute it and/or modify
@@ -14,41 +14,47 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef HANDLER_ARCHIVEHANDLER
-#define HANDLER_ARCHIVEHANDLER
 
+#ifndef HANDLER_DEFAULTHANDLER
+#define HANDLER_DEFAULTHANDLER
+
+
+// #include <wx/wfstream.h>
 
 #include "handler/handler.h"
 
-#include <wx/archive.h>
-#include <wx/wfstream.h>
-#include <wx/mstream.h>
+class wxDir;
 
-class ArchiveHandler 
+class DefaultHandler
     : public Handler
 {
     public:
-        ArchiveHandler() {}
-        ArchiveHandler( const wxString& path );
-        void Open( const wxString& path );
+        DefaultHandler() {} ;
+        DefaultHandler( const wxString& string );
+        ~DefaultHandler();
 
-        bool IsExist( int index );
-        
+        void Open ( const wxString& string );
         void Traverse();
-        int Index( const wxString& name ) { return 0; } ;
-        int Size() { return this->fstream.size();} ;
-        wxInputStream* Item( int index ) { return fstream.at(index); };
+
+        bool IsExist( int idx );
+
+        int Index( const wxString& path );
+        wxInputStream* Item( int idx ) { return stream.at(idx); };
+
+        int Size() { return stream.size(); };
+
         void Clear();
 
-        ~ArchiveHandler();
+        static bool CanHandle ( const wxString& path ) { return true; }
 
-        static bool CanHandle( wxString path );
-    private:
-        static bool Find( wxString& path, const wxArchiveClassFactory*& factory, wxInputStream*& in );
-
+   private:
         wxString filename;
-        wxArrayString name;
-        wxVector<wxInputStream*> fstream;
+        
+        void GetAllFiles( wxDir& dir, bool& cont, wxString& filename, wxArrayString& array  );
+        void GetAllFiles( const wxString& path, wxVector<wxInputStream*>& stream );
+
+        wxVector<wxInputStream*> stream;
+
 };
 
 #endif

@@ -16,24 +16,25 @@
  */
 
 #include "gui/panel.h"
-#include "reader/reader.h"
+#include "reader/windowreader.h"
 
-#include "iostream"
+#include <wx/sizer.h>
 
 Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
     wxPanel( parent, id, position, size )
 {
     this->sizer = new wxBoxSizer( wxHORIZONTAL );
-    this->reader = new Reader::Reader( this, this->GetSize() );    
+    this->m_reader = new Reader::Window( this, this->GetSize() );    
+    this->sizer->Add( m_reader, 1, wxALL | wxEXPAND );
     this->SetSizer( this->sizer );
 };
 
 void Panel::LoadFile( wxString path )
 {
     this->sizer->Clear();
-    this->sizer->SetOrientation( wxVERTICAL );
 
-    this->reader->LoadImage( path );
+    m_reader->Open( path );
 
-    this->sizer->Add( reader, 1, wxALL | wxEXPAND );
+
+    this->sizer->Add( m_reader, 1, wxALL | wxEXPAND );
 }

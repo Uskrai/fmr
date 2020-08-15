@@ -1,0 +1,41 @@
+/*
+ *  Copyright (c) 2020 Uskrai
+ *  
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#ifndef BITMAP
+#define BITMAP
+
+#include <wx/bitmap.h>
+
+struct SBitmap
+{
+    wxBitmap m_item;
+    wxPoint m_pos;
+    const wxBitmap& GetBitmap() const { return this->m_item; }
+    wxBitmap& GetBitmap() { return m_item; }
+    wxPoint GetPosition()  const { return m_pos; }
+    wxSize GetSize() const { return wxSize( GetWidth(), GetHeight() ); }
+    int GetWidth() const { return m_item.GetWidth(); }
+    int GetHeight() const { return m_item.GetHeight(); }
+    int GetY() const { return m_pos.y; }
+    int GetX() const { return m_pos.x; }
+    void SetBitmap( const wxBitmap& bmp ) { m_item = bmp; }
+    void SetPosition( const wxPoint& pos ) { m_pos = pos; }
+    void SetY( int PosY ) { m_pos.y = PosY; }
+    void SetX( int PosX ) { m_pos.x = PosX; }
+};
+
+#endif

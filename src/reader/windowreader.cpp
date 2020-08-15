@@ -15,48 +15,92 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <wx/event.h>
-#include "reader/reader.h"
-#include <iostream>
+#include "reader/windowreader.h"
 
-namespace Reader 
+#include "reader/threadreader.h"
+#include "base/config.h"
+
+#include "image/image.h"
+
+#include "bitmap/bitmapvertical.h"
+
+#include <wx/stattext.h>
+#include <wx/sizer.h>
+#include <wx/dc.h>
+
+#include "handler/handlerfactory.h"
+#include "handler/archivehandler.h"
+#include "handler/defaulthandler.h"
+#include "handler/filehandler.h"
+
+namespace Reader
 {
 
-wxBEGIN_EVENT_TABLE( Reader, wxScrolledWindow )
-    EVT_MOTION(Reader::OnMouseMotion)
-    EVT_MOUSEWHEEL(Reader::OnMouseWheel)
-    EVT_KEY_DOWN(Reader::OnKeyDown)
+wxBEGIN_EVENT_TABLE( Window, wxScrolledWindow )
+    EVT_MOTION(Window::OnMouseMotion)
+    EVT_MOUSEWHEEL(Window::OnMouseWheel)
+    EVT_KEY_DOWN(Window::OnKeyDown)
 wxEND_EVENT_TABLE()
 
-Reader::Reader( wxWindow* parent, wxSize size ) :
-    wxScrolledWindow( parent, wxID_ANY, wxDefaultPosition, size ) 
+Window::Window( wxWindow* parent, wxSize size ) :
+    wxScrolledWindow( parent, wxID_ANY, wxDefaultPosition, size )
 {
-    this->SetScrollRate(1,1);
-    this->SetVirtualSize(-1,-1);
+
+    SetScrollRate(1,1);
+    SetVirtualSize(-1,-1);
+    m_config = Config::Get();
+
+    m_image = new Image(this);
+    m_bitmap = new BitmapVertical(this);
+    m_factory = new HandlerFactory();
+    m_thread = new Thread( this, m_image, m_bitmap );
 };
 
-Reader::~Reader()
+Window::~Window()
 {
-    delete this->image;
+    delete m_thread;
 }
 
-void Reader::LoadImage( wxString path )
+void Window::Open( wxString path )
 {
-    this->image->Clear();
-    this->image->Open(path);
+    Clear(); 
+
+
+    m_factory->Find( path );
+
+    m_thread->SetHandler( m_factory->NewHandler() );
+    m_thread->Open( path );
 }
 
-void Reader::OnDraw( wxDC& dc )
+void Window::Find( const wxString& path )
+{
+}
+
+void Window::Clear()
+{
+    m_bitmap->Clear();
+    m_image->Clear();
+    m_thread->Clear();
+}
+
+void Window::OnDraw( wxDC& dc )
 {
     dc.SetClippingRegion( this->GetViewStart(), this->GetClientSize() );
-    wxCriticalSectionLocker locker( this->image->GetLock() );
-    for ( const auto& it : this->image->Get( this->GetViewStart(), this->GetClientSize() ) )
+    wxCriticalSectionLocker locker( this->m_thread->GetLock() );
+
+    for ( const auto& it : m_bitmap->Get() )
     {
-        dc.DrawBitmap( this->image->Get(it), this->image->GetPosition(it) );
+        dc.DrawBitmap( it.GetBitmap() , it.GetPosition() );
     }
 }
 
-void Reader::Error( wxSize size )
+template<typename T>
+T Window::ConfRead( wxString name, T def )
+{ 
+    return this->m_config->Read( wxString("Reader/") + name, def ); 
+}
+
+void Window::Error( wxSize size )
 {
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
     wxStaticText* statbox = new wxStaticText( this, wxID_ANY, wxString("Can't load the image"), wxPoint(0,size.GetY() - 22 ), wxSize(size.GetX(),22) ) ;
@@ -66,17 +110,17 @@ void Reader::Error( wxSize size )
     this->SetSizer(sizer);
 }
 
-void Reader::OnMouseWheel( wxMouseEvent& event )
+void Window::OnMouseWheel( wxMouseEvent& event )
 {
     int scrolling = event.GetWheelDelta()/event.GetWheelRotation() * this->ConfRead("WheelInvert",-1);
     this->OnArrow( wxVERTICAL, scrolling );
     event.Skip();
 }
 
-void Reader::OnKeyDown( wxKeyEvent& event )
+void Window::OnKeyDown( wxKeyEvent& event )
 {
     wxEventType key = event.GetKeyCode();
-    int def = this->config->Read("Invert",-1);
+    int def = this->m_config->Read("Invert",-1);
     switch (key)
     {
     case WXK_UP:
@@ -95,7 +139,7 @@ void Reader::OnKeyDown( wxKeyEvent& event )
     }
 }
 
-void Reader::OnArrow( wxOrientation orient, int modifier  )
+void Window::OnArrow( wxOrientation orient, int modifier  )
 {
     switch ( orient )
     {
@@ -110,9 +154,9 @@ void Reader::OnArrow( wxOrientation orient, int modifier  )
     }
 }
 
-void Reader::OnMouseMotion( wxMouseEvent& event )
+void Window::OnMouseMotion( wxMouseEvent& event )
 {
     event.Skip();
 }
 
-} // end of namespace Reade
+}
