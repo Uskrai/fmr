@@ -15,18 +15,15 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MyFrame
-#define MyFrame
+#ifndef FMR_GUI_FRAME
+#define FMR_GUI_FRAME
 
-#include <wx/menu.h>
 #include <wx/frame.h>
-#include <wx/filedlg.h>
-#include <wx/sizer.h>
-#ifndef WX_PRECOMP
-    #include <wx/wxprec.h>
-#endif
-
-#include "gui/panel.h"
+class wxBoxSizer;
+class wxMenuBar;
+class wxMenu;
+class wxStatusBar;
+class Panel;
 
 enum
 {
@@ -40,7 +37,7 @@ class Frame :
         Frame(const wxString& title, const wxPoint& pos, const wxSize& size,long style);
         
         Panel* panel = NULL; 
-        wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+        wxBoxSizer* sizer;
 
     private:
         void SetPanel();

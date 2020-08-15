@@ -14,21 +14,32 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef HANDLER_HANDLER_FACTORY
+#define HANDLER_HANDLER_FACTORY
 
-#include "handler/handler.h"
-#include "handler/archivehandler.h"
-#include "handler/filehandler.h"
+class Handler;
+class wxString;
 
-Handler* Handler::Find( const wxString& path )
+
+enum HandlerType
 {
-    if ( ArchiveHandler::CanHandle(path) )
-    {
-        return new ArchiveHandler(path);
-    }
+    Archive,
+    File
+};
 
-    if ( FileHandler::CanHandle(path) )
-    {
-        return new FileHandler(path);
-    }
-    return NULL;
-}
+
+
+class HandlerFactory
+{
+    public:
+        bool Find( const wxString& path );
+        bool Find( const wxString& path, HandlerType& type );
+        Handler* NewHandler( const wxString& path );
+        Handler* NewHandler( const HandlerType& type );
+        Handler* NewHandler();
+        HandlerType GetType();
+    private:
+        HandlerType m_type;
+};
+
+#endif

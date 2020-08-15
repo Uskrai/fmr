@@ -54,15 +54,9 @@ class Config :
         using wxFileConfig::Write;
         using wxFileConfig::Flush;
 
-        static Config* Get() 
-        { 
-            return Config::global; 
-        }
+        static Config* Get() { return Config::global; }
 
-        static void Set( Config* pConfig ) 
-        { 
-            Config::global = pConfig; 
-        }
+        static void Set( Config* pConfig ) { Config::global = pConfig; }
 };
 
 #endif

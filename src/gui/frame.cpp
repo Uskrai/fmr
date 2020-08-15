@@ -16,6 +16,11 @@
  */
 
 #include "gui/frame.h"
+#include "gui/panel.h"
+#include <wx/frame.h>
+#include <wx/menu.h>
+#include <wx/filedlg.h>
+#include <wx/sizer.h>
 
 enum {
     PANEL = wxID_HIGHEST + 1,
@@ -35,6 +40,8 @@ Frame::Frame(const wxString& title, const wxPoint& pos, const wxSize& size,long 
     SetMenuBar( Frame::MenuBar() );
     SetStatusBar( Frame::StatusBar() );
     SetBackgroundColour( *wxBLACK );
+
+    this->sizer = new wxBoxSizer(wxHORIZONTAL);
     SetPanel();
     SetSizer( this->sizer );
 }
@@ -92,7 +99,7 @@ void Frame::OpenFile(wxCommandEvent& event)
 void Frame::SetPanel()
 {
     this->panel = new Panel( this, PANEL, wxPoint(-1,-1), this->GetClientSize() );
-    this->sizer->Add( this->panel, 1, wxALL );
+    // this->sizer->Add( this->panel, 1, wxALL );
 }
 
 void Frame::OnExit(wxCommandEvent& event)

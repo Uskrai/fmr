@@ -17,9 +17,7 @@
 #ifndef HANDLER_HANDLER
 #define HANDLER_HANDLER
 
-class wxInputStream;
-
-class wxString;
+#include <wx/stream.h>
 
 class Handler 
 {
@@ -28,18 +26,16 @@ class Handler
         Handler( const wxString& path ) {};
         virtual ~Handler() {};
 
-        virtual void Open(wxString path) = 0;
+        virtual void Open( const wxString& path) = 0;
         virtual void Traverse() = 0 ;
 
         virtual bool IsExist( int index ) = 0;
 
-        virtual int Index( wxString name ) = 0;
+        virtual int Index( const wxString& name ) = 0;
         virtual wxInputStream* Item( int index ) = 0;
 
         virtual int Size() = 0;
         virtual void Clear() = 0;
-
-        static Handler* Find( const wxString& path );
 };
 
 #endif
