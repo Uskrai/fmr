@@ -32,6 +32,73 @@ BitmapVertical::~BitmapVertical()
 
 wxVector<SBitmap>& BitmapVertical::Get() { return m_item; }
 
+int BitmapVertical::CalcPointedBitmap( const wxPoint& area, const wxPoint& position ) const
+{
+    int
+    posY = area.y + position.y,
+    posX = area.x + position.x,
+    bmpPosY, bmpAfterY,
+    bmpPosX, bmpAfterX;
+
+    int i = 0;
+    for ( auto& it : m_item )
+    {
+        bmpPosY = it.GetY();
+        bmpAfterY = bmpPosY + it.GetHeight();
+        bmpPosX = it.GetX();
+        bmpAfterX = bmpPosX + it.GetWidth();
+        if  (    
+                posY >= bmpPosY && posY <= bmpAfterY 
+                && posX >= bmpPosX && posX <= bmpAfterX
+            )
+        {
+            return i;
+        }
+        i++;
+    }
+    return -1;
+}
+
+SBitmap& BitmapVertical::Get( const wxPoint& area, const wxPoint& position ) 
+{
+    return m_item.at( CalcPointedBitmap( area, position ) );
+}
+
+const SBitmap& BitmapVertical::Get( const wxPoint& area, const wxPoint& position ) const
+{
+    return m_item.at ( CalcPointedBitmap( area, position ) );
+}
+
+wxVector<int> BitmapVertical::Get( const wxPoint& area, const wxSize& size ) const
+{
+    int
+    top = area.y, bottom = top + size.GetHeight(),
+    left = area.x, right = left + size.GetHeight(),
+    bmpPosY, bmpAfterY, bmpPosX, bmpAfterX;
+
+    wxVector<int> bmp;
+
+    int i = 0;
+    for ( const auto& it : m_item )
+    {
+        bmpPosY = it.GetY();
+        bmpAfterY = bmpPosY + it.GetHeight();
+        bmpPosX = it.GetX();
+        bmpAfterX = bmpPosY + it.GetWidth();
+        if  (   
+                (   ( bmpPosY >= top || bmpAfterY >= top )
+                &&  ( bmpPosY <= bottom || bmpAfterY <= bottom )  )
+                &&  ( ( bmpPosX >= left || bmpAfterY >= left )
+                ||  ( bmpPosX <= right || bmpAfterX <= right ) ) 
+            )
+        {
+            bmp.push_back( i );
+        }
+        i++;
+    }
+    return bmp;
+}
+
 void BitmapVertical::Prepare( const wxImage& image, VectorPos pos, struct SBitmap& bmp )
 {
     bmp.SetBitmap( wxBitmap(image) );
@@ -39,14 +106,16 @@ void BitmapVertical::Prepare( const wxImage& image, VectorPos pos, struct SBitma
         m_maxWidth = bmp.GetWidth();
 }
 
-#include <iostream>
 void BitmapVertical::Exit( int idx )
 {
-    if ( idx < 0 ) return;
-
-
     struct SBitmap& bmp = Get().back();
     int h = bmp.GetY() + bmp.GetHeight();
+
+    if ( idx == VECTOR_BEGIN )
+    {
+        int viewY = GetParent()->GetViewStart().y + Get().front().GetHeight();
+        GetParent()->Scroll ( -1, viewY );
+    }
 
     GetParent()->SetVirtualSize( -1, h );
     GetParent()->Refresh();
@@ -74,7 +143,7 @@ void BitmapVertical::Add( const wxImage& image, VectorPos idx )
             RefreshPosition();
     }
     
-    Exit( i );
+    Exit( idx );
     GetParent()->GetClientSize();
     GetParent()->Refresh();
 }
