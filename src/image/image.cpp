@@ -18,310 +18,31 @@
 #include "image/image.h"
 #include "handler/handlerfactory.h"
 
-#include <wx/scrolwin.h>
-
-Image::Image( wxScrolledWindow* parent )
-{
-    this->parent = parent;
-    this->maxWidth = parent->GetClientSize().GetWidth();
-}
-
-void Image::Open( const wxString& path )
-{
-    if ( !(this->files) )
-    {
-        delete this->files;
-    }
-    HandlerFactory factory;
-    factory.Find( path );
-    this->files = factory.NewHandler();
-    this->file = path;
-    this->Load(path);
-}
-
-// Image::VectorBitmap Image::Get()
-// {
-//     return this->bitmap;
-// }
-
-int Image::Get( const wxPoint& area, const wxPoint& position ) const
-{
-    int
-    posY = area.y + position.y,
-    posX = area.x + position.x,
-    bmpPosY, bmpAfterY,
-    bmpPosX, bmpAfterX;
-    for ( size_t i = 0; i < this->bitmap.size(); i++ )
-    {
-        bmpPosY = this->imagePosY.at(i);
-        bmpAfterY = bmpPosY + this->bitmap.at(i).GetHeight();
-        bmpPosX = this->imagePosX.at(i);
-        bmpAfterX = bmpPosX + this->bitmap.at(i).GetWidth();
-        if  (    
-                posY >= bmpPosY && posY <= bmpAfterY 
-                && posX >= bmpPosX && posX <= bmpAfterX
-            )
-        {
-            return i;
-        }
-    }
-    return -1;
-}
-
-wxVector<int> Image::Get( const wxPoint& position, const wxSize& size ) const
-{
-    int
-    top = position.y, bottom = top + size.GetHeight(),
-    left = position.x, right = left + size.GetHeight(),
-    bmpPosY, bmpAfterY, bmpPosX, bmpAfterX;
-
-    wxVector<int> bmp;
-    for ( size_t i = 0; i < this->bitmap.size(); i++ )
-    {
-        bmpPosY = this->imagePosY.at(i);
-        bmpAfterY = bmpPosY + this->bitmap.at(i).GetHeight();
-        bmpPosX = this->imagePosX.at(i);
-        bmpAfterX = bmpPosY + this->bitmap.at(i).GetWidth();
-        if  (   (   ( bmpPosY >= top || bmpAfterY >= top )
-                &&  ( bmpPosY <= bottom || bmpAfterY <= bottom )  )
-                &&  ( ( bmpPosX >= left || bmpAfterY >= left )
-                ||  ( bmpPosX <= right || bmpAfterX <= right ) ) 
-            )
-        {
-            bmp.push_back( i );
-        }
-    }
-    return bmp;
-}
-
 bool Image::Load( wxInputStream* stream, int pos )
 {
-    if ( wxImage::CanRead( *stream ) )
+    if ( stream != NULL )
     {
-        wxImage img(*(stream));
-
-        switch ( pos )
+        if ( wxImage::CanRead( *stream ) )
         {
-            case VECTOR_END:
-                m_item.push_back( img );
-                break;
-            case VECTOR_BEGIN:
-                m_item.insert( m_item.begin(), img );
-                break;
-            default:
-                return false;
-                break;
-        }
-        return true;
-    }
-    return false;
-}
+            wxImage img(*(stream));
 
-bool Image::Push( wxInputStream* stream )
-{
-    return Load( stream, VECTOR_END );
-}
-
-void Image::Load( const wxString& path )
-{
-    int i = this->files->Index(path);
-    this->prev = i - 1;
-    this->next = i + 1;
-    this->showNext = 0;
-    this->showPrev = 0;
-    
-    if ( this->LoadAt( i ) ) 
-    {
-        this->LoadBitmap( this->image.back() ); // load first opened file
-    }
-
-    this->isThreadLoadBitmap = true;
-    this->CreateThread();
-    this->GetThread()->Run();
-}
-
-void Image::ThreadLoadBitmap()
-{
-    // // checking whether to load the next index or not
-    // bool isShowNext =   this->files->IsExist(this->next) 
-    //                     && this->showNext < this->config->Read("showNext", 10 );
-
-    // // loading the next index if there is no Thread Destroy Testing
-    // if ( isShowNext && !this->TestDestroy() )
-    // {
-    //     if ( this->LoadAt( this->next, VECTOR_END ) )
-    //     {
-    //         this->LoadBitmap( this->image.back(), VECTOR_END );
-    //         this->showNext++;
-    //     }
-    //     this->next++;
-    // }
-
-    // // checking whether to load the previous index or not
-    // bool isShowPrev =   this->files->IsExist( this->prev ) 
-    //                     && this->showPrev < this->config->Read("showPrev",10);
-
-    // // loading the next index if there is no Thread Destroy Testing
-    // if ( isShowPrev && !this->TestDestroy() )
-    // {
-    //     if ( this->LoadAt( this->prev, VECTOR_BEGIN ) )
-    //     {
-    //         this->LoadBitmap( this->image.front(), VECTOR_BEGIN );
-    //         this->showPrev++;
-    //     }
-    //     this->prev--;
-    // }
-
-    // // check whether the loading already done or not if true would disable loadBitmap;
-    // if ( (!isShowNext && !isShowPrev) )
-    // { 
-    //     this->isThreadLoadBitmap = false; 
-    // } 
-}
-
-void Image::ThreadPreLoadImage()
-{
-    // if ( !this->isThreadLoadBitmap )
-    // {
-
-    // if ( this->files->IsExist( this->next ) && this->config->Read("CacheNext",10) ) 
-    // {
-    //     this->LoadAt( this->next, VECTOR_END );
-    //     this->next++;
-    //     this->cacheNext++;
-    // }
-
-    // if ( this->files->IsExist( this->prev ) && this->config->Read("CachePrev", 10)  )
-    // {
-    //     this->LoadAt( this->prev, VECTOR_END );
-    //     this->prev--;
-    //     this->cachePrev++;
-    // }
-
-    // } // end of conditional isThreadLoadBitmap
-}
-
-wxThread::ExitCode Image::Entry() // might need to refactor
-{
-    // while ( this->isThreadLoadBitmap || this->isThreadPreLoadImage )
-    // {
-    //     if ( this->isThreadLoadBitmap && !this->TestDestroy())
-    //     {
-    //         this->ThreadLoadBitmap();
-    //     }
-
-    //     if ( this->isThreadPreLoadImage && !this->TestDestroy() )
-    //     {
-    //         this->ThreadPreLoadImage();
-    //     } 
-
-    //     if ( this->TestDestroy() )
-    //     {
-    //         this->isThreadLoadBitmap = false;
-    //         this->isThreadPreLoadImage = false;
-    //     }
-    // }
-    // return (wxThread::ExitCode)0;
-}
-
-void Image::LoadBitmap( const wxImage& img, VectorPos vectorPos )
-{
-    // wxBitmap bmp = wxBitmap( img );
-    // int viewY = -1, viewX = -1; // changed when insert to beginning so user's visiblity doesnt move
-
-    // if ( bmp.GetWidth() > this->maxWidth )
-    // {
-    //     this->maxWidth = bmp.GetWidth();
-    // }
-
-    // switch ( vectorPos )
-    // {
-    //     case VECTOR_END:
-    //     {
-    //         wxCriticalSectionLocker locker(gCS);
-    //         this->bitmap.push_back(bmp);
-    //         this->AddPosition( bmp ); // Add Image Position if just push
-    //         break;
-    //     }
-    //     case VECTOR_BEGIN:
-    //     {
-    //         viewY = this->GetParent()->GetViewStart().y + bmp.GetHeight();
-    //         wxCriticalSectionLocker locker(this->gCS);
-    //         this->bitmap.insert( this->bitmap.begin(), bmp );
-    //         this->RefreshImagePosition(); // Recalculate image Position if insert to begining
-    //         break;
-    //     }
-    // }
-
-    // this->GetParent()->SetVirtualSize( this->maxWidth,this->imagePosY.back() ); // expand virtual size
-    // this->GetParent()->Scroll( viewX, viewY); // Adjust user's view if needed
-    // this->GetParent()->Refresh();
-}
-
-bool Image::LoadAt( int index, VectorPos vecPos )
-{
-    if ( this->files->IsExist(index))
-    {
-        wxInputStream* filename = this->files->Item(index); // get InputStream from given index
-        if ( wxImage::CanRead( *(filename) ) ) // check whether the handler can Read the filename
-        {
-            wxImage img = wxImage( *(filename) );
-            switch ( vecPos )
+            switch ( pos )
             {
                 case VECTOR_END:
-                {
-                    this->image.push_back( img ); // push image to the end
-                }
+                    m_item.push_back( img );
+                    break;
                 case VECTOR_BEGIN:
-                {
-                    this->image.insert( this->image.begin(), img ); // insert image in the beginning
-                }
+                    m_item.insert( m_item.begin(), img );
+                    break;
+                default:
+                    return false;
+                    break;
             }
-            return true; // to determinate whether the image can be loaded or not
+            return true;
         }
     }
     return false;
 }
-
-int Image::GetCenteredPosition( int width )
-{
-    int clientWidth = this->GetParent()->GetSize().GetWidth();
-    if ( width > this->maxWidth ) width = this->maxWidth;
-    int pos = (clientWidth-width)/2;
-    return pos;
-}
-
-void Image::RefreshImagePosition()
-{
-    wxVector<int> x,y;
-    x.reserve( this->bitmap.size() );
-    y.reserve( this->bitmap.size() + 1 );
-    for ( const auto& it : this->bitmap )
-    {
-        this->AddPosition( it, x, y );
-    }
-
-    // wxCriticalSectionLocker locker(gCS);
-    this->imagePosX = x;
-    this->imagePosY = y;
-}
-
-void Image::AddPosition( const wxBitmap& bmp, wxVector<int>& x, wxVector<int>& y )
-{
-    // wxCriticalSectionLocker locker(this->gCS);
-    // if ( y.empty() )
-    // {
-    //     y.push_back(0);
-    // }
-    // x.push_back( this->GetCenteredPosition( bmp.GetWidth() ) );
-    // y.push_back( y.back() + bmp.GetHeight() );
-}
-
-void Image::AddPosition( const wxBitmap& bmp )
-{
-    this->AddPosition( bmp, this->imagePosX, this->imagePosY);
-}
-
 
 void Image::Clear()
 {    
@@ -331,8 +52,4 @@ void Image::Clear()
 Image::~Image()
 {
     this->Clear();
-    if ( !(this->files) )
-    {
-        delete this->files;
-    }
 }

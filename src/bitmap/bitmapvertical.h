@@ -29,6 +29,12 @@ class BitmapVertical
         // getting bitmap
         wxVector<SBitmap>& Get();
 
+        wxVector<int> Get( const wxPoint& area, const wxSize& size ) const;
+
+        int CalcPointedBitmap( const wxPoint& area, const wxPoint& position) const ;
+        SBitmap& Get( const wxPoint& area, const wxPoint& position );
+        const SBitmap& Get( const wxPoint& area, const wxPoint& position ) const;
+
         void Clear();
     protected:
         int m_maxWidth, m_maxHeight;
