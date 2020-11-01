@@ -29,8 +29,7 @@ endif
 
 gui 		:= panel frame
 handler 	:= filehandler archivehandler defaulthandler handlerfactory 
-image		:= image
-bitmap		:= bitmapvertical
+bitmap		:= bitmap bitmapvertical 
 reader 		:= windowreader threadreader 
 src			:= $(addprefix handler/, $(handler) ) $(addprefix bitmap/, $(bitmap) ) $(addprefix image/, $(image) ) $(addprefix reader/, $(reader) ) $(addprefix gui/, $(gui) )
 # src			:= handler/handler handler/filehandler handler/archivehandler reader/image reader/reader gui/panel gui/frame
@@ -69,8 +68,9 @@ $(src) : % : %.o %.$(soext)
 link : $(so)
 gui/frame.$(soext) : lib += gui/panel
 gui/panel.$(soext) : lib += reader/windowreader
-reader/windowreader.$(soext) : lib += image/image bitmap/bitmapvertical
-reader/threadreader.$(soext) : lib += handler/handlerfactory image/image bitmap/bitmapvertical
+bitmap/bitmapvertical.$(soext) : lib += bitmap/bitmap
+reader/windowreader.$(soext) : lib += bitmap/bitmapvertical bitmap/bitmap
+reader/threadreader.$(soext) : lib += handler/handlerfactory bitmap/bitmapvertical
 handler/handler.o	: lib += handler/filehandler handler/archivehandler
 
 $(filter-out config.$(soext), $(so)) : libs += base/config
@@ -81,9 +81,10 @@ $(addprefix build/, $(so) ) : build/%.$(soext): %.o
 
 # $(obj) : FLAGS := $(CXXFLAGS) $(wxFLAGS)
 
+bitmap/bitmapvertical.o : bitmap/bmp.h
 handler/handler.o 	: handler/filehandler.h handler/archivehandler.h
-reader/threadreader,o	: handler/handler.h
-reader/windowreader.o 	: bitmap/bitmapvertical.h image/image.h
+reader/threadreader,o	: handler/handler.h 
+reader/windowreader.o 	: bitmap/bitmapvertical.h 
 gui/panel.o : reader/windowreader.h 
 gui/frame.o : gui/panel.h
 main/app.o : gui/frame.h

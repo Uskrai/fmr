@@ -23,8 +23,10 @@
 
 #include "handler/handler.h"
 
+#include "base/vector.h"
+#include "base/range.h"
+
 class wxScrolledWindow;
-class Image; 
 class BitmapVertical;
 class wxString;
 
@@ -35,17 +37,20 @@ class Thread
     : public wxThreadHelper
 {
     public:
-        Thread( wxScrolledWindow* parent, Image* image, BitmapVertical* bitmap );
+        Thread( wxScrolledWindow* parent, BitmapVertical* bitmap );
         ~Thread();
 
         void Open( const wxString& path );
+
         void Clear();
         void SetHandler( Handler* handler );
+        void SetLimit( int prev = NO_LIMIT , int next = NO_LIMIT ) { m_limitPrev = prev, m_limitNext = next; }
 
         wxCriticalSection& GetLock() { return this->gCS; }
+        wxScrolledWindow* GetParent() { return m_parent; }
+        
     protected:
         wxCriticalSection gCS;
-        Image* m_image;
         BitmapVertical* m_bitmap;
         wxScrolledWindow* m_parent;
         Handler* m_handler = NULL;
@@ -55,14 +60,19 @@ class Thread
         wxThread::ExitCode Entry();
         void BitmapThread( bool& destroy );
 
-        int m_next, m_prev;
+        int m_limitNext = NO_LIMIT, m_limitPrev = NO_LIMIT;
         bool m_threadbmp = false;
 
         bool TestDestroy();
 
         bool IsExist( int idx );
 
-        bool LoadImage( size_t idx, int pos );
+        bool LoadImage( size_t idx, bool isScroll = false );
+        void LoadBitmap( int current, int prev, int next, bool& isDestroyed );
+    
+    private:
+        template<typename T>
+        T ConfRead( const wxString& name, T def );
 };
 
 };
