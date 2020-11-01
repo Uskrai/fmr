@@ -20,8 +20,9 @@
 
 
 #include <wx/scrolwin.h>
+#include "base/range.h"
+
 class Config;
-class Image;
 class BitmapVertical;
 class HandlerFactory;
 
@@ -37,10 +38,12 @@ class Window : public wxScrolledWindow
         Window( wxWindow* parent, wxSize size );
         ~Window();
         void Open( wxString path );
+
+        void Next();
+        void Prev();
+
         void Clear();
     private:
-        // vector to images
-        Image* m_image;
         //vector to bitmaps
         BitmapVertical* m_bitmap;
         // reference to threading class
@@ -60,9 +63,11 @@ class Window : public wxScrolledWindow
         void OnDraw( wxDC& dc );
         wxDECLARE_EVENT_TABLE();
         void OnMouseMotion( wxMouseEvent& event );
+        wxPoint m_mousePosition;
         void OnMouseWheel( wxMouseEvent& event );
         void OnKeyDown( wxKeyEvent& event );
-        void OnArrow( wxOrientation orient, int modifier  );
+        void OnArrow( wxOrientation orient, int modifier);
+        void OnEdge( int modifier );
 };
 
 };

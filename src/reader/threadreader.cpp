@@ -23,16 +23,13 @@
 
 #include <thread>
 #include <future>
-
 namespace Reader
 {
 
-Thread::Thread( wxScrolledWindow* parent, Image* image, BitmapVertical* bitmap )
+Thread::Thread( wxScrolledWindow* parent, BitmapVertical* bitmap )
 {
     m_bitmap = bitmap;
-    m_image = image;
     m_parent = parent;
-
 }
 
 Thread::~Thread() 
@@ -79,6 +76,11 @@ bool Thread::TestDestroy()
     return this->GetThread()->TestDestroy();
 }
 
+// template<typename T>
+// T Thread::ConfRead( const wxString& name, T def )
+// { 
+//     return m_config->Read( wxString("Reader/") + name, def ); 
+// }
 
 template<typename T>
 bool IsReady( std::future<T>& t )  // to check if the thread completed or not
@@ -88,7 +90,7 @@ bool IsReady( std::future<T>& t )  // to check if the thread completed or not
 
 wxThread::ExitCode Thread::Entry()
 {
-    bool destroy(false), threadbmpcreated(false);
+    bool destroy(false);
 
 
     std::future<void> bmp;
@@ -119,48 +121,52 @@ bool Thread::IsExist( int idx )
     return GetHandler()->IsExist( idx );
 }
 
-bool Thread::LoadImage( size_t idx, int pos )
+bool Thread::LoadImage( size_t idx, bool isScroll )
 {
-    if ( GetHandler()->IsExist( idx ) )
+    if ( IsExist(idx) )
     {
-        return m_image->Load( GetHandler()->Item( idx ), pos );
-
+        wxInputStream* stream = GetHandler()->Item(idx);
+        if ( wxImage::CanRead( *stream ) )
+        {
+            wxImage img = wxImage(*stream);
+            m_bitmap->Add( img, idx, isScroll );
+            m_bitmap->Refresh();
+            m_bitmap->RefreshPosition();
+            return true;
+        }
     }
+    
     return false;
 }
 
-void Thread::BitmapThread( bool& destroy  )
+void Thread::BitmapThread( bool& isDestroyed  )
 {
     GetHandler()->Clear();
     GetHandler()->Open( m_path );
     GetHandler()->Traverse();
+
     int curr = GetHandler()->Index( m_path ),
-    next = curr + 1, prev = curr - 1;
+        prev = curr - 1, next = curr + 1;
 
-    if ( LoadImage( curr, VECTOR_END ) )
+    m_bitmap->GetAll().assign( GetHandler()->Size(), SBitmap() );
+
+    if ( IsExist(curr) )
     {
-        m_bitmap->Add( m_image->Get().back(), VECTOR_END );
+        LoadImage( curr );
     }
-     
-    while ( (IsExist( next ) || IsExist( prev )) && !destroy )
+
+    while ( !isDestroyed && ( IsExist(prev) || IsExist(next) ) )
     {
-        if ( IsExist( next ) )
+        if ( !isDestroyed && IsExist(next) )
         {
-            if ( !destroy && LoadImage( next, VECTOR_END ) )
-            {
-                m_bitmap->Add( m_image->Get().back(), VECTOR_END );
-            }
-            next++;
+            LoadImage( next++ );
+        }
+        if ( !isDestroyed && IsExist(prev) )
+        {
+            LoadImage( prev--, true );
         }
 
-        if ( IsExist( prev ) )
-        {
-            if ( !destroy && LoadImage( prev, VECTOR_BEGIN ) )
-            {
-                m_bitmap->Add( m_image->Get().front(), VECTOR_BEGIN );
-            }
-            prev--;
-        }
+        if ( ( !IsExist(next) && !IsExist(prev) ) ) break;
     }
 }
 

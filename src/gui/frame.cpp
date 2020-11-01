@@ -99,7 +99,7 @@ void Frame::OpenFile(wxCommandEvent& event)
 void Frame::SetPanel()
 {
     this->panel = new Panel( this, PANEL, wxPoint(-1,-1), this->GetClientSize() );
-    // this->sizer->Add( this->panel, 1, wxALL );
+    this->sizer->Add( this->panel, 1, wxALL );
 }
 
 void Frame::OnExit(wxCommandEvent& event)
