@@ -23,8 +23,8 @@ class wxString;
 
 enum HandlerType
 {
-    Default,
-    Archive
+    Archive,
+    File
 };
 
 
