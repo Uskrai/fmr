@@ -38,11 +38,6 @@ void DefaultHandler::Open( const wxString& path )
     }    
 }
 
-bool DefaultHandler::IsExist( int index )
-{
-    return (index >= 0 && index < int(m_fstream.size()));
-}
-
 wxString DefaultHandler::GetNextPrev( int i )
 {
     if ( GetParent() )
