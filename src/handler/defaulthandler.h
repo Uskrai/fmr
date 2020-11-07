@@ -38,9 +38,9 @@ class DefaultHandler
         void Traverse( );
 
         int Index( const wxString& name );
-        int IndexFilename( wxString path ) { return this->Index(  path.AfterLast( wxFileName::GetPathSeparator() )  ); }
-        wxInputStream* Item( int index ) { return this->fstream.at(index); }
-        int Size() { return this->files.size(); }
+        int IndexFilename( wxString path ) { return Index(  path.AfterLast( wxFileName::GetPathSeparator() )  ); }
+        wxInputStream* Item( int index ) { return m_fstream.at(index); }
+        int Size() { return m_files.size(); }
 
         bool IsExist( int index );
 
@@ -51,11 +51,11 @@ class DefaultHandler
         
     private:
 
-        wxVector<wxInputStream*> fstream;
+        wxVector<wxInputStream*> m_fstream;
         int type;
-        wxString filename;
-        wxArrayString files;
-        wxArrayString directory;
+        wxString m_filename;
+        wxArrayString m_files;
+        wxArrayString m_directory;
         wxDir dir;
         
         void GetAllFiles( wxDir& dir, bool& cont, wxString& filename, wxArrayString& array);

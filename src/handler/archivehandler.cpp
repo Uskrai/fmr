@@ -19,29 +19,29 @@
 
 ArchiveHandler::ArchiveHandler( const wxString& path )
 {
-    this->Open( path );
+    Open( path );
 }
 
 void ArchiveHandler::Open( const wxString& path )
 {
-    this->filename = path;
+    m_filename = path;
 }
 
 bool ArchiveHandler::IsExist( int index )
 {
-    if ( this->fstream.empty() ) { return false; }
-    return index >= 0 && index < int(this->fstream.size()) ;
+    if ( m_fstream.empty() ) { return false; }
+    return index >= 0 && index < int(m_fstream.size()) ;
 }
 
 void ArchiveHandler::Traverse()
 {
-    wxString path = this->filename;
+    wxString path = m_filename;
 
     wxInputStream* instream;
 
     const wxArchiveClassFactory* factory;
 
-    this->Find( path, factory, instream );
+    Find( path, factory, instream );
 
     wxArchiveInputStream* stream = factory->NewStream( instream );
     wxArchiveEntry* entry;
@@ -53,21 +53,21 @@ void ArchiveHandler::Traverse()
             continue;
         }
 
-        this->name.push_back( entry->GetName() );
+        m_files.push_back( entry->GetName() );
     }
-    this->name.Sort(wxCmpNaturalGeneric);
+    m_files.Sort(wxCmpNaturalGeneric);
 
     stream = factory->NewStream( new wxFileInputStream(path) );
     while ( ( entry = stream->GetNextEntry()) )
     {
-        for ( int i = 0; i < int(this->name.size()); i++ )
+        for ( int i = 0; i < int(m_files.size()); i++ )
         {
-            if ( entry->GetName() == this->name.Item(i) )
+            if ( entry->GetName() == m_files.Item(i) )
             {
                 wxMemoryOutputStream file;
                 stream->Read(file);
-                this->fstream.push_back( new wxMemoryInputStream(file) );
-                this->name.RemoveAt(i);
+                m_fstream.push_back( new wxMemoryInputStream(file) );
+                m_files.RemoveAt(i);
             }
         }
     }
@@ -118,16 +118,16 @@ bool ArchiveHandler::CanHandle( wxString path )
 
 void ArchiveHandler::Clear()
 {
-    for ( auto& it : fstream )
+    for ( auto& it : m_fstream )
     {
         it->~wxInputStream();
     }
-    fstream.clear();
-    this->filename = wxEmptyString;
-    name.clear();
+    m_fstream.clear();
+    m_filename = wxEmptyString;
+    m_files.clear();
 }
 
 ArchiveHandler::~ArchiveHandler()
 {
-    this->Clear();
+    Clear();
 }
