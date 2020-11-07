@@ -22,6 +22,7 @@
 // #include <wx/wfstream.h>
 
 #include "handler/handler.h"
+#include "base/vector.h"
 #include <wx/dir.h>
 #include <wx/filename.h>
 
@@ -44,11 +45,12 @@ class DefaultHandler
         wxString GetPrev();
 
         int Index( const wxString& name );
-        int IndexFilename( wxString path ) { return this->Index(  path.AfterLast( wxFileName::GetPathSeparator() )  ); }
-        wxInputStream* Item( int index ) { return m_fstream.at(index); }
-        int Size() { return m_files.size(); }
+        int IndexFilename( wxString path ) { return Index(  path.AfterLast( wxFileName::GetPathSeparator() )  ); }
+        wxInputStream* Item( size_t index ) { return m_fstream.at(index); }
+        size_t Size() { return m_files.size(); }
 
-        bool IsExist( int index );
+        bool IsExist( size_t index )
+                { return Vector::IsExist(m_fstream,index); }
 
         void Clear();
 

@@ -36,7 +36,7 @@ class Bitmap
         virtual void RefreshSize() = 0;
 
 
-        bool OnMove( int& first, int& last, int step );
+        bool OnMove( size_t& first, size_t& last, int step );
         bool IsImageOk( int pos );
         bool Next();
         bool Prev();
@@ -62,7 +62,7 @@ class Bitmap
 
     private:
         int m_limit = 1;
-        int m_posFirst = 0 , m_posLast = 0;
+        size_t m_posFirst = 0 , m_posLast = 0;
 
 };
 
