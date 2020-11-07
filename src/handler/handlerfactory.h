@@ -24,7 +24,7 @@ class wxString;
 enum HandlerType
 {
     Archive,
-    File
+    Default
 };
 
 
