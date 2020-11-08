@@ -36,8 +36,21 @@ void ArchiveHandler::Open( const wxString& path )
     }
 }
 
-wxString ArchiveHandler::GetNext() { return wxString(); }
-wxString ArchiveHandler::GetPrev() { return wxString(); }
+wxString ArchiveHandler::GetNextPrev( int i )
+{
+    if ( GetParent() )
+    {
+        wxArrayString names = GetParent()->GetChild();
+        size_t idx = names.Index( Path::GetName( GetName() ));
+        if ( idx != size_t(-1) )
+            return GetParent()->GetName() + names.Item( idx + i );
+    }
+
+    return wxEmptyString;
+}
+
+wxString ArchiveHandler::GetNext() { return GetNextPrev(1); }
+wxString ArchiveHandler::GetPrev() { return GetNextPrev(-1); }
 
 void ArchiveHandler::Traverse()
 {

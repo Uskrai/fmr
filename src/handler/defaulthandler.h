@@ -39,15 +39,17 @@ class DefaultHandler
         void Traverse( );
 
         Handler* GetParent() { return m_parent; }
+        wxArrayString& GetChild() { return m_all; }
         wxString GetName() { return m_name; }
 
         wxString GetNextPrev( int i );
         wxString GetNext();
         wxString GetPrev();
 
-        int Index( const wxString& name );
-        int IndexFilename( wxString path ) { return Index(  path.AfterLast( wxFileName::GetPathSeparator() )  ); }
         wxInputStream* Item( size_t index ) { return m_fstream.at(index); }
+
+        size_t Index( const wxString& name );
+        size_t IndexFilename( wxString path );
         size_t Size() { return m_files.size(); }
 
         bool IsExist( size_t index )
@@ -63,6 +65,7 @@ class DefaultHandler
         wxVector<wxInputStream*> m_fstream;
         int type;
         wxString m_name;
+        wxString m_filename;
         wxString m_parentName;
         
         Handler* m_parent;

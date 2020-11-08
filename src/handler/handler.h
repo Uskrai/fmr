@@ -26,18 +26,29 @@ class Handler
         Handler( const wxString& path ) {};
         virtual ~Handler() {};
 
+        // return handler of Parent's Directory
         virtual Handler* GetParent() = 0;
-        
+
+        // return all directory and files in current dir
+        virtual wxArrayString& GetChild() = 0;
+
+        // return opened path
         virtual wxString GetName() = 0;
+        // return next or prev folder / file
         virtual wxString GetNext() = 0;
         virtual wxString GetPrev() = 0;
 
         virtual void Open( const wxString& path) = 0;
+        // enumerate current opened file or dir
         virtual void Traverse() = 0 ;
 
         virtual bool IsExist( size_t index ) = 0;
 
-        virtual int Index( const wxString& name ) = 0;
+        // search from files
+        // Index and Item should 
+        // return name and stream respectively
+        virtual size_t Index( const wxString& name ) = 0;
+        // return files stream;
         virtual wxInputStream* Item( size_t index ) = 0;
 
         virtual size_t Size() = 0;
