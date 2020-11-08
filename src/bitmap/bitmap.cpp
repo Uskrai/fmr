@@ -25,7 +25,9 @@ void Bitmap::Clear()
     {
         it = &G_BITMAP;
     }
+    m_posFirst = 0;
     GetAll().clear();
+    Refresh();
 }
 
 void Bitmap::SetLimit( int limit )
