@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef FMR_BASE_PATH
+#define FMR_BASE_PATH
+
 #include <wx/filename.h>
 #include <iostream>
 namespace Path
@@ -80,3 +83,5 @@ namespace Path
     
 
 } // namespace Path
+
+#endif
