@@ -1,8 +1,11 @@
 
-#include "handler/defaulthandler.h"
 #include <iostream>
+#include "handler/archivehandler.cpp"
+#include "handler/defaulthandler.cpp"
 
-int aaa()
+// todo "default point to file"
+
+void aaa()
 {
 	Handler* handler = new DefaultHandler(".");
 
@@ -10,30 +13,33 @@ int aaa()
 	{
 		handler->GetParent()->Traverse();
 		std::cout << handler->GetNext() << std::endl;
-		std::cout << handler->GetCurrentName() << '\n';
+		std::cout << handler->GetName() << '\n';
 		handler = handler->GetParent();
 	}
-	std::cout << handler->GetCurrentName() << '\n';
+	std::cout << handler->GetName() << '\n';
 	wxFileName dirname(".");
 	std::cout << dirname.GetVolume() << '\n';
 }
 
-int bbb()
+void testHandler( Handler* handler )
 {
-	DefaultHandler* handler = new DefaultHandler(".");
-	std::cout << handler->GetParentName() << '\n';
+	std::cout << "Parent Name:\t" << handler->GetParent()->GetName() << '\n';
 	handler->GetParent()->Traverse();
-	std::cout << handler->GetNext() << '\n';
-	std::cout << handler->GetPrev() << '\n';
+	std::cout << "Next : \t\t" << handler->GetNext() << '\n';
+	std::cout << "Prev : \t\t" << handler->GetPrev() << '\n';
+}
+void dfHandler()
+{
+	testHandler( new DefaultHandler(".") );
+}
 
-	for ( auto& it : handler->GetParent()->GetAllName() )
-	{
-	//	std::cout << it << std::endl;
-	}
+void arcHandler()
+{
+	testHandler( new ArchiveHandler("./handler.zip") );
 }
 
 int main()
 {
-	//DefaultHandler* handler = new DefaultHandler("./a.out");
-	bbb();
+	dfHandler();
+	arcHandler();
 }
