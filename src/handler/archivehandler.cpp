@@ -26,10 +26,10 @@ ArchiveHandler::ArchiveHandler( const wxString& path )
 
 void ArchiveHandler::Open( const wxString& path )
 {
-    m_filename = path;
+    m_name = path;
 
     wxString parent = Path::GetParent(path);
-    if ( parent != m_filename )
+    if ( parent != m_name )
     {
         m_parent = new DefaultHandler(parent);
         m_parentName = parent;
@@ -41,7 +41,7 @@ wxString ArchiveHandler::GetPrev() { return wxString(); }
 
 void ArchiveHandler::Traverse()
 {
-    wxString path = m_filename;
+    wxString path = m_name;
 
     wxInputStream* instream;
 
@@ -129,7 +129,7 @@ void ArchiveHandler::Clear()
         it->~wxInputStream();
     }
     m_fstream.clear();
-    m_filename = wxEmptyString;
+    m_name = wxEmptyString;
     m_files.clear();
 }
 

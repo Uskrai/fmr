@@ -28,10 +28,10 @@ DefaultHandler::DefaultHandler( const wxString& path )
 }
 void DefaultHandler::Open( const wxString& path )
 {
-    m_filename = Path::GetFullPath(path);
+    m_name = Path::GetFullPath(path);
 
     wxString parent = Path::GetParent(path);
-    if ( parent != m_filename )
+    if ( parent != m_name )
     {
         m_parent = new DefaultHandler( parent );
         m_parentName = parent;
@@ -42,7 +42,7 @@ wxString DefaultHandler::GetNextPrev( int i )
 {
     if ( GetParent() )
     {
-        
+        wxString parent = GetParent()->GetName();
     }
     return wxEmptyString;
 }
@@ -62,7 +62,7 @@ int DefaultHandler::Index( const wxString& path )
 
 void DefaultHandler::Traverse()
 {
-    dir.Open( wxPathOnly( m_filename ) );
+    dir.Open( wxPathOnly( m_name ) );
     
     wxString filename;
     bool entry = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
@@ -112,7 +112,7 @@ void DefaultHandler::Clear()
     m_fstream.clear();
     m_files.clear();
     m_directory.clear();
-    m_filename = wxEmptyString;
+    m_name = wxEmptyString;
 }
 
 DefaultHandler::~DefaultHandler()

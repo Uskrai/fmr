@@ -39,6 +39,7 @@ class DefaultHandler
         void Traverse( );
 
         Handler* GetParent() { return m_parent; }
+        wxString GetName() { return m_name; }
 
         wxString GetNextPrev( int i );
         wxString GetNext();
@@ -61,7 +62,7 @@ class DefaultHandler
 
         wxVector<wxInputStream*> m_fstream;
         int type;
-        wxString m_filename;
+        wxString m_name;
         wxString m_parentName;
         
         Handler* m_parent;
