@@ -214,6 +214,7 @@ void Window::OnEdge( int modifier )
             m_onEdge = 0;
             if ( m_bitmap->Prev() )
                 Scroll( 0, GetVirtualSize().GetHeight() );
+            else Prev();
         }
     }
 }
