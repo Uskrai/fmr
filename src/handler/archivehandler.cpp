@@ -18,6 +18,7 @@
 #include "handler/archivehandler.h"
 #include "handler/defaulthandler.h"
 #include "base/path.h"
+#include "base/compare.h"
 
 ArchiveHandler::ArchiveHandler( const wxString& path )
 {
@@ -74,7 +75,7 @@ void ArchiveHandler::Traverse()
 
         m_files.push_back( entry->GetName() );
     }
-    m_files.Sort(wxCmpNaturalGeneric);
+    m_files.Sort(Compare::Natural);
 
     stream = factory->NewStream( new wxFileInputStream(path) );
     while ( ( entry = stream->GetNextEntry()) )

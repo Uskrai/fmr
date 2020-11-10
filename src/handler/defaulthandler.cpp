@@ -20,6 +20,7 @@
 #include "handler/defaulthandler.h"
 #include <wx/wfstream.h>
 #include "base/path.h"
+#include "base/compare.h"
 #include <iostream>
 
 DefaultHandler::DefaultHandler( const wxString& path )
@@ -67,6 +68,7 @@ size_t DefaultHandler::Index( const wxString& path )
     size_t idx = m_files.Index( Path::GetName(path) );
     
     idx = ( idx != size_t(-1) ) ? idx : 0;
+    return idx;
 }
 
 void DefaultHandler::Traverse()
@@ -76,14 +78,14 @@ void DefaultHandler::Traverse()
     wxString filename;
     bool entry = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
     GetAllFiles( dir, entry, filename, m_files );
-    m_files.Sort( wxCmpNaturalGeneric );
+    m_files.Sort( Compare::Natural );
     for ( const auto& it : m_files )
     {
         m_fstream.push_back( new wxFileInputStream( dir.GetNameWithSep() + it ) );
     }
     entry = dir.GetFirst(&filename,wxEmptyString, wxDIR_DIRS );
     GetAllFiles( dir, entry, filename, m_directory );
-    m_directory.Sort( wxCmpNaturalGeneric );
+    m_directory.Sort( Compare::Natural );
     
     m_all = m_directory;
     for ( const auto& it : m_files )
