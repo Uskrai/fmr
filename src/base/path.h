@@ -71,7 +71,6 @@ namespace Path
     // return Name without separator
     wxString GetName( wxString path )
     {
-        int idx;
         RemoveDirSep(path);
         
         wxString name = path.SubString( path.rfind(sep) + 1, -1 );
