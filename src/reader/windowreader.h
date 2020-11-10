@@ -24,6 +24,7 @@
 
 class Config;
 class BitmapVertical;
+class Handler;
 class HandlerFactory;
 
 namespace Reader
@@ -44,12 +45,15 @@ class Window : public wxScrolledWindow
         void Prev();
 
         void Clear();
+
+        Handler* GetHandler() {return m_fileHandler;}
     private:
         //vector to bitmaps
         BitmapVertical* m_bitmap;
         // reference to threading class
         Thread* m_thread;
         // pointer to handler
+        Handler* m_fileHandler = NULL;
         HandlerFactory* m_factory = NULL;
         // pointer to config files 
         Config* m_config;
@@ -68,6 +72,8 @@ class Window : public wxScrolledWindow
         void OnMouseWheel( wxMouseEvent& event );
         void OnKeyDown( wxKeyEvent& event );
         void OnArrow( wxOrientation orient, int modifier);
+        
+        size_t m_onEdge;
         void OnEdge( int modifier );
 };
 

@@ -32,6 +32,7 @@ enum HandlerType
 class HandlerFactory
 {
     public:
+        bool Is( const wxString& path1, const wxString& path2);
         bool Find( const wxString& path );
         bool Find( const wxString& path, HandlerType& type );
         Handler* NewHandler( const wxString& path );
