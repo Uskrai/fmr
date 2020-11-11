@@ -23,6 +23,7 @@
 struct SBitmap
 {
     wxBitmap m_item = wxBitmap( wxSize(1,1) );
+    wxString m_name = wxEmptyString;
     wxPoint m_pos = wxPoint(0,0);
     bool m_isOk = false; // determine bitmap status
 
@@ -59,12 +60,14 @@ struct SBitmap
     wxPoint GetPosition()  const { return m_pos; }
     wxSize GetSize() const { return wxSize( GetWidth(), GetHeight() ); }
 
+    wxString GetName() { return m_name;}
     int GetWidth() const { return m_item.GetWidth(); }
     int GetHeight() const { return m_item.GetHeight(); }
     int GetY() const { return m_pos.y; }
     int GetX() const { return m_pos.x; }
 
     void SetBitmap( const wxBitmap& bmp ) { m_item = bmp; m_isOk = true; }
+    void SetName( const wxString& name ) { m_name = name;}
     void SetPosition( const wxPoint& pos ) { m_pos = pos; }
     void SetY( int PosY ) { m_pos.y = PosY; }
     void SetX( int PosX ) { m_pos.x = PosX; }

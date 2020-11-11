@@ -35,11 +35,13 @@ class Bitmap
         virtual void RefreshPosition() = 0;
         virtual void RefreshSize() = 0;
 
+        void SetName( size_t idx, wxString name )
+            { GetAll()[idx].SetName(name); }
 
-        bool OnMove( size_t& first, size_t& last, int step );
+        bool ChangePage( int step );
         bool IsImageOk( int pos );
-        bool Next();
-        bool Prev();
+        bool NextPage();
+        bool PrevPage();
 
         wxVector<SBitmap>& GetAll() { return m_item; }
         const wxVector<SBitmap>& GetAll() const { return m_item; }
