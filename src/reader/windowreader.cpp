@@ -152,24 +152,29 @@ void Window::OnKeyDown( wxKeyEvent& event )
     switch (key)
     {
         case WXK_UP:
-            return this->OnArrow( wxVERTICAL, modVer * 1 );
+            if ( ! OnArrow( wxVERTICAL, modVer * 1 ) )
+                Scroll(0,0);
             break;
         case WXK_DOWN:
-            return this->OnArrow( wxVERTICAL, modVer * -1 );
+            if ( ! OnArrow( wxVERTICAL, modVer * -1 ) )
+                Scroll(0, GetVirtualSize().GetHeight());
             break;
         case WXK_LEFT:
-            return this->OnArrow( wxHORIZONTAL, modHor * 1, isInstant );
+            if ( ! OnArrow( wxHORIZONTAL, modHor * 1, isInstant ) )
+                Scroll( 0 , 0 );
             break;
         case WXK_RIGHT:
-            return this->OnArrow( wxHORIZONTAL, modHor * -1, isInstant );
+            if ( ! OnArrow( wxHORIZONTAL, modHor * -1, isInstant ) )
+                Scroll(0,0);
             break;
         default:
             event.Skip();
     }
 }
 
-void Window::OnArrow( wxOrientation orient, int modifier, bool isInstant )
+bool Window::OnArrow( wxOrientation orient, int modifier, bool isInstant )
 {
+    modifier = ( modifier > -1 ) ? 1 : -1;
     const wxPoint& view = GetViewStart();
     int step = ConfRead("ScrollStep", 300 );
     switch ( orient )
@@ -186,46 +191,31 @@ void Window::OnArrow( wxOrientation orient, int modifier, bool isInstant )
     if ( view == GetViewStart() )
     {
         m_onEdge++;
-        OnEdge( modifier, isInstant );
+        return OnEdge( modifier, isInstant );
     } else m_onEdge = 0;
+    return true;
 } 
 
-void Window::OnEdge( int modifier, bool isInstant )
+bool Window::OnEdge( int modifier, bool isInstant )
 {
 
-    if ( !m_thread->IsOpened() ) return;
+    if ( !m_thread->IsOpened() ) return false;
     
     size_t conf = ConfRead("ClickBeforeChangePage",1);
 
 
     if ( m_onEdge > conf || isInstant )
     {
-        Scroll(0,0);
         m_onEdge = 0;
-        if ( m_bitmap->ChangePage(modifier) );
-        else ChangeFolder(modifier);
-    }
+        bool isChangePage = m_bitmap->ChangePage(modifier);
 
-    // if ( modifier > 0 )
-    // {
-    //     if ( m_onEdge > conf || isInstant )
-    //     {
-    //         m_onEdge = 0;
-    //         if ( m_bitmap->Next() )
-    //             Scroll(0,0);
-    //         else Next();
-    //     }
-    // }
-    // else if ( modifier < 0 )
-    // {
-    //     if ( m_onEdge > conf || isInstant )
-    //     {
-    //         m_onEdge = 0;
-    //         if ( m_bitmap->Prev() )
-    //             Scroll( 0, GetVirtualSize().GetHeight() );
-    //         else Prev();
-    //     }
-    // }
+        if ( !isChangePage )
+            ChangeFolder(modifier);
+            
+        return !isChangePage;
+    }
+    return false;
+
 }
 
 void Window::OnMouseMotion( wxMouseEvent& event )
