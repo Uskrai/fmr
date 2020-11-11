@@ -38,7 +38,7 @@ class ArchiveHandler
         wxString GetParentName() { return m_parentName; }
         wxArrayString& GetChild() { return m_all; }
 
-        wxString GetNextPrev( int i );
+        wxString GetFromCurrent( int i );
         wxString GetNext();
         wxString GetPrev();
 
@@ -48,6 +48,8 @@ class ArchiveHandler
         void Traverse();
         size_t Index( const wxString& name ) { return m_files.Index(name); } ;
         size_t Size() { return m_fstream.size();} ;
+
+        wxString ItemName( size_t idx ) { return m_files.Item(idx); }
         wxInputStream* Item( size_t index ) { return m_fstream.at(index); }
         void Clear();
 
