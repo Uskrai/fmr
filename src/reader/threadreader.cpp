@@ -47,6 +47,22 @@ void Thread::Open( const wxString& path )
     m_path = path;
     m_threadbmp = true; // activate bitrmap thread;
     
+    GetHandler()->Clear();
+    GetHandler()->Open( m_path );
+    GetHandler()->Traverse();
+    if ( GetHandler()->GetParent() )
+        GetHandler()->GetParent()->Traverse();
+
+    size_t m_curr = GetHandler()->Index( m_path );
+
+    m_bitmap->Clear();
+    m_bitmap->GetAll().assign( GetHandler()->Size(), SBitmap() );
+
+    if ( IsExist( m_curr ) )
+    {
+        LoadImage( m_curr );
+    }
+
     // return if thread already running
     if ( GetThread() && GetThread()->IsRunning() ) return; 
     if ( CreateThread( wxTHREAD_JOINABLE ) != wxTHREAD_NO_ERROR )
@@ -63,19 +79,12 @@ void Thread::Clear()
     if ( GetThread() && GetThread()->IsRunning() )
         GetThread()->Delete();
 
-    m_bitmap->Clear();
 }
 
 bool Thread::TestDestroy()
 {
     return this->GetThread()->TestDestroy();
 }
-
-// template<typename T>
-// T Thread::ConfRead( const wxString& name, T def )
-// { 
-//     return m_config->Read( wxString("Reader/") + name, def ); 
-// }
 
 template<typename T>
 bool IsReady( std::future<T>& t )  // to check if the thread completed or not
@@ -93,7 +102,8 @@ wxThread::ExitCode Thread::Entry()
     {
         if ( m_threadbmp )
         {
-            bmp = std::async( std::launch::async, &Thread::BitmapThread, this, std::ref(destroy) );
+            bmp = std::async( std::launch::async, &Thread::BitmapThread,
+                             this, std::ref(destroy), m_curr );
             m_threadbmp = false;
         }
 
@@ -134,23 +144,22 @@ bool Thread::LoadImage( size_t idx, bool isScroll )
     return false;
 }
 
-void Thread::BitmapThread( bool& isDestroyed  )
+void Thread::BitmapThread( bool& isDestroyed, size_t curr )
 {
-    GetHandler()->Clear();
-    GetHandler()->Open( m_path );
-    GetHandler()->Traverse();
-    if ( GetHandler()->GetParent() )
-        GetHandler()->GetParent()->Traverse();
+    // GetHandler()->Clear();
+    // GetHandler()->Open( m_path );
+    // GetHandler()->Traverse();
+    // if ( GetHandler()->GetParent() )
+    //     GetHandler()->GetParent()->Traverse();
 
-    size_t curr = GetHandler()->Index( m_path ),
-        prev = curr - 1, next = curr + 1;
+    size_t prev = curr - 1, next = curr + 1;
 
-    m_bitmap->GetAll().assign( GetHandler()->Size(), SBitmap() );
+    // m_bitmap->GetAll().assign( GetHandler()->Size(), SBitmap() );
 
-    if ( IsExist(curr) )
-    {
-        LoadImage( curr );
-    }
+    // if ( IsExist(curr) )
+    // {
+    //     LoadImage( curr );
+    // }
 
     while ( !isDestroyed && ( IsExist(prev) || IsExist(next) ) )
     {
