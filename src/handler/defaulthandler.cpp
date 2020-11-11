@@ -123,6 +123,7 @@ void DefaultHandler::Clear()
     m_fstream.clear();
     m_files.clear();
     m_directory.clear();
+    dir.Close();
     m_name = wxEmptyString;
 }
 
