@@ -71,10 +71,10 @@ class Window : public wxScrolledWindow
         wxPoint m_mousePosition;
         void OnMouseWheel( wxMouseEvent& event );
         void OnKeyDown( wxKeyEvent& event );
-        void OnArrow( wxOrientation orient, int modifier);
+        void OnArrow( wxOrientation orient, int modifier, bool isInstant = false);
         
         size_t m_onEdge;
-        void OnEdge( int modifier );
+        void OnEdge( int modifier, bool isInstant = false );
 };
 
 };
