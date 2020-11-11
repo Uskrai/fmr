@@ -65,41 +65,33 @@ Window::~Window()
     delete m_thread;
 }
 
-void Window::Open( wxString path )
-{
-    Clear(); 
-
-    if ( !GetHandler() )
-    {
-        m_factory->Find( path );
-        m_fileHandler = m_factory->NewHandler();
-    }
-    else if ( !m_factory->Is( GetHandler()->GetName(),path) )
-    {
-        m_factory->Find(path);
-        m_fileHandler = m_factory->NewHandler();
-    }
-
-
-    m_thread->SetHandler( GetHandler() );
-
-    m_thread->Open( path );
-    m_config->Write("RecentlyOpened", path );
-}
-
-void Window::ChangeFolder( const wxString& path )
+void Window::Open( const wxString& path )
 {
     if ( path != wxEmptyString )
     {
-        Clear();
-        m_factory->Find(path);
-        m_thread->SetHandler( m_factory->NewHandler() );
-        m_thread->Open(path);
+        Clear(); 
+
+        if ( !GetHandler() )
+        {
+            m_factory->Find( path );
+            m_fileHandler = m_factory->NewHandler();
+        }
+        else if ( !m_factory->Is( GetHandler()->GetName(),path) )
+        {
+            m_factory->Find(path);
+            m_fileHandler = m_factory->NewHandler();
+        }
+
+
+        m_thread->SetHandler( GetHandler() );
+
+        m_thread->Open( path );
+        m_config->Write("RecentlyOpened", path );
     }
 }
 
-void Window::Next() { ChangeFolder( m_thread->GetHandler()->GetNext()); }
-void Window::Prev() { ChangeFolder( m_thread->GetHandler()->GetPrev()); }
+void Window::Next() { Open( m_thread->GetHandler()->GetNext()); }
+void Window::Prev() { Open( m_thread->GetHandler()->GetPrev()); }
 
 void Window::Find( const wxString& path )
 {
