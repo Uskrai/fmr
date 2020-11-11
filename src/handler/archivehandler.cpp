@@ -37,7 +37,7 @@ void ArchiveHandler::Open( const wxString& path )
     }
 }
 
-wxString ArchiveHandler::GetNextPrev( int i )
+wxString ArchiveHandler::GetFromCurrent( int i )
 {
     if ( GetParent() )
     {
@@ -50,8 +50,8 @@ wxString ArchiveHandler::GetNextPrev( int i )
     return wxEmptyString;
 }
 
-wxString ArchiveHandler::GetNext() { return GetNextPrev(1); }
-wxString ArchiveHandler::GetPrev() { return GetNextPrev(-1); }
+wxString ArchiveHandler::GetNext() { return GetFromCurrent(1); }
+wxString ArchiveHandler::GetPrev() { return GetFromCurrent(-1); }
 
 void ArchiveHandler::Traverse()
 {
@@ -77,17 +77,18 @@ void ArchiveHandler::Traverse()
     }
     m_files.Sort(Compare::Natural);
 
+    wxArrayString files = m_files;
     stream = factory->NewStream( new wxFileInputStream(path) );
     while ( ( entry = stream->GetNextEntry()) )
     {
-        for ( int i = 0; i < int(m_files.size()); i++ )
+        for ( int i = 0; i < int(files.size()); i++ )
         {
-            if ( entry->GetName() == m_files.Item(i) )
+            if ( entry->GetName() == files.Item(i) )
             {
                 wxMemoryOutputStream file;
                 stream->Read(file);
                 m_fstream.push_back( new wxMemoryInputStream(file) );
-                m_files.RemoveAt(i);
+                files.RemoveAt(i);
             }
         }
     }
