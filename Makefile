@@ -81,10 +81,10 @@ $(addprefix build/, $(so) ) : build/%.$(soext): %.o
 
 # $(obj) : FLAGS := $(CXXFLAGS) $(wxFLAGS)
 
-bitmap/bitmapvertical.o : bitmap/bmp.h
+bitmap/bitmapvertical.o : bitmap/bmp.h bitmap/bitmap.h
 handler/handler.o 	: handler/filehandler.h handler/archivehandler.h
-reader/threadreader,o	: handler/handler.h 
-reader/windowreader.o 	: bitmap/bitmapvertical.h 
+reader/threadreader.o	: handler/handler.h bitmap/bitmap.h
+reader/windowreader.o 	: bitmap/bitmapvertical.h bitmap/bitmap.h
 gui/panel.o : reader/windowreader.h 
 gui/frame.o : gui/panel.h
 main/app.o : gui/frame.h
