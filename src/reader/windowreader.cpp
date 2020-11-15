@@ -160,7 +160,7 @@ void Window::OnArrow( wxOrientation orient, int modifier )
         default:
             break;
     }
-    // printf("%d\n", GetViewStart().y );
+
     if ( view == GetViewStart() )
     {
         OnEdge( modifier );
@@ -169,20 +169,23 @@ void Window::OnArrow( wxOrientation orient, int modifier )
 
 void Window::OnEdge( int modifier )
 {
+    int conf = ConfRead("ClickBeforeChangePage",1);
     if ( modifier > 0 )
     {
         if ( m_bitmap->Next() )
             Scroll(0,0);
-        // else
-            // Next()
-        
+        else
+            Next();
     }
     else if ( modifier < 0 )
     {
-        if ( m_bitmap->Prev() )
-            Scroll( 0, GetVirtualSize().GetHeight() );
-        // else
-            // Prev()
+        if ( m_onEdge > conf )
+        {
+            m_onEdge = 0;
+            if ( m_bitmap->Prev() )
+                Scroll( 0, GetVirtualSize().GetHeight() );
+            else Prev();
+        }
     }
 }
 
