@@ -22,6 +22,8 @@
 #include <wx/filedlg.h>
 #include <wx/sizer.h>
 
+#include "base/config.h"
+
 enum {
     PANEL = wxID_HIGHEST + 1,
 };
@@ -84,8 +86,14 @@ wxMenu* Frame::MenuHelp()
 void Frame::OpenFile(wxCommandEvent& event)
 {  
     wxFileDialog* openDialog = new wxFileDialog(
-        this,_("Choose a file to open"),wxEmptyString,wxEmptyString,
-        _("All Files(*)|*|Images Files(*.jpg;*.png)|*.jpg;*.png|Archive Files (*.zip)|*.zip"),wxFD_OPEN,wxDefaultPosition
+        this,_("Choose a file to open"),
+        wxEmptyString, 
+        Config::Get()->Read("RecentlyOpened",wxString()),
+            _("All Files(*)|*| \
+            Images Files(*.jpg;*.png)|*.jpg;*.png|\
+            Archive Files (*.zip)|*.zip"
+            ),
+        wxFD_OPEN,wxDefaultPosition
     );
 
     if(openDialog->ShowModal() == wxID_OK)

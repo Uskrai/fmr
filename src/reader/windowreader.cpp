@@ -116,14 +116,10 @@ void Window::OnDraw( wxDC& dc )
 {
     dc.SetClippingRegion( GetViewStart(), GetClientSize() );
     wxCriticalSectionLocker locker( m_thread->GetLock() );
-    int i = 0;
     for ( const auto& it : m_bitmap->Get() )
     {
         if ( it->IsOk() )
-        {
             dc.DrawBitmap( it->GetBitmap() , it->GetPosition() );
-        }
-        i++;
     }
 }
 
@@ -146,7 +142,7 @@ void Window::Error( wxSize size )
 void Window::OnMouseWheel( wxMouseEvent& event )
 {
     int scrolling = event.GetWheelDelta()/event.GetWheelRotation() * ConfRead("WheelInvert",-1);
-    OnArrow( wxVERTICAL, scrolling );
+    OnArrow( wxVERTICAL, scrolling, true );
     event.Skip();
 }
 
@@ -154,35 +150,39 @@ void Window::OnKeyDown( wxKeyEvent& event )
 {
     wxEventType key = event.GetKeyCode();
     int def = this->m_config->Read("Invert",-1);
+    int modVer = ConfRead("ArrowVerticalInvert",def);
+    int modHor = ConfRead("ArrowHorizontalInvert",def );
+    bool isInstant = ConfRead("isInstantOnArrowLeftRight", true );
     switch (key)
     {
         case WXK_UP:
-            return this->OnArrow( wxVERTICAL, this->ConfRead("ArrowVerticalInvert",def) * 1 );
+            return this->OnArrow( wxVERTICAL, modVer * 1 );
             break;
         case WXK_DOWN:
-            return this->OnArrow( wxVERTICAL, this->ConfRead("ArrowVerticalInvert",def) * -1 );
+            return this->OnArrow( wxVERTICAL, modVer * -1 );
             break;
         case WXK_LEFT:
-            return this->OnArrow( wxHORIZONTAL, this->ConfRead("ArrowHorizontalInvert",def) * 1 );
+            return this->OnArrow( wxHORIZONTAL, modHor * 1, isInstant );
             break;
         case WXK_RIGHT:
-            return this->OnArrow( wxHORIZONTAL, this->ConfRead("ArrowHorizontalInvert",def) * -1 );
+            return this->OnArrow( wxHORIZONTAL, modHor * -1, isInstant );
             break;
         default:
             event.Skip();
     }
 }
 
-void Window::OnArrow( wxOrientation orient, int modifier )
+void Window::OnArrow( wxOrientation orient, int modifier, bool isInstant )
 {
     const wxPoint& view = GetViewStart();
+    int step = ConfRead("ScrollStep", 300 );
     switch ( orient )
     {
         case wxVERTICAL:
-            Scroll( -1, GetViewStart().y + ( ConfRead("ScrollStep",300) * modifier ) );
+            Scroll( -1, GetViewStart().y + ( step * modifier ) );
             break;
         case wxHORIZONTAL:
-            Scroll( GetViewStart().x + ( ConfRead("ScrollStep",300) * modifier ), -1 );
+            Scroll( GetViewStart().x + ( step * modifier ), -1 );
             break;
         default:
             break;
@@ -190,16 +190,16 @@ void Window::OnArrow( wxOrientation orient, int modifier )
     if ( view == GetViewStart() )
     {
         m_onEdge++;
-        OnEdge( modifier );
+        OnEdge( modifier, isInstant );
     } else m_onEdge = 0;
 } 
 
-void Window::OnEdge( int modifier )
+void Window::OnEdge( int modifier, bool isInstant )
 {
     size_t conf = ConfRead("ClickBeforeChangePage",1);
     if ( modifier > 0 )
     {
-        if ( m_onEdge > conf )
+        if ( m_onEdge > conf || isInstant )
         {
             m_onEdge = 0;
             if ( m_bitmap->Next() )
@@ -209,7 +209,7 @@ void Window::OnEdge( int modifier )
     }
     else if ( modifier < 0 )
     {
-        if ( m_onEdge > conf )
+        if ( m_onEdge > conf || isInstant )
         {
             m_onEdge = 0;
             if ( m_bitmap->Prev() )
