@@ -149,7 +149,13 @@ void Window::Error( wxSize size )
 void Window::OnMouseWheel( wxMouseEvent& event )
 {
     int scrolling = event.GetWheelDelta()/event.GetWheelRotation() * ConfRead("WheelInvert",-1);
-    OnArrow( wxVERTICAL, scrolling, true );
+    if ( ! OnArrow( wxVERTICAL, scrolling, true ) )
+    {
+        if ( scrolling > -1 )
+            Scroll(0,0);
+        else
+            Scroll(0,GetVirtualSize().GetHeight());
+    }
     event.Skip();
 }
 
