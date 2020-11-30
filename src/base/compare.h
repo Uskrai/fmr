@@ -89,7 +89,7 @@ namespace Compare
             idx++;pos++;
         }
 
-        return 0;
+        return first.size() - second.size();
     }
 }
 
