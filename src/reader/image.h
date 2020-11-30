@@ -18,7 +18,7 @@
 #ifndef READER_IMAGE
 #define READER_IMAGE
 
-#include "traverser.h"
+#include "filehandler.h"
 #include "config.h"
 
 #include <wx/scrolwin.h>
@@ -81,7 +81,7 @@ class Image :
         wxCriticalSection gCS; // useed for locking used variable to make thread-safe
         bool TestDestroy() { return this->GetThread()->TestDestroy(); }
 
-        Traverser* files = new Traverser();
+        FileHandler* files = new FileHandler();
         wxString file;
 
         VectorImage image;
