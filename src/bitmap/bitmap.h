@@ -28,7 +28,7 @@ class Bitmap
         void Clear();
         bool IsExist( int first, int last ) const;
 
-        void SetLimit( int limit );
+        void SetLimit( size_t limit );
 
         void Refresh();
 
@@ -61,7 +61,7 @@ class Bitmap
         wxVector<SBitmap*> m_itemPage;
 
     private:
-        int m_limit = 1;
+        size_t m_limit = 1;
         size_t m_posFirst = 0 , m_posLast = 0;
 
 };

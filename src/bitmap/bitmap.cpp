@@ -30,7 +30,7 @@ void Bitmap::Clear()
     Refresh();
 }
 
-void Bitmap::SetLimit( int limit )
+void Bitmap::SetLimit( size_t limit )
 {
     Get().resize( limit );
     m_posLast = ( limit < m_limit ) ? 
@@ -68,12 +68,12 @@ void Bitmap::Refresh()
 
 bool Bitmap::Next()
 {
-    OnMove( m_posFirst, m_posLast, 1 );
+    return OnMove( m_posFirst, m_posLast, 1 );
 }
 
 bool Bitmap::Prev()
 {
-    OnMove( m_posFirst,m_posFirst, -1 );
+    return OnMove( m_posFirst,m_posFirst, -1 );
 }
 
 bool Bitmap::IsImageOk( int pos )
