@@ -144,6 +144,11 @@ void Window::OnMouseWheel( wxMouseEvent& event )
 
 void Window::OnKeyDown( wxKeyEvent& event )
 {
+    if ( ! m_thread->IsOpened() ) 
+    {
+        event.Skip();
+        return;
+    }
     wxEventType key = event.GetKeyCode();
     int def = this->m_config->Read("Invert",-1);
     int modVer = ConfRead("ArrowVerticalInvert",def);
