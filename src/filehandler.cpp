@@ -17,26 +17,49 @@
 
 #include "filehandler.h"
 #include <iostream>
+#include <wx/stopwatch.h>
+
 void FileHandler::Open( wxString path )
 {
+    wxStopWatch sw;
+    wxInputStream* in = new wxFileInputStream(path);
+    if ( wxImage::CanRead(path) )
+    {
+        this->type = 0;
+        this->TraverseDir(path);
+        std::cout << sw.Time() << std::endl;
+        return;
+    }
+
     const wxArchiveClassFactory* factory = wxArchiveClassFactory::Find(path, wxSTREAM_FILEEXT);
     this->filename = path;
     if ( factory )
     {
         this->type = 1;
-        this->TraverseArchive(factory,path);
+        this->TraverseArchive(factory,in);
+        std::cout << sw.Time() << std::endl;
+        return;
     }
-    else
+
+    // for archive with extension like .tar.gz
+    const wxFilterClassFactory* fcf;
+    fcf = wxFilterClassFactory::Find(path, wxSTREAM_FILEEXT);
+    if ( fcf )
     {
-        delete factory;
-        this->type = 0;
-        this->TraverseDir(path);
+        in = fcf->NewStream(in);
+        path = fcf->PopExtension(path);
+    }
+
+    factory = wxArchiveClassFactory::Find(path,wxSTREAM_FILEEXT);
+    if ( factory )
+    {
+        this->TraverseArchive(factory,in);
+        return;
     }
 }
 
 bool FileHandler::IsExist( int index )
 {
-    std::cout << index << std::endl;
     return (index >= 0 && index < int(this->fstream.size()));
 }
 
@@ -55,28 +78,37 @@ int FileHandler::Index( wxString path )
     }
 }
 
-void FileHandler::TraverseArchive( const wxArchiveClassFactory* factory, wxString path )
+void FileHandler::TraverseArchive( const wxArchiveClassFactory* factory, wxInputStream* stream )
 {
-    wxFileInputStream* fstream = new wxFileInputStream(path);
-    wxArchiveInputStream* stream = factory->NewStream(fstream );
+    wxArchiveInputStream* aistream = factory->NewStream(stream);
     wxArchiveEntry* entry;
-    wxString temp = wxFileName::GetTempDir() + wxFileName::GetPathSeparator();
-    while ( (entry = stream->GetNextEntry()) != NULL )
+    while ( (entry = aistream->GetNextEntry()) != NULL )
     {
         if ( entry->IsDir() )
         {
             continue;
         }
-        wxFileName name(entry->GetName());
-        if ( !(wxDir::Exists( temp + name.GetPathWithSep() )) )
-        {
-            wxDir::Make( temp + name.GetPathWithSep() );
-        }
-        wxMemoryOutputStream file;
-        stream->Read(file);
-        this->fstream.push_back( new wxMemoryInputStream(file) );
+
+        this->files.push_back(entry->GetName());
     }
-    
+    this->files.Sort(wxCmpNaturalGeneric);
+
+    aistream = factory->NewStream(stream);
+    while ( ( entry = aistream->GetNextEntry()) != NULL )
+    {
+        for ( int i = 0; i < int(this->files.size()); i++ )
+        {
+            if ( entry->GetName() == this->files.Item(i) )
+            {
+                wxMemoryOutputStream file;
+                aistream->Read(file);
+                this->fstream.push_back( new wxMemoryInputStream(file) );
+                this->files.RemoveAt(i);
+            }
+        }
+    }
+    delete aistream;
+    delete entry;
 }
 
 void FileHandler::TraverseDir( wxString path  )
@@ -95,7 +127,6 @@ void FileHandler::TraverseDir( wxString path  )
     this->GetAllFiles(this->dir, cont, filename, this->directory );
     for ( const auto& it : this->directory )
     {
-        std::cout << it << std::endl;
     }
 }
 
@@ -115,4 +146,11 @@ void FileHandler::GetAllFiles( wxDir& dir, bool& cont, wxString& filename, wxArr
     }
 }
 
-// void quickSort( wxVector<)
+void FileHandler::Clear()
+{
+    for ( auto& it : this->fstream )
+    {
+        delete it;
+    }
+    this->fstream.clear();
+}
