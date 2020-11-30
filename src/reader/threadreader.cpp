@@ -138,7 +138,7 @@ bool Thread::LoadImage( size_t idx, bool isScroll )
         wxInputStream &stream = *GetHandler()->Item(idx);
         if ( wxImage::CanRead( stream ) )
         {
-            wxImage img = wxImage(stream);
+            wxImage img(stream);
             m_bitmap->Add( img, idx );
             return true;
         }
