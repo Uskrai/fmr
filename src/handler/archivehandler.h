@@ -46,7 +46,8 @@ class ArchiveHandler
         bool IsExist( size_t index ) 
             { return Vector::IsExist(m_fstream,index); }
         
-        void Traverse();
+        void Traverse( bool GetStream = false );
+        void TraverseStream();
         size_t Index( const wxString& name );
         size_t Size() { return m_fstream.size();} ;
 

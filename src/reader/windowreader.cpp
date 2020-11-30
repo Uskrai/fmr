@@ -71,17 +71,16 @@ void Window::Open( const wxString& path )
     {
         Clear(); 
 
-        if ( !GetHandler() )
-        {
-            m_factory->Find( path );
-            m_fileHandler = m_factory->NewHandler();
-        }
-        else if ( !m_factory->Is( GetHandler()->GetName(),path) )
-        {
-            m_factory->Find(path);
-            m_fileHandler = m_factory->NewHandler();
+#define GetFileHandler( con )                           \
+        if ( con )                                      \
+        {                                               \
+            m_factory->Find( path );                    \
+            if ( m_fileHandler ) delete m_fileHandler;  \
+            m_fileHandler = m_factory->NewHandler();    \
         }
 
+        GetFileHandler( !GetHandler() )
+        else GetFileHandler( !m_factory->Is( GetHandler()->GetName(),path) )
 
         m_thread->SetHandler( GetHandler() );
 

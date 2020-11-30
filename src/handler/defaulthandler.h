@@ -23,8 +23,12 @@
 
 #include "handler/handler.h"
 #include "base/vector.h"
+
 #include <wx/dir.h>
 #include <wx/filename.h>
+#include <wx/mstream.h>
+
+#include <memory>
 
 class wxDir;
 
@@ -36,7 +40,8 @@ class DefaultHandler
         DefaultHandler( const wxString& path );
         ~DefaultHandler();
         void Open( const wxString& path );
-        void Traverse( );
+        void Traverse( bool GetStream = false );
+        void TraverseStream();
 
         Handler* GetParent() { return m_parent; }
         wxArrayString& GetChild() { return m_all; }
@@ -47,7 +52,7 @@ class DefaultHandler
         wxString GetPrev();
 
         wxString ItemName( size_t idx ) { return m_files.Item(idx); }
-        wxInputStream* Item( size_t index ) { return m_fstream.at(index); }
+        wxInputStream* Item( size_t index );
 
         size_t Index( const wxString& name );
         size_t IndexFilename( wxString path );
@@ -57,13 +62,12 @@ class DefaultHandler
                 { return Vector::IsExist(m_fstream,index); }
 
         void Clear();
+        void Close();
 
         static bool CanHandle( wxString path ) { return true; }
-        static void GetAllFiles( const wxString& path, wxVector<wxInputStream*>& stream );
-        
     private:
 
-        wxVector<wxInputStream*> m_fstream;
+        wxVector<std::shared_ptr<wxMemoryInputStream>> m_fstream;
         int type;
         wxString m_name;
         wxString m_filename;

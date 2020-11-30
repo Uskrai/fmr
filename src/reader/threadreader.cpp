@@ -49,7 +49,7 @@ void Thread::Open( const wxString& path )
     
     GetHandler()->Clear();
     GetHandler()->Open( m_path );
-    GetHandler()->Traverse();
+    GetHandler()->Traverse( true );
     if ( GetHandler()->GetParent() )
         GetHandler()->GetParent()->Traverse();
 
@@ -134,10 +134,10 @@ bool Thread::LoadImage( size_t idx, bool isScroll )
     {
         const wxString& name = GetHandler()->ItemName(idx);
         m_bitmap->SetName( idx, name );
-        wxInputStream* stream = GetHandler()->Item(idx);
-        if ( wxImage::CanRead( *stream ) )
+        wxInputStream &stream = *GetHandler()->Item(idx);
+        if ( wxImage::CanRead( stream ) )
         {
-            wxImage img = wxImage(*stream);
+            wxImage img = wxImage(stream);
             m_bitmap->Add( img, idx );
             m_bitmap->Refresh();
             m_bitmap->RefreshPosition();
