@@ -57,16 +57,14 @@ void Bitmap::Refresh()
         }
     }
     m_posLast = pos;
-    RefreshSize();
-    RefreshPosition();
-    m_parent->Refresh();
 }
 
 bool Bitmap::ChangePage( int step )
 {
     // wont change image if there is an image that is not loaded
     for ( const auto& it : Get() )
-        if ( ! it->IsLoaded() ) return true;
+        if ( ! it->IsLoaded() )
+            return true;
 
     size_t &pos = m_posFirst;
 
@@ -80,13 +78,21 @@ bool Bitmap::ChangePage( int step )
                     : ( pos < Get().size() && pos != 0 ) 
                     ? 0 : pos - Get().size();
     
-    Refresh();
 
     bool isChanged = ( Vector::IsExist( m_item, pos ) );
     
     // if changed then pos stays,
     // else return to before calculation.
     pos = isChanged ? pos : temp;
+
+    if ( isChanged )
+    {
+        Refresh();
+        RefreshSize();
+        RefreshPosition();
+        GetParent()->Refresh();
+    }
+
     return isChanged;
 }
 
