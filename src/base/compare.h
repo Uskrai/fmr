@@ -27,24 +27,30 @@ bool NotEnd( const wxString& str, size_t idx )
 
 namespace Compare
 {
-    wxString GetNonZero( const wxString& str, size_t& idx, char& chr )
+    std::string GetNonZero( const std::string& str, size_t& idx, char& chr )
     {
-        size_t sz = idx;
-        while ( isdigit( str[idx + 1] ) )
+        size_t sz = 0;
+
+        // skip zero
+        while ( str[idx] == '0' )
             idx++;
 
-        while ( str[ sz ] == '0' )
+        // count digit after zero
+        while ( isdigit( str[ idx + sz ] ) )
             sz++;
 
+        const std::string& tmp = str.substr(idx,sz);
+        // skip the digit
+        idx += sz;
         chr = str[idx];
-        const wxString& tmp = str.SubString( sz, idx );
+
         return ( tmp == "" ) ? "0" : tmp;
     }
 
     StringCompareFunction( Natural ) 
     {
-        const wxString& first = s1.Lower();
-        const wxString& second = s2.Lower();
+        const std::string& first = s1.Lower().ToStdString();
+        const std::string& second = s2.Lower().ToStdString();
         // idx for first, pos for second;
         size_t idx = 0, pos = 0;
         while ( NotEnd( first, idx ) && NotEnd( second, pos ) )
@@ -54,8 +60,8 @@ namespace Compare
             
             if ( isdigit(fst) && isdigit(scnd) )
             {
-                const wxString& str1 = GetNonZero( first, idx, fst );
-                const wxString& str2 = GetNonZero( second, pos, scnd );
+                const std::string& str1 = GetNonZero( first, idx, fst );
+                const std::string& str2 = GetNonZero( second, pos, scnd );
 
                 // if str1's len not equal str2's len
                 // will return whether str1 more or less than str2
@@ -73,7 +79,6 @@ namespace Compare
                     i++;
                 }
             }
-
             if ( fst != scnd )
             {
                 if ( idx != pos )
