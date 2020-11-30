@@ -104,7 +104,11 @@ void DefaultHandler::TraverseStream()
     for ( const auto& it : m_files )
     {
         wxFileInputStream instream( Path::GetDirName(m_name) + it );
-        wxMemoryInputStream *mstream = new wxMemoryInputStream( instream );
+        wxMemoryInputStream *mstream;
+        if ( instream.IsOk() && instream.GetSize() != 0 )
+            mstream = new wxMemoryInputStream( instream );
+        else 
+            mstream = new wxMemoryInputStream( &DUMMY_BUFFER, sizeof(DUMMY_BUFFER) );
         m_fstream.push_back( std::shared_ptr<wxMemoryInputStream>(mstream) );
     }
 }

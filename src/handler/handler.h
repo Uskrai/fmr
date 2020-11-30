@@ -19,6 +19,7 @@
 
 #include <wx/stream.h>
 
+char DUMMY_BUFFER;
 class Handler 
 {
     public:     
