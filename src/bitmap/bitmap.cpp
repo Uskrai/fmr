@@ -67,22 +67,23 @@ bool Bitmap::ChangePage( int step )
     size_t &pos = m_posFirst;
 
     size_t temp = pos;
-    size_t i = 0;
-    while ( i < m_limit )
-    {
-        if ( ! Vector::IsExist( m_item, pos ) )
-            return false;
-
-        if ( IsImageOk( pos )  )
-            i++;
-
-        pos += step;
-    }
-
+    
+    // if step positive, then pos is pos + image per page.
+    // else if pos less than image per page pos not zero,
+    // then pos is 0, else pos is pos - image per page.
+    pos = ( step > 0 ) 
+                ? pos + Get().size() 
+                    : ( pos < Get().size() && pos != 0 ) 
+                    ? 0 : pos - Get().size();
+    
     Refresh();
-    if ( i == 0 )
-        return false;
-    return temp != pos;
+
+    bool isChanged = ( Vector::IsExist( m_item, pos ) );
+    
+    // if changed then pos stays,
+    // else return to before calculation.
+    pos = isChanged ? pos : temp;
+    return isChanged;
 }
 
 void Bitmap::Resize( size_t limit )
@@ -120,24 +121,6 @@ void Bitmap::Add( wxImage& image, int idx )
     GetParent()->Refresh();
 }
 
-void Bitmap::Exit( int idx )
-{
-    // wxSize size = GetParent(->GetVirtualSize();
-    RefreshSize();
-    // if ( isScroll )
-    // {
-        // wxSize afsize = GetParent()->GetVirtualSize(); 
-        // if ( size != afsize )
-        // {
-            // int y = afsize.GetHeight() - size.GetHeight();
-            // GetParent()->Scroll( -1, GetParent()->GetViewStart().y + y );
-        // }
-    // }
-
-    GetParent()->Refresh();
-}
-
-
 int Bitmap::Centered( int width )
 {
     int clientWidth = GetParent()->GetClientSize().GetWidth();
@@ -154,17 +137,6 @@ int Bitmap::Centered( int width )
 void Bitmap::RefreshPosition()
 {
     Position::Refresh( Get(), m_flagPosition, m_parent );
-    // int y = 0, tempheight = 0;
-    // for ( auto& it : Get() )
-    // {
-    //     if ( it->IsOk() )
-    //     {
-    //         it->SetY( y + tempheight );
-    //         y = it->GetY();
-    //         tempheight = it->GetHeight();            
-    //         it->SetX( Centered( it->GetWidth() ) );
-    //     }
-    // }
 }
 
 void Bitmap::RefreshSize()
