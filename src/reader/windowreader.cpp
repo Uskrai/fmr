@@ -52,7 +52,8 @@ Window::Window( wxWindow* parent, wxSize size ) :
     m_factory = new HandlerFactory();
     m_thread = new Thread( this, m_bitmap );
 
-    m_bitmap->SetLimit( ConfRead("ImageShowLimit", 1  ) );
+    int limit = ConfRead("ImageShowLimit", 1 );
+    m_bitmap->SetLimit( limit );
 
     int limitNext = ( ConfRead("ImageShowLimit", 1 ) > ConfRead("ImageMemoryLimitNext", NO_LIMIT ) ) ?
                     ConfRead("ImageShowLimit",1) : ConfRead("ImageMemoryLimitNext", NO_LIMIT );
@@ -229,7 +230,7 @@ bool Window::OnEdge( int modifier, bool isInstant )
             
         return !isChangePage;
     }
-    return false;
+    return true;
 
 }
 

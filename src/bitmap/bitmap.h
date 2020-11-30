@@ -40,6 +40,7 @@ class Bitmap
             { m_flagPosition = flags; }
             
         void SetLimit( size_t limit );
+        void Resize( size_t limit );
         void Clear();
 
         void Refresh();

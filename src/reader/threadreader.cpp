@@ -56,6 +56,7 @@ void Thread::Open( const wxString& path )
     size_t m_curr = GetHandler()->Index( m_path );
 
     m_bitmap->Clear();
+    m_bitmap->Resize( GetHandler()->Size() );
     m_bitmap->GetAll().assign( GetHandler()->Size(), SBitmap() );
 
     if ( IsExist( m_curr ) )

@@ -87,11 +87,15 @@ bool Bitmap::ChangePage( int step )
     return temp != pos;
 }
 
+void Bitmap::Resize( size_t limit )
+{
+    // use limit if m_limit is larger than limit
+    limit = m_limit > limit ? limit : m_limit;
+    Get().resize(limit);
+};
+
 void Bitmap::SetLimit( size_t limit )
 {
-    Get().resize( limit );
-    m_posLast = ( limit < m_limit ) ? 
-        m_posLast - ( m_limit - limit ) : m_posLast;
     m_limit = limit;
     Refresh();
 }
