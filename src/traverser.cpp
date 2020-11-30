@@ -19,8 +19,8 @@
 
 void Traverser::Open( wxString path )
 {
-    this->dir.Open( wxPathOnly(path) );
-    this->dir.Traverse(*(this) );
+    this->dir->Open( wxPathOnly(path) );
+    this->dir->Traverse(*(this) );
     this->files.Sort( wxCmpNaturalGeneric );
 }
 
