@@ -76,7 +76,7 @@ bool Bitmap::ChangePage( int step )
         pos += step;
     }
     while ( !IsImageOk( pos ) )
-        pos++;
+        pos += -(step);
 
     Refresh();
     if ( i == 0 )
