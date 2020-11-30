@@ -32,12 +32,17 @@ class ArchiveHandler
         ArchiveHandler( const wxString& path );
         void Open( const wxString& path );
 
+        Handler* GetParent() { return m_parent; }
+
+        wxString GetNext();
+        wxString GetPrev();
+
         bool IsExist( int index );
         
         void Traverse();
         int Index( const wxString& name ) { return 0; } ;
-        int Size() { return this->fstream.size();} ;
-        wxInputStream* Item( int index ) { return fstream.at(index); };
+        int Size() { return m_fstream.size();} ;
+        wxInputStream* Item( int index ) { return m_fstream.at(index); };
         void Clear();
 
         ~ArchiveHandler();
@@ -46,9 +51,15 @@ class ArchiveHandler
     private:
         static bool Find( wxString& path, const wxArchiveClassFactory*& factory, wxInputStream*& in );
 
-        wxString filename;
-        wxArrayString name;
-        wxVector<wxInputStream*> fstream;
+        Handler* m_parent;
+
+        wxString m_filename;
+        wxString m_parentName;
+
+        wxArrayString m_files;
+        wxArrayString m_all;
+
+        wxVector<wxInputStream*> m_fstream;
 };
 
 #endif
