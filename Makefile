@@ -28,7 +28,7 @@ endif
 
 
 gui 		:= panel frame
-handler 	:= archivehandler defaulthandler handlerfactory 
+handler 	:= filehandler archivehandler defaulthandler handlerfactory 
 bitmap		:= bitmap bitmapvertical 
 reader 		:= windowreader threadreader 
 src			:= $(addprefix handler/, $(handler) ) $(addprefix bitmap/, $(bitmap) ) $(addprefix image/, $(image) ) $(addprefix reader/, $(reader) ) $(addprefix gui/, $(gui) )
