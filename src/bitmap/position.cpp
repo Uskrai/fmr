@@ -48,12 +48,12 @@ RefreshFunc(Centered)
     for ( const auto& it : vec )
     {
         if ( it->GetWidth() > maxWidth )
-            maxWidth = it->GetWidth();        
+            maxWidth = it->GetWidth();
     }
 
     for ( const auto& it : vec )
     {
-        int width = ( size.GetWidth() < maxWidth ) ? size.GetWidth() : maxWidth;
+        int width = ( it->GetWidth() < maxWidth ) ? it->GetWidth() : maxWidth;
         int pos = (size.GetWidth() - width) / 2;
         pos = (pos > 0) ? pos : 0;
         it->SetX(pos);
