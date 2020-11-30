@@ -44,7 +44,7 @@ size_t DefaultHandler::IndexFilename( wxString path )
     return 0;
 }
 
-wxString DefaultHandler::GetNextPrev( int i )
+wxString DefaultHandler::GetFromCurrent( int i )
 {
     if ( GetParent() )
     {
@@ -59,9 +59,9 @@ wxString DefaultHandler::GetNextPrev( int i )
     return wxEmptyString;
 }
 
-wxString DefaultHandler::GetNext() { return GetNextPrev( 1 ); }
+wxString DefaultHandler::GetNext() { return GetFromCurrent( 1 ); }
 
-wxString DefaultHandler::GetPrev() { return GetNextPrev( -1 ); }
+wxString DefaultHandler::GetPrev() { return GetFromCurrent( -1 ); }
 
 size_t DefaultHandler::Index( const wxString& path )
 {

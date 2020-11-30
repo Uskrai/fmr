@@ -42,10 +42,11 @@ class DefaultHandler
         wxArrayString& GetChild() { return m_all; }
         wxString GetName() { return m_name; }
 
-        wxString GetNextPrev( int i );
+        wxString GetFromCurrent( int i );
         wxString GetNext();
         wxString GetPrev();
 
+        wxString ItemName( size_t idx ) { return m_files.Item(idx); }
         wxInputStream* Item( size_t index ) { return m_fstream.at(index); }
 
         size_t Index( const wxString& name );
