@@ -28,16 +28,27 @@ namespace Path
     // return long path
     wxString GetFullPath( wxString path )
     {
-        wxFileName name;
+        wxFileName name(path);
         if ( path.StartsWith('.') )
             path = wxFileName::GetCwd() + sep + path.AfterFirst(sep);
     
+        RemoveDirSep(path);
         if ( name.DirExists(path) )
             name.AssignDir(path);
         else if ( name.FileExists(path) )
             name.Assign(path);
 
         return name.GetFullPath();
+    }
+
+    wxString GetDirName( wxString path )
+    {
+        path = GetFullPath(path);
+        if ( path.EndsWith(sep) )
+            return path;
+
+        size_t idx = path.rfind( sep );
+        return path.SubString( 0, idx );
     }
 
     // return parent's path
@@ -79,8 +90,6 @@ namespace Path
         name = isDir ? name + sep : name;
         return name;
     }
-
-    
 
 } // namespace Path
 
