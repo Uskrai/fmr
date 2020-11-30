@@ -213,61 +213,66 @@ void Window::OnKeyDown( wxKeyEvent& event )
 
 BITMAP_PAGES Window::OnArrow( wxOrientation orient, int modifier, bool isInstant )
 {
-    if ( !m_thread->IsOpened() || modifier == 0 ) return BITMAP_NOTCHANGED;
-    
-    const wxPoint& view = GetViewStart();
-
-    // get per scroll step
-    int step = ConfRead("ScrollStep", 300 ) * modifier;
-    int ver = step * (orient == wxVERTICAL);
-    int hor = step * (orient == wxHORIZONTAL);
-
-    Scroll( view + wxPoint( hor , ver ) );
-
-    if ( view == GetViewStart() )
+    BITMAP_PAGES result = BITMAP_NOTCHANGED;
+    if ( m_thread->IsOpened() || modifier != 0 )
     {
-        m_onEdge++;
-        return OnEdge( modifier, isInstant );
-    } 
-    m_onEdge = 0;
+        const wxPoint& view = GetViewStart();
+
+        // get per scroll step
+        int step = ConfRead("ScrollStep", 300 ) * modifier;
+        int ver = step * (orient == wxVERTICAL);
+        int hor = step * (orient == wxHORIZONTAL);
+
+        Scroll( view + wxPoint( hor , ver ) );
+
+        static int onEdge;
+        if ( view == GetViewStart() )
+        {
+            onEdge++;
+            result = OnEdge( modifier, isInstant, onEdge );
+            if ( result != BITMAP_NOTCHANGED || result != BITMAP_NOTLOADED )
+            {
+                onEdge = 0;
+            }
+        } 
+        else onEdge = 0;
+    }    
     
-    return BITMAP_NOTCHANGED;
+    return result;
 } 
 
-BITMAP_PAGES Window::OnEdge( int modifier, bool isInstant )
+BITMAP_PAGES Window::OnEdge( int modifier, bool isInstant, int onEdgeCount )
 {
-
+    BITMAP_PAGES result = BITMAP_NOTCHANGED;
     size_t conf = ConfRead("ClickBeforeChangePage",1);
 
-    if ( (m_onEdge > conf || isInstant) && modifier != 0 )
+    if ( (onEdgeCount > conf || isInstant) && modifier != 0 )
     {
-        m_onEdge = 0;
         wxCriticalSectionLocker locker(m_thread->GetLock());
-        BITMAP_PAGES status = m_bitmap->ChangePage(modifier);
+        result = m_bitmap->ChangePage(modifier);
 
-        if ( status == BITMAP_ENDOFPAGE )
+        if ( result == BITMAP_ENDOFPAGE )
             ChangeFolder(modifier);
-            
-        return status;
     }
-    return BITMAP_NOTCHANGED;
+    return result;
 
 }
 
 void Window::OnMouseMotion( wxMouseEvent& event )
 {
+    static wxPoint mousePosition;
     const wxPoint& pos = event.GetPosition();
     if ( event.Dragging() )
     {
         if ( event.LeftIsDown() )
         {
-            int y = m_mousePosition.y - pos.y;
-            int x = m_mousePosition.x - pos.x;
+            int y = mousePosition.y - pos.y;
+            int x = mousePosition.x - pos.x;
             const wxPoint& scrolled = GetViewStart();
             Scroll( scrolled.x + ( x * 5 ), scrolled.y + ( y  * 5 ));
         }
     }
-    m_mousePosition = pos;
+    mousePosition = pos;
     event.Skip();
 }
 

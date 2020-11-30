@@ -25,7 +25,6 @@
 #include "bitmap/bitmap.h"
 
 class Config;
-class Bitmap;
 class Handler;
 class HandlerFactory;
 
@@ -77,9 +76,8 @@ class Window : public wxScrolledWindow
         
         // return is ViewStart Changed 
         BITMAP_PAGES OnArrow( wxOrientation orient, int modifier, bool isInstant = false);
-        size_t m_onEdge;
         // return is Change Folder
-        BITMAP_PAGES OnEdge( int modifier, bool isInstant = false );
+        BITMAP_PAGES OnEdge( int modifier, bool isInstant = false, int onEdgeCount = 0 );
 };
 
 };
