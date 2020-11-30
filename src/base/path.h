@@ -21,11 +21,13 @@ namespace Path
 {
     void RemoveDirSep( wxString& path );
     const wxUniChar sep = wxFileName::GetPathSeparator();
-    wxString GetFullPath( const wxString& path )
+    
+    // return long path
+    wxString GetFullPath( wxString path )
     {
         wxFileName name;
         if ( path.StartsWith('.') )
-            name = wxFileName::GetCwd() + sep + path.AfterFirst(sep);
+            path = wxFileName::GetCwd() + sep + path.AfterFirst(sep);
     
         if ( name.DirExists(path) )
             name.AssignDir(path);
@@ -35,6 +37,7 @@ namespace Path
         return name.GetFullPath();
     }
 
+    // return parent's path
     wxString GetParent( const wxString& path )
     {
         wxString name(GetFullPath(path));
@@ -44,33 +47,36 @@ namespace Path
         return name.SubString(0,name.rfind(sep));
     }
 
+    // strip last separator
     void RemoveDirSep( wxString& path )
     {
         if ( path.EndsWith(sep) )
             path.RemoveLast();
     }
 
-    wxString GetNameWithSep( wxString& path )
+    // return Name without separator
+    wxString GetName( wxString path )
     {
         int idx;
-        if ( path.EndsWith(sep) )
-            idx = path.rfind(sep, 1);
-        else idx = path.rfind(sep);
-        return path.SubString(idx,-1);
+        RemoveDirSep(path);
+        
+        wxString name = path.SubString( path.rfind(sep) + 1, -1 );
+
+        return name;
     }
 
-    wxString GetName( const wxString& path )
+    // return name with separator if directory
+    wxString GetNameWithSep( wxString path )
     {
-        int idx;
-        idx = path.find_last_not_of(sep);
+        bool isDir = path.EndsWith(sep);
+        if( isDir )
+            path.RemoveLast();
         
-        wxString name = path.SubString( path.rfind(sep,idx) + 1, -1 );
-        std::cout << name << '\n';
+        wxString name = GetName(path);
+        name = isDir ? name + sep : name;
         return name;
-        
-        // return name.GetPath();
-        // GetNameWithSep(name);
-        // return name.BeforeLast(sep);
     }
+
+    
 
 } // namespace Path
