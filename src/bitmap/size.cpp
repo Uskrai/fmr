@@ -34,7 +34,7 @@ namespace Size
     {
         parent->ShowScrollbars( wxSHOW_SB_DEFAULT , wxSHOW_SB_ALWAYS);
         FitOneSide(x,y)
-        img = img.Scale( size.x, imgsz.y * scl );
+        img.Rescale( size.x, imgsz.y * scl );
         return scl;
     }
 
@@ -42,7 +42,7 @@ namespace Size
     {
         parent->ShowScrollbars( wxSHOW_SB_ALWAYS, wxSHOW_SB_DEFAULT );
         FitOneSide(y,x);
-        img = img.Scale( imgsz.x * scl, size.y );
+        img.Rescale( imgsz.x * scl, size.y );
         return scl;
     }
     
