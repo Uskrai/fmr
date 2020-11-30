@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef FMR_BITMAP_BITMAP
+
 #include "base/vector.h"
 #include "bitmap/bmp.h"
 
@@ -81,3 +83,5 @@ class Bitmap
 
         int Centered( int width );
 };
+
+#endif
