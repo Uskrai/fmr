@@ -34,7 +34,7 @@ void testSort( Handler* handler )
 	handler->Traverse();
 	for ( const auto &it : handler->GetChild() )
 	{
-//make		std::cout << it << '\n';
+		std::cout << it << '\n';
 	}
 }
 
