@@ -26,7 +26,7 @@ ifeq ($(RELEASE), DEBUG)
 CXXFLAGS 	+= -g
 endif
 
-
+folder		:= reader handler bitmap gui
 gui 		:= panel frame
 handler 	:= archivehandler defaulthandler handlerfactory 
 bitmap		:= position size bitmap
@@ -40,10 +40,10 @@ obj			:= $(addsuffix .o, $(src) )
 
 .PHONY: clean all testing/scroll.cpp
 
-all: build $(obj) $(so) $(exe) 
+all: $(addprefix build/, $(folder) ) $(obj) $(so) $(exe) 
 
-build : 
-	mkdir $(addprefix build/, handler reader handler image gui bitmap ) -p
+$(addprefix build/, $(folder) ): 
+	mkdir $@ -p
 
 $(exe) : FLAGS := -Isrc $(CXXFLAGS) `$(wxCONFIG) --libs --cxxflags base,core`
 
