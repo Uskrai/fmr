@@ -58,7 +58,7 @@ class Thread
         wxString m_path;
 
         wxThread::ExitCode Entry();
-        void BitmapThread( bool& destroy );
+        void BitmapThread( bool& destroy, size_t current );
 
         int m_limitNext = NO_LIMIT, m_limitPrev = NO_LIMIT;
         bool m_threadbmp = false;
@@ -71,6 +71,7 @@ class Thread
         void LoadBitmap( int current, int prev, int next, bool& isDestroyed );
     
     private:
+        size_t m_curr = 0;
         template<typename T>
         T ConfRead( const wxString& name, T def );
 };

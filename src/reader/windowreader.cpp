@@ -86,6 +86,7 @@ void Window::Open( const wxString& path )
         m_thread->SetHandler( GetHandler() );
 
         m_thread->Open( path );
+        Scroll(0,0);
         m_config->Write("RecentlyOpened", path );
     }
 }
@@ -100,8 +101,6 @@ void Window::Find( const wxString& path )
 void Window::Clear()
 {
     m_thread->Clear();
-    m_bitmap->Clear();
-    Scroll(0,0);
 }
 
 void Window::OnDraw( wxDC& dc )
