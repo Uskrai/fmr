@@ -47,10 +47,12 @@ struct SBitmap
     wxString m_name = wxEmptyString;
     wxPoint m_pos = wxPoint(0,0);
     bool m_isOk = false; // determine bitmap status
+    bool m_isLoaded = false;
 
     const wxBitmap& GetBitmap() const { return this->m_item; }
     wxBitmap& GetBitmap() { return m_item; }
     bool IsOk() const { return m_isOk; }
+    bool IsLoaded() const { return m_isLoaded; }
     
     bool IsPointed( const wxPoint& area, const wxPoint& position ) const
     {
@@ -87,7 +89,8 @@ struct SBitmap
     int GetY() const { return m_pos.y; }
     int GetX() const { return m_pos.x; }
 
-    void SetBitmap( const wxBitmap& bmp ) { m_item = bmp; m_isOk = true; }
+    void SetBitmap( const wxBitmap& bmp ) { m_item = bmp; m_isOk = true; SetLoaded(); }
+    void SetLoaded( bool stat = true ) { m_isLoaded = stat; }
     void SetName( const wxString& name ) { m_name = name;}
     void SetPosition( const wxPoint& pos ) { m_pos = pos; }
     void SetY( int PosY ) { m_pos.y = PosY; }

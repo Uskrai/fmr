@@ -104,6 +104,12 @@ bool Bitmap::IsImageOk( int pos )
     return Vector::IsExist(m_item,pos) && m_item.at(pos).IsOk(); 
 }
 
+void Bitmap::MarkLoaded( size_t idx )
+{
+    if ( Vector::IsExist(m_item,idx) )
+        m_item.at(idx).SetLoaded();
+}
+
 void Bitmap::Prepare( const wxImage& image, int pos, struct SBitmap& bmp )
 {
     bmp.SetBitmap( wxBitmap(image) );

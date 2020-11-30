@@ -142,6 +142,10 @@ bool Thread::LoadImage( size_t idx, bool isScroll )
             m_bitmap->Add( img, idx );
             return true;
         }
+        else
+        {
+            m_bitmap->MarkLoaded(idx);
+        }
     }
     
     return false;

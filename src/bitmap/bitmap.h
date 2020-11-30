@@ -49,6 +49,7 @@ class Bitmap
 
         bool ChangePage( int step );
         bool IsImageOk( int pos );
+        void MarkLoaded( size_t idx );
         bool NextPage();
         bool PrevPage();
 
