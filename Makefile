@@ -91,7 +91,7 @@ gui/frame.o : gui/panel.h
 main/app.o : gui/frame.h
 
 $(filter-out config.o, $(obj) ) : base/config.h
-$(addsuffix .o, $(addprefix handler/, $(handler) ) ) : base/path.h base/vector.h
+$(addsuffix .o, $(addprefix handler/, $(filter-out handlerfactory, $(handler) ) ) ) : base/path.h base/vector.h base/compare.h
 obj : $(obj)
 
 $(addprefix build/, $(obj) ): build/%.o : %.cpp %.h 
