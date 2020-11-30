@@ -27,7 +27,6 @@
 #include <wx/stattext.h>
 #include <wx/sizer.h>
 #include <wx/dc.h>
-#include <iostream>
 
 #include "handler/handlerfactory.h"
 
@@ -71,6 +70,7 @@ void Window::Open( const wxString& path )
     if ( path != wxEmptyString )
     {
         Clear(); 
+        m_bitmap->Clear();
 
         #define GetFileHandler( con )                   \
         if ( con )                                      \
@@ -105,7 +105,10 @@ void Window::ReloadConfig()
 
 void Window::ChangeFolder( int step )
 {
-    Open ( m_fileHandler->GetFromCurrent( step ) );
+    wxString path = m_fileHandler->GetFromCurrent( step );
+
+    if ( path == wxEmptyString ) return;
+    Open ( path );
 }
 void Window::Next() { Open( m_thread->GetHandler()->GetNext()); }
 void Window::Prev() { Open( m_thread->GetHandler()->GetPrev()); }
@@ -156,7 +159,7 @@ void Window::OnMouseWheel( wxMouseEvent& event )
         else
             Scroll(0,GetVirtualSize().GetHeight());
     }
-    event.Skip();
+    // event.Skip();
 }
 
 void Window::OnKeyDown( wxKeyEvent& event )
@@ -196,6 +199,8 @@ void Window::OnKeyDown( wxKeyEvent& event )
 
 bool Window::OnArrow( wxOrientation orient, int modifier, bool isInstant )
 {
+    if ( !m_thread->IsOpened() ) return true;
+    
     modifier = ( modifier > -1 ) ? 1 : -1;
     const wxPoint& view = GetViewStart();
     int step = ConfRead("ScrollStep", 300 );
@@ -221,8 +226,6 @@ bool Window::OnArrow( wxOrientation orient, int modifier, bool isInstant )
 bool Window::OnEdge( int modifier, bool isInstant )
 {
 
-    if ( !m_thread->IsOpened() ) return false;
-    
     size_t conf = ConfRead("ClickBeforeChangePage",1);
 
 
