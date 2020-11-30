@@ -34,11 +34,10 @@ obj			:= $(addsuffix .o, $(src) )
 
 .PHONY: clean all testing/scroll.cpp
 
-all: build build/reader $(obj) $(so) $(exe) 
+all: build $(obj) $(so) $(exe) 
 
-build: 
-	mkdir build build/reader
-
+build : 
+	mkdir $(addprefix build/, handler reader ) -p
 
 $(exe) : FLAGS := -Isrc $(CXXFLAGS) `$(wxCONFIG) --libs --cxxflags base,core`
 
