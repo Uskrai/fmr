@@ -36,12 +36,6 @@ void ArchiveHandler::Open( const wxString& path )
     }
 }
 
-bool ArchiveHandler::IsExist( int index )
-{
-    if ( m_fstream.empty() ) { return false; }
-    return index >= 0 && index < int(m_fstream.size()) ;
-}
-
 wxString ArchiveHandler::GetNext() { return wxString(); }
 wxString ArchiveHandler::GetPrev() { return wxString(); }
 
