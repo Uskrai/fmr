@@ -22,17 +22,49 @@
 
 struct SBitmap
 {
-    wxBitmap m_item;
-    wxPoint m_pos;
+    wxBitmap m_item = wxBitmap( wxSize(1,1) );
+    wxPoint m_pos = wxPoint(0,0);
+    bool m_isOk = false; // determine bitmap status
+
     const wxBitmap& GetBitmap() const { return this->m_item; }
     wxBitmap& GetBitmap() { return m_item; }
+    bool IsOk() const { return m_isOk; }
+    
+    bool IsPointed( const wxPoint& area, const wxPoint& position ) const
+    {
+        int posY = area.y + position.y,
+            posX = area.x + position.x,
+            bmpPosY = GetY(), bmpAfterY = bmpPosY + GetHeight(),
+            bmpPosX = GetX(), bmpAfterX = bmpPosX + GetWidth();
+
+            return  posY >= bmpPosY && posY <= bmpAfterY 
+                && posX >= bmpPosX && posX <= bmpAfterX;
+    }
+
+    bool IsShown( const wxPoint& area, const wxSize& size ) const
+    {
+        int
+        top = area.y, bottom = top + size.GetHeight(),
+        left = area.x, right = left + size.GetHeight(),
+        bmpPosY = GetY(), bmpAfterY = bmpPosY + GetHeight(),
+        bmpPosX = GetX(), bmpAfterX = bmpPosX + GetWidth();
+
+        return    
+            (   ( bmpPosY >= top || bmpAfterY >= top )
+            &&  ( bmpPosY <= bottom || bmpAfterY <= bottom )  )
+            &&  ( ( bmpPosX >= left || bmpAfterY >= left )
+            ||  ( bmpPosX <= right || bmpAfterX <= right ) ) ;
+    }
+
     wxPoint GetPosition()  const { return m_pos; }
     wxSize GetSize() const { return wxSize( GetWidth(), GetHeight() ); }
+
     int GetWidth() const { return m_item.GetWidth(); }
     int GetHeight() const { return m_item.GetHeight(); }
     int GetY() const { return m_pos.y; }
     int GetX() const { return m_pos.x; }
-    void SetBitmap( const wxBitmap& bmp ) { m_item = bmp; }
+
+    void SetBitmap( const wxBitmap& bmp ) { m_item = bmp; m_isOk = true; }
     void SetPosition( const wxPoint& pos ) { m_pos = pos; }
     void SetY( int PosY ) { m_pos.y = PosY; }
     void SetX( int PosX ) { m_pos.x = PosX; }

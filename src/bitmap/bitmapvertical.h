@@ -16,38 +16,30 @@
  */
 
 #include "base/vector.h"
-#include "bitmap/bmp.h"
+#include "bitmap/bitmap.h"
 
 class wxScrolledWindow;
 class BitmapVertical
+    : public Bitmap
 {
     public:
         BitmapVertical( wxScrolledWindow* parent );
         ~BitmapVertical();
-        void Add( const wxImage& image, VectorPos pos );
+        void Add( const wxImage& image, int pos, bool isScroll = false );
 
-        // getting bitmap
-        wxVector<SBitmap>& Get();
-
-        wxVector<int> Get( const wxPoint& area, const wxSize& size ) const;
-
-        int CalcPointedBitmap( const wxPoint& area, const wxPoint& position) const ;
-        SBitmap& Get( const wxPoint& area, const wxPoint& position );
-        const SBitmap& Get( const wxPoint& area, const wxPoint& position ) const;
-
-        void Clear();
+        // void Refresh();
+        void RefreshPosition( );
+        void RefreshSize( );
     protected:
         int m_maxWidth, m_maxHeight;
-        wxVector<SBitmap> m_item;
         wxScrolledWindow* m_parent;
-        wxScrolledWindow* GetParent() { return m_parent; }
-        void Prepare( const wxImage& image, VectorPos pos, struct SBitmap& bmp );
-        void Exit( int i );
 
-        int Push( struct SBitmap& bmp, wxPoint& pos );
-        int Insert( struct SBitmap& bmp, wxPoint& pos, VectorPos idx );
+        wxScrolledWindow* GetParent() { return m_parent; }
+        void Prepare( const wxImage& image, int pos, struct SBitmap& bmp );
+        void Exit( int i, bool isScroll = false);
+
+        int Push( struct SBitmap& bmp );
 
         void CalcPosition( int idx, wxPoint& pos );
         int Centered( int width );
-        void RefreshPosition( );
 };
