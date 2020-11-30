@@ -32,14 +32,16 @@ handler_LTLIBRARIES = libdefaulthandler.la libarchivehandler.la libhandlerfactor
 # make libraries for bitmap
 bitmap = bitmap
 bitmapdir = @abs_builddir@/bitmap
-bitmap_LTLIBRARIES = libbitmap.la libsize.la libposition.la
+bitmap_LTLIBRARIES = libbitmap.la libsize.la libposition.la libbmp.la
+
+    libbmp_la_SOURCES = $(bitmap)/bmp.cpp
     # make source and link for bitmap
     libbitmap_la_SOURCES = $(bitmap)/bitmap.cpp
-    libbitmap_la_LIBADD = libsize.la libposition.la
+    libbitmap_la_LIBADD = libsize.la libposition.la libbmp.la
 
-    libsize_la_SOURCES = $(bitmap)/size.cpp
+    libsize_la_SOURCES = $(bitmap)/size.cpp libbmp.la
 
-    libposition_la_SOURCES = $(bitmap)/position.cpp
+    libposition_la_SOURCES = $(bitmap)/position.cpp libbmp.la
 
 reader = reader
 readerdir = @abs_builddir@/reader   
@@ -48,7 +50,7 @@ reader_LTLIBRARIES =  libthreadreader.la libwindowreader.la
     libthreadreader_la_SOURCES = $(reader)/threadreader.cpp
 
     libwindowreader_la_SOURCES = $(reader)/windowreader.cpp
-    libwindowreader_la_LIBADD = libthreadreader.la libhandlerfactory.la libbitmap.la
+    libwindowreader_la_LIBADD = libthreadreader.la libhandlerfactory.la libbitmap.la libbmp.la
 
 # make libraries for gui
 gui = gui

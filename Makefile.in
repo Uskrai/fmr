@@ -146,9 +146,12 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-libbitmap_la_DEPENDENCIES = libsize.la libposition.la
+libbitmap_la_DEPENDENCIES = libsize.la libposition.la libbmp.la
 am_libbitmap_la_OBJECTS = $(bitmap)/bitmap.lo
 libbitmap_la_OBJECTS = $(am_libbitmap_la_OBJECTS)
+libbmp_la_LIBADD =
+am_libbmp_la_OBJECTS = $(bitmap)/bmp.lo
+libbmp_la_OBJECTS = $(am_libbmp_la_OBJECTS)
 libcompare_la_LIBADD =
 am_libcompare_la_OBJECTS = $(base)/compare.lo
 libcompare_la_OBJECTS = $(am_libcompare_la_OBJECTS)
@@ -178,7 +181,7 @@ libthreadreader_la_LIBADD =
 am_libthreadreader_la_OBJECTS = $(reader)/threadreader.lo
 libthreadreader_la_OBJECTS = $(am_libthreadreader_la_OBJECTS)
 libwindowreader_la_DEPENDENCIES = libthreadreader.la \
-	libhandlerfactory.la libbitmap.la
+	libhandlerfactory.la libbitmap.la libbmp.la
 am_libwindowreader_la_OBJECTS = $(reader)/windowreader.lo
 libwindowreader_la_OBJECTS = $(am_libwindowreader_la_OBJECTS)
 am_fmr_OBJECTS = main/app.$(OBJEXT)
@@ -201,8 +204,9 @@ depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = $(base)/$(DEPDIR)/compare.Plo \
 	$(base)/$(DEPDIR)/path.Plo $(bitmap)/$(DEPDIR)/bitmap.Plo \
-	$(bitmap)/$(DEPDIR)/position.Plo $(bitmap)/$(DEPDIR)/size.Plo \
-	$(gui)/$(DEPDIR)/frame.Plo $(gui)/$(DEPDIR)/panel.Plo \
+	$(bitmap)/$(DEPDIR)/bmp.Plo $(bitmap)/$(DEPDIR)/position.Plo \
+	$(bitmap)/$(DEPDIR)/size.Plo $(gui)/$(DEPDIR)/frame.Plo \
+	$(gui)/$(DEPDIR)/panel.Plo \
 	$(handler)/$(DEPDIR)/archivehandler.Plo \
 	$(handler)/$(DEPDIR)/defaulthandler.Plo \
 	$(handler)/$(DEPDIR)/handlerfactory.Plo \
@@ -228,19 +232,19 @@ am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(libarchivehandler_la_SOURCES) $(libbitmap_la_SOURCES) \
-	$(libcompare_la_SOURCES) $(libdefaulthandler_la_SOURCES) \
-	$(libframe_la_SOURCES) $(libhandlerfactory_la_SOURCES) \
-	$(libpanel_la_SOURCES) $(libpath_la_SOURCES) \
-	$(libposition_la_SOURCES) $(libsize_la_SOURCES) \
-	$(libthreadreader_la_SOURCES) $(libwindowreader_la_SOURCES) \
-	$(fmr_SOURCES)
+	$(libbmp_la_SOURCES) $(libcompare_la_SOURCES) \
+	$(libdefaulthandler_la_SOURCES) $(libframe_la_SOURCES) \
+	$(libhandlerfactory_la_SOURCES) $(libpanel_la_SOURCES) \
+	$(libpath_la_SOURCES) $(libposition_la_SOURCES) \
+	$(libsize_la_SOURCES) $(libthreadreader_la_SOURCES) \
+	$(libwindowreader_la_SOURCES) $(fmr_SOURCES)
 DIST_SOURCES = $(libarchivehandler_la_SOURCES) $(libbitmap_la_SOURCES) \
-	$(libcompare_la_SOURCES) $(libdefaulthandler_la_SOURCES) \
-	$(libframe_la_SOURCES) $(libhandlerfactory_la_SOURCES) \
-	$(libpanel_la_SOURCES) $(libpath_la_SOURCES) \
-	$(libposition_la_SOURCES) $(libsize_la_SOURCES) \
-	$(libthreadreader_la_SOURCES) $(libwindowreader_la_SOURCES) \
-	$(fmr_SOURCES)
+	$(libbmp_la_SOURCES) $(libcompare_la_SOURCES) \
+	$(libdefaulthandler_la_SOURCES) $(libframe_la_SOURCES) \
+	$(libhandlerfactory_la_SOURCES) $(libpanel_la_SOURCES) \
+	$(libpath_la_SOURCES) $(libposition_la_SOURCES) \
+	$(libsize_la_SOURCES) $(libthreadreader_la_SOURCES) \
+	$(libwindowreader_la_SOURCES) $(fmr_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -448,17 +452,18 @@ libhandlerfactory_la_LIBADD = libdefaulthandler.la libarchivehandler.la libcompa
 # make libraries for bitmap
 bitmap = bitmap
 bitmapdir = @abs_builddir@/bitmap
-bitmap_LTLIBRARIES = libbitmap.la libsize.la libposition.la
+bitmap_LTLIBRARIES = libbitmap.la libsize.la libposition.la libbmp.la
+libbmp_la_SOURCES = $(bitmap)/bmp.cpp
 libbitmap_la_SOURCES = $(bitmap)/bitmap.cpp
-libbitmap_la_LIBADD = libsize.la libposition.la
-libsize_la_SOURCES = $(bitmap)/size.cpp
-libposition_la_SOURCES = $(bitmap)/position.cpp
+libbitmap_la_LIBADD = libsize.la libposition.la libbmp.la
+libsize_la_SOURCES = $(bitmap)/size.cpp libbmp.la
+libposition_la_SOURCES = $(bitmap)/position.cpp libbmp.la
 reader = reader
 readerdir = @abs_builddir@/reader   
 reader_LTLIBRARIES = libthreadreader.la libwindowreader.la
 libthreadreader_la_SOURCES = $(reader)/threadreader.cpp
 libwindowreader_la_SOURCES = $(reader)/windowreader.cpp
-libwindowreader_la_LIBADD = libthreadreader.la libhandlerfactory.la libbitmap.la
+libwindowreader_la_LIBADD = libthreadreader.la libhandlerfactory.la libbitmap.la libbmp.la
 
 # make libraries for gui
 gui = gui
@@ -753,6 +758,11 @@ $(bitmap)/bitmap.lo: $(bitmap)/$(am__dirstamp) \
 
 libbitmap.la: $(libbitmap_la_OBJECTS) $(libbitmap_la_DEPENDENCIES) $(EXTRA_libbitmap_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(bitmapdir) $(libbitmap_la_OBJECTS) $(libbitmap_la_LIBADD) $(LIBS)
+$(bitmap)/bmp.lo: $(bitmap)/$(am__dirstamp) \
+	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
+
+libbmp.la: $(libbmp_la_OBJECTS) $(libbmp_la_DEPENDENCIES) $(EXTRA_libbmp_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(bitmapdir) $(libbmp_la_OBJECTS) $(libbmp_la_LIBADD) $(LIBS)
 $(base)/$(am__dirstamp):
 	@$(MKDIR_P) $(base)
 	@: > $(base)/$(am__dirstamp)
@@ -854,6 +864,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(base)/$(DEPDIR)/compare.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(base)/$(DEPDIR)/path.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/bitmap.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/bmp.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/position.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/size.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(gui)/$(DEPDIR)/frame.Plo@am__quote@ # am--include-marker
@@ -1201,6 +1212,7 @@ distclean: distclean-am
 		-rm -f $(base)/$(DEPDIR)/compare.Plo
 	-rm -f $(base)/$(DEPDIR)/path.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/bitmap.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/bmp.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/position.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/size.Plo
 	-rm -f $(gui)/$(DEPDIR)/frame.Plo
@@ -1263,6 +1275,7 @@ maintainer-clean: maintainer-clean-am
 		-rm -f $(base)/$(DEPDIR)/compare.Plo
 	-rm -f $(base)/$(DEPDIR)/path.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/bitmap.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/bmp.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/position.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/size.Plo
 	-rm -f $(gui)/$(DEPDIR)/frame.Plo
