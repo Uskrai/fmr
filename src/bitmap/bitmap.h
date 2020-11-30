@@ -15,28 +15,26 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_BITMAP_BITMAP
-#define FMR_BITMAP_BITMAP
-
-#include <wx/bitmap.h>
-#include "bitmap/bmp.h"
 #include "base/vector.h"
+#include "bitmap/bmp.h"
 
+class wxScrolledWindow;
 class Bitmap
 {
     public:
-        void Clear();
-        bool IsExist( int first, int last ) const;
-
-        void SetLimit( size_t limit );
-
-        void Refresh();
-
-        virtual void RefreshPosition() = 0;
-        virtual void RefreshSize() = 0;
+        Bitmap( wxScrolledWindow* parent );
+        ~Bitmap();
+        void Add( const wxImage& image, int pos );
 
         void SetName( size_t idx, wxString name )
             { GetAll()[idx].SetName(name); }
+            
+        void SetLimit( size_t limit );
+        void Clear();
+
+        void Refresh();
+        void RefreshPosition( );
+        void RefreshSize( );
 
         bool ChangePage( int step );
         bool IsImageOk( int pos );
@@ -44,21 +42,15 @@ class Bitmap
         bool PrevPage();
 
         wxVector<SBitmap>& GetAll() { return m_item; }
-        const wxVector<SBitmap>& GetAll() const { return m_item; }
         
         wxVector<SBitmap*>& Get() { return m_itemPage; }
-        const wxVector<SBitmap*>& Get() const { return m_itemPage; }
 
-        const SBitmap* Get( const wxPoint& area, const wxPoint& position ) const;
         SBitmap* Get( const wxPoint& area, const wxPoint& position );
 
-        wxVector<const SBitmap*> Get( const wxPoint& area, const wxSize& size ) const;
         wxVector<SBitmap*> Get( const wxPoint& area, const wxSize& size );
 
-        virtual ~Bitmap() {};
-
     protected:
-
+        wxScrolledWindow* m_parent = NULL;
         wxVector<SBitmap> m_item;
         wxVector<SBitmap*> m_itemPage;
 
@@ -66,6 +58,13 @@ class Bitmap
         size_t m_limit = 1;
         size_t m_posFirst = 0 , m_posLast = 0;
 
-};
+        int m_maxWidth, m_maxHeight;
 
-#endif
+        wxScrolledWindow* GetParent() { return m_parent; }
+        void Prepare( const wxImage& image, int pos, struct SBitmap& bmp );
+        void Exit( int i );
+
+        int Push( struct SBitmap& bmp );
+
+        int Centered( int width );
+};

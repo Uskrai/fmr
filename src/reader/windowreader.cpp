@@ -22,7 +22,7 @@
 
 #include "image/image.h"
 
-#include "bitmap/bitmapvertical.h"
+#include "bitmap/bitmap.h"
 
 #include <wx/stattext.h>
 #include <wx/sizer.h>
@@ -48,7 +48,7 @@ Window::Window( wxWindow* parent, wxSize size ) :
 
     m_config = Config::Get();
 
-    m_bitmap = new BitmapVertical(this);
+    m_bitmap = new Bitmap(this);
     m_factory = new HandlerFactory();
     m_thread = new Thread( this, m_bitmap );
 

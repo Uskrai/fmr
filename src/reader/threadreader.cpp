@@ -19,14 +19,14 @@
 
 #include <wx/scrolwin.h>
 #include "image/image.h"
-#include "bitmap/bitmapvertical.h"
+#include "bitmap/bitmap.h"
 
 #include <thread>
 #include <future>
 namespace Reader
 {
 
-Thread::Thread( wxScrolledWindow* parent, BitmapVertical* bitmap )
+Thread::Thread( wxScrolledWindow* parent, Bitmap* bitmap )
 {
     m_bitmap = bitmap;
     m_parent = parent;

@@ -27,7 +27,7 @@
 #include "base/range.h"
 
 class wxScrolledWindow;
-class BitmapVertical;
+class Bitmap;
 class wxString;
 
 namespace Reader
@@ -37,7 +37,7 @@ class Thread
     : public wxThreadHelper
 {
     public:
-        Thread( wxScrolledWindow* parent, BitmapVertical* bitmap );
+        Thread( wxScrolledWindow* parent, Bitmap* bitmap );
         ~Thread();
 
         void Open( const wxString& path );
@@ -53,7 +53,7 @@ class Thread
         
     protected:
         wxCriticalSection gCS;
-        BitmapVertical* m_bitmap;
+        Bitmap* m_bitmap;
         wxScrolledWindow* m_parent;
         Handler* m_handler = NULL;
         wxString m_path;
