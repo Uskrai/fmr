@@ -21,7 +21,7 @@
 
 #include <wx/scrolwin.h>
 
-SBitmap G_BITMAP;
+SBitmap G_BITMAP(true);
 
 Bitmap::Bitmap( wxScrolledWindow* parent )
 {
@@ -43,18 +43,14 @@ void Bitmap::Refresh()
     {
         if ( Vector::IsExist( m_item, pos ) )
         {
-            if ( m_item.at(pos).IsOk() )
-            {
-                m_itemPage.at(i) = &m_item.at(pos);
-                i++;
-            }
+            m_itemPage.at(i) = &m_item.at(pos);
             pos++;
         }
         else 
         {
             m_itemPage.at(i) = &G_BITMAP;
-            i++;
         }
+        i++;
     }
     m_posLast = pos;
 }

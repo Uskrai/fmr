@@ -49,6 +49,8 @@ struct SBitmap
     bool m_isOk = false; // determine bitmap status
     bool m_isLoaded = false;
 
+    SBitmap(){}
+    SBitmap( bool isLoaded ) { m_isLoaded = isLoaded; }
     const wxBitmap& GetBitmap() const { return this->m_item; }
     wxBitmap& GetBitmap() { return m_item; }
     bool IsOk() const { return m_isOk; }
