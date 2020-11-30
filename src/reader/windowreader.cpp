@@ -161,39 +161,54 @@ void Window::OnMouseWheel( wxMouseEvent& event )
     }
 }
 
+bool IsKeyDown( wxKeyEvent &event, int val )
+{
+    return event.GetKeyCode() == val;
+}
+
 void Window::OnKeyDown( wxKeyEvent& event )
 {
-    if ( ! m_thread->IsOpened() ) 
+
+    wxEventType key = event.GetKeyCode();
+    int modVer = ConfRead("ArrowVerticalInvert",-1);
+    int modHor = ConfRead("ArrowHorizontalInvert",-1 );
+
+    bool IsUp = IsKeyDown( event, WXK_UP );
+    bool IsDown = IsKeyDown( event, WXK_DOWN );
+    bool IsRight = IsKeyDown( event, WXK_RIGHT );
+    bool IsLeft = IsKeyDown( event, WXK_LEFT );
+
+    if ( IsUp || IsDown || IsRight || IsLeft )
     {
-        event.Skip();
+        bool isInstant;
+        wxOrientation orient = wxVERTICAL;
+        int modifier = 0;
+
+        if ( IsUp || IsDown )
+        {
+            orient = wxVERTICAL;
+            modifier = modVer;
+            isInstant = ConfRead("IsInstantOnVertical",false);
+        }
+        
+        if ( IsRight || IsLeft )
+        {
+            orient = wxHORIZONTAL;
+            modifier = modHor;
+            isInstant = ConfRead("IsInstantOnHorizontal",true);
+        }
+
+        // if left or down multiply modifier by -1 to 
+        // make it scroll down or left
+        if ( IsRight || IsDown )
+            modifier *= -1;
+
+        if ( OnArrow( orient, modifier, isInstant ) == BITMAP_CHANGEPAGE )
+            Scroll(wxPoint(0,0));
+        
         return;
     }
-    wxEventType key = event.GetKeyCode();
-    int def = this->m_config->Read("Invert",-1);
-    int modVer = ConfRead("ArrowVerticalInvert",def);
-    int modHor = ConfRead("ArrowHorizontalInvert",def );
-    bool isInstant = ConfRead("isInstantOnArrowLeftRight", true );
-    switch (key)
-    {
-        case WXK_UP:
-            if ( ! OnArrow( wxVERTICAL, modVer * 1 ) )
-                Scroll(0, GetVirtualSize().GetHeight());
-            break;
-        case WXK_DOWN:
-            if ( ! OnArrow( wxVERTICAL, modVer * -1 ) )
-                Scroll(0,0); 
-            break;
-        case WXK_LEFT:
-            if ( ! OnArrow( wxHORIZONTAL, modHor * 1, isInstant ) )
-                Scroll( 0 , 0 );
-            break;
-        case WXK_RIGHT:
-            if ( ! OnArrow( wxHORIZONTAL, modHor * -1, isInstant ) )
-                Scroll(0,0);
-            break;
-        default:
-            event.Skip();
-    }
+    event.Skip();
 }
 
 BITMAP_PAGES Window::OnArrow( wxOrientation orient, int modifier, bool isInstant )
@@ -201,18 +216,14 @@ BITMAP_PAGES Window::OnArrow( wxOrientation orient, int modifier, bool isInstant
     if ( !m_thread->IsOpened() || modifier == 0 ) return BITMAP_NOTCHANGED;
     
     const wxPoint& view = GetViewStart();
-    int step = ConfRead("ScrollStep", 300 );
-    switch ( orient )
-    {
-        case wxVERTICAL:
-            Scroll( -1, GetViewStart().y + ( step * modifier ) );
-            break;
-        case wxHORIZONTAL:
-            Scroll( GetViewStart().x + ( step * modifier ), -1 );
-            break;
-        default:
-            break;
-    }
+
+    // get per scroll step
+    int step = ConfRead("ScrollStep", 300 ) * modifier;
+    int ver = step * (orient == wxVERTICAL);
+    int hor = step * (orient == wxHORIZONTAL);
+
+    Scroll( view + wxPoint( hor , ver ) );
+
     if ( view == GetViewStart() )
     {
         m_onEdge++;
@@ -228,11 +239,11 @@ BITMAP_PAGES Window::OnEdge( int modifier, bool isInstant )
 
     size_t conf = ConfRead("ClickBeforeChangePage",1);
 
-
-    if ( m_onEdge > conf || isInstant )
+    if ( (m_onEdge > conf || isInstant) && modifier != 0 )
     {
         m_onEdge = 0;
-        bool isChangePage = m_bitmap->ChangePage(modifier);
+        wxCriticalSectionLocker locker(m_thread->GetLock());
+        BITMAP_PAGES status = m_bitmap->ChangePage(modifier);
 
         if ( status == BITMAP_ENDOFPAGE )
             ChangeFolder(modifier);

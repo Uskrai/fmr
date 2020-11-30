@@ -140,6 +140,7 @@ bool Thread::LoadImage( size_t idx, bool isScroll )
         if ( wxImage::CanRead( stream ) )
         {
             wxImage img(stream);
+            wxCriticalSectionLocker locker(GetLock());
             m_bitmap->Add( img, idx );
             return true;
         }
