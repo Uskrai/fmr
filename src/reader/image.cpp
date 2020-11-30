@@ -24,6 +24,7 @@ namespace Reader
 Image::Image( wxScrolledWindow* parent )
 {
     this->parent = parent;
+    this->maxWidth = parent->GetClientSize().GetWidth();
 }
 
 void Image::Open( const wxString& path )
@@ -43,7 +44,7 @@ Image::VectorBitmap Image::Get()
     return this->bitmap;
 }
 
-int Image::Get( const wxPoint& area, const wxPoint& position )
+int Image::Get( const wxPoint& area, const wxPoint& position ) const
 {
     int
     posY = area.y + position.y,
@@ -67,7 +68,7 @@ int Image::Get( const wxPoint& area, const wxPoint& position )
     return -1;
 }
 
-wxVector<int> Image::Get( const wxPoint& position, const wxSize& size )
+wxVector<int> Image::Get( const wxPoint& position, const wxSize& size ) const
 {
     int
     top = position.y, bottom = top + size.GetHeight(),
@@ -257,7 +258,7 @@ bool Image::LoadAt( int index, VectorPos vecPos )
 int Image::GetCenteredPosition( int width )
 {
     int clientWidth = this->GetParent()->GetSize().GetWidth();
-    if ( width < this->maxWidth ) width = this->maxWidth;
+    if ( width > this->maxWidth ) width = this->maxWidth;
     int pos = (clientWidth-width)/2;
     return pos;
 }
