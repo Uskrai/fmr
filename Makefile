@@ -26,7 +26,14 @@ ifeq ($(RELEASE), DEBUG)
 CXXFLAGS 	+= -g
 endif
 
-src			:= handler/handler handler/filehandler handler/archivehandler reader/image reader/reader gui/panel gui/frame
+
+gui 		:= panel frame
+handler 	:= filehandler archivehandler defaulthandler handlerfactory 
+image		:= image
+bitmap		:= bitmapvertical
+reader 		:= windowreader threadreader 
+src			:= $(addprefix handler/, $(handler) ) $(addprefix bitmap/, $(bitmap) ) $(addprefix image/, $(image) ) $(addprefix reader/, $(reader) ) $(addprefix gui/, $(gui) )
+# src			:= handler/handler handler/filehandler handler/archivehandler reader/image reader/reader gui/panel gui/frame
 header		:= $(addsuffix .h, $(src) )
 VPATH		:= src:build
 so			:= $(addsuffix .$(soext), $(src) )
@@ -37,14 +44,14 @@ obj			:= $(addsuffix .o, $(src) )
 all: build $(obj) $(so) $(exe) 
 
 build : 
-	mkdir $(addprefix build/, handler reader ) -p
+	mkdir $(addprefix build/, handler reader handler image gui bitmap ) -p
 
 $(exe) : FLAGS := -Isrc $(CXXFLAGS) `$(wxCONFIG) --libs --cxxflags base,core`
 
 
 $(exe) : LIBS := $(src)
 # building executable file
-$(exe) 		: main/app.cpp gui/frame.h base/config.h
+$(exe) 		: main/app.cpp main/app.h gui/frame.h base/config.h
 	$(CXX) $< $(INCLUDE) $(addprefix build/, $(addsuffix .$(soext), $(LIBS) ) ) $(FLAGS)  -o $(addprefix build/, $@ )
 
 
@@ -60,10 +67,10 @@ endif
 $(src) : % : %.o %.$(soext)
 
 link : $(so)
-frame.$(soext) : lib += gui/panel
-panel.$(soext) : lib += reader/reader
-reader/reader.$(soext) : lib += reader/image
-reader/image.$(soext) : lib += handler/handler
+gui/frame.$(soext) : lib += gui/panel
+gui/panel.$(soext) : lib += reader/windowreader
+reader/windowreader.$(soext) : lib += image/image bitmap/bitmapvertical
+reader/threadreader.$(soext) : lib += handler/handlerfactory image/image bitmap/bitmapvertical
 handler/handler.o	: lib += handler/filehandler handler/archivehandler
 
 $(filter-out config.$(soext), $(so)) : libs += base/config
@@ -75,11 +82,11 @@ $(addprefix build/, $(so) ) : build/%.$(soext): %.o
 # $(obj) : FLAGS := $(CXXFLAGS) $(wxFLAGS)
 
 handler/handler.o 	: handler/filehandler.h handler/archivehandler.h
-reader/image,o		: handler/handler.h
-reader/reader.o 	: reader/image.h
-panel.o : reader/reader.h 
-frame.o : panel.h
-app.o : frame.h
+reader/threadreader,o	: handler/handler.h
+reader/windowreader.o 	: bitmap/bitmapvertical.h image/image.h
+gui/panel.o : reader/windowreader.h 
+gui/frame.o : gui/panel.h
+main/app.o : gui/frame.h
 
 $(filter-out config.o, $(obj) ) : base/config.h
 obj : $(obj)

@@ -16,6 +16,12 @@
  */
 
 #include "app.h"
+#include "gui/frame.h"
+#include "base/config.h"
+
+#include <wx/display.h>
+
+#include <wx/stdpaths.h>
 
 wxIMPLEMENT_APP(App);
 

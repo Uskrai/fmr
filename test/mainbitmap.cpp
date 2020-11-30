@@ -15,31 +15,18 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reader/bmp.h"
+int main();
 
-namespace Reader
-{
+#include "bitmap/bmpvertical.h"
+#include <wx/scrolwin.h>
+#include <wx/bitmap.h>
 
-void Bitmap::OnPrepare( const wxImage& image, wxBitmap& bmp )
+int main () 
 {
-    bmp = wxBitmap( image );
-    
-    
+    wxInitAllImageHandlers();
+    wxImage img("001.jpg");
+    wxScrolledWindow* win = new wxScrolledWindow();
+    Reader::Bitmap bmp(win);
+    bmp.Add( img, VECTOR_END );
+    return 0;
 }
-
-void Bitmap::OnExit( wxBitmap& bmp )
-{
-
-}
-
-void Bitmap::AddPosition( const wxBitmap& bmp )
-{
-
-}
-
-void Bitmap::RefreshPosition( const wxBitmap& bmp )
-{
-
-}
-
-} // namespace reader

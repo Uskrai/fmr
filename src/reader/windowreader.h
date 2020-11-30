@@ -15,34 +15,46 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MyReader
-#define MyReader
+#ifndef FMR_READER_WINDOW
+#define FMR_READER_WINDOW
 
-#include "reader/image.h"
-#include "base/config.h"
 
 #include <wx/scrolwin.h>
-#include <wx/stattext.h>
-#include <wx/sizer.h>
-#include <wx/dc.h>
+class Config;
+class Image;
+class BitmapVertical;
+class HandlerFactory;
 
 namespace Reader
 {
 
-class Reader : public wxScrolledWindow
+class Thread;
+
+class Window : public wxScrolledWindow
 {
     // void Error( wxSize size );
     public:
-        Reader( wxWindow* parent, wxSize size );
-        Reader( wxWindow* parent, wxSize size, wxString path);
-        ~Reader();
-        void LoadImage( wxString path );
-
+        Window( wxWindow* parent, wxSize size );
+        ~Window();
+        void Open( wxString path );
+        void Clear();
     private:
-        Image* image = new Image(this);
-        Config* config = Config::Get();
+        // vector to images
+        Image* m_image;
+        //vector to bitmaps
+        BitmapVertical* m_bitmap;
+        // reference to threading class
+        Thread* m_thread;
+        // pointer to handler
+        HandlerFactory* m_factory = NULL;
+        // pointer to config files 
+        Config* m_config;
+
+        void Find( const wxString& path );
+
         template<typename T>
-        T ConfRead( wxString name, T def ) { return this->config->Read( wxString("Reader/") + name, def ); }
+        T ConfRead( wxString name, T def );
+
         int w,h;
         void Error( wxSize size ); 
         void OnDraw( wxDC& dc );

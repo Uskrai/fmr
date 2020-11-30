@@ -17,12 +17,12 @@
 
 #include "handler/archivehandler.h"
 
-ArchiveHandler::ArchiveHandler( wxString path )
+ArchiveHandler::ArchiveHandler( const wxString& path )
 {
     this->Open( path );
 }
 
-void ArchiveHandler::Open( wxString path )
+void ArchiveHandler::Open( const wxString& path )
 {
     this->filename = path;
 }
@@ -37,16 +37,12 @@ void ArchiveHandler::Traverse()
 {
     wxString path = this->filename;
 
-    wxInputStream* stream;
+    wxInputStream* instream;
 
     const wxArchiveClassFactory* factory;
-    this->Find( path, factory, stream );
-    this->Traverse( path, factory, stream );
-}
 
-void ArchiveHandler::Traverse( wxString path, const wxArchiveClassFactory* factory, wxInputStream* instream )
-{
-    // const wxArchiveClassFactory* fact = wxArchiveClassFactory::Find( path, wxSTREAM_FILEEXT );
+    this->Find( path, factory, instream );
+
     wxArchiveInputStream* stream = factory->NewStream( instream );
     wxArchiveEntry* entry;
 
@@ -75,9 +71,8 @@ void ArchiveHandler::Traverse( wxString path, const wxArchiveClassFactory* facto
             }
         }
     }
-    // delete stream;
-    // delete entry;
 }
+
 
 bool ArchiveHandler::Find( wxString& path, const wxArchiveClassFactory*& factory, wxInputStream*& in )
 {
@@ -117,7 +112,7 @@ bool ArchiveHandler::CanHandle( wxString path )
     wxInputStream* in;
     const wxArchiveClassFactory* factory;
     bool result = ArchiveHandler::Find( path, factory, in );
-    delete in;
+    if ( result ) delete in;
     return result;
 }
 
@@ -130,7 +125,6 @@ void ArchiveHandler::Clear()
     fstream.clear();
     this->filename = wxEmptyString;
     name.clear();
-    this->factory = NULL;
 }
 
 ArchiveHandler::~ArchiveHandler()

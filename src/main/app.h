@@ -15,15 +15,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "gui/frame.h"
-#include "base/config.h"
-
-#include <wx/wxprec.h>
 #include <wx/app.h>
-#include <wx/display.h>
 
-#include <wx/stdpaths.h>
-
+class wxFrame;
+class Config;
 
 class App : 
     public wxApp

@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reader/image.h"
+#include "image/image.h"
+#include "handler/handlerfactory.h"
 
-namespace Reader
-{
+#include <wx/scrolwin.h>
 
 Image::Image( wxScrolledWindow* parent )
 {
@@ -32,16 +32,17 @@ void Image::Open( const wxString& path )
     {
         delete this->files;
     }
-    this->files = Handler::Find(path);
-    this->files->Traverse();
+    HandlerFactory factory;
+    factory.Find( path );
+    this->files = factory.NewHandler();
     this->file = path;
     this->Load(path);
 }
 
-Image::VectorBitmap Image::Get()
-{
-    return this->bitmap;
-}
+// Image::VectorBitmap Image::Get()
+// {
+//     return this->bitmap;
+// }
 
 int Image::Get( const wxPoint& area, const wxPoint& position ) const
 {
@@ -93,6 +94,34 @@ wxVector<int> Image::Get( const wxPoint& position, const wxSize& size ) const
     return bmp;
 }
 
+bool Image::Load( wxInputStream* stream, int pos )
+{
+    if ( wxImage::CanRead( *stream ) )
+    {
+        wxImage img(*(stream));
+
+        switch ( pos )
+        {
+            case VECTOR_END:
+                m_item.push_back( img );
+                break;
+            case VECTOR_BEGIN:
+                m_item.insert( m_item.begin(), img );
+                break;
+            default:
+                return false;
+                break;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool Image::Push( wxInputStream* stream )
+{
+    return Load( stream, VECTOR_END );
+}
+
 void Image::Load( const wxString& path )
 {
     int i = this->files->Index(path);
@@ -113,120 +142,120 @@ void Image::Load( const wxString& path )
 
 void Image::ThreadLoadBitmap()
 {
-    // checking whether to load the next index or not
-    bool isShowNext =   this->files->IsExist(this->next) 
-                        && this->showNext < this->config->Read("showNext", 10 );
+    // // checking whether to load the next index or not
+    // bool isShowNext =   this->files->IsExist(this->next) 
+    //                     && this->showNext < this->config->Read("showNext", 10 );
 
-    // loading the next index if there is no Thread Destroy Testing
-    if ( isShowNext && !this->TestDestroy() )
-    {
-        if ( this->LoadAt( this->next, VECTOR_PUSH ) )
-        {
-            this->LoadBitmap( this->image.back(), VECTOR_PUSH );
-            this->showNext++;
-        }
-        this->next++;
-    }
+    // // loading the next index if there is no Thread Destroy Testing
+    // if ( isShowNext && !this->TestDestroy() )
+    // {
+    //     if ( this->LoadAt( this->next, VECTOR_END ) )
+    //     {
+    //         this->LoadBitmap( this->image.back(), VECTOR_END );
+    //         this->showNext++;
+    //     }
+    //     this->next++;
+    // }
 
-    // checking whether to load the previous index or not
-    bool isShowPrev =   this->files->IsExist( this->prev ) 
-                        && this->showPrev < this->config->Read("showPrev",10);
+    // // checking whether to load the previous index or not
+    // bool isShowPrev =   this->files->IsExist( this->prev ) 
+    //                     && this->showPrev < this->config->Read("showPrev",10);
 
-    // loading the next index if there is no Thread Destroy Testing
-    if ( isShowPrev && !this->TestDestroy() )
-    {
-        if ( this->LoadAt( this->prev, VECTOR_BEGIN ) )
-        {
-            this->LoadBitmap( this->image.front(), VECTOR_BEGIN );
-            this->showPrev++;
-        }
-        this->prev--;
-    }
+    // // loading the next index if there is no Thread Destroy Testing
+    // if ( isShowPrev && !this->TestDestroy() )
+    // {
+    //     if ( this->LoadAt( this->prev, VECTOR_BEGIN ) )
+    //     {
+    //         this->LoadBitmap( this->image.front(), VECTOR_BEGIN );
+    //         this->showPrev++;
+    //     }
+    //     this->prev--;
+    // }
 
-    // check whether the loading already done or not if true would disable loadBitmap;
-    if ( (!isShowNext && !isShowPrev) )
-    { 
-        this->isThreadLoadBitmap = false; 
-    } 
+    // // check whether the loading already done or not if true would disable loadBitmap;
+    // if ( (!isShowNext && !isShowPrev) )
+    // { 
+    //     this->isThreadLoadBitmap = false; 
+    // } 
 }
 
 void Image::ThreadPreLoadImage()
 {
-    if ( !this->isThreadLoadBitmap )
-    {
+    // if ( !this->isThreadLoadBitmap )
+    // {
 
-    if ( this->files->IsExist( this->next ) && this->config->Read("CacheNext",10) ) 
-    {
-        this->LoadAt( this->next, VECTOR_PUSH );
-        this->next++;
-        this->cacheNext++;
-    }
+    // if ( this->files->IsExist( this->next ) && this->config->Read("CacheNext",10) ) 
+    // {
+    //     this->LoadAt( this->next, VECTOR_END );
+    //     this->next++;
+    //     this->cacheNext++;
+    // }
 
-    if ( this->files->IsExist( this->prev ) && this->config->Read("CachePrev", 10)  )
-    {
-        this->LoadAt( this->prev, VECTOR_PUSH );
-        this->prev--;
-        this->cachePrev++;
-    }
+    // if ( this->files->IsExist( this->prev ) && this->config->Read("CachePrev", 10)  )
+    // {
+    //     this->LoadAt( this->prev, VECTOR_END );
+    //     this->prev--;
+    //     this->cachePrev++;
+    // }
 
-    } // end of conditional isThreadLoadBitmap
+    // } // end of conditional isThreadLoadBitmap
 }
 
 wxThread::ExitCode Image::Entry() // might need to refactor
 {
-    while ( this->isThreadLoadBitmap || this->isThreadPreLoadImage )
-    {
-        if ( this->isThreadLoadBitmap && !this->TestDestroy())
-        {
-            this->ThreadLoadBitmap();
-        }
+    // while ( this->isThreadLoadBitmap || this->isThreadPreLoadImage )
+    // {
+    //     if ( this->isThreadLoadBitmap && !this->TestDestroy())
+    //     {
+    //         this->ThreadLoadBitmap();
+    //     }
 
-        if ( this->isThreadPreLoadImage && !this->TestDestroy() )
-        {
-            this->ThreadPreLoadImage();
-        } 
+    //     if ( this->isThreadPreLoadImage && !this->TestDestroy() )
+    //     {
+    //         this->ThreadPreLoadImage();
+    //     } 
 
-        if ( this->TestDestroy() )
-        {
-            this->isThreadLoadBitmap = false;
-            this->isThreadPreLoadImage = false;
-        }
-    }
-    return (wxThread::ExitCode)0;
+    //     if ( this->TestDestroy() )
+    //     {
+    //         this->isThreadLoadBitmap = false;
+    //         this->isThreadPreLoadImage = false;
+    //     }
+    // }
+    // return (wxThread::ExitCode)0;
 }
 
 void Image::LoadBitmap( const wxImage& img, VectorPos vectorPos )
 {
-    wxBitmap bmp = wxBitmap( img );
-    int viewY = -1, viewX = -1; // changed when insert to beginning so user's visiblity doesnt move
+    // wxBitmap bmp = wxBitmap( img );
+    // int viewY = -1, viewX = -1; // changed when insert to beginning so user's visiblity doesnt move
 
-    if ( bmp.GetWidth() > this->maxWidth )
-    {
-        this->maxWidth = bmp.GetWidth();
-    }
+    // if ( bmp.GetWidth() > this->maxWidth )
+    // {
+    //     this->maxWidth = bmp.GetWidth();
+    // }
 
-    switch ( vectorPos )
-    {
-        case VECTOR_PUSH:
-        {
-            wxCriticalSectionLocker locker(gCS);
-            this->bitmap.push_back(bmp);
-            this->AddPosition( bmp ); // Add Image Position if just push
-            break;
-        }
-        case VECTOR_BEGIN:
-        {
-            viewY = this->GetParent()->GetViewStart().y + bmp.GetHeight();
-            wxCriticalSectionLocker locker(this->gCS);
-            this->bitmap.insert( this->bitmap.begin(), bmp );
-            this->RefreshImagePosition(); // Recalculate image Position if insert to begining
-            break;
-        }
-    }
+    // switch ( vectorPos )
+    // {
+    //     case VECTOR_END:
+    //     {
+    //         wxCriticalSectionLocker locker(gCS);
+    //         this->bitmap.push_back(bmp);
+    //         this->AddPosition( bmp ); // Add Image Position if just push
+    //         break;
+    //     }
+    //     case VECTOR_BEGIN:
+    //     {
+    //         viewY = this->GetParent()->GetViewStart().y + bmp.GetHeight();
+    //         wxCriticalSectionLocker locker(this->gCS);
+    //         this->bitmap.insert( this->bitmap.begin(), bmp );
+    //         this->RefreshImagePosition(); // Recalculate image Position if insert to begining
+    //         break;
+    //     }
+    // }
 
-    this->GetParent()->SetVirtualSize( this->maxWidth,this->imagePosY.back() ); // expand virtual size
-    this->GetParent()->Scroll( viewX, viewY); // Adjust user's view if needed
-    this->GetParent()->Refresh();
+    // this->GetParent()->SetVirtualSize( this->maxWidth,this->imagePosY.back() ); // expand virtual size
+    // this->GetParent()->Scroll( viewX, viewY); // Adjust user's view if needed
+    // this->GetParent()->Refresh();
 }
 
 bool Image::LoadAt( int index, VectorPos vecPos )
@@ -239,7 +268,7 @@ bool Image::LoadAt( int index, VectorPos vecPos )
             wxImage img = wxImage( *(filename) );
             switch ( vecPos )
             {
-                case VECTOR_PUSH:
+                case VECTOR_END:
                 {
                     this->image.push_back( img ); // push image to the end
                 }
@@ -272,20 +301,20 @@ void Image::RefreshImagePosition()
         this->AddPosition( it, x, y );
     }
 
-    wxCriticalSectionLocker locker(gCS);
+    // wxCriticalSectionLocker locker(gCS);
     this->imagePosX = x;
     this->imagePosY = y;
 }
 
 void Image::AddPosition( const wxBitmap& bmp, wxVector<int>& x, wxVector<int>& y )
 {
-    wxCriticalSectionLocker locker(this->gCS);
-    if ( y.empty() )
-    {
-        y.push_back(0);
-    }
-    x.push_back( this->GetCenteredPosition( bmp.GetWidth() ) );
-    y.push_back( y.back() + bmp.GetHeight() );
+    // wxCriticalSectionLocker locker(this->gCS);
+    // if ( y.empty() )
+    // {
+    //     y.push_back(0);
+    // }
+    // x.push_back( this->GetCenteredPosition( bmp.GetWidth() ) );
+    // y.push_back( y.back() + bmp.GetHeight() );
 }
 
 void Image::AddPosition( const wxBitmap& bmp )
@@ -296,17 +325,7 @@ void Image::AddPosition( const wxBitmap& bmp )
 
 void Image::Clear()
 {    
-    if ( this->GetThread() && this->GetThread()->IsRunning() )
-    {
-        this->GetThread()->Delete();
-    }
-    this->bitmap.clear();
-    this->image.clear();
-    this->imagePosY.clear();
-    this->imagePosX.clear();
-    this->maxWidth = 0;
-
-
+    m_item.clear();
 }
 
 Image::~Image()
@@ -317,5 +336,3 @@ Image::~Image()
         delete this->files;
     }
 }
-
-} // end of namespace reader

@@ -1,4 +1,4 @@
-/* 
+/*
  *  Copyright (c) 2020 Uskrai
  *  
  *  This program is free software: you can redistribute it and/or modify
@@ -15,28 +15,24 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TRAVERSER
-#define TRAVERSER
-
-#include "base/config.h"
+#ifndef HANDLER_FILEHANDLER
+#define HANDLER_FILEHANDLER
 
 #include "handler/handler.h"
-
 #include <wx/dir.h>
 #include <wx/filename.h>
-#include <wx/image.h>
-#include <wx/wfstream.h>
 
 class FileHandler
     : public Handler
 {
     public:
-        FileHandler( wxString path );
+        FileHandler(){}
+        FileHandler( const wxString& path );
         ~FileHandler();
-        void Open( wxString path );
+        void Open( const wxString& path );
         void Traverse( );
 
-        int Index( wxString name );
+        int Index( const wxString& name );
         int IndexFilename( wxString path ) { return this->Index(  path.AfterLast( wxFileName::GetPathSeparator() )  ); }
         wxInputStream* Item( int index ) { return this->fstream.at(index); }
         int Size() { return this->files.size(); }
@@ -45,7 +41,7 @@ class FileHandler
 
         void Clear();
 
-        static bool CanHandle( wxString path ) { return wxImage::CanRead( path ); }
+        static bool CanHandle( wxString path ) { return true; }
         static void GetAllFiles( const wxString& path, wxVector<wxInputStream*>& stream );
         
     private:
@@ -60,5 +56,6 @@ class FileHandler
         void GetAllFiles( wxDir& dir, bool& cont, wxString& filename, wxArrayString& array);
 
 };
+
 
 #endif
