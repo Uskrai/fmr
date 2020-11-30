@@ -23,7 +23,7 @@
 #include "base/range.h"
 
 class Config;
-class BitmapVertical;
+class Bitmap;
 class Handler;
 class HandlerFactory;
 
@@ -49,7 +49,7 @@ class Window : public wxScrolledWindow
         Handler* GetHandler() {return m_fileHandler;}
     private:
         //vector to bitmaps
-        BitmapVertical* m_bitmap;
+        Bitmap* m_bitmap;
         // reference to threading class
         Thread* m_thread;
         // pointer to handler
