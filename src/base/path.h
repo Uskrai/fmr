@@ -20,75 +20,22 @@
 
 #include <wx/filename.h>
 #include <iostream>
-namespace Path
+inline namespace Path
 {
-    void RemoveDirSep( wxString& path );
     const wxUniChar sep = wxFileName::GetPathSeparator();
     
     // return long path
-    wxString GetFullPath( wxString path )
-    {
-        wxFileName name(path);
-        if ( path.StartsWith('.') )
-            path = wxFileName::GetCwd() + sep + path.AfterFirst(sep);
-    
-        RemoveDirSep(path);
-        if ( name.DirExists(path) )
-            name.AssignDir(path);
-        else if ( name.FileExists(path) )
-            name.Assign(path);
-
-        return name.GetFullPath();
-    }
-
-    wxString GetDirName( wxString path )
-    {
-        path = GetFullPath(path);
-        if ( path.EndsWith(sep) )
-            return path;
-
-        size_t idx = path.rfind( sep );
-        return path.SubString( 0, idx );
-    }
-
+    wxString GetFullPath( wxString path );
+    // return directory name
+    wxString GetDirName( wxString path );
     // return parent's path
-    wxString GetParent( const wxString& path )
-    {
-        wxString name(GetFullPath(path));
-
-        RemoveDirSep(name);
-
-        return name.SubString(0,name.rfind(sep));
-    }
-
+    wxString GetParent( const wxString& path );
     // strip last separator
-    void RemoveDirSep( wxString& path )
-    {
-        if ( path.EndsWith(sep) )
-            path.RemoveLast();
-    }
-
+    void RemoveDirSep( wxString& path );
     // return Name without separator
-    wxString GetName( wxString path )
-    {
-        RemoveDirSep(path);
-        
-        wxString name = path.SubString( path.rfind(sep) + 1, -1 );
-
-        return name;
-    }
-
+    wxString GetName( wxString path );
     // return name with separator if directory
-    wxString GetNameWithSep( wxString path )
-    {
-        bool isDir = path.EndsWith(sep);
-        if( isDir )
-            path.RemoveLast();
-        
-        wxString name = GetName(path);
-        name = isDir ? name + sep : name;
-        return name;
-    }
+    wxString GetNameWithSep( wxString path );
 
 } // namespace Path
 

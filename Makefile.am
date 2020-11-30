@@ -5,6 +5,16 @@ AM_CPPFLAGS = -I@srcdir@/src
 if SHARED
     # sds
 endif
+
+base = base
+basedir = @abs_builddir@/base
+base_LTLIBRARIES = libcompare.la libpath.la
+
+    libcompare_la_SOURCES = $(base)/compare.cpp
+
+    libpath_la_SOURCES = $(base)/path.cpp
+
+
 handler = handler
 handlerdir = @abs_builddir@/handler
 handler_LTLIBRARIES = libdefaulthandler.la libarchivehandler.la libhandlerfactory.la
@@ -12,10 +22,10 @@ handler_LTLIBRARIES = libdefaulthandler.la libarchivehandler.la libhandlerfactor
     libdefaulthandler_la_SOURCES = $(handler)/defaulthandler.cpp
 
     libarchivehandler_la_SOURCES = $(handler)/archivehandler.cpp
-    libarchivehandler_la_LIBADD = libdefaulthandler.la
+    libarchivehandler_la_LIBADD = libdefaulthandler.la libcompare.la libpath.la
 
     libhandlerfactory_la_SOURCES = $(handler)/handlerfactory.cpp
-    libhandlerfactory_la_LIBADD =  libdefaulthandler.la libarchivehandler.la
+    libhandlerfactory_la_LIBADD =  libdefaulthandler.la libarchivehandler.la libcompare.la libpath.la
 
 
 

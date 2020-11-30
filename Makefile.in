@@ -103,9 +103,9 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bitmapdir)" \
-	"$(DESTDIR)$(guidir)" "$(DESTDIR)$(handlerdir)" \
-	"$(DESTDIR)$(readerdir)"
+am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(basedir)" \
+	"$(DESTDIR)$(bitmapdir)" "$(DESTDIR)$(guidir)" \
+	"$(DESTDIR)$(handlerdir)" "$(DESTDIR)$(readerdir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -134,9 +134,11 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-LTLIBRARIES = $(bitmap_LTLIBRARIES) $(gui_LTLIBRARIES) \
-	$(handler_LTLIBRARIES) $(reader_LTLIBRARIES)
-libarchivehandler_la_DEPENDENCIES = libdefaulthandler.la
+LTLIBRARIES = $(base_LTLIBRARIES) $(bitmap_LTLIBRARIES) \
+	$(gui_LTLIBRARIES) $(handler_LTLIBRARIES) \
+	$(reader_LTLIBRARIES)
+libarchivehandler_la_DEPENDENCIES = libdefaulthandler.la libcompare.la \
+	libpath.la
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libarchivehandler_la_OBJECTS = $(handler)/archivehandler.lo
 libarchivehandler_la_OBJECTS = $(am_libarchivehandler_la_OBJECTS)
@@ -147,6 +149,9 @@ am__v_lt_1 =
 libbitmap_la_DEPENDENCIES = libsize.la libposition.la
 am_libbitmap_la_OBJECTS = $(bitmap)/bitmap.lo
 libbitmap_la_OBJECTS = $(am_libbitmap_la_OBJECTS)
+libcompare_la_LIBADD =
+am_libcompare_la_OBJECTS = $(base)/compare.lo
+libcompare_la_OBJECTS = $(am_libcompare_la_OBJECTS)
 libdefaulthandler_la_LIBADD =
 am_libdefaulthandler_la_OBJECTS = $(handler)/defaulthandler.lo
 libdefaulthandler_la_OBJECTS = $(am_libdefaulthandler_la_OBJECTS)
@@ -154,12 +159,15 @@ libframe_la_DEPENDENCIES = libpanel.la
 am_libframe_la_OBJECTS = $(gui)/frame.lo
 libframe_la_OBJECTS = $(am_libframe_la_OBJECTS)
 libhandlerfactory_la_DEPENDENCIES = libdefaulthandler.la \
-	libarchivehandler.la
+	libarchivehandler.la libcompare.la libpath.la
 am_libhandlerfactory_la_OBJECTS = $(handler)/handlerfactory.lo
 libhandlerfactory_la_OBJECTS = $(am_libhandlerfactory_la_OBJECTS)
 libpanel_la_DEPENDENCIES = libwindowreader.la
 am_libpanel_la_OBJECTS = $(gui)/panel.lo
 libpanel_la_OBJECTS = $(am_libpanel_la_OBJECTS)
+libpath_la_LIBADD =
+am_libpath_la_OBJECTS = $(base)/path.lo
+libpath_la_OBJECTS = $(am_libpath_la_OBJECTS)
 libposition_la_LIBADD =
 am_libposition_la_OBJECTS = $(bitmap)/position.lo
 libposition_la_OBJECTS = $(am_libposition_la_OBJECTS)
@@ -191,7 +199,8 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap.Plo \
+am__depfiles_remade = $(base)/$(DEPDIR)/compare.Plo \
+	$(base)/$(DEPDIR)/path.Plo $(bitmap)/$(DEPDIR)/bitmap.Plo \
 	$(bitmap)/$(DEPDIR)/position.Plo $(bitmap)/$(DEPDIR)/size.Plo \
 	$(gui)/$(DEPDIR)/frame.Plo $(gui)/$(DEPDIR)/panel.Plo \
 	$(handler)/$(DEPDIR)/archivehandler.Plo \
@@ -219,14 +228,16 @@ am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(libarchivehandler_la_SOURCES) $(libbitmap_la_SOURCES) \
-	$(libdefaulthandler_la_SOURCES) $(libframe_la_SOURCES) \
-	$(libhandlerfactory_la_SOURCES) $(libpanel_la_SOURCES) \
+	$(libcompare_la_SOURCES) $(libdefaulthandler_la_SOURCES) \
+	$(libframe_la_SOURCES) $(libhandlerfactory_la_SOURCES) \
+	$(libpanel_la_SOURCES) $(libpath_la_SOURCES) \
 	$(libposition_la_SOURCES) $(libsize_la_SOURCES) \
 	$(libthreadreader_la_SOURCES) $(libwindowreader_la_SOURCES) \
 	$(fmr_SOURCES)
 DIST_SOURCES = $(libarchivehandler_la_SOURCES) $(libbitmap_la_SOURCES) \
-	$(libdefaulthandler_la_SOURCES) $(libframe_la_SOURCES) \
-	$(libhandlerfactory_la_SOURCES) $(libpanel_la_SOURCES) \
+	$(libcompare_la_SOURCES) $(libdefaulthandler_la_SOURCES) \
+	$(libframe_la_SOURCES) $(libhandlerfactory_la_SOURCES) \
+	$(libpanel_la_SOURCES) $(libpath_la_SOURCES) \
 	$(libposition_la_SOURCES) $(libsize_la_SOURCES) \
 	$(libthreadreader_la_SOURCES) $(libwindowreader_la_SOURCES) \
 	$(fmr_SOURCES)
@@ -420,14 +431,19 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -I@srcdir@/src
+base = base
+basedir = @abs_builddir@/base
+base_LTLIBRARIES = libcompare.la libpath.la
+libcompare_la_SOURCES = $(base)/compare.cpp
+libpath_la_SOURCES = $(base)/path.cpp
 handler = handler
 handlerdir = @abs_builddir@/handler
 handler_LTLIBRARIES = libdefaulthandler.la libarchivehandler.la libhandlerfactory.la
 libdefaulthandler_la_SOURCES = $(handler)/defaulthandler.cpp
 libarchivehandler_la_SOURCES = $(handler)/archivehandler.cpp
-libarchivehandler_la_LIBADD = libdefaulthandler.la
+libarchivehandler_la_LIBADD = libdefaulthandler.la libcompare.la libpath.la
 libhandlerfactory_la_SOURCES = $(handler)/handlerfactory.cpp
-libhandlerfactory_la_LIBADD = libdefaulthandler.la libarchivehandler.la
+libhandlerfactory_la_LIBADD = libdefaulthandler.la libarchivehandler.la libcompare.la libpath.la
 
 # make libraries for bitmap
 bitmap = bitmap
@@ -540,6 +556,41 @@ clean-binPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+
+install-baseLTLIBRARIES: $(base_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	@list='$(base_LTLIBRARIES)'; test -n "$(basedir)" || list=; \
+	list2=; for p in $$list; do \
+	  if test -f $$p; then \
+	    list2="$$list2 $$p"; \
+	  else :; fi; \
+	done; \
+	test -z "$$list2" || { \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(basedir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(basedir)" || exit 1; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(basedir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(basedir)"; \
+	}
+
+uninstall-baseLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(base_LTLIBRARIES)'; test -n "$(basedir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(basedir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(basedir)/$$f"; \
+	done
+
+clean-baseLTLIBRARIES:
+	-test -z "$(base_LTLIBRARIES)" || rm -f $(base_LTLIBRARIES)
+	@list='$(base_LTLIBRARIES)'; \
+	locs=`for p in $$list; do echo $$p; done | \
+	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
+	      sort -u`; \
+	test -z "$$locs" || { \
+	  echo rm -f $${locs}; \
+	  rm -f $${locs}; \
+	}
 
 install-bitmapLTLIBRARIES: $(bitmap_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -702,6 +753,17 @@ $(bitmap)/bitmap.lo: $(bitmap)/$(am__dirstamp) \
 
 libbitmap.la: $(libbitmap_la_OBJECTS) $(libbitmap_la_DEPENDENCIES) $(EXTRA_libbitmap_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(bitmapdir) $(libbitmap_la_OBJECTS) $(libbitmap_la_LIBADD) $(LIBS)
+$(base)/$(am__dirstamp):
+	@$(MKDIR_P) $(base)
+	@: > $(base)/$(am__dirstamp)
+$(base)/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) $(base)/$(DEPDIR)
+	@: > $(base)/$(DEPDIR)/$(am__dirstamp)
+$(base)/compare.lo: $(base)/$(am__dirstamp) \
+	$(base)/$(DEPDIR)/$(am__dirstamp)
+
+libcompare.la: $(libcompare_la_OBJECTS) $(libcompare_la_DEPENDENCIES) $(EXTRA_libcompare_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(basedir) $(libcompare_la_OBJECTS) $(libcompare_la_LIBADD) $(LIBS)
 $(handler)/defaulthandler.lo: $(handler)/$(am__dirstamp) \
 	$(handler)/$(DEPDIR)/$(am__dirstamp)
 
@@ -728,6 +790,11 @@ $(gui)/panel.lo: $(gui)/$(am__dirstamp) \
 
 libpanel.la: $(libpanel_la_OBJECTS) $(libpanel_la_DEPENDENCIES) $(EXTRA_libpanel_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(guidir) $(libpanel_la_OBJECTS) $(libpanel_la_LIBADD) $(LIBS)
+$(base)/path.lo: $(base)/$(am__dirstamp) \
+	$(base)/$(DEPDIR)/$(am__dirstamp)
+
+libpath.la: $(libpath_la_OBJECTS) $(libpath_la_DEPENDENCIES) $(EXTRA_libpath_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(basedir) $(libpath_la_OBJECTS) $(libpath_la_LIBADD) $(LIBS)
 $(bitmap)/position.lo: $(bitmap)/$(am__dirstamp) \
 	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
 
@@ -769,6 +836,8 @@ fmr$(EXEEXT): $(fmr_OBJECTS) $(fmr_DEPENDENCIES) $(EXTRA_fmr_DEPENDENCIES)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f $(base)/*.$(OBJEXT)
+	-rm -f $(base)/*.lo
 	-rm -f $(bitmap)/*.$(OBJEXT)
 	-rm -f $(bitmap)/*.lo
 	-rm -f $(gui)/*.$(OBJEXT)
@@ -782,6 +851,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@$(base)/$(DEPDIR)/compare.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(base)/$(DEPDIR)/path.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/bitmap.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/position.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/size.Plo@am__quote@ # am--include-marker
@@ -828,6 +899,7 @@ mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
+	-rm -rf $(base)/.libs $(base)/_libs
 	-rm -rf $(bitmap)/.libs $(bitmap)/_libs
 	-rm -rf $(gui)/.libs $(gui)/_libs
 	-rm -rf $(handler)/.libs $(handler)/_libs
@@ -1072,7 +1144,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(PROGRAMS) $(LTLIBRARIES)
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bitmapdir)" "$(DESTDIR)$(guidir)" "$(DESTDIR)$(handlerdir)" "$(DESTDIR)$(readerdir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(basedir)" "$(DESTDIR)$(bitmapdir)" "$(DESTDIR)$(guidir)" "$(DESTDIR)$(handlerdir)" "$(DESTDIR)$(readerdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -1103,6 +1175,8 @@ distclean-generic:
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
 	-rm -f main/$(DEPDIR)/$(am__dirstamp)
 	-rm -f main/$(am__dirstamp)
+	-test -z "$(base)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(base)/$(DEPDIR)/$(am__dirstamp)
+	-test -z "$(base)/$(am__dirstamp)" || rm -f $(base)/$(am__dirstamp)
 	-test -z "$(bitmap)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(bitmap)/$(DEPDIR)/$(am__dirstamp)
 	-test -z "$(bitmap)/$(am__dirstamp)" || rm -f $(bitmap)/$(am__dirstamp)
 	-test -z "$(gui)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(gui)/$(DEPDIR)/$(am__dirstamp)
@@ -1117,13 +1191,16 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-bitmapLTLIBRARIES clean-generic \
-	clean-guiLTLIBRARIES clean-handlerLTLIBRARIES clean-libtool \
-	clean-readerLTLIBRARIES mostlyclean-am
+clean-am: clean-baseLTLIBRARIES clean-binPROGRAMS \
+	clean-bitmapLTLIBRARIES clean-generic clean-guiLTLIBRARIES \
+	clean-handlerLTLIBRARIES clean-libtool clean-readerLTLIBRARIES \
+	mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-		-rm -f $(bitmap)/$(DEPDIR)/bitmap.Plo
+		-rm -f $(base)/$(DEPDIR)/compare.Plo
+	-rm -f $(base)/$(DEPDIR)/path.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/bitmap.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/position.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/size.Plo
 	-rm -f $(gui)/$(DEPDIR)/frame.Plo
@@ -1150,8 +1227,9 @@ info: info-am
 
 info-am:
 
-install-data-am: install-bitmapLTLIBRARIES install-guiLTLIBRARIES \
-	install-handlerLTLIBRARIES install-readerLTLIBRARIES
+install-data-am: install-baseLTLIBRARIES install-bitmapLTLIBRARIES \
+	install-guiLTLIBRARIES install-handlerLTLIBRARIES \
+	install-readerLTLIBRARIES
 
 install-dvi: install-dvi-am
 
@@ -1182,7 +1260,9 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-		-rm -f $(bitmap)/$(DEPDIR)/bitmap.Plo
+		-rm -f $(base)/$(DEPDIR)/compare.Plo
+	-rm -f $(base)/$(DEPDIR)/path.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/bitmap.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/position.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/size.Plo
 	-rm -f $(gui)/$(DEPDIR)/frame.Plo
@@ -1209,22 +1289,23 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-bitmapLTLIBRARIES \
-	uninstall-guiLTLIBRARIES uninstall-handlerLTLIBRARIES \
-	uninstall-readerLTLIBRARIES
+uninstall-am: uninstall-baseLTLIBRARIES uninstall-binPROGRAMS \
+	uninstall-bitmapLTLIBRARIES uninstall-guiLTLIBRARIES \
+	uninstall-handlerLTLIBRARIES uninstall-readerLTLIBRARIES
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles am--refresh check \
-	check-am clean clean-binPROGRAMS clean-bitmapLTLIBRARIES \
-	clean-cscope clean-generic clean-guiLTLIBRARIES \
-	clean-handlerLTLIBRARIES clean-libtool clean-readerLTLIBRARIES \
-	cscope cscopelist-am ctags ctags-am dist dist-all dist-bzip2 \
-	dist-gzip dist-lzip dist-shar dist-tarZ dist-xz dist-zip \
-	dist-zstd distcheck distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-tags \
-	distcleancheck distdir distuninstallcheck dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
+	check-am clean clean-baseLTLIBRARIES clean-binPROGRAMS \
+	clean-bitmapLTLIBRARIES clean-cscope clean-generic \
+	clean-guiLTLIBRARIES clean-handlerLTLIBRARIES clean-libtool \
+	clean-readerLTLIBRARIES cscope cscopelist-am ctags ctags-am \
+	dist dist-all dist-bzip2 dist-gzip dist-lzip dist-shar \
+	dist-tarZ dist-xz dist-zip dist-zstd distcheck distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distcleancheck distdir distuninstallcheck dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-baseLTLIBRARIES install-binPROGRAMS \
 	install-bitmapLTLIBRARIES install-data install-data-am \
 	install-dvi install-dvi-am install-exec install-exec-am \
 	install-guiLTLIBRARIES install-handlerLTLIBRARIES install-html \
@@ -1234,9 +1315,10 @@ uninstall-am: uninstall-binPROGRAMS uninstall-bitmapLTLIBRARIES \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-bitmapLTLIBRARIES uninstall-guiLTLIBRARIES \
-	uninstall-handlerLTLIBRARIES uninstall-readerLTLIBRARIES
+	tags tags-am uninstall uninstall-am uninstall-baseLTLIBRARIES \
+	uninstall-binPROGRAMS uninstall-bitmapLTLIBRARIES \
+	uninstall-guiLTLIBRARIES uninstall-handlerLTLIBRARIES \
+	uninstall-readerLTLIBRARIES
 
 .PRECIOUS: Makefile
 
