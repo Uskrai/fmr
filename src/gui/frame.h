@@ -18,7 +18,6 @@
 #ifndef MyFrame
 #define MyFrame
 
-// #include <wx/wx.h>
 #include <wx/menu.h>
 #include <wx/frame.h>
 #include <wx/filedlg.h>
@@ -27,7 +26,7 @@
     #include <wx/wxprec.h>
 #endif
 
-#include "panel.h"
+#include "gui/panel.h"
 
 enum
 {

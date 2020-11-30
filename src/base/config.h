@@ -19,12 +19,13 @@
 #define FMR_CONFIG
 
 #include <wx/fileconf.h>
+#include <iostream>
 
 class Config :
     private wxFileConfig
 {
     private:
-        static Config* global;
+        inline static Config* global = NULL;
     public:
         using wxFileConfig::wxFileConfig;
         using wxFileConfig::GetPath;
@@ -53,9 +54,15 @@ class Config :
         using wxFileConfig::Write;
         using wxFileConfig::Flush;
 
-        static Config* Get();
-        static void Set( Config* pConfig );
-};
+        static Config* Get() 
+        { 
+            return Config::global; 
+        }
 
+        static void Set( Config* pConfig ) 
+        { 
+            Config::global = pConfig; 
+        }
+};
 
 #endif

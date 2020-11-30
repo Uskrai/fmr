@@ -19,7 +19,7 @@
 #define MyReader
 
 #include "reader/image.h"
-#include "config.h"
+#include "base/config.h"
 
 #include <wx/scrolwin.h>
 #include <wx/stattext.h>

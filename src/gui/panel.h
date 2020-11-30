@@ -1,4 +1,4 @@
-/*
+/* 
  *  Copyright (c) 2020 Uskrai
  *  
  *  This program is free software: you can redistribute it and/or modify
@@ -15,20 +15,22 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "handler/handler.h"
-#include "handler/archivehandler.h"
-#include "handler/filehandler.h"
+#include <wx/sizer.h>
+#include <wx/panel.h>
 
-Handler* Handler::Find( const wxString& path )
+namespace Reader{
+    class Reader;
+};
+
+class Panel :
+    public wxPanel
 {
-    if ( ArchiveHandler::CanHandle(path) )
-    {
-        return new ArchiveHandler(path);
-    }
+    public: 
+        Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ); 
 
-    if ( FileHandler::CanHandle(path) )
-    {
-        return new FileHandler(path);
-    }
-    return NULL;
-}
+        void LoadFile( wxString path );
+    private:
+        Reader::Reader* reader;
+        wxBoxSizer* sizer;
+
+};
