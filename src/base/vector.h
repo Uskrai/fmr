@@ -23,9 +23,9 @@
 namespace Vector
 {
     template< typename T>
-    bool IsExist( const wxVector<T>& vec, int idx )
+    bool IsExist( const wxVector<T>& vec, size_t idx )
     {
-        return 0 <= idx && idx < vec.size();
+        return idx < vec.size();
     }
 };
 

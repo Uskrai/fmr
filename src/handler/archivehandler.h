@@ -23,6 +23,7 @@
 #include <wx/archive.h>
 #include <wx/wfstream.h>
 #include <wx/mstream.h>
+#include "base/vector.h"
 
 class ArchiveHandler 
     : public Handler
@@ -37,12 +38,13 @@ class ArchiveHandler
         wxString GetNext();
         wxString GetPrev();
 
-        bool IsExist( int index );
+        bool IsExist( size_t index ) 
+            { return Vector::IsExist(m_fstream,index); }
         
         void Traverse();
         int Index( const wxString& name ) { return 0; } ;
-        int Size() { return m_fstream.size();} ;
-        wxInputStream* Item( int index ) { return m_fstream.at(index); };
+        size_t Size() { return m_fstream.size();} ;
+        wxInputStream* Item( size_t index ) { return m_fstream.at(index); }
         void Clear();
 
         ~ArchiveHandler();

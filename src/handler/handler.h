@@ -32,12 +32,12 @@ class Handler
         virtual void Open( const wxString& path) = 0;
         virtual void Traverse() = 0 ;
 
-        virtual bool IsExist( int index ) = 0;
+        virtual bool IsExist( size_t index ) = 0;
 
         virtual int Index( const wxString& name ) = 0;
-        virtual wxInputStream* Item( int index ) = 0;
+        virtual wxInputStream* Item( size_t index ) = 0;
 
-        virtual int Size() = 0;
+        virtual size_t Size() = 0;
         virtual void Clear() = 0;
 };
 

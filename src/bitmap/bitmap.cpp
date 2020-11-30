@@ -39,8 +39,8 @@ void Bitmap::SetLimit( int limit )
 
 void Bitmap::Refresh()
 {
-    int i = 0;
-    int pos = m_posFirst;
+    size_t i = 0;
+    size_t pos = m_posFirst;
 
     while( Vector::IsExist( m_itemPage, i) )
     {
@@ -79,10 +79,10 @@ bool Bitmap::IsImageOk( int pos )
     return Vector::IsExist(m_item,pos) && m_item.at(pos).IsOk(); 
 }
 
-bool Bitmap::OnMove( int& pos, int& last, int step )
+bool Bitmap::OnMove( size_t& pos, size_t& last, int step )
 {
-    int temp = pos;
-    int i = 0;
+    size_t temp = pos;
+    size_t i = 0;
     while ( i < m_limit )
     {
         if ( ! Vector::IsExist( m_item, pos + step ) )
@@ -131,7 +131,7 @@ wxVector<const SBitmap*> Bitmap::Get( const wxPoint& area, const wxSize& size ) 
 
 wxVector<SBitmap*> Bitmap::Get( const wxPoint& area, const wxSize& size )
 {
-    int i =0;
+    int i = 0;
     wxVector<SBitmap*> bmp;
     for ( auto& it : Get() )
     {
