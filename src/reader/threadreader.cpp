@@ -63,6 +63,7 @@ void Thread::Open( const wxString& path )
         LoadImage( m_curr );
     }
 
+    m_isOpened = true;
     // return if thread already running
     if ( GetThread() && GetThread()->IsRunning() ) return; 
     if ( CreateThread( wxTHREAD_JOINABLE ) != wxTHREAD_NO_ERROR )
@@ -75,6 +76,7 @@ void Thread::Open( const wxString& path )
 void Thread::Clear()
 {
     m_threadbmp = false;
+    m_isOpened = false;
     
     if ( GetThread() && GetThread()->IsRunning() )
         GetThread()->Delete();
@@ -130,6 +132,8 @@ bool Thread::LoadImage( size_t idx, bool isScroll )
 {
     if ( IsExist(idx) )
     {
+        const wxString& name = GetHandler()->ItemName(idx);
+        m_bitmap->SetName( idx, name );
         wxInputStream* stream = GetHandler()->Item(idx);
         if ( wxImage::CanRead( *stream ) )
         {
