@@ -22,12 +22,15 @@
 
 #define StringCompareFunction( name ) int name ( const wxString& s1, const wxString& s2 )
 
-bool NotEnd( const wxString& str, size_t idx ) 
-    { return idx < str.size(); }
-
 namespace Compare
 {
-    std::string GetNonZero( const std::string& str, size_t& idx, char& chr )
+    typedef wchar_t Char;
+    typedef std::wstring String;
+
+    bool NotEnd( const wxString& str, size_t idx ) 
+        { return idx < str.size(); }
+
+    std::wstring GetNonZero( const String& str, size_t& idx, Char& chr )
     {
         size_t sz = 0;
 
@@ -39,29 +42,29 @@ namespace Compare
         while ( isdigit( str[ idx + sz ] ) )
             sz++;
 
-        const std::string& tmp = str.substr(idx,sz);
+        const String& tmp = str.substr(idx,sz);
         // skip the digit
         idx += sz;
         chr = str[idx];
 
-        return ( tmp == "" ) ? "0" : tmp;
+        return ( tmp == "" ) ? L"0" : tmp;
     }
 
     StringCompareFunction( Natural ) 
     {
-        const std::string& first = s1.Lower().ToStdString();
-        const std::string& second = s2.Lower().ToStdString();
+        const String& first = s1.Lower().wx_str();
+        const String& second = s2.Lower().wx_str();
         // idx for first, pos for second;
         size_t idx = 0, pos = 0;
         while ( NotEnd( first, idx ) && NotEnd( second, pos ) )
         {
-            char fst = first[idx];
-            char scnd = second[pos];
+            Char fst = first[idx];
+            Char scnd = second[pos];
             
             if ( isdigit(fst) && isdigit(scnd) )
             {
-                const std::string& str1 = GetNonZero( first, idx, fst );
-                const std::string& str2 = GetNonZero( second, pos, scnd );
+                const String& str1 = GetNonZero( first, idx, fst );
+                const String& str2 = GetNonZero( second, pos, scnd );
 
                 // if str1's len not equal str2's len
                 // will return whether str1 more or less than str2
