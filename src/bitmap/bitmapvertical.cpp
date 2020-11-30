@@ -64,18 +64,6 @@ void BitmapVertical::Add( const wxImage& image, int idx, bool isScroll )
     Exit( idx, isScroll );
 }
 
-void BitmapVertical::CalcPosition( int idx, wxPoint& pos )
-{
-    if ( idx == 0 )
-        pos.y = 0;
-    else
-    {
-        struct SBitmap& bmp = GetAll().at( idx - 1 );
-        pos.y = bmp.GetY() + bmp.GetHeight();
-    }
-    pos.x = Centered( GetAll().at(idx).GetWidth() ) ;
-}
-
 int BitmapVertical::Centered( int width )
 {
     int clientWidth = GetParent()->GetClientSize().GetWidth();
@@ -88,11 +76,6 @@ int BitmapVertical::Centered( int width )
     
     return pos;
 }
-
-// void BitmapVertical::Refresh()
-// {
-//     Bitmap::Refresh();
-// }
 
 void BitmapVertical::RefreshPosition()
 {

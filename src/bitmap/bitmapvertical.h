@@ -40,6 +40,5 @@ class BitmapVertical
 
         int Push( struct SBitmap& bmp );
 
-        void CalcPosition( int idx, wxPoint& pos );
         int Centered( int width );
 };
