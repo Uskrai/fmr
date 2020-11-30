@@ -2,3 +2,10 @@
 build
 sample
 test/ignore
+
+config.log
+config.status
+Makefile
+.dirstamp
+autom4te.cache
+.deps
