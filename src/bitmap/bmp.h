@@ -37,8 +37,7 @@ enum BITMAP_SIZE : int
     BITMAP_FITHEIGHT    = 0x4,
     BITMAP_FITALL       = 0x8,
     BITMAP_MANUAL       = 0x10,
-
-    INVALID_BITMAP_SIZE    = 0x20
+    BITMAP_ALLOWENLARGE = 0x20,
 };
 
 struct SBitmap

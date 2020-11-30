@@ -21,11 +21,11 @@
 #include <wx/scrolwin.h>
 
 #define SizeFlagFilter( flag, func )    \
-    if ( flags & flag )                 \
-        return func( img, parent, parentscl );
+    if ( flag & flags )                   \
+        return func( img, flags, parent, scale );
 
 #define SizeFunc( name )                \
-    float name( wxImage &img, wxScrolledWindow *parent, int scale )
+    float name( wxImage &img, int flags, wxScrolledWindow *parent, int scale )
 
 namespace Size
 {
@@ -34,7 +34,7 @@ namespace Size
     SizeFunc( FitWidth );
     SizeFunc( FitHeight );
 
-    float Prepare( wxImage &img, int flags, wxScrolledWindow *parent, int parentscl )
+    float Prepare( wxImage &img, int flags, wxScrolledWindow *parent, int scale )
     {
         SizeFlagFilter( BITMAP_ORIGINAL, Original)
         else SizeFlagFilter( BITMAP_FITALL, FitAll )

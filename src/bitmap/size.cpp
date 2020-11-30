@@ -32,17 +32,23 @@ namespace Size
 {
     SizeFunc( FitWidth )
     {
-        parent->ShowScrollbars( wxSHOW_SB_DEFAULT , wxSHOW_SB_ALWAYS);
         FitOneSide(x,y)
-        img.Rescale( size.x, imgsz.y * scl );
-        return scl;
+        if ( size.GetWidth() < img.GetWidth() || ( flags & BITMAP_ALLOWENLARGE ) )
+        {
+            img.Rescale( size.x, imgsz.y * scl );
+            return scl;
+        }
+        return 1;
     }
 
     SizeFunc ( FitHeight )
     {
-        parent->ShowScrollbars( wxSHOW_SB_ALWAYS, wxSHOW_SB_DEFAULT );
         FitOneSide(y,x);
-        img.Rescale( imgsz.x * scl, size.y );
+        if ( size.GetHeight() < img.GetWidth() || flags & BITMAP_ALLOWENLARGE )
+        {
+            img.Rescale( imgsz.x * scl, size.y );
+            return scl;
+        }
         return scl;
     }
     
@@ -51,8 +57,8 @@ namespace Size
         wxSize imgsz = img.GetSize();
 
         if ( imgsz.GetHeight() < img.GetWidth() )
-            return FitWidth( img, parent, scale );
+            return FitWidth( img, flags, parent, scale);
         else 
-            return FitHeight( img, parent, scale );
+            return FitHeight( img, flags, parent, scale );
     }     
 };
