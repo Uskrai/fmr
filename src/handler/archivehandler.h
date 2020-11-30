@@ -55,7 +55,7 @@ class ArchiveHandler
 
         Handler* m_parent;
 
-        wxString m_filename;
+        wxString m_name;
         wxString m_parentName;
 
         wxArrayString m_files;
