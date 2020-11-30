@@ -63,8 +63,8 @@ void Thread::Open( const wxString& path )
     {
         LoadImage( m_curr );
     }
+    m_parent->Refresh();
 
-    m_isOpened = true;
     // return if thread already running
     if ( GetThread() && GetThread()->IsRunning() ) return; 
     if ( CreateThread( wxTHREAD_JOINABLE ) != wxTHREAD_NO_ERROR )
@@ -72,6 +72,7 @@ void Thread::Open( const wxString& path )
         return;
     }
     GetThread()->Run();
+    m_parent->Scroll(0,0);
 }
 
 void Thread::Clear()
@@ -168,19 +169,21 @@ void Thread::BitmapThread( bool& isDestroyed, size_t curr )
     //     LoadImage( curr );
     // }
 
+        #define LoadImg( idx, step )                    \
+        if ( !isDestroyed && IsExist(idx) )             \
+        {                                               \
+            LoadImage( idx );                           \
+            idx += step;                                \
+        }
     while ( !isDestroyed && ( IsExist(prev) || IsExist(next) ) )
     {
-        if ( !isDestroyed && IsExist(next) )
-        {
-            LoadImage( next++ );
-        }
-        if ( !isDestroyed && IsExist(prev) )
-        {
-            LoadImage( prev--, true );
-        }
+        m_isOpened = true;
+        LoadImg( next, 1 )
+        LoadImg( prev, -1 )
 
         if ( ( !IsExist(next) && !IsExist(prev) ) ) break;
     }
+    m_isOpened = true;
 }
 
 } // namespace reader
