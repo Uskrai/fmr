@@ -61,4 +61,15 @@ namespace Size
         else 
             return FitHeight( img, flags, parent, scale );
     }     
+    
+    SizeFunc ( Prepare )
+    {
+        SizeFlagFilter( BITMAP_ORIGINAL, Original)
+        else SizeFlagFilter( BITMAP_FITALL, FitAll )
+        else SizeFlagFilter( BITMAP_FITWIDTH, FitWidth )
+        else SizeFlagFilter( BITMAP_FITHEIGHT, FitHeight )
+        return 0;
+    }
+
+  
 };

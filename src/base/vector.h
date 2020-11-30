@@ -24,12 +24,12 @@
 namespace Vector
 {
     template< typename T>
-    bool IsExist( const wxVector<T>& vec, size_t idx )
+    inline bool IsExist( const wxVector<T>& vec, size_t idx )
     {
         return idx < vec.size();
     }
 
-    bool IsExist( const wxArrayString vec, size_t idx )
+    inline bool IsExist( const wxArrayString vec, size_t idx )
     {
         return idx < vec.size();
     }

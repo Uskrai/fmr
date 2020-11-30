@@ -29,19 +29,12 @@
 
 namespace Size
 {
-    SizeFunc( Original ) { return 1;};
+    inline SizeFunc( Original ) { return 1;};
     SizeFunc( FitAll );
     SizeFunc( FitWidth );
     SizeFunc( FitHeight );
 
-    float Prepare( wxImage &img, int flags, wxScrolledWindow *parent, int scale )
-    {
-        SizeFlagFilter( BITMAP_ORIGINAL, Original)
-        else SizeFlagFilter( BITMAP_FITALL, FitAll )
-        else SizeFlagFilter( BITMAP_FITWIDTH, FitWidth )
-        else SizeFlagFilter( BITMAP_FITHEIGHT, FitHeight )
-        return 0;
-    }
+    SizeFunc ( Prepare );
 };
 
 #endif
