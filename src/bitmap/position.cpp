@@ -24,14 +24,23 @@
         wxScrolledWindow *parent  )
 
 
-#define PositionFunc( pos, dimension )              \
-        int pos = 0, temp = 0;                      \
+#define PositionFunc( coord, dimension )            \
+        size_t dimension = 0, pos = 0, temp = 0;    \
+        size_t prnt = 0;                            \
+        prnt = parent->GetVirtualSize().            \
+                Get ## dimension();                 \
+        for ( const auto& it : vec )                \
+            dimension += it->Get ## dimension();    \
+                                                    \
+        if (dimension < prnt)                       \
+            pos = ( prnt - dimension ) / 2;         \
+                                                    \
         for ( auto& it : vec )                      \
         {                                           \
             if ( it->IsOk() )                       \
             {                                       \
-                it->Set ## pos ( pos + temp );      \
-                pos = it->Get  ## pos ();           \
+                it->Set ## coord ( pos + temp );    \
+                pos = it->Get  ## coord ();         \
                 temp = it->Get ## dimension ();     \
             }                                       \
         }                                           
