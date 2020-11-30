@@ -95,14 +95,6 @@ void Frame::SetPanel()
     this->sizer->Add( this->panel, 1, wxALL );
 }
 
-// void Frame::loadImage(wxString path)
-//{
-//    this->sizer->Clear();
-//    this->sizer->SetOrientation( wxVERTICAL );
-//    this->reader->loadImage(path);
-//    this->SendSizeEvent();
-//}
-
 void Frame::OnExit(wxCommandEvent& event)
 {
     Close( true );
