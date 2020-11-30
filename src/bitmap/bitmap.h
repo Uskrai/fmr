@@ -24,7 +24,7 @@ class Bitmap
     public:
         Bitmap( wxScrolledWindow* parent );
         ~Bitmap();
-        void Add( wxImage& image, int pos );
+        void Add( wxImage& image, size_t idx );
 
         void SetName( size_t idx, wxString name )
             { GetAll()[idx].SetName(name); }
