@@ -17,15 +17,30 @@
 
 #include "app.h"
 
-
 wxIMPLEMENT_APP(App);
 
 bool App::OnInit()
 {
     wxInitAllImageHandlers();
+
+    this->config =  new Config
+                    (  
+                        wxEmptyString,
+                        wxEmptyString,
+                        wxPathOnly (wxStandardPaths::Get().GetExecutablePath() ) +
+                        wxFileName::GetPathSeparator() +
+                        wxString("config.ini") 
+                    );
+    Config::Set ( this->config );
     wxRect screen = wxDisplay().GetClientArea();
     App::frame = new Frame("FMR",wxPoint(0,0),wxSize(screen.GetWidth(),screen.GetHeight()),wxDEFAULT_FRAME_STYLE);
     App::frame->Maximize(true);
     App::frame->Show(true);
     return true;
+}
+
+int App::OnExit()
+{
+    delete this->config;
+    return 0;
 }
