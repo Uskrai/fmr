@@ -19,7 +19,6 @@
 
 #include "handler/defaulthandler.h"
 #include "handler/archivehandler.h"
-#include <iostream>
 
 HandlerType HandlerFactory::GetType()
 {
@@ -31,7 +30,6 @@ bool HandlerFactory::Is( const wxString& path1, const wxString& path2)
     HandlerType type1, type2;
     Find( path1, type1 );
     Find( path2, type2 );
-    std::cout << path1 << '\n' << path2 << '\n';
     return type1 == type2;
 }
 

@@ -38,9 +38,8 @@ class Window : public wxScrolledWindow
     public:
         Window( wxWindow* parent, wxSize size );
         ~Window();
-        void Open( wxString path );
+        void Open( const wxString& path );
 
-        void ChangeFolder( const wxString& path );
         void Next();
         void Prev();
 
