@@ -22,6 +22,8 @@
 // #include <wx/wfstream.h>
 
 #include "handler/handler.h"
+#include <wx/dir.h>
+#include <wx/filename.h>
 
 class wxDir;
 
@@ -29,31 +31,34 @@ class DefaultHandler
     : public Handler
 {
     public:
-        DefaultHandler() {} ;
-        DefaultHandler( const wxString& string );
+        DefaultHandler(){}
+        DefaultHandler( const wxString& path );
         ~DefaultHandler();
+        void Open( const wxString& path );
+        void Traverse( );
 
-        void Open ( const wxString& string );
-        void Traverse();
+        int Index( const wxString& name );
+        int IndexFilename( wxString path ) { return this->Index(  path.AfterLast( wxFileName::GetPathSeparator() )  ); }
+        wxInputStream* Item( int index ) { return this->fstream.at(index); }
+        int Size() { return this->files.size(); }
 
-        bool IsExist( int idx );
-
-        int Index( const wxString& path );
-        wxInputStream* Item( int idx ) { return stream.at(idx); };
-
-        int Size() { return stream.size(); };
+        bool IsExist( int index );
 
         void Clear();
 
-        static bool CanHandle ( const wxString& path ) { return true; }
-
-   private:
-        wxString filename;
+        static bool CanHandle( wxString path ) { return true; }
+        static void GetAllFiles( const wxString& path, wxVector<wxInputStream*>& stream );
         
-        void GetAllFiles( wxDir& dir, bool& cont, wxString& filename, wxArrayString& array  );
-        void GetAllFiles( const wxString& path, wxVector<wxInputStream*>& stream );
+    private:
 
-        wxVector<wxInputStream*> stream;
+        wxVector<wxInputStream*> fstream;
+        int type;
+        wxString filename;
+        wxArrayString files;
+        wxArrayString directory;
+        wxDir dir;
+        
+        void GetAllFiles( wxDir& dir, bool& cont, wxString& filename, wxArrayString& array);
 
 };
 

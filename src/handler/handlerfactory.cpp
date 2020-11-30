@@ -17,7 +17,7 @@
 
 #include "handler/handlerfactory.h"
 
-#include "handler/filehandler.h"
+#include "handler/defaulthandler.h"
 #include "handler/archivehandler.h"
 
 HandlerType HandlerFactory::GetType()
@@ -38,9 +38,9 @@ bool HandlerFactory::Find( const wxString& path, HandlerType& type )
         return true;
     }
 
-    if ( FileHandler::CanHandle(path) )
+    if ( DefaultHandler::CanHandle(path) )
     {
-        m_type = File;
+        m_type = Default;
         return true;
     }
     return false;
@@ -62,8 +62,8 @@ Handler* HandlerFactory::NewHandler( const HandlerType& type )
     {
         case Archive:
             return new ArchiveHandler();
-        case File:
-            return new FileHandler();
+        case Default:
+            return new DefaultHandler();
         default:
             return NULL;
     }
