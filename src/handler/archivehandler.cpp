@@ -21,7 +21,7 @@
 
 ArchiveHandler::ArchiveHandler( const wxString& path )
 {
-    this->Open( path );
+    Open( path );
 }
 
 void ArchiveHandler::Open( const wxString& path )
@@ -53,7 +53,7 @@ void ArchiveHandler::Traverse()
 
     const wxArchiveClassFactory* factory;
 
-    this->Find( path, factory, instream );
+    Find( path, factory, instream );
 
     wxArchiveInputStream* stream = factory->NewStream( instream );
     wxArchiveEntry* entry;
@@ -141,5 +141,5 @@ void ArchiveHandler::Clear()
 
 ArchiveHandler::~ArchiveHandler()
 {
-    this->Clear();
+    Clear();
 }
