@@ -20,6 +20,7 @@
 
 #include <wx/dir.h>
 #include <wx/filename.h>
+#include <wx/wfstream.h>
 
 class Traverser :
     public wxDirTraverser
@@ -28,7 +29,7 @@ class Traverser :
         void Open( wxString path );
         int Index( wxString name ) { return this->files.Index( name.AfterLast( wxFileName::GetPathSeparator() ) ); }
         int IndexFilename( wxString path ) { return this->Index(  path.AfterLast( wxFileName::GetPathSeparator() )  ); }
-        wxString Item( int index ) { return this->dir->GetNameWithSep() + this->files.Item(index); }
+        wxInputStream* Item( int index ) { return this->fstream.at(index); }
         int Size() { return this->files.size(); }
         bool IsExist(int index ) { return index > 0 && index < int(this->files.size()) ;}
     
@@ -37,6 +38,7 @@ class Traverser :
         wxDirTraverseResult OnFile( const wxString& name );
         wxDirTraverseResult OnOpenError( const wxString& name );
        
+        wxVector<wxFileStream*> fstream;
         wxArrayString files;
         wxArrayString directory;
         wxDir* dir = new wxDir();

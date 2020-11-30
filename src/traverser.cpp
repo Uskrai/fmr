@@ -22,6 +22,11 @@ void Traverser::Open( wxString path )
     this->dir->Open( wxPathOnly(path) );
     this->dir->Traverse(*(this) );
     this->files.Sort( wxCmpNaturalGeneric );
+    for ( const auto& it : this->files )
+    {
+        wxFileStream* strm = new wxFileStream( this->dir->GetNameWithSep() + it);
+        this->fstream.push_back( strm );
+    }
 }
 
 wxDirTraverseResult Traverser::OnDir( const wxString& name )
