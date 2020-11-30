@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BITMAP
-#define BITMAP
+#ifndef BITMAP_BMP
+#define BITMAP_BMP
 
 #include <wx/bitmap.h>
 
