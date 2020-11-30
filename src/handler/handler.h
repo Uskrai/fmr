@@ -34,6 +34,7 @@ class Handler
 
         // return opened path
         virtual wxString GetName() = 0;
+        virtual wxString GetFromCurrent( int step ) = 0;
         // return next or prev folder / file
         virtual wxString GetNext() = 0;
         virtual wxString GetPrev() = 0;
@@ -45,9 +46,11 @@ class Handler
         virtual bool IsExist( size_t index ) = 0;
 
         // search from files
-        // Index and Item should 
-        // return name and stream respectively
+        // Index, ItemName, and Item should 
+        // return pos, filename, and stream respectively
         virtual size_t Index( const wxString& name ) = 0;
+
+        virtual wxString ItemName( size_t idx ) = 0;
         // return files stream;
         virtual wxInputStream* Item( size_t index ) = 0;
 

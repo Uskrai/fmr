@@ -66,14 +66,14 @@ void Bitmap::Refresh()
     RefreshPosition();
 }
 
-bool Bitmap::Next()
+bool Bitmap::NextPage()
 {
-    return OnMove( m_posFirst, m_posLast, 1 );
+    return ChangePage( 1 );
 }
 
-bool Bitmap::Prev()
+bool Bitmap::PrevPage()
 {
-    return OnMove( m_posFirst,m_posFirst, -1 );
+    return ChangePage( -1 );
 }
 
 bool Bitmap::IsImageOk( int pos )
@@ -81,8 +81,10 @@ bool Bitmap::IsImageOk( int pos )
     return Vector::IsExist(m_item,pos) && m_item.at(pos).IsOk(); 
 }
 
-bool Bitmap::OnMove( size_t& pos, size_t& last, int step )
+bool Bitmap::ChangePage( int step )
 {
+    size_t &pos = m_posFirst;
+
     size_t temp = pos;
     size_t i = 0;
     while ( i < m_limit )
@@ -92,9 +94,15 @@ bool Bitmap::OnMove( size_t& pos, size_t& last, int step )
 
         if ( IsImageOk( pos )  )
             i++;
+
         pos += step;
     }
+    while ( !IsImageOk( pos ) )
+        pos++;
+
     Refresh();
+    if ( i == 0 )
+        return false;
     return temp != pos;
 }
 
