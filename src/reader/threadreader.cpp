@@ -139,8 +139,6 @@ bool Thread::LoadImage( size_t idx, bool isScroll )
         {
             wxImage img = wxImage(stream);
             m_bitmap->Add( img, idx );
-            m_bitmap->Refresh();
-            m_bitmap->RefreshPosition();
             return true;
         }
     }

@@ -17,6 +17,7 @@
 
 #include "bitmap/bitmap.h"
 #include "bitmap/position.h"
+#include "bitmap/size.h"
 
 #include <wx/scrolwin.h>
 
@@ -105,16 +106,15 @@ void Bitmap::Prepare( const wxImage& image, int pos, struct SBitmap& bmp )
     bmp.SetBitmap( wxBitmap(image) );
 }
 
-void Bitmap::Add( const wxImage& image, int idx )
+void Bitmap::Add( wxImage& image, int idx )
 {
+    Size::Prepare( image, m_flagSize, m_parent, m_scaleParent );
     struct SBitmap& bmp = m_item.at(idx);
     bmp.SetBitmap( wxBitmap( image ) );
     
     m_maxWidth = ( bmp.GetWidth() > m_maxWidth ) ? bmp.GetWidth() : m_maxWidth;
     
-    RefreshPosition();
-    
-    RefreshSize();
+    Refresh();
     GetParent()->Refresh();
 }
 
@@ -188,5 +188,4 @@ void Bitmap::Clear()
     }
     m_posFirst = 0;
     GetAll().clear();
-    Refresh();
 }

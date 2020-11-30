@@ -82,6 +82,7 @@ void Window::Open( const wxString& path )
         GetFileHandler( !GetHandler() )
         else GetFileHandler( !m_factory->Is( GetHandler()->GetName(),path) )
 
+        SetVirtualSize( GetClientSize() + wxSize(1,0) );
 
         ReloadConfig();
         m_thread->SetHandler( GetHandler() );
@@ -89,15 +90,15 @@ void Window::Open( const wxString& path )
         m_config->Write("RecentlyOpened", path );
         m_thread->Open( path );
         Scroll(0,0);
-        
     }
 }
 
 void Window::ReloadConfig()
 {
+    int scale = ConfRead("ImageScaleFromOriginal", 100 );
     long pos = ConfRead("ImagePosition", long(BITMAP_VERTICAL | BITMAP_CENTERED) );
     long size = ConfRead("ImageSize", long(BITMAP_ORIGINAL) );
-    m_bitmap->SetFlags(pos,size);
+    m_bitmap->SetFlags(pos,size,scale);
     m_config->Flush();
 }
 
