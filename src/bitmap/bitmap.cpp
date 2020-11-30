@@ -16,6 +16,8 @@
  */
 
 #include "bitmap/bitmap.h"
+#include "bitmap/position.h"
+
 #include <wx/scrolwin.h>
 
 SBitmap G_BITMAP;
@@ -149,17 +151,18 @@ int Bitmap::Centered( int width )
 
 void Bitmap::RefreshPosition()
 {
-    int y = 0, tempheight = 0;
-    for ( auto& it : Get() )
-    {
-        if ( it->IsOk() )
-        {
-            it->SetY( y + tempheight );
-            y = it->GetY();
-            tempheight = it->GetHeight();            
-            it->SetX( Centered( it->GetWidth() ) );
-        }
-    }
+    Position::Refresh( Get(), m_flagPosition, m_parent );
+    // int y = 0, tempheight = 0;
+    // for ( auto& it : Get() )
+    // {
+    //     if ( it->IsOk() )
+    //     {
+    //         it->SetY( y + tempheight );
+    //         y = it->GetY();
+    //         tempheight = it->GetHeight();            
+    //         it->SetX( Centered( it->GetWidth() ) );
+    //     }
+    // }
 }
 
 void Bitmap::RefreshSize()

@@ -28,6 +28,13 @@ class Bitmap
 
         void SetName( size_t idx, wxString name )
             { GetAll()[idx].SetName(name); }
+
+        void SetFlags( int posFlags, int sizeFlags )
+            { SetPosition(posFlags);SetSize(sizeFlags);}
+        void SetSize( int flags ) 
+            { m_flagSize = flags; }
+        void SetPosition( int flags ) 
+            { m_flagPosition = flags; }
             
         void SetLimit( size_t limit );
         void Clear();
@@ -58,6 +65,7 @@ class Bitmap
         size_t m_limit = 1;
         size_t m_posFirst = 0 , m_posLast = 0;
 
+        int m_flagSize, m_flagPosition;
         int m_maxWidth, m_maxHeight;
 
         wxScrolledWindow* GetParent() { return m_parent; }

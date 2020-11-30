@@ -20,6 +20,27 @@
 
 #include <wx/bitmap.h>
 
+enum BITMAP_POSITION : int
+{
+    BITMAP_VERTICAL     = 0x1,
+    BITMAP_WEBTOON      = 0x2,
+    BITMAP_HORIZONTAL   = 0x4,
+    BITMAP_CENTERED     = 0x8,
+    
+    INVALID_BITMAP_POSITION = 0x10
+};
+
+enum BITMAP_SIZE : int
+{
+    BITMAP_ORIGINAL     = 0x1,
+    BITMAP_FITWIDTH     = 0x2,
+    BITMAP_FITHEIGHT    = 0x4,
+    BITMAP_FITALL       = 0x8,
+    BITMAP_MANUAL       = 0x10,
+
+    INVALID_BITMAP_SIZE    = 0x20
+};
+
 struct SBitmap
 {
     wxBitmap m_item = wxBitmap( wxSize(1,1) );

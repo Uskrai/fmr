@@ -71,7 +71,7 @@ void Window::Open( const wxString& path )
     {
         Clear(); 
 
-#define GetFileHandler( con )                           \
+        #define GetFileHandler( con )                   \
         if ( con )                                      \
         {                                               \
             m_factory->Find( path );                    \
@@ -82,13 +82,23 @@ void Window::Open( const wxString& path )
         GetFileHandler( !GetHandler() )
         else GetFileHandler( !m_factory->Is( GetHandler()->GetName(),path) )
 
+
+        ReloadConfig();
         m_thread->SetHandler( GetHandler() );
 
+        m_config->Write("RecentlyOpened", path );
         m_thread->Open( path );
         Scroll(0,0);
-        m_config->Write("RecentlyOpened", path );
-        m_config->Flush();
+        
     }
+}
+
+void Window::ReloadConfig()
+{
+    long pos = ConfRead("ImagePosition", long(BITMAP_VERTICAL | BITMAP_CENTERED) );
+    long size = ConfRead("ImageSize", long(BITMAP_ORIGINAL) );
+    m_bitmap->SetFlags(pos,size);
+    m_config->Flush();
 }
 
 void Window::ChangeFolder( int step )
