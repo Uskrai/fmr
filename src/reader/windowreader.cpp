@@ -88,9 +88,14 @@ void Window::Open( const wxString& path )
         m_thread->Open( path );
         Scroll(0,0);
         m_config->Write("RecentlyOpened", path );
+        m_config->Flush();
     }
 }
 
+void Window::ChangeFolder( int step )
+{
+    Open ( m_fileHandler->GetFromCurrent( step ) );
+}
 void Window::Next() { Open( m_thread->GetHandler()->GetNext()); }
 void Window::Prev() { Open( m_thread->GetHandler()->GetPrev()); }
 
@@ -187,27 +192,40 @@ void Window::OnArrow( wxOrientation orient, int modifier, bool isInstant )
 
 void Window::OnEdge( int modifier, bool isInstant )
 {
+
+    if ( !m_thread->IsOpened() ) return;
+    
     size_t conf = ConfRead("ClickBeforeChangePage",1);
-    if ( modifier > 0 )
+
+
+    if ( m_onEdge > conf || isInstant )
     {
-        if ( m_onEdge > conf || isInstant )
-        {
-            m_onEdge = 0;
-            if ( m_bitmap->Next() )
-                Scroll(0,0);
-            else Next();
-        }
+        Scroll(0,0);
+        m_onEdge = 0;
+        if ( m_bitmap->ChangePage(modifier) );
+        else ChangeFolder(modifier);
     }
-    else if ( modifier < 0 )
-    {
-        if ( m_onEdge > conf || isInstant )
-        {
-            m_onEdge = 0;
-            if ( m_bitmap->Prev() )
-                Scroll( 0, GetVirtualSize().GetHeight() );
-            else Prev();
-        }
-    }
+
+    // if ( modifier > 0 )
+    // {
+    //     if ( m_onEdge > conf || isInstant )
+    //     {
+    //         m_onEdge = 0;
+    //         if ( m_bitmap->Next() )
+    //             Scroll(0,0);
+    //         else Next();
+    //     }
+    // }
+    // else if ( modifier < 0 )
+    // {
+    //     if ( m_onEdge > conf || isInstant )
+    //     {
+    //         m_onEdge = 0;
+    //         if ( m_bitmap->Prev() )
+    //             Scroll( 0, GetVirtualSize().GetHeight() );
+    //         else Prev();
+    //     }
+    // }
 }
 
 void Window::OnMouseMotion( wxMouseEvent& event )
