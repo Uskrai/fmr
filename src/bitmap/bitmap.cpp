@@ -70,16 +70,14 @@ bool Bitmap::ChangePage( int step )
     size_t i = 0;
     while ( i < m_limit )
     {
-        if ( ! Vector::IsExist( m_item, pos + step ) )
-            break;
+        if ( ! Vector::IsExist( m_item, pos ) )
+            return false;
 
         if ( IsImageOk( pos )  )
             i++;
 
         pos += step;
     }
-    while ( !IsImageOk( pos ) )
-        pos += -(step);
 
     Refresh();
     if ( i == 0 )
