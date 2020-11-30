@@ -37,13 +37,19 @@ void ArchiveHandler::Open( const wxString& path )
     }
 }
 
+size_t ArchiveHandler::Index( const wxString& name )
+{
+    if ( name == m_name ) return 0;
+    return m_files.Index(name);
+}
+
 wxString ArchiveHandler::GetFromCurrent( int i )
 {
     if ( GetParent() )
     {
-        wxArrayString names = GetParent()->GetChild();
+        wxArrayString& names = GetParent()->GetChild();
         size_t idx = names.Index( Path::GetName( GetName() ));
-        if ( idx != size_t(-1) )
+        if ( idx != size_t(-1) && Vector::IsExist(names, idx + i ) )
             return GetParent()->GetName() + names.Item( idx + i );
     }
 

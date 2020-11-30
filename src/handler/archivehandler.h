@@ -24,6 +24,7 @@
 #include <wx/wfstream.h>
 #include <wx/mstream.h>
 #include "base/vector.h"
+#include "base/path.h"
 
 class ArchiveHandler 
     : public Handler
@@ -46,7 +47,7 @@ class ArchiveHandler
             { return Vector::IsExist(m_fstream,index); }
         
         void Traverse();
-        size_t Index( const wxString& name ) { return m_files.Index(name); } ;
+        size_t Index( const wxString& name );
         size_t Size() { return m_fstream.size();} ;
 
         wxString ItemName( size_t idx ) { return m_files.Item(idx); }
