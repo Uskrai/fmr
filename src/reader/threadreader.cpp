@@ -39,7 +39,6 @@ Thread::~Thread()
 
 void Thread::SetHandler( Handler* handler )
 {
-    if ( m_handler ) delete m_handler;
     m_handler = handler;
 }
 
@@ -64,11 +63,6 @@ void Thread::Clear()
     if ( GetThread() && GetThread()->IsRunning() )
         GetThread()->Delete();
 
-    if ( m_handler )
-    {
-        delete m_handler;
-        m_handler = NULL;
-    }
     m_bitmap->Clear();
 }
 

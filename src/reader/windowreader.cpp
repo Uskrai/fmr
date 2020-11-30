@@ -69,10 +69,22 @@ void Window::Open( wxString path )
 {
     Clear(); 
 
-    m_factory->Find( path );
-    m_thread->SetHandler( m_factory->NewHandler() );
+    if ( !GetHandler() )
+    {
+        m_factory->Find( path );
+        m_fileHandler = m_factory->NewHandler();
+    }
+    else if ( !m_factory->Is( GetHandler()->GetName(),path) )
+    {
+        m_factory->Find(path);
+        m_fileHandler = m_factory->NewHandler();
+    }
+
+
+    m_thread->SetHandler( GetHandler() );
 
     m_thread->Open( path );
+    m_config->Write("RecentlyOpened", path );
 }
 
 void Window::ChangeFolder( const wxString& path )
@@ -175,27 +187,34 @@ void Window::OnArrow( wxOrientation orient, int modifier )
         default:
             break;
     }
-    // printf("%d\n", GetViewStart().y );
     if ( view == GetViewStart() )
     {
+        m_onEdge++;
         OnEdge( modifier );
-    }
+    } else m_onEdge = 0;
 } 
 
 void Window::OnEdge( int modifier )
 {
+    size_t conf = ConfRead("ClickBeforeChangePage",1);
     if ( modifier > 0 )
     {
-        if ( m_bitmap->Next() )
-            Scroll(0,0);
-        else Next();
-        
+        if ( m_onEdge > conf )
+        {
+            m_onEdge = 0;
+            if ( m_bitmap->Next() )
+                Scroll(0,0);
+            else Next();
+        }
     }
     else if ( modifier < 0 )
     {
-        if ( m_bitmap->Prev() )
-            Scroll( 0, GetVirtualSize().GetHeight() );
-        else Prev();
+        if ( m_onEdge > conf )
+        {
+            m_onEdge = 0;
+            if ( m_bitmap->Prev() )
+                Scroll( 0, GetVirtualSize().GetHeight() );
+        }
     }
 }
 
