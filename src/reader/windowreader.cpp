@@ -153,11 +153,11 @@ void Window::OnKeyDown( wxKeyEvent& event )
     {
         case WXK_UP:
             if ( ! OnArrow( wxVERTICAL, modVer * 1 ) )
-                Scroll(0,0);
+                Scroll(0, GetVirtualSize().GetHeight());
             break;
         case WXK_DOWN:
             if ( ! OnArrow( wxVERTICAL, modVer * -1 ) )
-                Scroll(0, GetVirtualSize().GetHeight());
+                Scroll(0,0); 
             break;
         case WXK_LEFT:
             if ( ! OnArrow( wxHORIZONTAL, modHor * 1, isInstant ) )
