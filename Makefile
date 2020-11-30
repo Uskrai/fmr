@@ -81,16 +81,17 @@ $(addprefix build/, $(so) ) : build/%.$(soext): %.o
 
 # $(obj) : FLAGS := $(CXXFLAGS) $(wxFLAGS)
 
-bitmap/bitmapvertical.o : bitmap/bmp.h
+(filter-out $(addprefix bitmap/, bmp.o bitmap.o), $(bitmap) : $(addprefix bitmap, bmp.h bitmap.h)
+bitmap/bitmapvertical.o : bitmap/bmp.h bitmap/bitmap.h
 handler/handler.o 	: handler/defaulthandler.h handler/archivehandler.h
-reader/threadreader,o	: handler/handler.h 
-reader/windowreader.o 	: bitmap/bitmapvertical.h 
+reader/threadreader.o	: $(addprefix handler/, $(addsuffix .h, $(handler) ) ) bitmap/bitmap.h
+reader/windowreader.o 	: bitmap/bitmap.h bitmap/bitmapvertical.h
 gui/panel.o : reader/windowreader.h 
 gui/frame.o : gui/panel.h
 main/app.o : gui/frame.h
 
 $(filter-out config.o, $(obj) ) : base/config.h
-$(addsuffix .o, $(addprefix handler/, $(handler) ) ) : base/path.h
+$(addsuffix .o, $(addprefix handler/, $(handler) ) ) : base/path.h base/vector.h
 obj : $(obj)
 
 $(addprefix build/, $(obj) ): build/%.o : %.cpp %.h 
