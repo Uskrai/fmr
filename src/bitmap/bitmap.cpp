@@ -55,12 +55,12 @@ void Bitmap::Refresh()
     m_posLast = pos;
 }
 
-bool Bitmap::ChangePage( int step )
+BITMAP_PAGES Bitmap::ChangePage( int step )
 {
     // wont change image if there is an image that is not loaded
     for ( const auto& it : Get() )
         if ( ! it->IsLoaded() )
-            return true;
+            return BITMAP_NOTLOADED;
 
     size_t &pos = m_posFirst;
 
@@ -87,9 +87,11 @@ bool Bitmap::ChangePage( int step )
         RefreshSize();
         RefreshPosition();
         GetParent()->Refresh();
+        return BITMAP_CHANGEPAGE;
     }
 
-    return isChanged;
+    return BITMAP_ENDOFPAGE;
+
 }
 
 void Bitmap::Resize( size_t limit )

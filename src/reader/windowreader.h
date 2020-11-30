@@ -22,6 +22,8 @@
 #include <wx/scrolwin.h>
 #include "base/range.h"
 
+#include "bitmap/bitmap.h"
+
 class Config;
 class Bitmap;
 class Handler;
@@ -70,15 +72,14 @@ class Window : public wxScrolledWindow
         void OnDraw( wxDC& dc );
         wxDECLARE_EVENT_TABLE();
         void OnMouseMotion( wxMouseEvent& event );
-        wxPoint m_mousePosition;
         void OnMouseWheel( wxMouseEvent& event );
         void OnKeyDown( wxKeyEvent& event );
         
         // return is ViewStart Changed 
-        bool OnArrow( wxOrientation orient, int modifier, bool isInstant = false);
+        BITMAP_PAGES OnArrow( wxOrientation orient, int modifier, bool isInstant = false);
         size_t m_onEdge;
         // return is Change Folder
-        bool OnEdge( int modifier, bool isInstant = false );
+        BITMAP_PAGES OnEdge( int modifier, bool isInstant = false );
 };
 
 };

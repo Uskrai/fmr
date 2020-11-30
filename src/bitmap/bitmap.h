@@ -16,6 +16,7 @@
  */
 
 #ifndef FMR_BITMAP_BITMAP
+#define FMR_BITMAP_BITMAP
 
 #include "base/vector.h"
 #include "bitmap/bmp.h"
@@ -49,7 +50,7 @@ class Bitmap
         void RefreshPosition( );
         void RefreshSize( );
 
-        bool ChangePage( int step );
+        BITMAP_PAGES ChangePage( int step );
         bool IsImageOk( int pos );
         void MarkLoaded( size_t idx );
         bool NextPage();

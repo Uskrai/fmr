@@ -159,7 +159,6 @@ void Window::OnMouseWheel( wxMouseEvent& event )
         else
             Scroll(0,GetVirtualSize().GetHeight());
     }
-    // event.Skip();
 }
 
 void Window::OnKeyDown( wxKeyEvent& event )
@@ -197,11 +196,10 @@ void Window::OnKeyDown( wxKeyEvent& event )
     }
 }
 
-bool Window::OnArrow( wxOrientation orient, int modifier, bool isInstant )
+BITMAP_PAGES Window::OnArrow( wxOrientation orient, int modifier, bool isInstant )
 {
-    if ( !m_thread->IsOpened() ) return true;
+    if ( !m_thread->IsOpened() || modifier == 0 ) return BITMAP_NOTCHANGED;
     
-    modifier = ( modifier > -1 ) ? 1 : -1;
     const wxPoint& view = GetViewStart();
     int step = ConfRead("ScrollStep", 300 );
     switch ( orient )
@@ -219,11 +217,13 @@ bool Window::OnArrow( wxOrientation orient, int modifier, bool isInstant )
     {
         m_onEdge++;
         return OnEdge( modifier, isInstant );
-    } else m_onEdge = 0;
-    return true;
+    } 
+    m_onEdge = 0;
+    
+    return BITMAP_NOTCHANGED;
 } 
 
-bool Window::OnEdge( int modifier, bool isInstant )
+BITMAP_PAGES Window::OnEdge( int modifier, bool isInstant )
 {
 
     size_t conf = ConfRead("ClickBeforeChangePage",1);
@@ -234,12 +234,12 @@ bool Window::OnEdge( int modifier, bool isInstant )
         m_onEdge = 0;
         bool isChangePage = m_bitmap->ChangePage(modifier);
 
-        if ( !isChangePage )
+        if ( status == BITMAP_ENDOFPAGE )
             ChangeFolder(modifier);
             
-        return !isChangePage;
+        return status;
     }
-    return true;
+    return BITMAP_NOTCHANGED;
 
 }
 
