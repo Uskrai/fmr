@@ -161,14 +161,18 @@ void Bitmap::RefreshPosition()
 void Bitmap::RefreshSize()
 {
     wxSize size;
+    m_parent->ShowScrollbars( wxSHOW_SB_ALWAYS, wxSHOW_SB_ALWAYS );
     for ( const auto& it : Get() )
     {
         if ( it->IsOk() )
         {
-            size.SetHeight( it->GetHeight() + size.GetHeight() );
-            size.SetWidth( size.GetWidth() > it->GetWidth() ? size.GetWidth() : it->GetWidth() );
+            if ( ! (m_flagSize & BITMAP_FITHEIGHT) )
+                size.SetHeight( it->GetHeight() + size.GetHeight() );
+            if ( ! (m_flagSize & BITMAP_FITWIDTH ) )
+                size.SetWidth( size.GetWidth() > it->GetWidth() ? size.GetWidth() : it->GetWidth() );
         }
     }
+    m_parent->ShowScrollbars( wxSHOW_SB_DEFAULT, wxSHOW_SB_DEFAULT );
     GetParent()->SetVirtualSize( size );
     GetParent()->Refresh();
 }

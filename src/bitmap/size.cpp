@@ -20,8 +20,6 @@
 #define FitOneSide( left, right)                    \
         wxSize size = parent->GetClientSize();      \
         wxSize imgsz = img.GetSize();               \
-        parent->ShowScrollbars( wxSHOW_SB_DEFAULT , \
-                                wxSHOW_SB_DEFAULT );\
         float scl = float(scale) / 100;             \
                                                     \
         size.Scale(scl,scl);                        \
@@ -30,12 +28,44 @@
 
 namespace Size
 {
+    bool IsScrollbarShown( wxScrolledWindow* parent, wxSize size, int flags )
+    {
+        wxSize virori = parent->GetVirtualSize();
+        wxSize ori = parent->GetClientSize();
+        parent->SetVirtualSize( size );
+
+        wxSize clt = parent->GetClientSize();
+
+        parent->SetVirtualSize( virori );
+        if ( flags & BITMAP_FITHEIGHT ) 
+            return ori.GetHeight() != clt.GetHeight();
+
+        else if ( flags & BITMAP_FITWIDTH )
+            return ori.GetWidth() != clt.GetWidth();
+    }
+
     SizeFunc( FitWidth )
     {
         FitOneSide(x,y)
-        if ( size.GetWidth() < img.GetWidth() || ( flags & BITMAP_ALLOWENLARGE ) )
+
+        bool isRescale = size.GetWidth() < img.GetWidth() || flags & BITMAP_ALLOWENLARGE;
+
+        if ( isRescale )
         {
-            img.Rescale( size.x, imgsz.y * scl );
+            imgsz.Set( size.x, imgsz.y * scl );
+        }
+
+        if ( IsScrollbarShown( parent, imgsz, flags ) )
+        {
+            parent->ShowScrollbars( wxSHOW_SB_DEFAULT, wxSHOW_SB_ALWAYS );
+            float res = FitWidth( img, flags, parent, scale );
+            parent->ShowScrollbars( wxSHOW_SB_DEFAULT, wxSHOW_SB_DEFAULT );
+            return res;
+        }
+
+        if ( isRescale )
+        {
+            img.Rescale( imgsz.x, imgsz.y );
             return scl;
         }
         return 1;
@@ -60,7 +90,7 @@ namespace Size
             return FitWidth( img, flags, parent, scale);
         else 
             return FitHeight( img, flags, parent, scale );
-    }     
+    } 
     
     SizeFunc ( Prepare )
     {
