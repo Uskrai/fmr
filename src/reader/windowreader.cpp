@@ -27,6 +27,7 @@
 #include <wx/stattext.h>
 #include <wx/sizer.h>
 #include <wx/dc.h>
+#include <iostream>
 
 #include "handler/handlerfactory.h"
 
@@ -73,6 +74,20 @@ void Window::Open( wxString path )
 
     m_thread->Open( path );
 }
+
+void Window::ChangeFolder( const wxString& path )
+{
+    if ( path != wxEmptyString )
+    {
+        Clear();
+        m_factory->Find(path);
+        m_thread->SetHandler( m_factory->NewHandler() );
+        m_thread->Open(path);
+    }
+}
+
+void Window::Next() { ChangeFolder( m_thread->GetHandler()->GetNext()); }
+void Window::Prev() { ChangeFolder( m_thread->GetHandler()->GetPrev()); }
 
 void Window::Find( const wxString& path )
 {
@@ -173,16 +188,14 @@ void Window::OnEdge( int modifier )
     {
         if ( m_bitmap->Next() )
             Scroll(0,0);
-        // else
-            // Next()
+        else Next();
         
     }
     else if ( modifier < 0 )
     {
         if ( m_bitmap->Prev() )
             Scroll( 0, GetVirtualSize().GetHeight() );
-        // else
-            // Prev()
+        else Prev();
     }
 }
 

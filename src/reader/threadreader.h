@@ -41,6 +41,7 @@ class Thread
         ~Thread();
 
         void Open( const wxString& path );
+        Handler* GetHandler() { return m_handler; }
 
         void Clear();
         void SetHandler( Handler* handler );
@@ -55,7 +56,6 @@ class Thread
         wxScrolledWindow* m_parent;
         Handler* m_handler = NULL;
         wxString m_path;
-        Handler* GetHandler(){ return m_handler; }
 
         wxThread::ExitCode Entry();
         void BitmapThread( bool& destroy );

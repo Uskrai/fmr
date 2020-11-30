@@ -28,9 +28,9 @@ DefaultHandler::DefaultHandler( const wxString& path )
 }
 void DefaultHandler::Open( const wxString& path )
 {
-    m_name = Path::GetFullPath(path);
+    m_name = Path::GetDirName(path);
 
-    wxString parent = Path::GetParent(path);
+    wxString parent = Path::GetParent(m_name);
     if ( parent != m_name )
     {
         m_parent = new DefaultHandler( parent );
@@ -38,11 +38,22 @@ void DefaultHandler::Open( const wxString& path )
     }    
 }
 
+size_t DefaultHandler::IndexFilename( wxString path )
+{
+    return 0;
+}
+
 wxString DefaultHandler::GetNextPrev( int i )
 {
     if ( GetParent() )
     {
         wxString parent = GetParent()->GetName();
+        wxArrayString &name = GetParent()->GetChild();
+        size_t idx = name.Index( Path::GetName(m_name) );
+        if ( idx != size_t(-1) && Vector::IsExist(name, idx + i ) )
+        {
+            return GetParent()->GetName() + name.Item( idx + i );
+        }
     }
     return wxEmptyString;
 }
@@ -51,13 +62,11 @@ wxString DefaultHandler::GetNext() { return GetNextPrev( 1 ); }
 
 wxString DefaultHandler::GetPrev() { return GetNextPrev( -1 ); }
 
-int DefaultHandler::Index( const wxString& path )
+size_t DefaultHandler::Index( const wxString& path )
 {
-    if ( m_files.size() > 0 )
-    {
-        return m_files.Index( path.AfterLast( wxFileName::GetPathSeparator() ) ); 
-    }
-    return -1;
+    size_t idx = m_files.Index( Path::GetName(path) );
+    
+    idx = ( idx != size_t(-1) ) ? idx : 0;
 }
 
 void DefaultHandler::Traverse()

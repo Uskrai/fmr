@@ -69,6 +69,7 @@ void Thread::Clear()
         delete m_handler;
         m_handler = NULL;
     }
+    m_bitmap->Clear();
 }
 
 bool Thread::TestDestroy()
@@ -144,8 +145,10 @@ void Thread::BitmapThread( bool& isDestroyed  )
     GetHandler()->Clear();
     GetHandler()->Open( m_path );
     GetHandler()->Traverse();
+    if ( GetHandler()->GetParent() )
+        GetHandler()->GetParent()->Traverse();
 
-    int curr = GetHandler()->Index( m_path ),
+    size_t curr = GetHandler()->Index( m_path ),
         prev = curr - 1, next = curr + 1;
 
     m_bitmap->GetAll().assign( GetHandler()->Size(), SBitmap() );

@@ -39,6 +39,7 @@ class Window : public wxScrolledWindow
         ~Window();
         void Open( wxString path );
 
+        void ChangeFolder( const wxString& path );
         void Next();
         void Prev();
 
