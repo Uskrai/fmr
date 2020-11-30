@@ -24,7 +24,7 @@
         wxScrolledWindow *parent  )
 
 
-#define PositionFunc( coord, dimension )            \
+#define CalcCentered( coord, dimension )            \
         size_t dimension = 0, pos = 0, temp = 0;    \
         size_t prnt = 0;                            \
         prnt = parent->GetVirtualSize().            \
@@ -45,12 +45,15 @@
             }                                       \
         }                                           
 
-RefreshFunc(Vertical)
+#define PositionFunction( name )            \
+    void Position:: ## name ## ( wxVector<SBitmap*> vec, int flags, wxScrolledWindow *parent )
+
+PositionFunction(Vertical)
 {
-    PositionFunc(Y,Height);
+    CalcCentered(Y,Height);
 }
 
-RefreshFunc(Centered)
+PositionFunction(Centered)
 {
     wxSize size = parent->GetClientSize();
     int maxWidth = 0;
@@ -70,8 +73,17 @@ RefreshFunc(Centered)
 }
 
 
-RefreshFunc(Horizontal)
+PositionFunction(Horizontal)
 {
-    PositionFunc(X,Width);
+    CalcCentered(X,Width);
 }
 
+
+PositionFunction( Refresh )
+{
+    CheckFlags( BITMAP_VERTICAL, Vertical )
+    else CheckFlags( BITMAP_HORIZONTAL, Horizontal )
+    else CheckFlags( BITMAP_WEBTOON, Vertical )
+
+    CheckFlags( BITMAP_CENTERED, Centered )
+}

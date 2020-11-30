@@ -23,23 +23,17 @@ class wxScrolledWindow;
 
 #define CheckFlags( flag, func )    \
     if ( flags & flag )             \
-        { func( vec, parent ); }
+        { func( vec, flags, parent ); }
+
+#define PositionFunc( name )        \
+    void name( wxVector<SBitmap*> vec, int flags, wxScrolledWindow *parent )
         
 namespace Position
 {
-    void RefreshVertical( wxVector<SBitmap*>& vec, wxScrolledWindow *parent);
-
-    void RefreshHorizontal( wxVector<SBitmap*>& vec, wxScrolledWindow *parent);
-
-    void RefreshCentered( wxVector<SBitmap*>& vec, wxScrolledWindow *parent );
-    void Refresh( wxVector<SBitmap*>& vec, int flags, wxScrolledWindow *parent )
-    {
-        CheckFlags( BITMAP_VERTICAL,RefreshVertical )
-        else CheckFlags( BITMAP_HORIZONTAL, RefreshHorizontal )
-        else CheckFlags( BITMAP_WEBTOON, RefreshVertical )
-
-        CheckFlags( BITMAP_CENTERED, RefreshCentered )
-    }
+    PositionFunc( Centered );
+    PositionFunc( Vertical );
+    PositionFunc( Horizontal );
+    PositionFunc( Refresh );
 };
 
 #endif
