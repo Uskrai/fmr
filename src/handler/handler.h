@@ -26,6 +26,8 @@ class Handler
         Handler( const wxString& path ) {};
         virtual ~Handler() {};
 
+        virtual Handler* GetParent() = 0;
+        
         virtual wxString GetName() = 0;
         virtual wxString GetNext() = 0;
         virtual wxString GetPrev() = 0;
