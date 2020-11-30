@@ -64,6 +64,10 @@ void Bitmap::Refresh()
 
 bool Bitmap::ChangePage( int step )
 {
+    // wont change image if there is an image that is not loaded
+    for ( const auto& it : Get() )
+        if ( ! it->IsLoaded() ) return true;
+
     size_t &pos = m_posFirst;
 
     size_t temp = pos;
