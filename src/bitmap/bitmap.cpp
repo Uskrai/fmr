@@ -134,6 +134,11 @@ void Bitmap::Add( wxImage& image, int idx )
     m_maxWidth = ( bmp.GetWidth() > m_maxWidth ) ? bmp.GetWidth() : m_maxWidth;
     
     Refresh();
+    if ( m_posFirst <= idx && idx <= m_posLast)
+    {
+        RefreshSize();
+        RefreshPosition();
+    }
     GetParent()->Refresh();
 }
 
