@@ -26,7 +26,7 @@
 
 #include <wx/stattext.h>
 #include <wx/sizer.h>
-#include <wx/dc.h>
+#include <wx/dcclient.h>
 
 #include "handler/handlerfactory.h"
 
@@ -34,6 +34,7 @@ namespace Reader
 {
 
 wxBEGIN_EVENT_TABLE( Window, wxWindow )
+    EVT_PAINT(Window::OnDraw)
 //     EVT_MOTION(Window::OnMouseMotion)
 //     EVT_MOUSEWHEEL(Window::OnMouseWheel)
 //     EVT_KEY_DOWN(Window::OnKeyDown)
@@ -67,7 +68,6 @@ void Window::Open( const wxString& path )
 {
     if ( path != wxEmptyString )
     {
-        wxPrintf("%s\n",path);
         Clear(); 
         m_bitmap->Clear();
 
@@ -120,8 +120,10 @@ void Window::Clear()
     m_thread->Clear();
 }
 
-void Window::OnDraw( wxDC& dc )
-{
+// void Window::OnDraw( wxDC& dc )
+void Window::OnDraw( wxPaintEvent &event )
+{   
+    wxPaintDC dc(this);
     // dc.SetClippingRegion( GetViewStart(), GetClientSize() );
     wxCriticalSectionLocker locker( m_thread->GetLock() );
     for ( const auto& it : m_bitmap->Get() )

@@ -76,6 +76,7 @@ class Window : public wxPanel
         void Error( wxSize size ); 
         void OnDraw( wxDC& dc );
         wxDECLARE_EVENT_TABLE();
+        void OnDraw( wxPaintEvent &event );
         // void OnMouseMotion( wxMouseEvent& event );
         // void OnMouseWheel( wxMouseEvent& event );
         // void OnKeyDown( wxKeyEvent& event );
