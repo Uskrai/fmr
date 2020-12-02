@@ -46,7 +46,7 @@
         }                                           
 
 #define PositionFunction( name )            \
-    void Position:: ## name ## ( wxVector<SBitmap*> vec, int flags, wxScrolledWindow *parent )
+    void Position::name( wxVector<SBitmap*> vec, int flags, wxScrolledWindow *parent )
 
 PositionFunction(Vertical)
 {
