@@ -636,6 +636,23 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+WX_VERSION_MICRO
+WX_VERSION_MINOR
+WX_VERSION_MAJOR
+WX_RESCOMP
+WX_VERSION
+WX_LIBS_STATIC
+WX_LIBS
+WX_CXXFLAGS_ONLY
+WX_CFLAGS_ONLY
+WX_CXXFLAGS
+WX_CFLAGS
+WX_CPPFLAGS
+WX_CONFIG_PATH
+HAVE_CXX17
+SHARED_FALSE
+SHARED_TRUE
+AM_LDFLAGS
 CXXCPP
 CPP
 LT_SYS_LIBRARY_PATH
@@ -699,20 +716,6 @@ am__isrc
 INSTALL_DATA
 INSTALL_SCRIPT
 INSTALL_PROGRAM
-WX_VERSION_MICRO
-WX_VERSION_MINOR
-WX_VERSION_MAJOR
-WX_RESCOMP
-WX_VERSION
-WX_LIBS_STATIC
-WX_LIBS
-WX_CXXFLAGS_ONLY
-WX_CFLAGS_ONLY
-WX_CXXFLAGS
-WX_CFLAGS
-WX_CPPFLAGS
-WX_CONFIG_PATH
-HAVE_CXX17
 ac_ct_CXX
 CXXFLAGS
 CXX
@@ -723,8 +726,6 @@ CPPFLAGS
 LDFLAGS
 CFLAGS
 CC
-SHARED_FALSE
-SHARED_TRUE
 host_os
 host_vendor
 host_cpu
@@ -775,10 +776,6 @@ am__quote'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
-with_wxdir
-with_wx_config
-with_wx_prefix
-with_wx_exec_prefix
 enable_dependency_tracking
 enable_silent_rules
 enable_shared
@@ -789,6 +786,10 @@ with_aix_soname
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
+with_wxdir
+with_wx_config
+with_wx_prefix
+with_wx_exec_prefix
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1429,7 +1430,7 @@ Optional Features:
   --enable-silent-rules   less verbose build output (undo: "make V=1")
   --disable-silent-rules  verbose build output (undo: "make V=0")
   --enable-shared[=PKGS]  build shared libraries [default=yes]
-  --enable-static[=PKGS]  build static libraries [default=yes]
+  --enable-static[=PKGS]  build static libraries [default=no]
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
@@ -1437,11 +1438,6 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-wxdir=PATH       Use uninstalled version of wxWidgets in PATH
-  --with-wx-config=CONFIG wx-config script to use (optional)
-  --with-wx-prefix=PREFIX Prefix where wxWidgets is installed (optional)
-  --with-wx-exec-prefix=PREFIX
-                          Exec prefix where wxWidgets is installed (optional)
   --with-pic[=PKGS]       try to use only PIC/non-PIC objects [default=use
                           both]
   --with-aix-soname=aix|svr4|both
@@ -1450,6 +1446,11 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot[=DIR]    Search for dependent libraries within DIR (or the
                           compiler's sysroot if not specified).
+  --with-wxdir=PATH       Use uninstalled version of wxWidgets in PATH
+  --with-wx-config=CONFIG wx-config script to use (optional)
+  --with-wx-prefix=PREFIX Prefix where wxWidgets is installed (optional)
+  --with-wx-exec-prefix=PREFIX
+                          Exec prefix where wxWidgets is installed (optional)
 
 Some influential environment variables:
   CC          C compiler command
@@ -2385,27 +2386,6 @@ host_os=$*
 IFS=$ac_save_IFS
 case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
-
-
-# notice that if --host was given but --build was not, cross_compiling is
-# only set to "maybe" and not "yes" and will be either set to "yes" later or
-# configure will exit with error in AC_PROG_CC so don't test for = "yes" here
-
-if test "$cross_compiling" != "no"; then
-    HOST_PREFIX="${host_alias}-"
-    HOST_SUFFIX="-$host_alias"
-else
-    HOST_PREFIX=
-    HOST_SUFFIX=
-fi
-
- if test "x$enable_shared" = "xyes"; then
-  SHARED_TRUE=
-  SHARED_FALSE='#'
-else
-  SHARED_TRUE='#'
-  SHARED_FALSE=
-fi
 
 
 #Check for compiler
@@ -3518,6 +3498,56 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # ===========================================================================
 #  https://www.gnu.org/software/autoconf-archive/ax_cxx_compile_stdcxx.html
 # ===========================================================================
@@ -3587,1233 +3617,57 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+# ===========================================================================
+#  https://www.gnu.org/software/autoconf-archive/ax_check_compile_flag.html
+# ===========================================================================
+#
+# SYNOPSIS
+#
+#   AX_CHECK_COMPILE_FLAG(FLAG, [ACTION-SUCCESS], [ACTION-FAILURE], [EXTRA-FLAGS], [INPUT])
+#
+# DESCRIPTION
+#
+#   Check whether the given FLAG works with the current language's compiler
+#   or gives an error.  (Warnings, however, are ignored)
+#
+#   ACTION-SUCCESS/ACTION-FAILURE are shell commands to execute on
+#   success/failure.
+#
+#   If EXTRA-FLAGS is defined, it is added to the current language's default
+#   flags (e.g. CFLAGS) when the check is done.  The check is thus made with
+#   the flags: "CFLAGS EXTRA-FLAGS FLAG".  This can for example be used to
+#   force the compiler to issue an error when a bad flag is given.
+#
+#   INPUT gives an alternative input source to AC_COMPILE_IFELSE.
+#
+#   NOTE: Implementation based on AX_CFLAGS_GCC_OPTION. Please keep this
+#   macro in sync with AX_CHECK_{PREPROC,LINK}_FLAG.
+#
+# LICENSE
+#
+#   Copyright (c) 2008 Guido U. Draheim <guidod@gmx.de>
+#   Copyright (c) 2011 Maarten Bosmans <mkbosmans@gmail.com>
+#
+#   Copying and distribution of this file, with or without modification, are
+#   permitted in any medium without royalty provided the copyright notice
+#   and this notice are preserved.  This file is offered as-is, without any
+#   warranty.
 
-  ax_cxx_compile_alternatives="17 1z"    ax_cxx_compile_cxx17_required=true
-  ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-  ac_success=no
+#serial 6
 
 
+# notice that if --host was given but --build was not, cross_compiling is
+# only set to "maybe" and not "yes" and will be either set to "yes" later or
+# configure will exit with error in AC_PROG_CC so don't test for = "yes" here
 
-    if test x$ac_success = xno; then
-                for alternative in ${ax_cxx_compile_alternatives}; do
-      for switch in -std=c++${alternative} +std=c++${alternative} "-h std=c++${alternative}"; do
-        cachevar=`$as_echo "ax_cv_cxx_compile_cxx17_$switch" | $as_tr_sh`
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CXX supports C++17 features with $switch" >&5
-$as_echo_n "checking whether $CXX supports C++17 features with $switch... " >&6; }
-if eval \${$cachevar+:} false; then :
-  $as_echo_n "(cached) " >&6
+if test "$cross_compiling" != "no"; then
+    HOST_PREFIX="${host_alias}-"
+    HOST_SUFFIX="-$host_alias"
 else
-  ac_save_CXX="$CXX"
-           CXX="$CXX $switch"
-           cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-// If the compiler admits that it is not ready for C++11, why torture it?
-// Hopefully, this will speed up the test.
-
-#ifndef __cplusplus
-
-#error "This is not a C++ compiler"
-
-#elif __cplusplus < 201103L
-
-#error "This is not a C++11 compiler"
-
-#else
-
-namespace cxx11
-{
-
-  namespace test_static_assert
-  {
-
-    template <typename T>
-    struct check
-    {
-      static_assert(sizeof(int) <= sizeof(T), "not big enough");
-    };
-
-  }
-
-  namespace test_final_override
-  {
-
-    struct Base
-    {
-      virtual ~Base() {}
-      virtual void f() {}
-    };
-
-    struct Derived : public Base
-    {
-      virtual ~Derived() override {}
-      virtual void f() override {}
-    };
-
-  }
-
-  namespace test_double_right_angle_brackets
-  {
-
-    template < typename T >
-    struct check {};
-
-    typedef check<void> single_type;
-    typedef check<check<void>> double_type;
-    typedef check<check<check<void>>> triple_type;
-    typedef check<check<check<check<void>>>> quadruple_type;
-
-  }
-
-  namespace test_decltype
-  {
-
-    int
-    f()
-    {
-      int a = 1;
-      decltype(a) b = 2;
-      return a + b;
-    }
-
-  }
-
-  namespace test_type_deduction
-  {
-
-    template < typename T1, typename T2 >
-    struct is_same
-    {
-      static const bool value = false;
-    };
-
-    template < typename T >
-    struct is_same<T, T>
-    {
-      static const bool value = true;
-    };
-
-    template < typename T1, typename T2 >
-    auto
-    add(T1 a1, T2 a2) -> decltype(a1 + a2)
-    {
-      return a1 + a2;
-    }
-
-    int
-    test(const int c, volatile int v)
-    {
-      static_assert(is_same<int, decltype(0)>::value == true, "");
-      static_assert(is_same<int, decltype(c)>::value == false, "");
-      static_assert(is_same<int, decltype(v)>::value == false, "");
-      auto ac = c;
-      auto av = v;
-      auto sumi = ac + av + 'x';
-      auto sumf = ac + av + 1.0;
-      static_assert(is_same<int, decltype(ac)>::value == true, "");
-      static_assert(is_same<int, decltype(av)>::value == true, "");
-      static_assert(is_same<int, decltype(sumi)>::value == true, "");
-      static_assert(is_same<int, decltype(sumf)>::value == false, "");
-      static_assert(is_same<int, decltype(add(c, v))>::value == true, "");
-      return (sumf > 0.0) ? sumi : add(c, v);
-    }
-
-  }
-
-  namespace test_noexcept
-  {
-
-    int f() { return 0; }
-    int g() noexcept { return 0; }
-
-    static_assert(noexcept(f()) == false, "");
-    static_assert(noexcept(g()) == true, "");
-
-  }
-
-  namespace test_constexpr
-  {
-
-    template < typename CharT >
-    unsigned long constexpr
-    strlen_c_r(const CharT *const s, const unsigned long acc) noexcept
-    {
-      return *s ? strlen_c_r(s + 1, acc + 1) : acc;
-    }
-
-    template < typename CharT >
-    unsigned long constexpr
-    strlen_c(const CharT *const s) noexcept
-    {
-      return strlen_c_r(s, 0UL);
-    }
-
-    static_assert(strlen_c("") == 0UL, "");
-    static_assert(strlen_c("1") == 1UL, "");
-    static_assert(strlen_c("example") == 7UL, "");
-    static_assert(strlen_c("another\0example") == 7UL, "");
-
-  }
-
-  namespace test_rvalue_references
-  {
-
-    template < int N >
-    struct answer
-    {
-      static constexpr int value = N;
-    };
-
-    answer<1> f(int&)       { return answer<1>(); }
-    answer<2> f(const int&) { return answer<2>(); }
-    answer<3> f(int&&)      { return answer<3>(); }
-
-    void
-    test()
-    {
-      int i = 0;
-      const int c = 0;
-      static_assert(decltype(f(i))::value == 1, "");
-      static_assert(decltype(f(c))::value == 2, "");
-      static_assert(decltype(f(0))::value == 3, "");
-    }
-
-  }
-
-  namespace test_uniform_initialization
-  {
-
-    struct test
-    {
-      static const int zero {};
-      static const int one {1};
-    };
-
-    static_assert(test::zero == 0, "");
-    static_assert(test::one == 1, "");
-
-  }
-
-  namespace test_lambdas
-  {
-
-    void
-    test1()
-    {
-      auto lambda1 = [](){};
-      auto lambda2 = lambda1;
-      lambda1();
-      lambda2();
-    }
-
-    int
-    test2()
-    {
-      auto a = [](int i, int j){ return i + j; }(1, 2);
-      auto b = []() -> int { return '0'; }();
-      auto c = [=](){ return a + b; }();
-      auto d = [&](){ return c; }();
-      auto e = [a, &b](int x) mutable {
-        const auto identity = [](int y){ return y; };
-        for (auto i = 0; i < a; ++i)
-          a += b--;
-        return x + identity(a + b);
-      }(0);
-      return a + b + c + d + e;
-    }
-
-    int
-    test3()
-    {
-      const auto nullary = [](){ return 0; };
-      const auto unary = [](int x){ return x; };
-      using nullary_t = decltype(nullary);
-      using unary_t = decltype(unary);
-      const auto higher1st = [](nullary_t f){ return f(); };
-      const auto higher2nd = [unary](nullary_t f1){
-        return [unary, f1](unary_t f2){ return f2(unary(f1())); };
-      };
-      return higher1st(nullary) + higher2nd(nullary)(unary);
-    }
-
-  }
-
-  namespace test_variadic_templates
-  {
-
-    template <int...>
-    struct sum;
-
-    template <int N0, int... N1toN>
-    struct sum<N0, N1toN...>
-    {
-      static constexpr auto value = N0 + sum<N1toN...>::value;
-    };
-
-    template <>
-    struct sum<>
-    {
-      static constexpr auto value = 0;
-    };
-
-    static_assert(sum<>::value == 0, "");
-    static_assert(sum<1>::value == 1, "");
-    static_assert(sum<23>::value == 23, "");
-    static_assert(sum<1, 2>::value == 3, "");
-    static_assert(sum<5, 5, 11>::value == 21, "");
-    static_assert(sum<2, 3, 5, 7, 11, 13>::value == 41, "");
-
-  }
-
-  // http://stackoverflow.com/questions/13728184/template-aliases-and-sfinae
-  // Clang 3.1 fails with headers of libstd++ 4.8.3 when using std::function
-  // because of this.
-  namespace test_template_alias_sfinae
-  {
-
-    struct foo {};
-
-    template<typename T>
-    using member = typename T::member_type;
-
-    template<typename T>
-    void func(...) {}
-
-    template<typename T>
-    void func(member<T>*) {}
-
-    void test();
-
-    void test() { func<foo>(0); }
-
-  }
-
-}  // namespace cxx11
-
-#endif  // __cplusplus >= 201103L
-
-
-
-
-// If the compiler admits that it is not ready for C++14, why torture it?
-// Hopefully, this will speed up the test.
-
-#ifndef __cplusplus
-
-#error "This is not a C++ compiler"
-
-#elif __cplusplus < 201402L
-
-#error "This is not a C++14 compiler"
-
-#else
-
-namespace cxx14
-{
-
-  namespace test_polymorphic_lambdas
-  {
-
-    int
-    test()
-    {
-      const auto lambda = [](auto&&... args){
-        const auto istiny = [](auto x){
-          return (sizeof(x) == 1UL) ? 1 : 0;
-        };
-        const int aretiny[] = { istiny(args)... };
-        return aretiny[0];
-      };
-      return lambda(1, 1L, 1.0f, '1');
-    }
-
-  }
-
-  namespace test_binary_literals
-  {
-
-    constexpr auto ivii = 0b0000000000101010;
-    static_assert(ivii == 42, "wrong value");
-
-  }
-
-  namespace test_generalized_constexpr
-  {
-
-    template < typename CharT >
-    constexpr unsigned long
-    strlen_c(const CharT *const s) noexcept
-    {
-      auto length = 0UL;
-      for (auto p = s; *p; ++p)
-        ++length;
-      return length;
-    }
-
-    static_assert(strlen_c("") == 0UL, "");
-    static_assert(strlen_c("x") == 1UL, "");
-    static_assert(strlen_c("test") == 4UL, "");
-    static_assert(strlen_c("another\0test") == 7UL, "");
-
-  }
-
-  namespace test_lambda_init_capture
-  {
-
-    int
-    test()
-    {
-      auto x = 0;
-      const auto lambda1 = [a = x](int b){ return a + b; };
-      const auto lambda2 = [a = lambda1(x)](){ return a; };
-      return lambda2();
-    }
-
-  }
-
-  namespace test_digit_separators
-  {
-
-    constexpr auto ten_million = 100'000'000;
-    static_assert(ten_million == 100000000, "");
-
-  }
-
-  namespace test_return_type_deduction
-  {
-
-    auto f(int& x) { return x; }
-    decltype(auto) g(int& x) { return x; }
-
-    template < typename T1, typename T2 >
-    struct is_same
-    {
-      static constexpr auto value = false;
-    };
-
-    template < typename T >
-    struct is_same<T, T>
-    {
-      static constexpr auto value = true;
-    };
-
-    int
-    test()
-    {
-      auto x = 0;
-      static_assert(is_same<int, decltype(f(x))>::value, "");
-      static_assert(is_same<int&, decltype(g(x))>::value, "");
-      return x;
-    }
-
-  }
-
-}  // namespace cxx14
-
-#endif  // __cplusplus >= 201402L
-
-
-
-
-// If the compiler admits that it is not ready for C++17, why torture it?
-// Hopefully, this will speed up the test.
-
-#ifndef __cplusplus
-
-#error "This is not a C++ compiler"
-
-#elif __cplusplus < 201703L
-
-#error "This is not a C++17 compiler"
-
-#else
-
-#include <initializer_list>
-#include <utility>
-#include <type_traits>
-
-namespace cxx17
-{
-
-  namespace test_constexpr_lambdas
-  {
-
-    constexpr int foo = [](){return 42;}();
-
-  }
-
-  namespace test::nested_namespace::definitions
-  {
-
-  }
-
-  namespace test_fold_expression
-  {
-
-    template<typename... Args>
-    int multiply(Args... args)
-    {
-      return (args * ... * 1);
-    }
-
-    template<typename... Args>
-    bool all(Args... args)
-    {
-      return (args && ...);
-    }
-
-  }
-
-  namespace test_extended_static_assert
-  {
-
-    static_assert (true);
-
-  }
-
-  namespace test_auto_brace_init_list
-  {
-
-    auto foo = {5};
-    auto bar {5};
-
-    static_assert(std::is_same<std::initializer_list<int>, decltype(foo)>::value);
-    static_assert(std::is_same<int, decltype(bar)>::value);
-  }
-
-  namespace test_typename_in_template_template_parameter
-  {
-
-    template<template<typename> typename X> struct D;
-
-  }
-
-  namespace test_fallthrough_nodiscard_maybe_unused_attributes
-  {
-
-    int f1()
-    {
-      return 42;
-    }
-
-    [[nodiscard]] int f2()
-    {
-      [[maybe_unused]] auto unused = f1();
-
-      switch (f1())
-      {
-      case 17:
-        f1();
-        [[fallthrough]];
-      case 42:
-        f1();
-      }
-      return f1();
-    }
-
-  }
-
-  namespace test_extended_aggregate_initialization
-  {
-
-    struct base1
-    {
-      int b1, b2 = 42;
-    };
-
-    struct base2
-    {
-      base2() {
-        b3 = 42;
-      }
-      int b3;
-    };
-
-    struct derived : base1, base2
-    {
-        int d;
-    };
-
-    derived d1 {{1, 2}, {}, 4};  // full initialization
-    derived d2 {{}, {}, 4};      // value-initialized bases
-
-  }
-
-  namespace test_general_range_based_for_loop
-  {
-
-    struct iter
-    {
-      int i;
-
-      int& operator* ()
-      {
-        return i;
-      }
-
-      const int& operator* () const
-      {
-        return i;
-      }
-
-      iter& operator++()
-      {
-        ++i;
-        return *this;
-      }
-    };
-
-    struct sentinel
-    {
-      int i;
-    };
-
-    bool operator== (const iter& i, const sentinel& s)
-    {
-      return i.i == s.i;
-    }
-
-    bool operator!= (const iter& i, const sentinel& s)
-    {
-      return !(i == s);
-    }
-
-    struct range
-    {
-      iter begin() const
-      {
-        return {0};
-      }
-
-      sentinel end() const
-      {
-        return {5};
-      }
-    };
-
-    void f()
-    {
-      range r {};
-
-      for (auto i : r)
-      {
-        [[maybe_unused]] auto v = i;
-      }
-    }
-
-  }
-
-  namespace test_lambda_capture_asterisk_this_by_value
-  {
-
-    struct t
-    {
-      int i;
-      int foo()
-      {
-        return [*this]()
-        {
-          return i;
-        }();
-      }
-    };
-
-  }
-
-  namespace test_enum_class_construction
-  {
-
-    enum class byte : unsigned char
-    {};
-
-    byte foo {42};
-
-  }
-
-  namespace test_constexpr_if
-  {
-
-    template <bool cond>
-    int f ()
-    {
-      if constexpr(cond)
-      {
-        return 13;
-      }
-      else
-      {
-        return 42;
-      }
-    }
-
-  }
-
-  namespace test_selection_statement_with_initializer
-  {
-
-    int f()
-    {
-      return 13;
-    }
-
-    int f2()
-    {
-      if (auto i = f(); i > 0)
-      {
-        return 3;
-      }
-
-      switch (auto i = f(); i + 4)
-      {
-      case 17:
-        return 2;
-
-      default:
-        return 1;
-      }
-    }
-
-  }
-
-  namespace test_template_argument_deduction_for_class_templates
-  {
-
-    template <typename T1, typename T2>
-    struct pair
-    {
-      pair (T1 p1, T2 p2)
-        : m1 {p1},
-          m2 {p2}
-      {}
-
-      T1 m1;
-      T2 m2;
-    };
-
-    void f()
-    {
-      [[maybe_unused]] auto p = pair{13, 42u};
-    }
-
-  }
-
-  namespace test_non_type_auto_template_parameters
-  {
-
-    template <auto n>
-    struct B
-    {};
-
-    B<5> b1;
-    B<'a'> b2;
-
-  }
-
-  namespace test_structured_bindings
-  {
-
-    int arr[2] = { 1, 2 };
-    std::pair<int, int> pr = { 1, 2 };
-
-    auto f1() -> int(&)[2]
-    {
-      return arr;
-    }
-
-    auto f2() -> std::pair<int, int>&
-    {
-      return pr;
-    }
-
-    struct S
-    {
-      int x1 : 2;
-      volatile double y1;
-    };
-
-    S f3()
-    {
-      return {};
-    }
-
-    auto [ x1, y1 ] = f1();
-    auto& [ xr1, yr1 ] = f1();
-    auto [ x2, y2 ] = f2();
-    auto& [ xr2, yr2 ] = f2();
-    const auto [ x3, y3 ] = f3();
-
-  }
-
-  namespace test_exception_spec_type_system
-  {
-
-    struct Good {};
-    struct Bad {};
-
-    void g1() noexcept;
-    void g2();
-
-    template<typename T>
-    Bad
-    f(T*, T*);
-
-    template<typename T1, typename T2>
-    Good
-    f(T1*, T2*);
-
-    static_assert (std::is_same_v<Good, decltype(f(g1, g2))>);
-
-  }
-
-  namespace test_inline_variables
-  {
-
-    template<class T> void f(T)
-    {}
-
-    template<class T> inline T g(T)
-    {
-      return T{};
-    }
-
-    template<> inline void f<>(int)
-    {}
-
-    template<> int g<>(int)
-    {
-      return 5;
-    }
-
-  }
-
-}  // namespace cxx17
-
-#endif  // __cplusplus < 201703L
-
-
-
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  eval $cachevar=yes
-else
-  eval $cachevar=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-           CXX="$ac_save_CXX"
-fi
-eval ac_res=\$$cachevar
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-        if eval test x\$$cachevar = xyes; then
-          CXX="$CXX $switch"
-          if test -n "$CXXCPP" ; then
-            CXXCPP="$CXXCPP $switch"
-          fi
-          ac_success=yes
-          break
-        fi
-      done
-      if test x$ac_success = xyes; then
-        break
-      fi
-    done
-  fi
-  ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-  if test x$ax_cxx_compile_cxx17_required = xtrue; then
-    if test x$ac_success = xno; then
-      as_fn_error $? "*** A compiler with support for C++17 language features is required." "$LINENO" 5
-    fi
-  fi
-  if test x$ac_success = xno; then
-    HAVE_CXX17=0
-    { $as_echo "$as_me:${as_lineno-$LINENO}: No compiler with C++17 support was found" >&5
-$as_echo "$as_me: No compiler with C++17 support was found" >&6;}
-  else
-    HAVE_CXX17=1
-
-$as_echo "#define HAVE_CXX17 1" >>confdefs.h
-
-  fi
-
-
-
-if test "$HAVE_CXX17" != 1; then
-	as_fn_error $? "This Application need c++17 support" "$LINENO" 5
-fi
-CXXFLAGS="$CXXFLAGS -std=c++17"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# check for libraries
-
-
-# Check whether --with-wxdir was given.
-if test "${with_wxdir+set}" = set; then :
-  withval=$with_wxdir;  wx_config_name="$withval/wx-config"
-                  wx_config_args="--inplace"
+    HOST_PREFIX=
+    HOST_SUFFIX=
 fi
 
-
-# Check whether --with-wx-config was given.
-if test "${with_wx_config+set}" = set; then :
-  withval=$with_wx_config; wx_config_name="$withval"
-fi
-
-
-# Check whether --with-wx-prefix was given.
-if test "${with_wx_prefix+set}" = set; then :
-  withval=$with_wx_prefix; wx_config_prefix="$withval"
-else
-  wx_config_prefix=""
-fi
-
-
-# Check whether --with-wx-exec-prefix was given.
-if test "${with_wx_exec_prefix+set}" = set; then :
-  withval=$with_wx_exec_prefix; wx_config_exec_prefix="$withval"
-else
-  wx_config_exec_prefix=""
-fi
-
-
-reqwx=3.0.4
-
-
-    if test x${WX_CONFIG_NAME+set} != xset ; then
-     WX_CONFIG_NAME=wx-config
-  fi
-
-  if test "x$wx_config_name" != x ; then
-     WX_CONFIG_NAME="$wx_config_name"
-  fi
-
-    if test x$wx_config_exec_prefix != x ; then
-     wx_config_args="$wx_config_args --exec-prefix=$wx_config_exec_prefix"
-     WX_LOOKUP_PATH="$wx_config_exec_prefix/bin"
-  fi
-  if test x$wx_config_prefix != x ; then
-     wx_config_args="$wx_config_args --prefix=$wx_config_prefix"
-     WX_LOOKUP_PATH="$WX_LOOKUP_PATH:$wx_config_prefix/bin"
-  fi
-  if test "$cross_compiling" = "yes"; then
-     wx_config_args="$wx_config_args --host=$host_alias"
-  fi
-
-    if test -x "$WX_CONFIG_NAME" ; then
-     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for wx-config" >&5
-$as_echo_n "checking for wx-config... " >&6; }
-     WX_CONFIG_PATH="$WX_CONFIG_NAME"
-     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $WX_CONFIG_PATH" >&5
-$as_echo "$WX_CONFIG_PATH" >&6; }
-  else
-     # Extract the first word of "$WX_CONFIG_NAME", so it can be a program name with args.
-set dummy $WX_CONFIG_NAME; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_path_WX_CONFIG_PATH+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  case $WX_CONFIG_PATH in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_WX_CONFIG_PATH="$WX_CONFIG_PATH" # Let the user override the test with a path.
-  ;;
-  *)
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-as_dummy=""$WX_LOOKUP_PATH:$PATH""
-for as_dir in $as_dummy
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_path_WX_CONFIG_PATH="$as_dir/$ac_word$ac_exec_ext"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_path_WX_CONFIG_PATH" && ac_cv_path_WX_CONFIG_PATH="no"
-  ;;
-esac
-fi
-WX_CONFIG_PATH=$ac_cv_path_WX_CONFIG_PATH
-if test -n "$WX_CONFIG_PATH"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $WX_CONFIG_PATH" >&5
-$as_echo "$WX_CONFIG_PATH" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  fi
-
-  if test "$WX_CONFIG_PATH" != "no" ; then
-    WX_VERSION=""
-
-    min_wx_version=$reqwx
-    if test -z "" ; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for wxWidgets version >= $min_wx_version" >&5
-$as_echo_n "checking for wxWidgets version >= $min_wx_version... " >&6; }
-    else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for wxWidgets version >= $min_wx_version ()" >&5
-$as_echo_n "checking for wxWidgets version >= $min_wx_version ()... " >&6; }
-    fi
-
-            WX_CONFIG_WITH_ARGS="$WX_CONFIG_PATH $wx_config_args "
-
-    WX_VERSION=`$WX_CONFIG_WITH_ARGS --version 2>/dev/null`
-    wx_config_major_version=`echo $WX_VERSION | \
-           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\1/'`
-    wx_config_minor_version=`echo $WX_VERSION | \
-           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\2/'`
-    wx_config_micro_version=`echo $WX_VERSION | \
-           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\3/'`
-
-    wx_requested_major_version=`echo $min_wx_version | \
-           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\1/'`
-    wx_requested_minor_version=`echo $min_wx_version | \
-           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\2/'`
-    wx_requested_micro_version=`echo $min_wx_version | \
-           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\3/'`
-
-
-    wx_ver_ok=""
-    if test "x$WX_VERSION" != x ; then
-      if test $wx_config_major_version -gt $wx_requested_major_version; then
-        wx_ver_ok=yes
-      else
-        if test $wx_config_major_version -eq $wx_requested_major_version; then
-           if test $wx_config_minor_version -gt $wx_requested_minor_version; then
-              wx_ver_ok=yes
-           else
-              if test $wx_config_minor_version -eq $wx_requested_minor_version; then
-                 if test $wx_config_micro_version -ge $wx_requested_micro_version; then
-                    wx_ver_ok=yes
-                 fi
-              fi
-           fi
-        fi
-      fi
-    fi
-
-
-    if test -n "$wx_ver_ok"; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (version $WX_VERSION)" >&5
-$as_echo "yes (version $WX_VERSION)" >&6; }
-      WX_LIBS=`$WX_CONFIG_WITH_ARGS --libs `
-
-                              { $as_echo "$as_me:${as_lineno-$LINENO}: checking for wxWidgets static library" >&5
-$as_echo_n "checking for wxWidgets static library... " >&6; }
-      WX_LIBS_STATIC=`$WX_CONFIG_WITH_ARGS --static --libs  2>/dev/null`
-      if test "x$WX_LIBS_STATIC" = "x"; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-      else
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-      fi
-
-            wx_has_cppflags=""
-      if test $wx_config_major_version -gt 2; then
-        wx_has_cppflags=yes
-      else
-        if test $wx_config_major_version -eq 2; then
-           if test $wx_config_minor_version -gt 2; then
-              wx_has_cppflags=yes
-           else
-              if test $wx_config_minor_version -eq 2; then
-                 if test $wx_config_micro_version -ge 6; then
-                    wx_has_cppflags=yes
-                 fi
-              fi
-           fi
-        fi
-      fi
-
-            wx_has_rescomp=""
-      if test $wx_config_major_version -gt 2; then
-        wx_has_rescomp=yes
-      else
-        if test $wx_config_major_version -eq 2; then
-           if test $wx_config_minor_version -ge 7; then
-              wx_has_rescomp=yes
-           fi
-        fi
-      fi
-      if test "x$wx_has_rescomp" = x ; then
-                  WX_RESCOMP=
-      else
-         WX_RESCOMP=`$WX_CONFIG_WITH_ARGS --rescomp`
-      fi
-
-      if test "x$wx_has_cppflags" = x ; then
-                  WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags `
-         WX_CPPFLAGS=$WX_CFLAGS
-         WX_CXXFLAGS=$WX_CFLAGS
-
-         WX_CFLAGS_ONLY=$WX_CFLAGS
-         WX_CXXFLAGS_ONLY=$WX_CFLAGS
-      else
-                  WX_CPPFLAGS=`$WX_CONFIG_WITH_ARGS --cppflags `
-         WX_CXXFLAGS=`$WX_CONFIG_WITH_ARGS --cxxflags `
-         WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags `
-
-         WX_CFLAGS_ONLY=`echo $WX_CFLAGS | sed "s@^$WX_CPPFLAGS *@@"`
-         WX_CXXFLAGS_ONLY=`echo $WX_CXXFLAGS | sed "s@^$WX_CFLAGS *@@"`
-      fi
-
-      wxWin=1
-
-    else
-
-       if test "x$WX_VERSION" = x; then
-                    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-       else
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (version $WX_VERSION is not new enough)" >&5
-$as_echo "no (version $WX_VERSION is not new enough)" >&6; }
-       fi
-
-       WX_CFLAGS=""
-       WX_CPPFLAGS=""
-       WX_CXXFLAGS=""
-       WX_LIBS=""
-       WX_LIBS_STATIC=""
-       WX_RESCOMP=""
-
-       if test ! -z ""; then
-
-          wx_error_message="
-    The configuration you asked for $PACKAGE_NAME requires a wxWidgets
-    build with the following settings:
-
-    but such build is not available.
-
-    To see the wxWidgets builds available on this system, please use
-    'wx-config --list' command. To use the default build, returned by
-    'wx-config --selected-config', use the options with their 'auto'
-    default values."
-
-       fi
-
-       wx_error_message="
-    The requested wxWidgets build couldn't be found.
-    $wx_error_message
-
-    If you still get this error, then check that 'wx-config' is
-    in path, the directory where wxWidgets libraries are installed
-    (returned by 'wx-config --libs' command) is in LD_LIBRARY_PATH
-    or equivalent variable and wxWidgets version is $reqwx or above."
-
-       as_fn_error $? "$wx_error_message" "$LINENO" 5
-
-    fi
-  else
-
-    WX_CFLAGS=""
-    WX_CPPFLAGS=""
-    WX_CXXFLAGS=""
-    WX_LIBS=""
-    WX_LIBS_STATIC=""
-    WX_RESCOMP=""
-
-    :
-
-  fi
-
-
-
-
-
-
-
-
-
-
-
-      WX_VERSION_MAJOR="$wx_config_major_version"
-  WX_VERSION_MINOR="$wx_config_minor_version"
-  WX_VERSION_MICRO="$wx_config_micro_version"
-
-
-
-
-
-if test "$wxWin" != 1; then
-	as_fn_error $? "
-		wxWidgets must be installed on your system.
-
-		Please check that wx-config is in path, the directory
-		where wxWidgets libraries are installed (returned by
-		'wx-config --libs' or 'wx-config --static --libs' command)
-		is in LD_LIBRARY_PATH or equivalent variable and
-		wxWidgets version is $reqwx or above.
-		" "$LINENO" 5
-fi
-CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
-CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
-CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
-LIBS="$LIBS $WX_LIBS"
 ac_config_files="$ac_config_files Makefile"
 
 
@@ -9584,6 +8438,7 @@ done
 
 
 
+
 func_stripname_cnf ()
 {
   case $2 in
@@ -9597,16 +8452,7 @@ func_stripname_cnf ()
 
 
 # Set options
-
-
-
-        enable_dlopen=no
-
-
-  enable_win32_dll=no
-
-
-            # Check whether --enable-shared was given.
+# Check whether --enable-shared was given.
 if test "${enable_shared+set}" = set; then :
   enableval=$enable_shared; p=${PACKAGE-default}
     case $enableval in
@@ -9635,9 +8481,7 @@ fi
 
 
 
-
-
-  # Check whether --enable-static was given.
+# Check whether --enable-static was given.
 if test "${enable_static+set}" = set; then :
   enableval=$enable_static; p=${PACKAGE-default}
     case $enableval in
@@ -9657,13 +8501,22 @@ if test "${enable_static+set}" = set; then :
       ;;
     esac
 else
-  enable_static=yes
+  enable_static=no
 fi
 
 
 
 
 
+
+
+
+
+
+        enable_dlopen=no
+
+
+  enable_win32_dll=no
 
 
 
@@ -17199,6 +16052,1295 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+# check for os
+build_linux=no
+build_windows=no
+build_mac=no
+
+# Detect the target system
+case "${host_os}" in
+    linux*)
+        build_linux=yes
+        ;;
+    cygwin*|mingw*)
+        build_windows=yes
+        ;;
+    darwin*)
+        build_mac=yes
+        ;;
+    *)
+        as_fn_error $? "\"OS $host_os is not supported\"" "$LINENO" 5
+        ;;
+esac
+
+# if static and windows use -static -libgcc and -libstdc++
+if test "$enable_static" = "yes" && test "$build_windows" = "yes"; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -static-libstdc++" >&5
+$as_echo_n "checking whether C compiler accepts -static-libstdc++... " >&6; }
+if ${ax_cv_check_cflags___static_libstdcpp+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -static-libstdc++"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ax_cv_check_cflags___static_libstdcpp=yes
+else
+  ax_cv_check_cflags___static_libstdcpp=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___static_libstdcpp" >&5
+$as_echo "$ax_cv_check_cflags___static_libstdcpp" >&6; }
+if test "x$ax_cv_check_cflags___static_libstdcpp" = xyes; then :
+  :
+else
+
+		as_fn_error $? "-static-libstdc++ flag needed" "$LINENO" 5
+
+fi
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -static-libgcc" >&5
+$as_echo_n "checking whether C compiler accepts -static-libgcc... " >&6; }
+if ${ax_cv_check_cflags___static_libgcc+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -static-libgcc"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ax_cv_check_cflags___static_libgcc=yes
+else
+  ax_cv_check_cflags___static_libgcc=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___static_libgcc" >&5
+$as_echo "$ax_cv_check_cflags___static_libgcc" >&6; }
+if test "x$ax_cv_check_cflags___static_libgcc" = xyes; then :
+  :
+else
+
+		as_fn_error $? "-static-libgcc flag needed" "$LINENO" 5
+
+fi
+
+	AM_LDFLAGS="-static-libstdc++ -static-libgcc"
+
+
+fi
+
+
+ if test "x$enable_shared" = "xyes"; then
+  SHARED_TRUE=
+  SHARED_FALSE='#'
+else
+  SHARED_TRUE='#'
+  SHARED_FALSE=
+fi
+
+
+  ax_cxx_compile_alternatives="17 1z"    ax_cxx_compile_cxx17_required=true
+  ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+  ac_success=no
+
+
+
+    if test x$ac_success = xno; then
+                for alternative in ${ax_cxx_compile_alternatives}; do
+      for switch in -std=c++${alternative} +std=c++${alternative} "-h std=c++${alternative}"; do
+        cachevar=`$as_echo "ax_cv_cxx_compile_cxx17_$switch" | $as_tr_sh`
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CXX supports C++17 features with $switch" >&5
+$as_echo_n "checking whether $CXX supports C++17 features with $switch... " >&6; }
+if eval \${$cachevar+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_save_CXX="$CXX"
+           CXX="$CXX $switch"
+           cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+// If the compiler admits that it is not ready for C++11, why torture it?
+// Hopefully, this will speed up the test.
+
+#ifndef __cplusplus
+
+#error "This is not a C++ compiler"
+
+#elif __cplusplus < 201103L
+
+#error "This is not a C++11 compiler"
+
+#else
+
+namespace cxx11
+{
+
+  namespace test_static_assert
+  {
+
+    template <typename T>
+    struct check
+    {
+      static_assert(sizeof(int) <= sizeof(T), "not big enough");
+    };
+
+  }
+
+  namespace test_final_override
+  {
+
+    struct Base
+    {
+      virtual ~Base() {}
+      virtual void f() {}
+    };
+
+    struct Derived : public Base
+    {
+      virtual ~Derived() override {}
+      virtual void f() override {}
+    };
+
+  }
+
+  namespace test_double_right_angle_brackets
+  {
+
+    template < typename T >
+    struct check {};
+
+    typedef check<void> single_type;
+    typedef check<check<void>> double_type;
+    typedef check<check<check<void>>> triple_type;
+    typedef check<check<check<check<void>>>> quadruple_type;
+
+  }
+
+  namespace test_decltype
+  {
+
+    int
+    f()
+    {
+      int a = 1;
+      decltype(a) b = 2;
+      return a + b;
+    }
+
+  }
+
+  namespace test_type_deduction
+  {
+
+    template < typename T1, typename T2 >
+    struct is_same
+    {
+      static const bool value = false;
+    };
+
+    template < typename T >
+    struct is_same<T, T>
+    {
+      static const bool value = true;
+    };
+
+    template < typename T1, typename T2 >
+    auto
+    add(T1 a1, T2 a2) -> decltype(a1 + a2)
+    {
+      return a1 + a2;
+    }
+
+    int
+    test(const int c, volatile int v)
+    {
+      static_assert(is_same<int, decltype(0)>::value == true, "");
+      static_assert(is_same<int, decltype(c)>::value == false, "");
+      static_assert(is_same<int, decltype(v)>::value == false, "");
+      auto ac = c;
+      auto av = v;
+      auto sumi = ac + av + 'x';
+      auto sumf = ac + av + 1.0;
+      static_assert(is_same<int, decltype(ac)>::value == true, "");
+      static_assert(is_same<int, decltype(av)>::value == true, "");
+      static_assert(is_same<int, decltype(sumi)>::value == true, "");
+      static_assert(is_same<int, decltype(sumf)>::value == false, "");
+      static_assert(is_same<int, decltype(add(c, v))>::value == true, "");
+      return (sumf > 0.0) ? sumi : add(c, v);
+    }
+
+  }
+
+  namespace test_noexcept
+  {
+
+    int f() { return 0; }
+    int g() noexcept { return 0; }
+
+    static_assert(noexcept(f()) == false, "");
+    static_assert(noexcept(g()) == true, "");
+
+  }
+
+  namespace test_constexpr
+  {
+
+    template < typename CharT >
+    unsigned long constexpr
+    strlen_c_r(const CharT *const s, const unsigned long acc) noexcept
+    {
+      return *s ? strlen_c_r(s + 1, acc + 1) : acc;
+    }
+
+    template < typename CharT >
+    unsigned long constexpr
+    strlen_c(const CharT *const s) noexcept
+    {
+      return strlen_c_r(s, 0UL);
+    }
+
+    static_assert(strlen_c("") == 0UL, "");
+    static_assert(strlen_c("1") == 1UL, "");
+    static_assert(strlen_c("example") == 7UL, "");
+    static_assert(strlen_c("another\0example") == 7UL, "");
+
+  }
+
+  namespace test_rvalue_references
+  {
+
+    template < int N >
+    struct answer
+    {
+      static constexpr int value = N;
+    };
+
+    answer<1> f(int&)       { return answer<1>(); }
+    answer<2> f(const int&) { return answer<2>(); }
+    answer<3> f(int&&)      { return answer<3>(); }
+
+    void
+    test()
+    {
+      int i = 0;
+      const int c = 0;
+      static_assert(decltype(f(i))::value == 1, "");
+      static_assert(decltype(f(c))::value == 2, "");
+      static_assert(decltype(f(0))::value == 3, "");
+    }
+
+  }
+
+  namespace test_uniform_initialization
+  {
+
+    struct test
+    {
+      static const int zero {};
+      static const int one {1};
+    };
+
+    static_assert(test::zero == 0, "");
+    static_assert(test::one == 1, "");
+
+  }
+
+  namespace test_lambdas
+  {
+
+    void
+    test1()
+    {
+      auto lambda1 = [](){};
+      auto lambda2 = lambda1;
+      lambda1();
+      lambda2();
+    }
+
+    int
+    test2()
+    {
+      auto a = [](int i, int j){ return i + j; }(1, 2);
+      auto b = []() -> int { return '0'; }();
+      auto c = [=](){ return a + b; }();
+      auto d = [&](){ return c; }();
+      auto e = [a, &b](int x) mutable {
+        const auto identity = [](int y){ return y; };
+        for (auto i = 0; i < a; ++i)
+          a += b--;
+        return x + identity(a + b);
+      }(0);
+      return a + b + c + d + e;
+    }
+
+    int
+    test3()
+    {
+      const auto nullary = [](){ return 0; };
+      const auto unary = [](int x){ return x; };
+      using nullary_t = decltype(nullary);
+      using unary_t = decltype(unary);
+      const auto higher1st = [](nullary_t f){ return f(); };
+      const auto higher2nd = [unary](nullary_t f1){
+        return [unary, f1](unary_t f2){ return f2(unary(f1())); };
+      };
+      return higher1st(nullary) + higher2nd(nullary)(unary);
+    }
+
+  }
+
+  namespace test_variadic_templates
+  {
+
+    template <int...>
+    struct sum;
+
+    template <int N0, int... N1toN>
+    struct sum<N0, N1toN...>
+    {
+      static constexpr auto value = N0 + sum<N1toN...>::value;
+    };
+
+    template <>
+    struct sum<>
+    {
+      static constexpr auto value = 0;
+    };
+
+    static_assert(sum<>::value == 0, "");
+    static_assert(sum<1>::value == 1, "");
+    static_assert(sum<23>::value == 23, "");
+    static_assert(sum<1, 2>::value == 3, "");
+    static_assert(sum<5, 5, 11>::value == 21, "");
+    static_assert(sum<2, 3, 5, 7, 11, 13>::value == 41, "");
+
+  }
+
+  // http://stackoverflow.com/questions/13728184/template-aliases-and-sfinae
+  // Clang 3.1 fails with headers of libstd++ 4.8.3 when using std::function
+  // because of this.
+  namespace test_template_alias_sfinae
+  {
+
+    struct foo {};
+
+    template<typename T>
+    using member = typename T::member_type;
+
+    template<typename T>
+    void func(...) {}
+
+    template<typename T>
+    void func(member<T>*) {}
+
+    void test();
+
+    void test() { func<foo>(0); }
+
+  }
+
+}  // namespace cxx11
+
+#endif  // __cplusplus >= 201103L
+
+
+
+
+// If the compiler admits that it is not ready for C++14, why torture it?
+// Hopefully, this will speed up the test.
+
+#ifndef __cplusplus
+
+#error "This is not a C++ compiler"
+
+#elif __cplusplus < 201402L
+
+#error "This is not a C++14 compiler"
+
+#else
+
+namespace cxx14
+{
+
+  namespace test_polymorphic_lambdas
+  {
+
+    int
+    test()
+    {
+      const auto lambda = [](auto&&... args){
+        const auto istiny = [](auto x){
+          return (sizeof(x) == 1UL) ? 1 : 0;
+        };
+        const int aretiny[] = { istiny(args)... };
+        return aretiny[0];
+      };
+      return lambda(1, 1L, 1.0f, '1');
+    }
+
+  }
+
+  namespace test_binary_literals
+  {
+
+    constexpr auto ivii = 0b0000000000101010;
+    static_assert(ivii == 42, "wrong value");
+
+  }
+
+  namespace test_generalized_constexpr
+  {
+
+    template < typename CharT >
+    constexpr unsigned long
+    strlen_c(const CharT *const s) noexcept
+    {
+      auto length = 0UL;
+      for (auto p = s; *p; ++p)
+        ++length;
+      return length;
+    }
+
+    static_assert(strlen_c("") == 0UL, "");
+    static_assert(strlen_c("x") == 1UL, "");
+    static_assert(strlen_c("test") == 4UL, "");
+    static_assert(strlen_c("another\0test") == 7UL, "");
+
+  }
+
+  namespace test_lambda_init_capture
+  {
+
+    int
+    test()
+    {
+      auto x = 0;
+      const auto lambda1 = [a = x](int b){ return a + b; };
+      const auto lambda2 = [a = lambda1(x)](){ return a; };
+      return lambda2();
+    }
+
+  }
+
+  namespace test_digit_separators
+  {
+
+    constexpr auto ten_million = 100'000'000;
+    static_assert(ten_million == 100000000, "");
+
+  }
+
+  namespace test_return_type_deduction
+  {
+
+    auto f(int& x) { return x; }
+    decltype(auto) g(int& x) { return x; }
+
+    template < typename T1, typename T2 >
+    struct is_same
+    {
+      static constexpr auto value = false;
+    };
+
+    template < typename T >
+    struct is_same<T, T>
+    {
+      static constexpr auto value = true;
+    };
+
+    int
+    test()
+    {
+      auto x = 0;
+      static_assert(is_same<int, decltype(f(x))>::value, "");
+      static_assert(is_same<int&, decltype(g(x))>::value, "");
+      return x;
+    }
+
+  }
+
+}  // namespace cxx14
+
+#endif  // __cplusplus >= 201402L
+
+
+
+
+// If the compiler admits that it is not ready for C++17, why torture it?
+// Hopefully, this will speed up the test.
+
+#ifndef __cplusplus
+
+#error "This is not a C++ compiler"
+
+#elif __cplusplus < 201703L
+
+#error "This is not a C++17 compiler"
+
+#else
+
+#include <initializer_list>
+#include <utility>
+#include <type_traits>
+
+namespace cxx17
+{
+
+  namespace test_constexpr_lambdas
+  {
+
+    constexpr int foo = [](){return 42;}();
+
+  }
+
+  namespace test::nested_namespace::definitions
+  {
+
+  }
+
+  namespace test_fold_expression
+  {
+
+    template<typename... Args>
+    int multiply(Args... args)
+    {
+      return (args * ... * 1);
+    }
+
+    template<typename... Args>
+    bool all(Args... args)
+    {
+      return (args && ...);
+    }
+
+  }
+
+  namespace test_extended_static_assert
+  {
+
+    static_assert (true);
+
+  }
+
+  namespace test_auto_brace_init_list
+  {
+
+    auto foo = {5};
+    auto bar {5};
+
+    static_assert(std::is_same<std::initializer_list<int>, decltype(foo)>::value);
+    static_assert(std::is_same<int, decltype(bar)>::value);
+  }
+
+  namespace test_typename_in_template_template_parameter
+  {
+
+    template<template<typename> typename X> struct D;
+
+  }
+
+  namespace test_fallthrough_nodiscard_maybe_unused_attributes
+  {
+
+    int f1()
+    {
+      return 42;
+    }
+
+    [[nodiscard]] int f2()
+    {
+      [[maybe_unused]] auto unused = f1();
+
+      switch (f1())
+      {
+      case 17:
+        f1();
+        [[fallthrough]];
+      case 42:
+        f1();
+      }
+      return f1();
+    }
+
+  }
+
+  namespace test_extended_aggregate_initialization
+  {
+
+    struct base1
+    {
+      int b1, b2 = 42;
+    };
+
+    struct base2
+    {
+      base2() {
+        b3 = 42;
+      }
+      int b3;
+    };
+
+    struct derived : base1, base2
+    {
+        int d;
+    };
+
+    derived d1 {{1, 2}, {}, 4};  // full initialization
+    derived d2 {{}, {}, 4};      // value-initialized bases
+
+  }
+
+  namespace test_general_range_based_for_loop
+  {
+
+    struct iter
+    {
+      int i;
+
+      int& operator* ()
+      {
+        return i;
+      }
+
+      const int& operator* () const
+      {
+        return i;
+      }
+
+      iter& operator++()
+      {
+        ++i;
+        return *this;
+      }
+    };
+
+    struct sentinel
+    {
+      int i;
+    };
+
+    bool operator== (const iter& i, const sentinel& s)
+    {
+      return i.i == s.i;
+    }
+
+    bool operator!= (const iter& i, const sentinel& s)
+    {
+      return !(i == s);
+    }
+
+    struct range
+    {
+      iter begin() const
+      {
+        return {0};
+      }
+
+      sentinel end() const
+      {
+        return {5};
+      }
+    };
+
+    void f()
+    {
+      range r {};
+
+      for (auto i : r)
+      {
+        [[maybe_unused]] auto v = i;
+      }
+    }
+
+  }
+
+  namespace test_lambda_capture_asterisk_this_by_value
+  {
+
+    struct t
+    {
+      int i;
+      int foo()
+      {
+        return [*this]()
+        {
+          return i;
+        }();
+      }
+    };
+
+  }
+
+  namespace test_enum_class_construction
+  {
+
+    enum class byte : unsigned char
+    {};
+
+    byte foo {42};
+
+  }
+
+  namespace test_constexpr_if
+  {
+
+    template <bool cond>
+    int f ()
+    {
+      if constexpr(cond)
+      {
+        return 13;
+      }
+      else
+      {
+        return 42;
+      }
+    }
+
+  }
+
+  namespace test_selection_statement_with_initializer
+  {
+
+    int f()
+    {
+      return 13;
+    }
+
+    int f2()
+    {
+      if (auto i = f(); i > 0)
+      {
+        return 3;
+      }
+
+      switch (auto i = f(); i + 4)
+      {
+      case 17:
+        return 2;
+
+      default:
+        return 1;
+      }
+    }
+
+  }
+
+  namespace test_template_argument_deduction_for_class_templates
+  {
+
+    template <typename T1, typename T2>
+    struct pair
+    {
+      pair (T1 p1, T2 p2)
+        : m1 {p1},
+          m2 {p2}
+      {}
+
+      T1 m1;
+      T2 m2;
+    };
+
+    void f()
+    {
+      [[maybe_unused]] auto p = pair{13, 42u};
+    }
+
+  }
+
+  namespace test_non_type_auto_template_parameters
+  {
+
+    template <auto n>
+    struct B
+    {};
+
+    B<5> b1;
+    B<'a'> b2;
+
+  }
+
+  namespace test_structured_bindings
+  {
+
+    int arr[2] = { 1, 2 };
+    std::pair<int, int> pr = { 1, 2 };
+
+    auto f1() -> int(&)[2]
+    {
+      return arr;
+    }
+
+    auto f2() -> std::pair<int, int>&
+    {
+      return pr;
+    }
+
+    struct S
+    {
+      int x1 : 2;
+      volatile double y1;
+    };
+
+    S f3()
+    {
+      return {};
+    }
+
+    auto [ x1, y1 ] = f1();
+    auto& [ xr1, yr1 ] = f1();
+    auto [ x2, y2 ] = f2();
+    auto& [ xr2, yr2 ] = f2();
+    const auto [ x3, y3 ] = f3();
+
+  }
+
+  namespace test_exception_spec_type_system
+  {
+
+    struct Good {};
+    struct Bad {};
+
+    void g1() noexcept;
+    void g2();
+
+    template<typename T>
+    Bad
+    f(T*, T*);
+
+    template<typename T1, typename T2>
+    Good
+    f(T1*, T2*);
+
+    static_assert (std::is_same_v<Good, decltype(f(g1, g2))>);
+
+  }
+
+  namespace test_inline_variables
+  {
+
+    template<class T> void f(T)
+    {}
+
+    template<class T> inline T g(T)
+    {
+      return T{};
+    }
+
+    template<> inline void f<>(int)
+    {}
+
+    template<> int g<>(int)
+    {
+      return 5;
+    }
+
+  }
+
+}  // namespace cxx17
+
+#endif  // __cplusplus < 201703L
+
+
+
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  eval $cachevar=yes
+else
+  eval $cachevar=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+           CXX="$ac_save_CXX"
+fi
+eval ac_res=\$$cachevar
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+        if eval test x\$$cachevar = xyes; then
+          CXX="$CXX $switch"
+          if test -n "$CXXCPP" ; then
+            CXXCPP="$CXXCPP $switch"
+          fi
+          ac_success=yes
+          break
+        fi
+      done
+      if test x$ac_success = xyes; then
+        break
+      fi
+    done
+  fi
+  ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+  if test x$ax_cxx_compile_cxx17_required = xtrue; then
+    if test x$ac_success = xno; then
+      as_fn_error $? "*** A compiler with support for C++17 language features is required." "$LINENO" 5
+    fi
+  fi
+  if test x$ac_success = xno; then
+    HAVE_CXX17=0
+    { $as_echo "$as_me:${as_lineno-$LINENO}: No compiler with C++17 support was found" >&5
+$as_echo "$as_me: No compiler with C++17 support was found" >&6;}
+  else
+    HAVE_CXX17=1
+
+$as_echo "#define HAVE_CXX17 1" >>confdefs.h
+
+  fi
+
+
+
+if test "$HAVE_CXX17" != 1; then
+	as_fn_error $? "This Application need c++17 support" "$LINENO" 5
+fi
+CXXFLAGS="$CXXFLAGS -std=c++17"
+
+# check for libraries
+
+
+# Check whether --with-wxdir was given.
+if test "${with_wxdir+set}" = set; then :
+  withval=$with_wxdir;  wx_config_name="$withval/wx-config"
+                  wx_config_args="--inplace"
+fi
+
+
+# Check whether --with-wx-config was given.
+if test "${with_wx_config+set}" = set; then :
+  withval=$with_wx_config; wx_config_name="$withval"
+fi
+
+
+# Check whether --with-wx-prefix was given.
+if test "${with_wx_prefix+set}" = set; then :
+  withval=$with_wx_prefix; wx_config_prefix="$withval"
+else
+  wx_config_prefix=""
+fi
+
+
+# Check whether --with-wx-exec-prefix was given.
+if test "${with_wx_exec_prefix+set}" = set; then :
+  withval=$with_wx_exec_prefix; wx_config_exec_prefix="$withval"
+else
+  wx_config_exec_prefix=""
+fi
+
+
+reqwx=3.0.4
+
+
+    if test x${WX_CONFIG_NAME+set} != xset ; then
+     WX_CONFIG_NAME=wx-config
+  fi
+
+  if test "x$wx_config_name" != x ; then
+     WX_CONFIG_NAME="$wx_config_name"
+  fi
+
+    if test x$wx_config_exec_prefix != x ; then
+     wx_config_args="$wx_config_args --exec-prefix=$wx_config_exec_prefix"
+     WX_LOOKUP_PATH="$wx_config_exec_prefix/bin"
+  fi
+  if test x$wx_config_prefix != x ; then
+     wx_config_args="$wx_config_args --prefix=$wx_config_prefix"
+     WX_LOOKUP_PATH="$WX_LOOKUP_PATH:$wx_config_prefix/bin"
+  fi
+  if test "$cross_compiling" = "yes"; then
+     wx_config_args="$wx_config_args --host=$host_alias"
+  fi
+
+    if test -x "$WX_CONFIG_NAME" ; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for wx-config" >&5
+$as_echo_n "checking for wx-config... " >&6; }
+     WX_CONFIG_PATH="$WX_CONFIG_NAME"
+     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $WX_CONFIG_PATH" >&5
+$as_echo "$WX_CONFIG_PATH" >&6; }
+  else
+     # Extract the first word of "$WX_CONFIG_NAME", so it can be a program name with args.
+set dummy $WX_CONFIG_NAME; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_WX_CONFIG_PATH+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $WX_CONFIG_PATH in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_WX_CONFIG_PATH="$WX_CONFIG_PATH" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy=""$WX_LOOKUP_PATH:$PATH""
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_WX_CONFIG_PATH="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_WX_CONFIG_PATH" && ac_cv_path_WX_CONFIG_PATH="no"
+  ;;
+esac
+fi
+WX_CONFIG_PATH=$ac_cv_path_WX_CONFIG_PATH
+if test -n "$WX_CONFIG_PATH"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $WX_CONFIG_PATH" >&5
+$as_echo "$WX_CONFIG_PATH" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  fi
+
+  if test "$WX_CONFIG_PATH" != "no" ; then
+    WX_VERSION=""
+
+    min_wx_version=$reqwx
+    if test -z "" ; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for wxWidgets version >= $min_wx_version" >&5
+$as_echo_n "checking for wxWidgets version >= $min_wx_version... " >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for wxWidgets version >= $min_wx_version ()" >&5
+$as_echo_n "checking for wxWidgets version >= $min_wx_version ()... " >&6; }
+    fi
+
+            WX_CONFIG_WITH_ARGS="$WX_CONFIG_PATH $wx_config_args "
+
+    WX_VERSION=`$WX_CONFIG_WITH_ARGS --version 2>/dev/null`
+    wx_config_major_version=`echo $WX_VERSION | \
+           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\1/'`
+    wx_config_minor_version=`echo $WX_VERSION | \
+           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\2/'`
+    wx_config_micro_version=`echo $WX_VERSION | \
+           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\3/'`
+
+    wx_requested_major_version=`echo $min_wx_version | \
+           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\1/'`
+    wx_requested_minor_version=`echo $min_wx_version | \
+           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\2/'`
+    wx_requested_micro_version=`echo $min_wx_version | \
+           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\3/'`
+
+
+    wx_ver_ok=""
+    if test "x$WX_VERSION" != x ; then
+      if test $wx_config_major_version -gt $wx_requested_major_version; then
+        wx_ver_ok=yes
+      else
+        if test $wx_config_major_version -eq $wx_requested_major_version; then
+           if test $wx_config_minor_version -gt $wx_requested_minor_version; then
+              wx_ver_ok=yes
+           else
+              if test $wx_config_minor_version -eq $wx_requested_minor_version; then
+                 if test $wx_config_micro_version -ge $wx_requested_micro_version; then
+                    wx_ver_ok=yes
+                 fi
+              fi
+           fi
+        fi
+      fi
+    fi
+
+
+    if test -n "$wx_ver_ok"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (version $WX_VERSION)" >&5
+$as_echo "yes (version $WX_VERSION)" >&6; }
+      WX_LIBS=`$WX_CONFIG_WITH_ARGS --libs `
+
+                              { $as_echo "$as_me:${as_lineno-$LINENO}: checking for wxWidgets static library" >&5
+$as_echo_n "checking for wxWidgets static library... " >&6; }
+      WX_LIBS_STATIC=`$WX_CONFIG_WITH_ARGS --static --libs  2>/dev/null`
+      if test "x$WX_LIBS_STATIC" = "x"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+      fi
+
+            wx_has_cppflags=""
+      if test $wx_config_major_version -gt 2; then
+        wx_has_cppflags=yes
+      else
+        if test $wx_config_major_version -eq 2; then
+           if test $wx_config_minor_version -gt 2; then
+              wx_has_cppflags=yes
+           else
+              if test $wx_config_minor_version -eq 2; then
+                 if test $wx_config_micro_version -ge 6; then
+                    wx_has_cppflags=yes
+                 fi
+              fi
+           fi
+        fi
+      fi
+
+            wx_has_rescomp=""
+      if test $wx_config_major_version -gt 2; then
+        wx_has_rescomp=yes
+      else
+        if test $wx_config_major_version -eq 2; then
+           if test $wx_config_minor_version -ge 7; then
+              wx_has_rescomp=yes
+           fi
+        fi
+      fi
+      if test "x$wx_has_rescomp" = x ; then
+                  WX_RESCOMP=
+      else
+         WX_RESCOMP=`$WX_CONFIG_WITH_ARGS --rescomp`
+      fi
+
+      if test "x$wx_has_cppflags" = x ; then
+                  WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags `
+         WX_CPPFLAGS=$WX_CFLAGS
+         WX_CXXFLAGS=$WX_CFLAGS
+
+         WX_CFLAGS_ONLY=$WX_CFLAGS
+         WX_CXXFLAGS_ONLY=$WX_CFLAGS
+      else
+                  WX_CPPFLAGS=`$WX_CONFIG_WITH_ARGS --cppflags `
+         WX_CXXFLAGS=`$WX_CONFIG_WITH_ARGS --cxxflags `
+         WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags `
+
+         WX_CFLAGS_ONLY=`echo $WX_CFLAGS | sed "s@^$WX_CPPFLAGS *@@"`
+         WX_CXXFLAGS_ONLY=`echo $WX_CXXFLAGS | sed "s@^$WX_CFLAGS *@@"`
+      fi
+
+      wxWin=1
+
+    else
+
+       if test "x$WX_VERSION" = x; then
+                    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+       else
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (version $WX_VERSION is not new enough)" >&5
+$as_echo "no (version $WX_VERSION is not new enough)" >&6; }
+       fi
+
+       WX_CFLAGS=""
+       WX_CPPFLAGS=""
+       WX_CXXFLAGS=""
+       WX_LIBS=""
+       WX_LIBS_STATIC=""
+       WX_RESCOMP=""
+
+       if test ! -z ""; then
+
+          wx_error_message="
+    The configuration you asked for $PACKAGE_NAME requires a wxWidgets
+    build with the following settings:
+
+    but such build is not available.
+
+    To see the wxWidgets builds available on this system, please use
+    'wx-config --list' command. To use the default build, returned by
+    'wx-config --selected-config', use the options with their 'auto'
+    default values."
+
+       fi
+
+       wx_error_message="
+    The requested wxWidgets build couldn't be found.
+    $wx_error_message
+
+    If you still get this error, then check that 'wx-config' is
+    in path, the directory where wxWidgets libraries are installed
+    (returned by 'wx-config --libs' command) is in LD_LIBRARY_PATH
+    or equivalent variable and wxWidgets version is $reqwx or above."
+
+       as_fn_error $? "$wx_error_message" "$LINENO" 5
+
+    fi
+  else
+
+    WX_CFLAGS=""
+    WX_CPPFLAGS=""
+    WX_CXXFLAGS=""
+    WX_LIBS=""
+    WX_LIBS_STATIC=""
+    WX_RESCOMP=""
+
+    :
+
+  fi
+
+
+
+
+
+
+
+
+
+
+
+      WX_VERSION_MAJOR="$wx_config_major_version"
+  WX_VERSION_MINOR="$wx_config_minor_version"
+  WX_VERSION_MICRO="$wx_config_micro_version"
+
+
+
+
+
+if test "$wxWin" != 1; then
+	as_fn_error $? "
+		wxWidgets must be installed on your system.
+
+		Please check that wx-config is in path, the directory
+		where wxWidgets libraries are installed (returned by
+		'wx-config --libs' or 'wx-config --static --libs' command)
+		is in LD_LIBRARY_PATH or equivalent variable and
+		wxWidgets version is $reqwx or above.
+		" "$LINENO" 5
+fi
+CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
+CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
+CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
+LIBS="$LIBS $WX_LIBS"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -17345,10 +17487,6 @@ LIBOBJS=$ac_libobjs
 LTLIBOBJS=$ac_ltlibobjs
 
 
-if test -z "${SHARED_TRUE}" && test -z "${SHARED_FALSE}"; then
-  as_fn_error $? "conditional \"SHARED\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking that generated files are newer than configure" >&5
 $as_echo_n "checking that generated files are newer than configure... " >&6; }
    if test -n "$am_sleep_pid"; then
@@ -17377,6 +17515,10 @@ else
   am__EXEEXT_FALSE=
 fi
 
+if test -z "${SHARED_TRUE}" && test -z "${SHARED_FALSE}"; then
+  as_fn_error $? "conditional \"SHARED\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 
 : "${CONFIG_STATUS=./config.status}"
 ac_write_fail=0

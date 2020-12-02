@@ -12,6 +12,14 @@ AC_CONFIG_AUX_DIR(build-aux)
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 
+#Check for compiler
+AC_PROG_CC
+AC_PROG_CXX
+
+
+m4_include([build-aux/wxwin.m4])
+m4_include([build-aux/ax_cxx_compile_stdcxx.m4])
+m4_include([build-aux/ax_check_compile_flag.m4])
 # notice that if --host was given but --build was not, cross_compiling is
 # only set to "maybe" and not "yes" and will be either set to "yes" later or
 # configure will exit with error in AC_PROG_CC so don't test for = "yes" here
@@ -24,13 +32,49 @@ else
     HOST_SUFFIX=
 fi
 
+AC_CONFIG_FILES([Makefile])
+
+AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
+
+AM_PROG_AR([act-if-fail])
+LT_INIT([shared disable-static])
+
+# check for os
+build_linux=no
+build_windows=no
+build_mac=no
+
+# Detect the target system
+case "${host_os}" in
+    linux*)
+        build_linux=yes
+        ;;
+    cygwin*|mingw*)
+        build_windows=yes
+        ;;
+    darwin*)
+        build_mac=yes
+        ;;
+    *)
+        AC_MSG_ERROR(["OS $host_os is not supported"])
+        ;;
+esac
+
+# if static and windows use -static -libgcc and -libstdc++
+if test "$enable_static" = "yes" && test "$build_windows" = "yes"; then
+	AX_CHECK_COMPILE_FLAG([-static-libstdc++], ,[
+		AC_MSG_ERROR([-static-libstdc++ flag needed])
+	], )
+	AX_CHECK_COMPILE_FLAG([-static-libgcc], ,[
+		AC_MSG_ERROR([-static-libgcc flag needed])
+	], )
+	AC_SUBST([AM_LDFLAGS],["-static-libstdc++ -static-libgcc"])
+
+fi
+
+
 AM_CONDITIONAL([SHARED], test "x$enable_shared" = "xyes")
 
-#Check for compiler
-AC_PROG_CC
-AC_PROG_CXX
-
-m4_include([build-aux/ax_cxx_compile_stdcxx.m4])
 AX_CXX_COMPILE_STDCXX([17],[noext],[mandatory])
 
 if test "$HAVE_CXX17" != 1; then
@@ -38,7 +82,6 @@ if test "$HAVE_CXX17" != 1; then
 fi
 CXXFLAGS="$CXXFLAGS -std=c++17"
 
-m4_include([build-aux/wxwin.m4])
 # check for libraries
 AM_OPTIONS_WXCONFIG
 reqwx=3.0.4
@@ -58,13 +101,6 @@ CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
 CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
 CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
 LIBS="$LIBS $WX_LIBS"
-AC_CONFIG_FILES([Makefile])
-
-AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
-
-AM_PROG_AR([act-if-fail])
-LT_INIT()
-
 
 AC_OUTPUT
 

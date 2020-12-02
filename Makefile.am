@@ -1,12 +1,7 @@
 
-VPATH = @srcdir@/src
 AM_CPPFLAGS = -I@srcdir@/src
 
-if SHARED
-    # sds
-endif
-
-base = base
+base = src/base
 basedir = @abs_builddir@/base
 base_LTLIBRARIES = libcompare.la libpath.la
 
@@ -15,7 +10,7 @@ base_LTLIBRARIES = libcompare.la libpath.la
     libpath_la_SOURCES = $(base)/path.cpp
 
 
-handler = handler
+handler = src/handler
 handlerdir = @abs_builddir@/handler
 handler_LTLIBRARIES = libdefaulthandler.la libarchivehandler.la libhandlerfactory.la
 
@@ -30,7 +25,7 @@ handler_LTLIBRARIES = libdefaulthandler.la libarchivehandler.la libhandlerfactor
 
 
 # make libraries for bitmap
-bitmap = bitmap
+bitmap = src/bitmap
 bitmapdir = @abs_builddir@/bitmap
 bitmap_LTLIBRARIES = libbitmap.la libsize.la libposition.la libbmp.la
 
@@ -39,11 +34,11 @@ bitmap_LTLIBRARIES = libbitmap.la libsize.la libposition.la libbmp.la
     libbitmap_la_SOURCES = $(bitmap)/bitmap.cpp
     libbitmap_la_LIBADD = libsize.la libposition.la libbmp.la
 
-    libsize_la_SOURCES = $(bitmap)/size.cpp libbmp.la
+    libsize_la_SOURCES = $(bitmap)/size.cpp
 
-    libposition_la_SOURCES = $(bitmap)/position.cpp libbmp.la
+    libposition_la_SOURCES = $(bitmap)/position.cpp
 
-reader = reader
+reader = src/reader
 readerdir = @abs_builddir@/reader   
 reader_LTLIBRARIES =  libthreadreader.la libwindowreader.la
 
@@ -53,7 +48,7 @@ reader_LTLIBRARIES =  libthreadreader.la libwindowreader.la
     libwindowreader_la_LIBADD = libthreadreader.la libhandlerfactory.la libbitmap.la libbmp.la
 
 # make libraries for gui
-gui = gui
+gui = src/gui
 guidir = @abs_builddir@/gui
 gui_LTLIBRARIES = libframe.la libpanel.la
     # make source and link for frame
@@ -65,8 +60,7 @@ gui_LTLIBRARIES = libframe.la libpanel.la
 
 
 bin_PROGRAMS = fmr
-fmr_SOURCES = main/app.cpp
+fmr_SOURCES = src/main/app.cpp
 fmr_LDADD = libframe.la
-# fmr_LDADD  = libframe.la libpanel.la libwindowreader.la libbitmap.la libsize.la libposition.la  libhandlerfactory.la libdefaulthandler.la libarchivehandler.la
 
     

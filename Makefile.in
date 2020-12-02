@@ -15,6 +15,7 @@
 @SET_MAKE@
 
 
+VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
     false; \
@@ -91,9 +92,10 @@ host_triplet = @host@
 bin_PROGRAMS = fmr$(EXEEXT)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps =  \
+am__aclocal_m4_deps = $(top_srcdir)/build-aux/wxwin.m4 \
 	$(top_srcdir)/build-aux/ax_cxx_compile_stdcxx.m4 \
-	$(top_srcdir)/build-aux/wxwin.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/build-aux/ax_check_compile_flag.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -184,7 +186,7 @@ libwindowreader_la_DEPENDENCIES = libthreadreader.la \
 	libhandlerfactory.la libbitmap.la libbmp.la
 am_libwindowreader_la_OBJECTS = $(reader)/windowreader.lo
 libwindowreader_la_OBJECTS = $(am_libwindowreader_la_OBJECTS)
-am_fmr_OBJECTS = main/app.$(OBJEXT)
+am_fmr_OBJECTS = src/main/app.$(OBJEXT)
 fmr_OBJECTS = $(am_fmr_OBJECTS)
 fmr_DEPENDENCIES = libframe.la
 AM_V_P = $(am__v_P_@AM_V@)
@@ -211,7 +213,7 @@ am__depfiles_remade = $(base)/$(DEPDIR)/compare.Plo \
 	$(handler)/$(DEPDIR)/defaulthandler.Plo \
 	$(handler)/$(DEPDIR)/handlerfactory.Plo \
 	$(reader)/$(DEPDIR)/threadreader.Plo \
-	$(reader)/$(DEPDIR)/windowreader.Plo main/$(DEPDIR)/app.Po
+	$(reader)/$(DEPDIR)/windowreader.Plo src/main/$(DEPDIR)/app.Po
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -299,10 +301,10 @@ distuninstallcheck_listfiles = find . -type f -print
 am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \
   | sed 's|^\./|$(prefix)/|' | grep -v '$(infodir)/dir$$'
 distcleancheck_listfiles = find . -type f -print
-VPATH = @srcdir@/src
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
+AM_LDFLAGS = @AM_LDFLAGS@
 AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
@@ -435,12 +437,12 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -I@srcdir@/src
-base = base
+base = src/base
 basedir = @abs_builddir@/base
 base_LTLIBRARIES = libcompare.la libpath.la
 libcompare_la_SOURCES = $(base)/compare.cpp
 libpath_la_SOURCES = $(base)/path.cpp
-handler = handler
+handler = src/handler
 handlerdir = @abs_builddir@/handler
 handler_LTLIBRARIES = libdefaulthandler.la libarchivehandler.la libhandlerfactory.la
 libdefaulthandler_la_SOURCES = $(handler)/defaulthandler.cpp
@@ -450,15 +452,15 @@ libhandlerfactory_la_SOURCES = $(handler)/handlerfactory.cpp
 libhandlerfactory_la_LIBADD = libdefaulthandler.la libarchivehandler.la libcompare.la libpath.la
 
 # make libraries for bitmap
-bitmap = bitmap
+bitmap = src/bitmap
 bitmapdir = @abs_builddir@/bitmap
 bitmap_LTLIBRARIES = libbitmap.la libsize.la libposition.la libbmp.la
 libbmp_la_SOURCES = $(bitmap)/bmp.cpp
 libbitmap_la_SOURCES = $(bitmap)/bitmap.cpp
 libbitmap_la_LIBADD = libsize.la libposition.la libbmp.la
-libsize_la_SOURCES = $(bitmap)/size.cpp libbmp.la
-libposition_la_SOURCES = $(bitmap)/position.cpp libbmp.la
-reader = reader
+libsize_la_SOURCES = $(bitmap)/size.cpp
+libposition_la_SOURCES = $(bitmap)/position.cpp
+reader = src/reader
 readerdir = @abs_builddir@/reader   
 reader_LTLIBRARIES = libthreadreader.la libwindowreader.la
 libthreadreader_la_SOURCES = $(reader)/threadreader.cpp
@@ -466,14 +468,14 @@ libwindowreader_la_SOURCES = $(reader)/windowreader.cpp
 libwindowreader_la_LIBADD = libthreadreader.la libhandlerfactory.la libbitmap.la libbmp.la
 
 # make libraries for gui
-gui = gui
+gui = src/gui
 guidir = @abs_builddir@/gui
 gui_LTLIBRARIES = libframe.la libpanel.la
 libframe_la_SOURCES = $(gui)/frame.cpp
 libframe_la_LIBADD = libpanel.la
 libpanel_la_SOURCES = $(gui)/panel.cpp
 libpanel_la_LIBADD = libwindowreader.la
-fmr_SOURCES = main/app.cpp
+fmr_SOURCES = src/main/app.cpp
 fmr_LDADD = libframe.la
 all: all-am
 
@@ -831,14 +833,14 @@ $(reader)/windowreader.lo: $(reader)/$(am__dirstamp) \
 
 libwindowreader.la: $(libwindowreader_la_OBJECTS) $(libwindowreader_la_DEPENDENCIES) $(EXTRA_libwindowreader_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(readerdir) $(libwindowreader_la_OBJECTS) $(libwindowreader_la_LIBADD) $(LIBS)
-main/$(am__dirstamp):
-	@$(MKDIR_P) main
-	@: > main/$(am__dirstamp)
-main/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) main/$(DEPDIR)
-	@: > main/$(DEPDIR)/$(am__dirstamp)
-main/app.$(OBJEXT): main/$(am__dirstamp) \
-	main/$(DEPDIR)/$(am__dirstamp)
+src/main/$(am__dirstamp):
+	@$(MKDIR_P) src/main
+	@: > src/main/$(am__dirstamp)
+src/main/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/main/$(DEPDIR)
+	@: > src/main/$(DEPDIR)/$(am__dirstamp)
+src/main/app.$(OBJEXT): src/main/$(am__dirstamp) \
+	src/main/$(DEPDIR)/$(am__dirstamp)
 
 fmr$(EXEEXT): $(fmr_OBJECTS) $(fmr_DEPENDENCIES) $(EXTRA_fmr_DEPENDENCIES) 
 	@rm -f fmr$(EXEEXT)
@@ -856,7 +858,7 @@ mostlyclean-compile:
 	-rm -f $(handler)/*.lo
 	-rm -f $(reader)/*.$(OBJEXT)
 	-rm -f $(reader)/*.lo
-	-rm -f main/*.$(OBJEXT)
+	-rm -f src/main/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -874,7 +876,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/handlerfactory.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/threadreader.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/windowreader.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@main/$(DEPDIR)/app.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@src/main/$(DEPDIR)/app.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -1184,8 +1186,8 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-rm -f main/$(DEPDIR)/$(am__dirstamp)
-	-rm -f main/$(am__dirstamp)
+	-rm -f src/main/$(DEPDIR)/$(am__dirstamp)
+	-rm -f src/main/$(am__dirstamp)
 	-test -z "$(base)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(base)/$(DEPDIR)/$(am__dirstamp)
 	-test -z "$(base)/$(am__dirstamp)" || rm -f $(base)/$(am__dirstamp)
 	-test -z "$(bitmap)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(bitmap)/$(DEPDIR)/$(am__dirstamp)
@@ -1222,7 +1224,7 @@ distclean: distclean-am
 	-rm -f $(handler)/$(DEPDIR)/handlerfactory.Plo
 	-rm -f $(reader)/$(DEPDIR)/threadreader.Plo
 	-rm -f $(reader)/$(DEPDIR)/windowreader.Plo
-	-rm -f main/$(DEPDIR)/app.Po
+	-rm -f src/main/$(DEPDIR)/app.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-tags
@@ -1285,7 +1287,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f $(handler)/$(DEPDIR)/handlerfactory.Plo
 	-rm -f $(reader)/$(DEPDIR)/threadreader.Plo
 	-rm -f $(reader)/$(DEPDIR)/windowreader.Plo
-	-rm -f main/$(DEPDIR)/app.Po
+	-rm -f src/main/$(DEPDIR)/app.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -1335,12 +1337,9 @@ uninstall-am: uninstall-baseLTLIBRARIES uninstall-binPROGRAMS \
 
 .PRECIOUS: Makefile
 
-
-@SHARED_TRUE@    # sds
     # make source and link for bitmap
     # make source and link for frame
     # make source and link for panel
-# fmr_LDADD  = libframe.la libpanel.la libwindowreader.la libbitmap.la libsize.la libposition.la  libhandlerfactory.la libdefaulthandler.la libarchivehandler.la
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
