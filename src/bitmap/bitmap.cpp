@@ -99,6 +99,7 @@ void Bitmap::Resize( size_t limit )
     // use limit if m_limit is larger than limit
     limit = m_limit > limit ? limit : m_limit;
     Get().resize(limit);
+    Refresh();
 };
 
 void Bitmap::SetLimit( size_t limit )
