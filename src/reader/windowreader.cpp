@@ -29,15 +29,27 @@
 #include <wx/dcclient.h>
 
 #include "handler/handlerfactory.h"
+#include <wx/log.h>
+
+// TODO : Make separate thread controller
 
 namespace Reader
 {
+
+#define Free( var )         \
+    if ( var )              \
+    {                       \
+        delete var;         \
+        var = NULL;         \
+    }
 
 wxBEGIN_EVENT_TABLE( Window, wxWindow )
     EVT_PAINT(Window::OnDraw)
 //     EVT_MOTION(Window::OnMouseMotion)
 //     EVT_MOUSEWHEEL(Window::OnMouseWheel)
 //     EVT_KEY_DOWN(Window::OnKeyDown)
+    EVT_COMMAND( wxID_ANY, EVT_COMMAND_LOADTHREAD_UPDATE, Window::OnThreadUpdate )
+    EVT_COMMAND( wxID_ANY, EVT_COMMAND_LOADTHREAD_COMPLETED, Window::OnThreadComplete)
 wxEND_EVENT_TABLE()
 
 Window::Window( wxWindow* parent, wxWindowID id, const wxPoint & pos, 
@@ -45,59 +57,99 @@ Window::Window( wxWindow* parent, wxWindowID id, const wxPoint & pos,
     wxPanel( parent, id, wxDefaultPosition, size, style | wxVSCROLL | wxHSCROLL, name )
 {
     m_config = Config::Get();
-
-    m_bitmap = new Bitmap(this);
-    m_factory = new HandlerFactory();
-    m_thread = new Thread( this, m_bitmap );
-
-    int limit = ConfRead("ImageShowLimit", 1 );
-    m_bitmap->SetLimit( limit );
-
-    int limitNext = ( ConfRead("ImageShowLimit", 1 ) > ConfRead("ImageMemoryLimitNext", NO_LIMIT ) ) ?
-                    ConfRead("ImageShowLimit",1) : ConfRead("ImageMemoryLimitNext", NO_LIMIT );
-
-    m_thread->SetLimit( ConfRead("ImageMemoryLimitPrev", NO_LIMIT ), limitNext );
 };
 
 Window::~Window()
 {
-    delete m_thread;
+    if ( m_thread ) m_thread->Delete();
 }
 
 void Window::Open( const wxString& path )
 {
+    // open if path is not empty
     if ( path != wxEmptyString )
     {
-        Clear(); 
-        m_bitmap->Clear();
-
-        #define GetFileHandler( con )                   \
-        if ( con )                                      \
-        {                                               \
-            m_factory->Find( path );                    \
-            if ( m_fileHandler ) delete m_fileHandler;  \
-            m_fileHandler = m_factory->NewHandler();    \
-        }
-
-        GetFileHandler( !GetHandler() )
-        else GetFileHandler( !m_factory->Is( GetHandler()->GetName(),path) )
-
+        Handler *tempHandler = m_fileHandler;
+        Bitmap *tempBitmap = m_bitmap;
+        LoadThread *tempThread = m_thread;
         SetVirtualSize( GetClientSize() + wxSize(1,0) );
 
-        ReloadConfig();
-        m_thread->SetHandler( GetHandler() );
+        Handler *handler = NewHandler( path );
+        // if handler found prepare for runing thread
+        if ( handler )
+        {
+            if ( handler->Size() > 0 )
+            {
+                m_config->Write("RecentlyOpened", path );
+                ReloadConfig();
+                size_t limitPrev = ConfRead("ImageMemoryLimitPrev", NO_LIMIT );
+                size_t limitNext = ConfRead("ImageMemoryLimitNext", NO_LIMIT );
 
-        m_config->Write("RecentlyOpened", path );
-        m_thread->Open( path );
+
+                Bitmap *bitmap = NewBitmap( handler->Size() );
+                size_t idx = handler->Index( path );
+
+                LoadThread *thread = new LoadThread( this );
+                thread->SetParameter( bitmap, handler, idx );
+                thread->SetLimit( limitPrev, limitNext );
+
+                if ( thread->Run() != wxTHREAD_NO_ERROR )
+                {
+                    wxLogError("Can't Create Thread");
+                    Free(handler)
+                    Free(bitmap)
+                    Free(thread)
+                    return;
+                }
+
+                Free(tempHandler);
+                Free(tempBitmap);
+                Free(tempThread);
+
+                m_fileHandler = handler;
+                m_bitmap = bitmap;
+                m_thread = thread;
+            }
+            else
+                wxLogStatus( path + " doesn't have any image");
+        } // end of if m_filehandler not null
+    } // end of if path not empty
+}
+
+Handler *Window::NewHandler( const wxString &path )
+{
+    Handler *handler = HandlerFactory::NewHandler(path);
+
+    if ( handler )
+    {
+        handler->Open(path);
+        handler->Traverse( true );
+        if ( handler->GetParent() )
+            handler->Traverse();
     }
+    
+    return handler;
+}
+
+Bitmap *Window::NewBitmap( size_t size )
+{
+    Bitmap *bitmap = NULL;
+    bitmap = new Bitmap( this );
+
+    bitmap->SetLimit( size );
+    bitmap->Resize( size );
+    bitmap->GetAll().assign( size,  SBitmap() );
+
+    int scale = ConfRead("ImageScaleFromOriginal", 100 );
+    long pos = ConfRead("ImagePosition", long(BITMAP_VERTICAL | BITMAP_CENTERED) );
+    long sizeflag = ConfRead("ImageSize", long(BITMAP_ORIGINAL) );
+    bitmap->SetFlags(pos,sizeflag,scale);
+
+    return bitmap;
 }
 
 void Window::ReloadConfig()
 {
-    int scale = ConfRead("ImageScaleFromOriginal", 100 );
-    long pos = ConfRead("ImagePosition", long(BITMAP_VERTICAL | BITMAP_CENTERED) );
-    long size = ConfRead("ImageSize", long(BITMAP_ORIGINAL) );
-    m_bitmap->SetFlags(pos,size,scale);
     m_config->Flush();
 }
 
@@ -108,8 +160,9 @@ void Window::ChangeFolder( int step )
     if ( path == wxEmptyString ) return;
     Open ( path );
 }
-void Window::Next() { Open( m_thread->GetHandler()->GetNext()); }
-void Window::Prev() { Open( m_thread->GetHandler()->GetPrev()); }
+
+void Window::Next() { Open( GetHandler()->GetNext()); }
+void Window::Prev() { Open( GetHandler()->GetPrev()); }
 
 void Window::Find( const wxString& path )
 {
@@ -117,7 +170,6 @@ void Window::Find( const wxString& path )
 
 void Window::Clear()
 {
-    m_thread->Clear();
 }
 
 // void Window::OnDraw( wxDC& dc )
@@ -125,11 +177,15 @@ void Window::OnDraw( wxPaintEvent &event )
 {   
     wxPaintDC dc(this);
     // dc.SetClippingRegion( GetViewStart(), GetClientSize() );
-    wxCriticalSectionLocker locker( m_thread->GetLock() );
-    for ( const auto& it : m_bitmap->Get() )
+    wxCriticalSectionLocker locker( LoadThread::s_GLock );
+    if ( m_bitmap )
     {
-        if ( it->IsOk() )
-            dc.DrawBitmap( it->GetBitmap() , it->GetPosition() );
+        wxVector<SBitmap*> vec = m_bitmap->Get();
+        for ( const auto& it : vec )
+        {
+            if ( it->IsOk() )
+                dc.DrawBitmap( it->GetBitmap() , it->GetPosition() );
+        }
     }
 }
 
@@ -248,7 +304,7 @@ BITMAP_PAGES Window::OnEdge( int modifier, bool isInstant, int onEdgeCount )
 
     if ( (onEdgeCount > conf || isInstant) && modifier != 0 )
     {
-        wxCriticalSectionLocker locker(m_thread->GetLock());
+        wxCriticalSectionLocker locker( LoadThread::s_GLock );
         result = m_bitmap->ChangePage(modifier);
 
         if ( result == BITMAP_ENDOFPAGE )

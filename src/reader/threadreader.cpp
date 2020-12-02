@@ -23,168 +23,79 @@
 
 #include <thread>
 #include <future>
+
+void LoadImage( Bitmap *bmp, wxInputStream &stream, size_t idx  )
+{
+    if ( wxImage::CanRead(stream) )
+    {
+        wxImage img(stream);
+        bmp->Add(img,idx);
+    }
+}
+
+bool IsExist( Handler *handler, size_t idx )
+{
+    return handler->IsExist(idx);
+}
+
 namespace Reader
 {
 
-Thread::Thread( wxWindow* parent, Bitmap* bitmap )
+LoadThread::LoadThread( wxWindow *parent, const wxThreadKind &type ) 
+    : wxThread( type )
 {
-    m_bitmap = bitmap;
     m_parent = parent;
 }
 
-Thread::~Thread() 
+LoadThread::~LoadThread()
 {
-    Clear();
+
 }
 
-void Thread::SetHandler( Handler* handler )
+void LoadThread::SetParameter( Bitmap *bitmap, Handler *handler, size_t start )
 {
-    m_handler = handler;
+    m_bitmap = bitmap;
+    m_fHandler = handler;
+    m_start = start;
 }
 
-void Thread::Open( const wxString& path )
+void LoadThread::SetLimit( size_t prev, size_t next )
 {
-    m_path = path;
-    m_threadbmp = true; // activate bitrmap thread;
-    
-    GetHandler()->Clear();
-    GetHandler()->Open( m_path );
-    GetHandler()->Traverse( true );
-    if ( GetHandler()->GetParent() )
-        GetHandler()->GetParent()->Traverse();
+}
 
-    size_t m_curr = GetHandler()->Index( m_path );
+wxThreadError LoadThread::Run()
+{
+    // prevent thread from running if
+    // m_bitmap or m_fHandler is not set
+    if ( m_bitmap == NULL ||  m_fHandler == NULL )
+        return wxTHREAD_MISC_ERROR;
 
-    m_bitmap->Clear();
-    m_bitmap->Resize( GetHandler()->Size() );
-    m_bitmap->GetAll().assign( GetHandler()->Size(), SBitmap() );
+    return wxThread::Run();
+}
 
-    if ( IsExist( m_curr ) )
-    {
-        LoadImage( m_curr );
+#define CheckAndLoadImage( idx, step )                  \
+    if ( IsExist(m_fHandler,idx) )                      \
+    {                                                   \
+        wxInputStream &stream = *m_fHandler->Item(idx); \
+        LoadImage(m_bitmap,stream,idx);                 \
+        idx += step;                                    \
+        wxQueueEvent( m_parent,                         \
+            new wxThreadEvent(                          \
+                EVT_COMMAND_LOADTHREAD_UPDATE           \
+            ));                                         \
     }
-    m_parent->Refresh();
 
-    // return if thread already running
-    if ( GetThread() && GetThread()->IsRunning() ) return; 
-    if ( CreateThread( wxTHREAD_JOINABLE ) != wxTHREAD_NO_ERROR )
+wxThread::ExitCode LoadThread::Entry()
+{
+    size_t next = m_start, prev = next - 1;
+    while( !TestDestroy() && ( IsExist( m_fHandler, next ) || IsExist( m_fHandler, prev ) ) )
     {
-        return;
+        CheckAndLoadImage( next, 1 );
+        CheckAndLoadImage( prev, -1 );
     }
-    GetThread()->Run();
-    // m_parent->Scroll(0,0);
-}
 
-void Thread::Clear()
-{
-    m_threadbmp = false;
-    m_isOpened = false;
-    
-    if ( GetThread() && GetThread()->IsRunning() )
-        GetThread()->Delete();
-
-}
-
-bool Thread::TestDestroy()
-{
-    return this->GetThread()->TestDestroy();
-}
-
-template<typename T>
-bool IsReady( std::future<T>& t )  // to check if the thread completed or not
-{
-    return t.wait_for( std::chrono::microseconds(0) ) == std::future_status::ready;
-}
-
-wxThread::ExitCode Thread::Entry()
-{
-    bool destroy(false);
-
-
-    std::future<void> bmp;
-    while ( true ) // for checking whether the thread finishes or the thread
-    {
-        if ( m_threadbmp )
-        {
-            bmp = std::async( std::launch::async, &Thread::BitmapThread,
-                             this, std::ref(destroy), m_curr );
-            m_threadbmp = false;
-        }
-
-        if ( TestDestroy() )
-        {
-            destroy = true;
-            break;
-        }
-
-        if ( IsReady( bmp ) )
-        {
-            break;
-        }
-    }
+    printf("owoewoew\n\n\n\n");
     return (wxThread::ExitCode)0;
-}
-
-bool Thread::IsExist( int idx )
-{
-    return GetHandler()->IsExist( idx );
-}
-
-bool Thread::LoadImage( size_t idx, bool isScroll )
-{
-    if ( IsExist(idx) )
-    {
-        const wxString& name = GetHandler()->ItemName(idx);
-        m_bitmap->SetName( idx, name );
-        wxInputStream &stream = *GetHandler()->Item(idx);
-        if ( wxImage::CanRead( stream ) )
-        {
-            wxImage img(stream);
-            wxCriticalSectionLocker locker(GetLock());
-            m_bitmap->Add( img, idx );
-            return true;
-        }
-        else
-        {
-            m_bitmap->MarkLoaded(idx);
-        }
-    }
-    
-    return false;
-}
-
-void Thread::BitmapThread( bool& isDestroyed, size_t curr )
-{
-    // GetHandler()->Clear();
-    // GetHandler()->Open( m_path );
-    // GetHandler()->Traverse();
-    // if ( GetHandler()->GetParent() )
-    //     GetHandler()->GetParent()->Traverse();
-
-    size_t prev = curr - 1, next = curr + 1;
-
-    // m_bitmap->GetAll().assign( GetHandler()->Size(), SBitmap() );
-
-    // if ( IsExist(curr) )
-    // {
-    //     LoadImage( curr );
-    // }
-
-        #define LoadImg( idx, step )                    \
-        if ( !isDestroyed && IsExist(idx) )             \
-        {                                               \
-            LoadImage( idx );                           \
-            idx += step;                                \
-        }
-    while ( !isDestroyed && ( IsExist(prev) || IsExist(next) ) )
-    {
-        m_isOpened = true;
-        LoadImg( next, 1 )
-        LoadImg( prev, -1 )
-
-        if ( ( !IsExist(next) && !IsExist(prev) ) ) break;
-    }
-    m_isOpened = true;
 }
 
 } // namespace reader

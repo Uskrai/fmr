@@ -20,6 +20,8 @@
 
 
 #include <wx/panel.h>
+#include <wx/event.h>
+
 #include "base/range.h"
 
 #include "bitmap/bitmap.h"
@@ -31,7 +33,7 @@ class HandlerFactory;
 namespace Reader
 {
 
-class Thread;
+class LoadThread;
 
 class Window : public wxPanel
 {
@@ -60,7 +62,7 @@ class Window : public wxPanel
         //vector to bitmaps
         Bitmap* m_bitmap;
         // reference to threading class
-        Thread* m_thread;
+        LoadThread* m_thread;
         // pointer to handler
         Handler* m_fileHandler = NULL;
         HandlerFactory* m_factory = NULL;
@@ -72,11 +74,17 @@ class Window : public wxPanel
         template<typename T>
         T ConfRead( wxString name, T def );
 
+        Handler *NewHandler( const wxString &path );
+        Bitmap *NewBitmap( size_t size );
+
         int w,h;
         void Error( wxSize size ); 
         void OnDraw( wxDC& dc );
         wxDECLARE_EVENT_TABLE();
         void OnDraw( wxPaintEvent &event );
+
+        void OnThreadUpdate( wxCommandEvent &event ) { printf("owow\n");};
+        void OnThreadComplete( wxCommandEvent &event ){};
         // void OnMouseMotion( wxMouseEvent& event );
         // void OnMouseWheel( wxMouseEvent& event );
         // void OnKeyDown( wxKeyEvent& event );

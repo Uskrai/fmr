@@ -19,6 +19,7 @@
 #define FMR_READER_THREAD
 
 #include <wx/thread.h>
+#include <wx/event.h>
 #include <wx/string.h>
 
 #include "handler/handler.h"
@@ -28,57 +29,35 @@
 
 class wxWindow;
 class Bitmap;
-class wxString;
 
+wxDECLARE_EVENT( EVT_COMMAND_LOADTHREAD_UPDATE, wxThreadEvent );
+wxDECLARE_EVENT( EVT_COMMAND_LOADTHREAD_COMPLETED, wxThreadEvent );
 namespace Reader
 {
 
-class Thread
-    : public wxThreadHelper
+class LoadThread
+    : public wxThread
 {
     public:
-        Thread( wxWindow* parent, Bitmap* bitmap );
-        ~Thread();
+        LoadThread( wxWindow *parent, const wxThreadKind &type = wxTHREAD_DETACHED );
+        void SetParameter( Bitmap *bitmap, Handler *handler, size_t start );
+        void SetLimit( size_t prev, size_t next );
+        ~LoadThread();
 
-        void Open( const wxString& path );
-        bool IsOpened() { return m_isOpened; }
-        Handler* GetHandler() { return m_handler; }
+        wxThreadError Run();
 
-        void Clear();
-        void SetHandler( Handler* handler );
-        void SetLimit( int prev = NO_LIMIT , int next = NO_LIMIT ) { m_limitPrev = prev, m_limitNext = next; }
-
-        wxCriticalSection& GetLock() { return this->gCS; }
-        wxWindow* GetParent() { return m_parent; }
-        
+        inline static wxCriticalSection s_GLock;
     protected:
-        wxCriticalSection gCS;
-        Bitmap* m_bitmap;
-        wxWindow* m_parent;
-        Handler* m_handler = NULL;
-        wxString m_path;
-
-        bool m_isOpened = false;
-
-        wxThread::ExitCode Entry();
-        void BitmapThread( bool& destroy, size_t current );
-
-        int m_limitNext = NO_LIMIT, m_limitPrev = NO_LIMIT;
-        bool m_threadbmp = false;
-
-        bool TestDestroy();
-
-        bool IsExist( int idx );
-
-        bool LoadImage( size_t idx, bool isScroll = false );
-        void LoadBitmap( int current, int prev, int next, bool& isDestroyed );
-    
-    private:
-        size_t m_curr = 0;
-        template<typename T>
-        T ConfRead( const wxString& name, T def );
+        size_t m_start;
+        Bitmap *m_bitmap = NULL;
+        Handler *m_fHandler;
+        virtual ExitCode Entry();
+        wxWindow *m_parent;
 };
 
 };
+
+wxDEFINE_EVENT( EVT_COMMAND_LOADTHREAD_UPDATE, wxThreadEvent );
+wxDEFINE_EVENT( EVT_COMMAND_LOADTHREAD_COMPLETED, wxThreadEvent );
 
 #endif
