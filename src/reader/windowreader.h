@@ -19,7 +19,7 @@
 #define FMR_READER_WINDOW
 
 
-#include <wx/scrolwin.h>
+#include <wx/panel.h>
 #include "base/range.h"
 
 #include "bitmap/bitmap.h"
@@ -33,10 +33,16 @@ namespace Reader
 
 class Thread;
 
-class Window : public wxScrolledWindow
+class Window : public wxPanel
 {
     // void Error( wxSize size );
     public:
+        Window( wxWindow *parent, wxWindowID id=wxID_ANY, 
+                const wxPoint &pos=wxDefaultPosition, 
+                const wxSize &size=wxDefaultSize, 
+                long style=wxTAB_TRAVERSAL, 
+                const wxString &name=wxPanelNameStr
+                );
         Window( wxWindow* parent, wxSize size );
         ~Window();
         void Open( const wxString& path );
@@ -70,12 +76,12 @@ class Window : public wxScrolledWindow
         void Error( wxSize size ); 
         void OnDraw( wxDC& dc );
         wxDECLARE_EVENT_TABLE();
-        void OnMouseMotion( wxMouseEvent& event );
-        void OnMouseWheel( wxMouseEvent& event );
-        void OnKeyDown( wxKeyEvent& event );
+        // void OnMouseMotion( wxMouseEvent& event );
+        // void OnMouseWheel( wxMouseEvent& event );
+        // void OnKeyDown( wxKeyEvent& event );
         
         // return is ViewStart Changed 
-        BITMAP_PAGES OnArrow( wxOrientation orient, int modifier, bool isInstant = false);
+        // BITMAP_PAGES OnArrow( wxOrientation orient, int modifier, bool isInstant = false);
         // return is Change Folder
         BITMAP_PAGES OnEdge( int modifier, bool isInstant = false, int onEdgeCount = 0 );
 };

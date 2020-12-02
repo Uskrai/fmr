@@ -19,14 +19,14 @@
 #define FMR_BITMAP_POSITION
 
 #include "bitmap/bmp.h"  
-class wxScrolledWindow;
+class wxWindow;
 
 #define CheckFlags( flag, func )    \
     if ( flags & flag )             \
         { func( vec, flags, parent ); }
 
 #define PositionFunc( name )        \
-    void name( wxVector<SBitmap*> vec, int flags, wxScrolledWindow *parent )
+    void name( wxVector<SBitmap*> vec, int flags, wxWindow *parent )
         
 namespace Position
 {

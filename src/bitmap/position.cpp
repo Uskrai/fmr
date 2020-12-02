@@ -16,7 +16,7 @@
  */
 
 #include "bitmap/position.h"
-#include <wx/scrolwin.h>
+#include <wx/window.h>
 
 #define RefreshFunc( space )            \
     void Position::Refresh ## space     \
@@ -46,7 +46,7 @@
         }                                           
 
 #define PositionFunction( name )            \
-    void Position::name( wxVector<SBitmap*> vec, int flags, wxScrolledWindow *parent )
+    void Position::name( wxVector<SBitmap*> vec, int flags, wxWindow *parent )
 
 PositionFunction(Vertical)
 {

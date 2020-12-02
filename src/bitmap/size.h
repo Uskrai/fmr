@@ -25,7 +25,7 @@
         return func( img, flags, parent, scale );
 
 #define SizeFunc( name )                \
-    float name( wxImage &img, int flags, wxScrolledWindow *parent, int scale )
+    float name( wxImage &img, int flags, wxWindow *parent, int scale )
 
 namespace Size
 {

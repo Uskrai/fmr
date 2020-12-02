@@ -17,7 +17,7 @@
 
 #include "reader/threadreader.h"
 
-#include <wx/scrolwin.h>
+#include <wx/window.h>
 #include "image/image.h"
 #include "bitmap/bitmap.h"
 
@@ -26,7 +26,7 @@
 namespace Reader
 {
 
-Thread::Thread( wxScrolledWindow* parent, Bitmap* bitmap )
+Thread::Thread( wxWindow* parent, Bitmap* bitmap )
 {
     m_bitmap = bitmap;
     m_parent = parent;
@@ -72,7 +72,7 @@ void Thread::Open( const wxString& path )
         return;
     }
     GetThread()->Run();
-    m_parent->Scroll(0,0);
+    // m_parent->Scroll(0,0);
 }
 
 void Thread::Clear()

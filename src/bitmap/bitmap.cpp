@@ -19,11 +19,11 @@
 #include "bitmap/position.h"
 #include "bitmap/size.h"
 
-#include <wx/scrolwin.h>
+#include <wx/window.h>
 
 SBitmap G_BITMAP(true);
 
-Bitmap::Bitmap( wxScrolledWindow* parent )
+Bitmap::Bitmap( wxWindow* parent )
 {
     this->m_parent = parent;
     m_maxWidth = parent->GetClientSize().GetWidth();
@@ -161,7 +161,7 @@ void Bitmap::RefreshPosition()
 void Bitmap::RefreshSize()
 {
     wxSize size;
-    m_parent->ShowScrollbars( wxSHOW_SB_ALWAYS, wxSHOW_SB_ALWAYS );
+    // m_parent->ShowScrollbars( wxSHOW_SB_ALWAYS, wxSHOW_SB_ALWAYS );
     for ( const auto& it : Get() )
     {
         if ( it->IsOk() )
@@ -172,7 +172,7 @@ void Bitmap::RefreshSize()
                 size.SetWidth( size.GetWidth() > it->GetWidth() ? size.GetWidth() : it->GetWidth() );
         }
     }
-    m_parent->ShowScrollbars( wxSHOW_SB_DEFAULT, wxSHOW_SB_DEFAULT );
+    // m_parent->ShowScrollbars( wxSHOW_SB_DEFAULT, wxSHOW_SB_DEFAULT );
     GetParent()->SetVirtualSize( size );
     GetParent()->Refresh();
 }

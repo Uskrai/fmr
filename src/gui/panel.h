@@ -18,6 +18,11 @@
 #include <wx/panel.h>
 
 class wxBoxSizer;
+
+enum WindowID
+{
+    ReaderWindow = wxID_HIGHEST + 1
+};
 namespace Reader{
     class Window;
 };

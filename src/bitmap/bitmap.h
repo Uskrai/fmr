@@ -21,11 +21,11 @@
 #include "base/vector.h"
 #include "bitmap/bmp.h"
 
-class wxScrolledWindow;
+class wxWindow;
 class Bitmap
 {
     public:
-        Bitmap( wxScrolledWindow* parent );
+        Bitmap( wxWindow* parent );
         ~Bitmap();
         void Add( wxImage& image, size_t idx );
 
@@ -65,7 +65,7 @@ class Bitmap
         wxVector<SBitmap*> Get( const wxPoint& area, const wxSize& size );
 
     protected:
-        wxScrolledWindow* m_parent = NULL;
+        wxWindow* m_parent = NULL;
         wxVector<SBitmap> m_item;
         wxVector<SBitmap*> m_itemPage;
 
@@ -76,7 +76,7 @@ class Bitmap
         int m_flagSize, m_flagPosition, m_scaleParent;
         int m_maxWidth, m_maxHeight;
 
-        wxScrolledWindow* GetParent() { return m_parent; }
+        wxWindow* GetParent() { return m_parent; }
         void Prepare( const wxImage& image, int pos, struct SBitmap& bmp );
         void Exit( int i );
 

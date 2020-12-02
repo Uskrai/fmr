@@ -33,18 +33,16 @@
 namespace Reader
 {
 
-wxBEGIN_EVENT_TABLE( Window, wxScrolledWindow )
-    EVT_MOTION(Window::OnMouseMotion)
-    EVT_MOUSEWHEEL(Window::OnMouseWheel)
-    EVT_KEY_DOWN(Window::OnKeyDown)
+wxBEGIN_EVENT_TABLE( Window, wxWindow )
+//     EVT_MOTION(Window::OnMouseMotion)
+//     EVT_MOUSEWHEEL(Window::OnMouseWheel)
+//     EVT_KEY_DOWN(Window::OnKeyDown)
 wxEND_EVENT_TABLE()
 
-Window::Window( wxWindow* parent, wxSize size ) :
-    wxScrolledWindow( parent, wxID_ANY, wxDefaultPosition, size )
+Window::Window( wxWindow* parent, wxWindowID id, const wxPoint & pos, 
+                const wxSize &size, long style, const wxString &name ) :
+    wxPanel( parent, id, wxDefaultPosition, size, style | wxVSCROLL | wxHSCROLL, name )
 {
-    SetScrollRate(1,1);
-    SetVirtualSize(GetSize());
-
     m_config = Config::Get();
 
     m_bitmap = new Bitmap(this);
@@ -69,6 +67,7 @@ void Window::Open( const wxString& path )
 {
     if ( path != wxEmptyString )
     {
+        wxPrintf("%s\n",path);
         Clear(); 
         m_bitmap->Clear();
 
@@ -90,7 +89,6 @@ void Window::Open( const wxString& path )
 
         m_config->Write("RecentlyOpened", path );
         m_thread->Open( path );
-        Scroll(0,0);
     }
 }
 
@@ -124,7 +122,7 @@ void Window::Clear()
 
 void Window::OnDraw( wxDC& dc )
 {
-    dc.SetClippingRegion( GetViewStart(), GetClientSize() );
+    // dc.SetClippingRegion( GetViewStart(), GetClientSize() );
     wxCriticalSectionLocker locker( m_thread->GetLock() );
     for ( const auto& it : m_bitmap->Get() )
     {
@@ -149,97 +147,97 @@ void Window::Error( wxSize size )
     this->SetSizer(sizer);
 }
 
-void Window::OnMouseWheel( wxMouseEvent& event )
-{
-    int scrolling = event.GetWheelDelta()/event.GetWheelRotation() * ConfRead("WheelInvert",-1);
-    if ( ! OnArrow( wxVERTICAL, scrolling, true ) )
-    {
-        if ( scrolling > -1 )
-            Scroll(0,0);
-        else
-            Scroll(0,GetVirtualSize().GetHeight());
-    }
-}
+// void Window::OnMouseWheel( wxMouseEvent& event )
+// {
+//     int scrolling = event.GetWheelDelta()/event.GetWheelRotation() * ConfRead("WheelInvert",-1);
+//     if ( ! OnArrow( wxVERTICAL, scrolling, true ) )
+//     {
+//         // if ( scrolling > -1 )
+//         //     Scroll(0,0);
+//         // else
+//         //     Scroll(0,GetVirtualSize().GetHeight());
+//     }
+// }
 
 bool IsKeyDown( wxKeyEvent &event, int val )
 {
     return event.GetKeyCode() == val;
 }
 
-void Window::OnKeyDown( wxKeyEvent& event )
-{
+// void Window::OnKeyDown( wxKeyEvent& event )
+// {
 
-    wxEventType key = event.GetKeyCode();
-    int modVer = ConfRead("ArrowVerticalInvert",-1);
-    int modHor = ConfRead("ArrowHorizontalInvert",-1 );
+//     wxEventType key = event.GetKeyCode();
+//     int modVer = ConfRead("ArrowVerticalInvert",-1);
+//     int modHor = ConfRead("ArrowHorizontalInvert",-1 );
 
-    bool IsUp = IsKeyDown( event, WXK_UP );
-    bool IsDown = IsKeyDown( event, WXK_DOWN );
-    bool IsRight = IsKeyDown( event, WXK_RIGHT );
-    bool IsLeft = IsKeyDown( event, WXK_LEFT );
+//     bool IsUp = IsKeyDown( event, WXK_UP );
+//     bool IsDown = IsKeyDown( event, WXK_DOWN );
+//     bool IsRight = IsKeyDown( event, WXK_RIGHT );
+//     bool IsLeft = IsKeyDown( event, WXK_LEFT );
 
-    if ( IsUp || IsDown || IsRight || IsLeft )
-    {
-        bool isInstant;
-        wxOrientation orient = wxVERTICAL;
-        int modifier = 0;
+//     if ( IsUp || IsDown || IsRight || IsLeft )
+//     {
+//         bool isInstant;
+//         wxOrientation orient = wxVERTICAL;
+//         int modifier = 0;
 
-        if ( IsUp || IsDown )
-        {
-            orient = wxVERTICAL;
-            modifier = modVer;
-            isInstant = ConfRead("IsInstantOnVertical",false);
-        }
+//         if ( IsUp || IsDown )
+//         {
+//             orient = wxVERTICAL;
+//             modifier = modVer;
+//             isInstant = ConfRead("IsInstantOnVertical",false);
+//         }
         
-        if ( IsRight || IsLeft )
-        {
-            orient = wxHORIZONTAL;
-            modifier = modHor;
-            isInstant = ConfRead("IsInstantOnHorizontal",true);
-        }
+//         if ( IsRight || IsLeft )
+//         {
+//             orient = wxHORIZONTAL;
+//             modifier = modHor;
+//             isInstant = ConfRead("IsInstantOnHorizontal",true);
+//         }
 
-        // if left or down multiply modifier by -1 to 
-        // make it scroll down or left
-        if ( IsRight || IsDown )
-            modifier *= -1;
+//         // if left or down multiply modifier by -1 to 
+//         // make it scroll down or left
+//         if ( IsRight || IsDown )
+//             modifier *= -1;
 
-        if ( OnArrow( orient, modifier, isInstant ) == BITMAP_CHANGEPAGE )
-            Scroll(wxPoint(0,0));
+//         // if ( OnArrow( orient, modifier, isInstant ) == BITMAP_CHANGEPAGE )
+//         //     Scroll(wxPoint(0,0));
         
-        return;
-    }
-    event.Skip();
-}
+//         return;
+//     }
+//     event.Skip();
+// }
 
-BITMAP_PAGES Window::OnArrow( wxOrientation orient, int modifier, bool isInstant )
-{
-    BITMAP_PAGES result = BITMAP_NOTCHANGED;
-    if ( m_thread->IsOpened() || modifier != 0 )
-    {
-        const wxPoint& view = GetViewStart();
+// BITMAP_PAGES Window::OnArrow( wxOrientation orient, int modifier, bool isInstant )
+// {
+//     BITMAP_PAGES result = BITMAP_NOTCHANGED;
+//     if ( m_thread->IsOpened() || modifier != 0 )
+//     {
+//         const wxPoint& view = GetViewStart();
 
-        // get per scroll step
-        int step = ConfRead("ScrollStep", 300 ) * modifier;
-        int ver = step * (orient == wxVERTICAL);
-        int hor = step * (orient == wxHORIZONTAL);
+//         // get per scroll step
+//         int step = ConfRead("ScrollStep", 300 ) * modifier;
+//         int ver = step * (orient == wxVERTICAL);
+//         int hor = step * (orient == wxHORIZONTAL);
 
-        Scroll( view + wxPoint( hor , ver ) );
+//         Scroll( view + wxPoint( hor , ver ) );
 
-        static int onEdge;
-        if ( view == GetViewStart() )
-        {
-            onEdge++;
-            result = OnEdge( modifier, isInstant, onEdge );
-            if ( result != BITMAP_NOTCHANGED || result != BITMAP_NOTLOADED )
-            {
-                onEdge = 0;
-            }
-        } 
-        else onEdge = 0;
-    }    
+//         static int onEdge;
+//         if ( view == GetViewStart() )
+//         {
+//             onEdge++;
+//             result = OnEdge( modifier, isInstant, onEdge );
+//             if ( result != BITMAP_NOTCHANGED || result != BITMAP_NOTLOADED )
+//             {
+//                 onEdge = 0;
+//             }
+//         } 
+//         else onEdge = 0;
+//     }    
     
-    return result;
-} 
+//     return result;
+// } 
 
 BITMAP_PAGES Window::OnEdge( int modifier, bool isInstant, int onEdgeCount )
 {
@@ -258,22 +256,22 @@ BITMAP_PAGES Window::OnEdge( int modifier, bool isInstant, int onEdgeCount )
 
 }
 
-void Window::OnMouseMotion( wxMouseEvent& event )
-{
-    static wxPoint mousePosition;
-    const wxPoint& pos = event.GetPosition();
-    if ( event.Dragging() )
-    {
-        if ( event.LeftIsDown() )
-        {
-            int y = mousePosition.y - pos.y;
-            int x = mousePosition.x - pos.x;
-            const wxPoint& scrolled = GetViewStart();
-            Scroll( scrolled.x + ( x * 5 ), scrolled.y + ( y  * 5 ));
-        }
-    }
-    mousePosition = pos;
-    event.Skip();
-}
+// void Window::OnMouseMotion( wxMouseEvent& event )
+// {
+//     static wxPoint mousePosition;
+//     const wxPoint& pos = event.GetPosition();
+//     if ( event.Dragging() )
+//     {
+//         if ( event.LeftIsDown() )
+//         {
+//             int y = mousePosition.y - pos.y;
+//             int x = mousePosition.x - pos.x;
+//             // const wxPoint& scrolled = GetViewStart();
+//             // Scroll( scrolled.x + ( x * 5 ), scrolled.y + ( y  * 5 ));
+//         }
+//     }
+//     mousePosition = pos;
+//     event.Skip();
+// }
 
 }

@@ -28,21 +28,21 @@
 
 namespace Size
 {
-    bool IsScrollbarShown( wxScrolledWindow* parent, wxSize size, int flags )
-    {
-        wxSize virori = parent->GetVirtualSize();
-        wxSize ori = parent->GetClientSize();
-        parent->SetVirtualSize( size );
+    // bool IsScrollbarShown( wxScrolledWindow* parent, wxSize size, int flags )
+    // {
+    //     wxSize virori = parent->GetVirtualSize();
+    //     wxSize ori = parent->GetClientSize();
+    //     parent->SetVirtualSize( size );
 
-        wxSize clt = parent->GetClientSize();
+    //     wxSize clt = parent->GetClientSize();
 
-        parent->SetVirtualSize( virori );
-        if ( flags & BITMAP_FITHEIGHT ) 
-            return ori.GetHeight() != clt.GetHeight();
+    //     parent->SetVirtualSize( virori );
+    //     if ( flags & BITMAP_FITHEIGHT ) 
+    //         return ori.GetHeight() != clt.GetHeight();
 
-        else if ( flags & BITMAP_FITWIDTH )
-            return ori.GetWidth() != clt.GetWidth();
-    }
+    //     else if ( flags & BITMAP_FITWIDTH )
+    //         return ori.GetWidth() != clt.GetWidth();
+    // }
 
     SizeFunc( FitWidth )
     {
@@ -55,13 +55,13 @@ namespace Size
             imgsz.Set( size.x, imgsz.y * scl );
         }
 
-        if ( IsScrollbarShown( parent, imgsz, flags ) )
-        {
-            parent->ShowScrollbars( wxSHOW_SB_DEFAULT, wxSHOW_SB_ALWAYS );
-            float res = FitWidth( img, flags, parent, scale );
-            parent->ShowScrollbars( wxSHOW_SB_DEFAULT, wxSHOW_SB_DEFAULT );
-            return res;
-        }
+        // if ( IsScrollbarShown( parent, imgsz, flags ) )
+        // {
+        //     // parent->ShowScrollbars( wxSHOW_SB_DEFAULT, wxSHOW_SB_ALWAYS );
+        //     float res = FitWidth( img, flags, parent, scale );
+        //     // parent->ShowScrollbars( wxSHOW_SB_DEFAULT, wxSHOW_SB_DEFAULT );
+        //     return res;
+        // }
 
         if ( isRescale )
         {

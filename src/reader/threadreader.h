@@ -26,7 +26,7 @@
 #include "base/vector.h"
 #include "base/range.h"
 
-class wxScrolledWindow;
+class wxWindow;
 class Bitmap;
 class wxString;
 
@@ -37,7 +37,7 @@ class Thread
     : public wxThreadHelper
 {
     public:
-        Thread( wxScrolledWindow* parent, Bitmap* bitmap );
+        Thread( wxWindow* parent, Bitmap* bitmap );
         ~Thread();
 
         void Open( const wxString& path );
@@ -49,12 +49,12 @@ class Thread
         void SetLimit( int prev = NO_LIMIT , int next = NO_LIMIT ) { m_limitPrev = prev, m_limitNext = next; }
 
         wxCriticalSection& GetLock() { return this->gCS; }
-        wxScrolledWindow* GetParent() { return m_parent; }
+        wxWindow* GetParent() { return m_parent; }
         
     protected:
         wxCriticalSection gCS;
         Bitmap* m_bitmap;
-        wxScrolledWindow* m_parent;
+        wxWindow* m_parent;
         Handler* m_handler = NULL;
         wxString m_path;
 
