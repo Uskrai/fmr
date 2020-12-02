@@ -20,16 +20,14 @@
 #include "reader/threadreader.h"
 #include "base/config.h"
 
-#include "image/image.h"
-
 #include "bitmap/bitmap.h"
+#include "handler/handlerfactory.h"
 
-#include <wx/stattext.h>
+
+#include <wx/log.h>
+#include <wx/scrolbar.h>
 #include <wx/sizer.h>
 #include <wx/dcclient.h>
-
-#include "handler/handlerfactory.h"
-#include <wx/log.h>
 
 // TODO : Make separate thread controller
 
@@ -54,14 +52,37 @@ wxEND_EVENT_TABLE()
 
 Window::Window( wxWindow* parent, wxWindowID id, const wxPoint & pos, 
                 const wxSize &size, long style, const wxString &name ) :
-    wxPanel( parent, id, wxDefaultPosition, size, style | wxVSCROLL | wxHSCROLL, name )
+    wxWindow( parent, id, wxDefaultPosition, size, style | wxVSCROLL | wxHSCROLL, name )
 {
     m_config = Config::Get();
+    m_vScroll = new wxScrollBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSB_VERTICAL );
+    m_vScroll->Show();
 };
 
 Window::~Window()
 {
-    if ( m_thread ) m_thread->Delete();
+}
+
+bool Window::Destroy()
+{
+    Clear();
+    return wxWindow::Destroy();
+}
+
+void Window::Clear()
+{
+    if ( m_thread ) 
+    {
+        m_thread->Delete();
+        m_thread->Wait();
+    }
+    Free(m_thread)
+    Free(m_fileHandler)
+    Free(m_bitmap)
+}
+
+void Window::OnThreadComplete( wxCommandEvent &event )
+{
 }
 
 void Window::Open( const wxString& path )
@@ -89,7 +110,8 @@ void Window::Open( const wxString& path )
                 Bitmap *bitmap = NewBitmap( handler->Size() );
                 size_t idx = handler->Index( path );
 
-                LoadThread *thread = new LoadThread( this );
+                LoadThread *thread;
+                thread = new LoadThread( this, wxTHREAD_JOINABLE );
                 thread->SetParameter( bitmap, handler, idx );
                 thread->SetLimit( limitPrev, limitNext );
 
@@ -99,12 +121,14 @@ void Window::Open( const wxString& path )
                     Free(handler)
                     Free(bitmap)
                     Free(thread)
+
+                    m_fileHandler = tempHandler;
+                    m_thread = tempThread;
+                    m_bitmap = tempBitmap;
                     return;
                 }
 
-                Free(tempHandler);
-                Free(tempBitmap);
-                Free(tempThread);
+                Clear();
 
                 m_fileHandler = handler;
                 m_bitmap = bitmap;
@@ -168,16 +192,12 @@ void Window::Find( const wxString& path )
 {
 }
 
-void Window::Clear()
-{
-}
-
 // void Window::OnDraw( wxDC& dc )
 void Window::OnDraw( wxPaintEvent &event )
 {   
     wxPaintDC dc(this);
     // dc.SetClippingRegion( GetViewStart(), GetClientSize() );
-    wxCriticalSectionLocker locker( LoadThread::s_GLock );
+    wxCriticalSectionLocker locker( LoadThreadLock );
     if ( m_bitmap )
     {
         wxVector<SBitmap*> vec = m_bitmap->Get();
@@ -197,12 +217,12 @@ T Window::ConfRead( wxString name, T def )
 
 void Window::Error( wxSize size )
 {
-    wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-    wxStaticText* statbox = new wxStaticText( this, wxID_ANY, wxString("Can't load the image"), wxPoint(0,size.GetY() - 22 ), wxSize(size.GetX(),22) ) ;
-    statbox->SetBackgroundColour( *wxRED );
-    statbox->SetForegroundColour( *wxWHITE );
-    sizer->Add(statbox,0, wxALL);
-    this->SetSizer(sizer);
+    // wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+    // wxStaticText* statbox = new wxStaticText( this, wxID_ANY, wxString("Can't load the image"), wxPoint(0,size.GetY() - 22 ), wxSize(size.GetX(),22) ) ;
+    // statbox->SetBackgroundColour( *wxRED );
+    // statbox->SetForegroundColour( *wxWHITE );
+    // sizer->Add(statbox,0, wxALL);
+    // this->SetSizer(sizer);
 }
 
 // void Window::OnMouseWheel( wxMouseEvent& event )
@@ -304,7 +324,7 @@ BITMAP_PAGES Window::OnEdge( int modifier, bool isInstant, int onEdgeCount )
 
     if ( (onEdgeCount > conf || isInstant) && modifier != 0 )
     {
-        wxCriticalSectionLocker locker( LoadThread::s_GLock );
+        // wxCriticalSectionLocker locker( LoadThread::s_GLock );
         result = m_bitmap->ChangePage(modifier);
 
         if ( result == BITMAP_ENDOFPAGE )

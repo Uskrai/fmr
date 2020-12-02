@@ -15,20 +15,17 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reader/threadreader.h"
-
 #include <wx/window.h>
 #include "image/image.h"
 #include "bitmap/bitmap.h"
-
-#include <thread>
-#include <future>
+#include "reader/threadreader.h"
 
 void LoadImage( Bitmap *bmp, wxInputStream &stream, size_t idx  )
 {
     if ( wxImage::CanRead(stream) )
     {
         wxImage img(stream);
+        wxCriticalSectionLocker locker( Reader::LoadThreadLock );
         bmp->Add(img,idx);
     }
 }
@@ -49,7 +46,6 @@ LoadThread::LoadThread( wxWindow *parent, const wxThreadKind &type )
 
 LoadThread::~LoadThread()
 {
-
 }
 
 void LoadThread::SetParameter( Bitmap *bitmap, Handler *handler, size_t start )
@@ -94,7 +90,6 @@ wxThread::ExitCode LoadThread::Entry()
         CheckAndLoadImage( prev, -1 );
     }
 
-    printf("owoewoew\n\n\n\n");
     return (wxThread::ExitCode)0;
 }
 

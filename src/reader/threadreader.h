@@ -24,8 +24,6 @@
 
 #include "handler/handler.h"
 
-#include "base/vector.h"
-#include "base/range.h"
 
 class wxWindow;
 class Bitmap;
@@ -35,6 +33,7 @@ wxDECLARE_EVENT( EVT_COMMAND_LOADTHREAD_COMPLETED, wxThreadEvent );
 namespace Reader
 {
 
+inline wxCriticalSection LoadThreadLock;
 class LoadThread
     : public wxThread
 {
@@ -46,7 +45,7 @@ class LoadThread
 
         wxThreadError Run();
 
-        inline static wxCriticalSection s_GLock;
+        wxCriticalSection &GetLock() { return LoadThreadLock; }
     protected:
         size_t m_start;
         Bitmap *m_bitmap = NULL;

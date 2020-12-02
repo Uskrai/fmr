@@ -19,7 +19,7 @@
 #define FMR_READER_WINDOW
 
 
-#include <wx/panel.h>
+#include "wx/window.h"
 #include <wx/event.h>
 
 #include "base/range.h"
@@ -29,13 +29,15 @@
 class Config;
 class Handler;
 class HandlerFactory;
+class wxScrollBar;
+class wxSizer;
 
 namespace Reader
 {
 
 class LoadThread;
 
-class Window : public wxPanel
+class Window : public wxWindow
 {
     // void Error( wxSize size );
     public:
@@ -47,6 +49,8 @@ class Window : public wxPanel
                 );
         Window( wxWindow* parent, wxSize size );
         ~Window();
+        bool Destroy();
+
         void Open( const wxString& path );
         
         void ReloadConfig();
@@ -60,14 +64,17 @@ class Window : public wxPanel
         Handler* GetHandler() {return m_fileHandler;}
     private:
         //vector to bitmaps
-        Bitmap* m_bitmap;
+        Bitmap* m_bitmap = NULL;
         // reference to threading class
-        LoadThread* m_thread;
+        LoadThread *m_thread = NULL;
         // pointer to handler
         Handler* m_fileHandler = NULL;
         HandlerFactory* m_factory = NULL;
         // pointer to config files 
         Config* m_config;
+        // pointer to scrollbar
+        wxScrollBar *m_vScroll, *m_hScroll;
+        wxSizer *m_sizer;
 
         void Find( const wxString& path );
 
@@ -83,8 +90,8 @@ class Window : public wxPanel
         wxDECLARE_EVENT_TABLE();
         void OnDraw( wxPaintEvent &event );
 
-        void OnThreadUpdate( wxCommandEvent &event ) { printf("owow\n");};
-        void OnThreadComplete( wxCommandEvent &event ){};
+        void OnThreadUpdate( wxCommandEvent &event ) { Refresh();};
+        void OnThreadComplete( wxCommandEvent &event );
         // void OnMouseMotion( wxMouseEvent& event );
         // void OnMouseWheel( wxMouseEvent& event );
         // void OnKeyDown( wxKeyEvent& event );

@@ -38,3 +38,9 @@ void Panel::LoadFile( wxString path )
 
     this->sizer->Add( m_reader, 1, wxALL | wxEXPAND );
 }
+
+bool Panel::Destroy()
+{
+    m_reader->Destroy();
+    return wxPanel::Destroy();
+}

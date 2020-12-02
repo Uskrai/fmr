@@ -34,6 +34,7 @@ class Panel :
         Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ); 
 
         void LoadFile( wxString path );
+        bool Destroy();
     private:
         Reader::Window* m_reader = NULL;
         wxBoxSizer* sizer;
