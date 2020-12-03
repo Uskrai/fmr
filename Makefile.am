@@ -45,7 +45,7 @@ reader_LTLIBRARIES =  libthreadreader.la libwindowreader.la
     libthreadreader_la_SOURCES = $(reader)/threadreader.cpp
 
     libwindowreader_la_SOURCES = $(reader)/windowreader.cpp
-    libwindowreader_la_LIBADD = libthreadreader.la libhandlerfactory.la libbitmap.la libbmp.la
+    libwindowreader_la_LIBADD = libthreadreader.la libhandlerfactory.la libwindow.la libbitmap.la libbmp.la
 
 # make libraries for gui
 gui = src/gui
@@ -58,6 +58,10 @@ gui_LTLIBRARIES = libframe.la libpanel.la
     libpanel_la_SOURCES = $(gui)/panel.cpp
     libpanel_la_LIBADD = libwindowreader.la
 
+window = src/window
+windowdir = @abs_builddir@/window
+window_LTLIBRARIES = libwindow.la
+    libwindow_la_SOURCES = $(window)/window.cpp
 
 bin_PROGRAMS = fmr
 fmr_SOURCES = src/main/app.cpp

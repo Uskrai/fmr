@@ -107,7 +107,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(basedir)" \
 	"$(DESTDIR)$(bitmapdir)" "$(DESTDIR)$(guidir)" \
-	"$(DESTDIR)$(handlerdir)" "$(DESTDIR)$(readerdir)"
+	"$(DESTDIR)$(handlerdir)" "$(DESTDIR)$(readerdir)" \
+	"$(DESTDIR)$(windowdir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -138,7 +139,7 @@ am__uninstall_files_from_dir = { \
   }
 LTLIBRARIES = $(base_LTLIBRARIES) $(bitmap_LTLIBRARIES) \
 	$(gui_LTLIBRARIES) $(handler_LTLIBRARIES) \
-	$(reader_LTLIBRARIES)
+	$(reader_LTLIBRARIES) $(window_LTLIBRARIES)
 libarchivehandler_la_DEPENDENCIES = libdefaulthandler.la libcompare.la \
 	libpath.la
 am__dirstamp = $(am__leading_dot)dirstamp
@@ -182,8 +183,11 @@ libsize_la_OBJECTS = $(am_libsize_la_OBJECTS)
 libthreadreader_la_LIBADD =
 am_libthreadreader_la_OBJECTS = $(reader)/threadreader.lo
 libthreadreader_la_OBJECTS = $(am_libthreadreader_la_OBJECTS)
+libwindow_la_LIBADD =
+am_libwindow_la_OBJECTS = $(window)/window.lo
+libwindow_la_OBJECTS = $(am_libwindow_la_OBJECTS)
 libwindowreader_la_DEPENDENCIES = libthreadreader.la \
-	libhandlerfactory.la libbitmap.la libbmp.la
+	libhandlerfactory.la libwindow.la libbitmap.la libbmp.la
 am_libwindowreader_la_OBJECTS = $(reader)/windowreader.lo
 libwindowreader_la_OBJECTS = $(am_libwindowreader_la_OBJECTS)
 am_fmr_OBJECTS = src/main/app.$(OBJEXT)
@@ -213,7 +217,8 @@ am__depfiles_remade = $(base)/$(DEPDIR)/compare.Plo \
 	$(handler)/$(DEPDIR)/defaulthandler.Plo \
 	$(handler)/$(DEPDIR)/handlerfactory.Plo \
 	$(reader)/$(DEPDIR)/threadreader.Plo \
-	$(reader)/$(DEPDIR)/windowreader.Plo src/main/$(DEPDIR)/app.Po
+	$(reader)/$(DEPDIR)/windowreader.Plo \
+	$(window)/$(DEPDIR)/window.Plo src/main/$(DEPDIR)/app.Po
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -239,14 +244,16 @@ SOURCES = $(libarchivehandler_la_SOURCES) $(libbitmap_la_SOURCES) \
 	$(libhandlerfactory_la_SOURCES) $(libpanel_la_SOURCES) \
 	$(libpath_la_SOURCES) $(libposition_la_SOURCES) \
 	$(libsize_la_SOURCES) $(libthreadreader_la_SOURCES) \
-	$(libwindowreader_la_SOURCES) $(fmr_SOURCES)
+	$(libwindow_la_SOURCES) $(libwindowreader_la_SOURCES) \
+	$(fmr_SOURCES)
 DIST_SOURCES = $(libarchivehandler_la_SOURCES) $(libbitmap_la_SOURCES) \
 	$(libbmp_la_SOURCES) $(libcompare_la_SOURCES) \
 	$(libdefaulthandler_la_SOURCES) $(libframe_la_SOURCES) \
 	$(libhandlerfactory_la_SOURCES) $(libpanel_la_SOURCES) \
 	$(libpath_la_SOURCES) $(libposition_la_SOURCES) \
 	$(libsize_la_SOURCES) $(libthreadreader_la_SOURCES) \
-	$(libwindowreader_la_SOURCES) $(fmr_SOURCES)
+	$(libwindow_la_SOURCES) $(libwindowreader_la_SOURCES) \
+	$(fmr_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -465,7 +472,7 @@ readerdir = @abs_builddir@/reader
 reader_LTLIBRARIES = libthreadreader.la libwindowreader.la
 libthreadreader_la_SOURCES = $(reader)/threadreader.cpp
 libwindowreader_la_SOURCES = $(reader)/windowreader.cpp
-libwindowreader_la_LIBADD = libthreadreader.la libhandlerfactory.la libbitmap.la libbmp.la
+libwindowreader_la_LIBADD = libthreadreader.la libhandlerfactory.la libwindow.la libbitmap.la libbmp.la
 
 # make libraries for gui
 gui = src/gui
@@ -475,6 +482,10 @@ libframe_la_SOURCES = $(gui)/frame.cpp
 libframe_la_LIBADD = libpanel.la
 libpanel_la_SOURCES = $(gui)/panel.cpp
 libpanel_la_LIBADD = libwindowreader.la
+window = src/window
+windowdir = @abs_builddir@/window
+window_LTLIBRARIES = libwindow.la
+libwindow_la_SOURCES = $(window)/window.cpp
 fmr_SOURCES = src/main/app.cpp
 fmr_LDADD = libframe.la
 all: all-am
@@ -738,6 +749,41 @@ clean-readerLTLIBRARIES:
 	  echo rm -f $${locs}; \
 	  rm -f $${locs}; \
 	}
+
+install-windowLTLIBRARIES: $(window_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	@list='$(window_LTLIBRARIES)'; test -n "$(windowdir)" || list=; \
+	list2=; for p in $$list; do \
+	  if test -f $$p; then \
+	    list2="$$list2 $$p"; \
+	  else :; fi; \
+	done; \
+	test -z "$$list2" || { \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(windowdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(windowdir)" || exit 1; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(windowdir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(windowdir)"; \
+	}
+
+uninstall-windowLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(window_LTLIBRARIES)'; test -n "$(windowdir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(windowdir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(windowdir)/$$f"; \
+	done
+
+clean-windowLTLIBRARIES:
+	-test -z "$(window_LTLIBRARIES)" || rm -f $(window_LTLIBRARIES)
+	@list='$(window_LTLIBRARIES)'; \
+	locs=`for p in $$list; do echo $$p; done | \
+	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
+	      sort -u`; \
+	test -z "$$locs" || { \
+	  echo rm -f $${locs}; \
+	  rm -f $${locs}; \
+	}
 $(handler)/$(am__dirstamp):
 	@$(MKDIR_P) $(handler)
 	@: > $(handler)/$(am__dirstamp)
@@ -828,6 +874,17 @@ $(reader)/threadreader.lo: $(reader)/$(am__dirstamp) \
 
 libthreadreader.la: $(libthreadreader_la_OBJECTS) $(libthreadreader_la_DEPENDENCIES) $(EXTRA_libthreadreader_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(readerdir) $(libthreadreader_la_OBJECTS) $(libthreadreader_la_LIBADD) $(LIBS)
+$(window)/$(am__dirstamp):
+	@$(MKDIR_P) $(window)
+	@: > $(window)/$(am__dirstamp)
+$(window)/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) $(window)/$(DEPDIR)
+	@: > $(window)/$(DEPDIR)/$(am__dirstamp)
+$(window)/window.lo: $(window)/$(am__dirstamp) \
+	$(window)/$(DEPDIR)/$(am__dirstamp)
+
+libwindow.la: $(libwindow_la_OBJECTS) $(libwindow_la_DEPENDENCIES) $(EXTRA_libwindow_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(windowdir) $(libwindow_la_OBJECTS) $(libwindow_la_LIBADD) $(LIBS)
 $(reader)/windowreader.lo: $(reader)/$(am__dirstamp) \
 	$(reader)/$(DEPDIR)/$(am__dirstamp)
 
@@ -858,6 +915,8 @@ mostlyclean-compile:
 	-rm -f $(handler)/*.lo
 	-rm -f $(reader)/*.$(OBJEXT)
 	-rm -f $(reader)/*.lo
+	-rm -f $(window)/*.$(OBJEXT)
+	-rm -f $(window)/*.lo
 	-rm -f src/main/*.$(OBJEXT)
 
 distclean-compile:
@@ -876,6 +935,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/handlerfactory.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/threadreader.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/windowreader.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/window.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/main/$(DEPDIR)/app.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -917,6 +977,7 @@ clean-libtool:
 	-rm -rf $(gui)/.libs $(gui)/_libs
 	-rm -rf $(handler)/.libs $(handler)/_libs
 	-rm -rf $(reader)/.libs $(reader)/_libs
+	-rm -rf $(window)/.libs $(window)/_libs
 	-rm -rf .libs _libs
 
 distclean-libtool:
@@ -1157,7 +1218,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(PROGRAMS) $(LTLIBRARIES)
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(basedir)" "$(DESTDIR)$(bitmapdir)" "$(DESTDIR)$(guidir)" "$(DESTDIR)$(handlerdir)" "$(DESTDIR)$(readerdir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(basedir)" "$(DESTDIR)$(bitmapdir)" "$(DESTDIR)$(guidir)" "$(DESTDIR)$(handlerdir)" "$(DESTDIR)$(readerdir)" "$(DESTDIR)$(windowdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -1198,6 +1259,8 @@ distclean-generic:
 	-test -z "$(handler)/$(am__dirstamp)" || rm -f $(handler)/$(am__dirstamp)
 	-test -z "$(reader)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(reader)/$(DEPDIR)/$(am__dirstamp)
 	-test -z "$(reader)/$(am__dirstamp)" || rm -f $(reader)/$(am__dirstamp)
+	-test -z "$(window)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(window)/$(DEPDIR)/$(am__dirstamp)
+	-test -z "$(window)/$(am__dirstamp)" || rm -f $(window)/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -1207,7 +1270,7 @@ clean: clean-am
 clean-am: clean-baseLTLIBRARIES clean-binPROGRAMS \
 	clean-bitmapLTLIBRARIES clean-generic clean-guiLTLIBRARIES \
 	clean-handlerLTLIBRARIES clean-libtool clean-readerLTLIBRARIES \
-	mostlyclean-am
+	clean-windowLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -1224,6 +1287,7 @@ distclean: distclean-am
 	-rm -f $(handler)/$(DEPDIR)/handlerfactory.Plo
 	-rm -f $(reader)/$(DEPDIR)/threadreader.Plo
 	-rm -f $(reader)/$(DEPDIR)/windowreader.Plo
+	-rm -f $(window)/$(DEPDIR)/window.Plo
 	-rm -f src/main/$(DEPDIR)/app.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -1243,7 +1307,7 @@ info-am:
 
 install-data-am: install-baseLTLIBRARIES install-bitmapLTLIBRARIES \
 	install-guiLTLIBRARIES install-handlerLTLIBRARIES \
-	install-readerLTLIBRARIES
+	install-readerLTLIBRARIES install-windowLTLIBRARIES
 
 install-dvi: install-dvi-am
 
@@ -1287,6 +1351,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f $(handler)/$(DEPDIR)/handlerfactory.Plo
 	-rm -f $(reader)/$(DEPDIR)/threadreader.Plo
 	-rm -f $(reader)/$(DEPDIR)/windowreader.Plo
+	-rm -f $(window)/$(DEPDIR)/window.Plo
 	-rm -f src/main/$(DEPDIR)/app.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
@@ -1306,7 +1371,8 @@ ps-am:
 
 uninstall-am: uninstall-baseLTLIBRARIES uninstall-binPROGRAMS \
 	uninstall-bitmapLTLIBRARIES uninstall-guiLTLIBRARIES \
-	uninstall-handlerLTLIBRARIES uninstall-readerLTLIBRARIES
+	uninstall-handlerLTLIBRARIES uninstall-readerLTLIBRARIES \
+	uninstall-windowLTLIBRARIES
 
 .MAKE: install-am install-strip
 
@@ -1314,26 +1380,28 @@ uninstall-am: uninstall-baseLTLIBRARIES uninstall-binPROGRAMS \
 	check-am clean clean-baseLTLIBRARIES clean-binPROGRAMS \
 	clean-bitmapLTLIBRARIES clean-cscope clean-generic \
 	clean-guiLTLIBRARIES clean-handlerLTLIBRARIES clean-libtool \
-	clean-readerLTLIBRARIES cscope cscopelist-am ctags ctags-am \
-	dist dist-all dist-bzip2 dist-gzip dist-lzip dist-shar \
-	dist-tarZ dist-xz dist-zip dist-zstd distcheck distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distcleancheck distdir distuninstallcheck dvi \
-	dvi-am html html-am info info-am install install-am \
+	clean-readerLTLIBRARIES clean-windowLTLIBRARIES cscope \
+	cscopelist-am ctags ctags-am dist dist-all dist-bzip2 \
+	dist-gzip dist-lzip dist-shar dist-tarZ dist-xz dist-zip \
+	dist-zstd distcheck distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-tags \
+	distcleancheck distdir distuninstallcheck dvi dvi-am html \
+	html-am info info-am install install-am \
 	install-baseLTLIBRARIES install-binPROGRAMS \
 	install-bitmapLTLIBRARIES install-data install-data-am \
 	install-dvi install-dvi-am install-exec install-exec-am \
 	install-guiLTLIBRARIES install-handlerLTLIBRARIES install-html \
 	install-html-am install-info install-info-am install-man \
 	install-pdf install-pdf-am install-ps install-ps-am \
-	install-readerLTLIBRARIES install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-baseLTLIBRARIES \
-	uninstall-binPROGRAMS uninstall-bitmapLTLIBRARIES \
-	uninstall-guiLTLIBRARIES uninstall-handlerLTLIBRARIES \
-	uninstall-readerLTLIBRARIES
+	install-readerLTLIBRARIES install-strip \
+	install-windowLTLIBRARIES installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
+	uninstall-am uninstall-baseLTLIBRARIES uninstall-binPROGRAMS \
+	uninstall-bitmapLTLIBRARIES uninstall-guiLTLIBRARIES \
+	uninstall-handlerLTLIBRARIES uninstall-readerLTLIBRARIES \
+	uninstall-windowLTLIBRARIES
 
 .PRECIOUS: Makefile
 

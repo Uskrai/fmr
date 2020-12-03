@@ -24,7 +24,7 @@ Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
     wxPanel( parent, id, position, size )
 {
     this->sizer = new wxBoxSizer( wxHORIZONTAL );
-    this->m_reader = new Reader::Window( this, ReaderWindow, wxDefaultPosition, GetSize(), 0, "Reader" );    
+    this->m_reader = new Reader::Window( this, ReaderWindow, wxDefaultPosition, GetClientSize(), 0, "Reader" );    
     this->sizer->Add( m_reader, 1, wxALL | wxEXPAND );
     this->SetSizer( this->sizer );
 };

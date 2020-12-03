@@ -19,7 +19,7 @@
 #define FMR_READER_WINDOW
 
 
-#include "wx/window.h"
+#include "window/window.h"
 #include <wx/event.h>
 
 #include "base/range.h"
@@ -37,7 +37,7 @@ namespace Reader
 
 class LoadThread;
 
-class Window : public wxWindow
+class Window : public ScrolledWindow
 {
     // void Error( wxSize size );
     public:
@@ -88,7 +88,6 @@ class Window : public wxWindow
         void Error( wxSize size ); 
         void OnDraw( wxDC& dc );
         wxDECLARE_EVENT_TABLE();
-        void OnDraw( wxPaintEvent &event );
 
         void OnThreadUpdate( wxCommandEvent &event ) { Refresh();};
         void OnThreadComplete( wxCommandEvent &event );

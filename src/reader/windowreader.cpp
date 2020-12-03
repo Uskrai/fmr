@@ -41,8 +41,7 @@ namespace Reader
         var = NULL;         \
     }
 
-wxBEGIN_EVENT_TABLE( Window, wxWindow )
-    EVT_PAINT(Window::OnDraw)
+wxBEGIN_EVENT_TABLE( Window, ScrolledWindow )
 //     EVT_MOTION(Window::OnMouseMotion)
 //     EVT_MOUSEWHEEL(Window::OnMouseWheel)
 //     EVT_KEY_DOWN(Window::OnKeyDown)
@@ -52,11 +51,9 @@ wxEND_EVENT_TABLE()
 
 Window::Window( wxWindow* parent, wxWindowID id, const wxPoint & pos, 
                 const wxSize &size, long style, const wxString &name ) :
-    wxWindow( parent, id, wxDefaultPosition, size, style | wxVSCROLL | wxHSCROLL, name )
+    ScrolledWindow( parent, id, wxDefaultPosition, size, style, name )
 {
     m_config = Config::Get();
-    m_vScroll = new wxScrollBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSB_VERTICAL );
-    m_vScroll->Show();
 };
 
 Window::~Window()
@@ -193,9 +190,8 @@ void Window::Find( const wxString& path )
 }
 
 // void Window::OnDraw( wxDC& dc )
-void Window::OnDraw( wxPaintEvent &event )
+void Window::OnDraw( wxDC &dc )
 {   
-    wxPaintDC dc(this);
     // dc.SetClippingRegion( GetViewStart(), GetClientSize() );
     wxCriticalSectionLocker locker( LoadThreadLock );
     if ( m_bitmap )
