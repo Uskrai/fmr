@@ -57,6 +57,7 @@ class ScrolledWindow : public wxWindow
         wxPoint m_viewStart;
         // this is how much window should scroll per event.
         int m_stepPerKey = 300, m_stepPerWheel = 300;
+        bool m_isMouseWheelInvert = false;
         void DoSetVirtualSize( int width, int height );
         
         void DoPrepareDC( wxDC &dc );
@@ -67,10 +68,13 @@ class ScrolledWindow : public wxWindow
         void OnKeyDown( wxKeyEvent &event );
         void OnMouseWheel( wxMouseEvent &event );
         void OnMouseMotion( wxMouseEvent &event );
+        void OnScroll( wxScrollWinEvent &event );
         virtual void OnDraw( wxDC &dc ) {};
 
         wxDECLARE_EVENT_TABLE();
         
+        void DoScroll( wxOrientation orient, int step );
+        void DoScroll( wxScrollBar *scrollbar, int step );
 };
 
 #endif
