@@ -21,6 +21,12 @@
 #include <wx/window.h>
 class wxScrollBar;
 
+enum ScrollBarId
+{
+    HorizontalScrollBar = wxID_HIGHEST + 20,
+    VerticalScrollBar
+};
+
 class ScrolledWindow : public wxWindow
 {
     public:

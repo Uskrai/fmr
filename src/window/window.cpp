@@ -57,9 +57,9 @@ bool ScrolledWindow::Create(    wxWindow *parent,
 {
     bool ret = wxWindow::Create( parent, id, pos, size, style, name );
     if ( !m_vScrollBar ) 
-        m_vScrollBar = new wxScrollBar(this,wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSB_VERTICAL );
+        m_vScrollBar = new wxScrollBar(this, VerticalScrollBar , wxDefaultPosition, wxDefaultSize, wxSB_VERTICAL );
     if ( !m_hScrollBar )
-        m_hScrollBar = new wxScrollBar(this,wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSB_HORIZONTAL );
+        m_hScrollBar = new wxScrollBar(this, HorizontalScrollBar , wxDefaultPosition, wxDefaultSize, wxSB_HORIZONTAL );
     
     SetVirtualSize(0,0);
     return ret;
