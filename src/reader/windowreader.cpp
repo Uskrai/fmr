@@ -146,7 +146,7 @@ Handler *Window::NewHandler( const wxString &path )
         handler->Open(path);
         handler->Traverse( true );
         if ( handler->GetParent() )
-            handler->Traverse();
+            handler->GetParent()->Traverse();
     }
     
     return handler;
