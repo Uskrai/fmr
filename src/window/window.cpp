@@ -27,7 +27,8 @@ wxBEGIN_EVENT_TABLE( ScrolledWindow, wxWindow )
     EVT_KEY_DOWN( ScrolledWindow::OnKeyDown )
     EVT_MOUSEWHEEL( ScrolledWindow::OnMouseWheel )
     EVT_MOTION( ScrolledWindow::OnMouseMotion )
-    EVT_SCROLLWIN( ScrolledWindow::OnScroll )
+    EVT_SCROLLWIN_LINEUP( ScrolledWindow::OnScrollLine )
+    EVT_SCROLLWIN_LINEDOWN ( ScrolledWindow::OnScrollLine )
     EVT_COMMAND_SCROLL_THUMBTRACK( VerticalScrollBar, ScrolledWindow::OnScrollThumbTrack )
     EVT_COMMAND_SCROLL_THUMBTRACK( HorizontalScrollBar, ScrolledWindow::OnScrollThumbTrack )
 wxEND_EVENT_TABLE()
@@ -135,13 +136,17 @@ void ScrolledWindow::Scroll( wxOrientation orient, int step )
 }
 
 void ScrolledWindow::DoScrollLine( wxEventType type, wxOrientation orient, int step )
-{
+{    
+    int pos = GetScrollPos( orient );
     Scroll( orient, step );
+    pos = ( pos == GetScrollPos( orient ) ) ?
+        pos + step : GetScrollPos( orient );
+
     wxQueueEvent(
         this,
         new wxScrollWinEvent(
             type,
-            GetScrollPos( orient ),
+            pos,
             orient
         )
     );
@@ -165,12 +170,45 @@ void ScrolledWindow::LineDown( wxOrientation orient, int step )
     );
 }
 
+void ScrolledWindow::OnScrollLine( wxScrollWinEvent &event )
+{
+    wxDirection direction;
+    int orient = event.GetOrientation();
+    int pos = event.GetPosition();
+    wxScrollBar *bar;
+
+    if ( orient == wxVERTICAL )
+        bar = m_vScrollBar;
+    else if ( orient == wxHORIZONTAL )
+        bar = m_hScrollBar;
+    
+    if ( pos < 0 )
+    {
+        if ( orient == wxVERTICAL )
+            direction = wxUP;
+        if ( orient == wxHORIZONTAL )
+            direction = wxLEFT;
+    }
+    else if ( pos > bar->GetRange() - bar->GetThumbSize() )
+    {
+        if ( orient == wxVERTICAL )
+            direction = wxDOWN;
+        if( orient == wxHORIZONTAL )
+            direction = wxRIGHT;
+    }
+    else 
+        return;
+    
+    OnEdge( direction );
+}
+
 int ScrolledWindow::GetScrollPos( wxOrientation orient )
 {
      if ( orient == wxVERTICAL )
         return m_viewStart.y;
     else if ( orient == wxHORIZONTAL )
         return m_viewStart.x;
+    return 0;
 }
 
 void ScrolledWindow::OnKeyDown( wxKeyEvent &event )
@@ -272,10 +310,6 @@ void ScrolledWindow::OnScrollThumbTrack( wxScrollEvent &event )
     );
 }
 
-void ScrolledWindow::OnScroll( wxScrollWinEvent &event )
-{
-
-}
 
 void ScrolledWindow::AdjustScrollBar()
 {

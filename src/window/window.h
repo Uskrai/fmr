@@ -70,6 +70,8 @@ class ScrolledWindow : public wxWindow
         void DoSetVirtualSize( int width, int height );
         
         void DoPrepareDC( wxDC &dc );
+
+        virtual void OnEdge( wxDirection direction ) {};
     
     private:
         void OnSize( wxSizeEvent &event );
@@ -77,8 +79,11 @@ class ScrolledWindow : public wxWindow
         void OnKeyDown( wxKeyEvent &event );
         void OnMouseWheel( wxMouseEvent &event );
         void OnMouseMotion( wxMouseEvent &event );
-        void OnScroll( wxScrollWinEvent &event );
         void OnScrollThumbTrack( wxScrollEvent &event );
+
+        void OnScrollLine( wxScrollWinEvent &event );
+        void OnLineUp( wxScrollWinEvent &event );
+        void OnLineDown( wxScrollWinEvent &event );
         virtual void OnDraw( wxDC &dc ) {};
 
         wxDECLARE_EVENT_TABLE();
