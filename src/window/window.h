@@ -66,7 +66,7 @@ class ScrolledWindow : public wxWindow
         wxPoint m_viewStart;
         // this is how much window should scroll per event.
         int m_stepPerKey = 300, m_stepPerWheel = 300;
-        bool m_isMouseWheelInvert = false;
+        bool m_isMouseWheelInvert = false, m_isFromRight = false;
         void DoSetVirtualSize( int width, int height );
         
         void DoPrepareDC( wxDC &dc );

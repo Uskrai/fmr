@@ -199,6 +199,14 @@ void ScrolledWindow::OnScrollLine( wxScrollWinEvent &event )
     else 
         return;
     
+    // this will inverse the direction
+    // if m_isFromRight is true
+    // and direction is left or right
+    if ( m_isFromRight && (direction == wxLEFT || direction == wxRIGHT) )
+        direction = ( direction == wxLEFT ) ?
+            wxRIGHT : wxLEFT;
+        
+    
     OnEdge( direction );
 }
 

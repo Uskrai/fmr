@@ -51,11 +51,11 @@ class Window : public ScrolledWindow
         ~Window();
         bool Destroy();
 
-        void Open( const wxString& path );
+        bool Open( const wxString& path );
         
         void ReloadConfig();
 
-        void ChangeFolder( int step );
+        bool ChangeFolder( int step );
         void Next();
         void Prev();
 
@@ -87,6 +87,8 @@ class Window : public ScrolledWindow
         void Error( wxSize size ); 
         void OnDraw( wxDC& dc );
         wxDECLARE_EVENT_TABLE();
+
+        void OnEdge( wxDirection direction );
 
         void OnThreadUpdate( wxCommandEvent &event ) { Refresh();};
         void OnThreadComplete( wxCommandEvent &event );

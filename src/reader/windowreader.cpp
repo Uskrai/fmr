@@ -82,7 +82,7 @@ void Window::OnThreadComplete( wxCommandEvent &event )
 {
 }
 
-void Window::Open( const wxString& path )
+bool Window::Open( const wxString& path )
 {
     // open if path is not empty
     if ( path != wxEmptyString )
@@ -122,7 +122,7 @@ void Window::Open( const wxString& path )
                     m_fileHandler = tempHandler;
                     m_thread = tempThread;
                     m_bitmap = tempBitmap;
-                    return;
+                    return false;
                 }
 
                 Clear();
@@ -130,11 +130,13 @@ void Window::Open( const wxString& path )
                 m_fileHandler = handler;
                 m_bitmap = bitmap;
                 m_thread = thread;
+                return true;
             }
             else
                 wxLogStatus( path + " doesn't have any image");
         } // end of if m_filehandler not null
     } // end of if path not empty
+    return false;
 }
 
 Handler *Window::NewHandler( const wxString &path )
@@ -174,12 +176,16 @@ void Window::ReloadConfig()
     m_config->Flush();
 }
 
-void Window::ChangeFolder( int step )
+bool Window::ChangeFolder( int step )
 {
     wxString path = m_fileHandler->GetFromCurrent( step );
 
-    if ( path == wxEmptyString ) return;
-    Open ( path );
+    if ( path == wxEmptyString ) return false;
+
+    if ( Open( path ) ) return true;
+
+    return ChangeFolder( step + step );
+
 }
 
 void Window::Next() { Open( GetHandler()->GetNext()); }
@@ -192,7 +198,7 @@ void Window::Find( const wxString& path )
 // void Window::OnDraw( wxDC& dc )
 void Window::OnDraw( wxDC &dc )
 {   
-    // dc.SetClippingRegion( GetViewStart(), GetClientSize() );
+    dc.SetClippingRegion( GetViewStart(), GetClientSize() );
     wxCriticalSectionLocker locker( LoadThreadLock );
     if ( m_bitmap )
     {
@@ -211,120 +217,37 @@ T Window::ConfRead( wxString name, T def )
     return m_config->Read( wxString("Reader/") + name, def ); 
 }
 
-void Window::Error( wxSize size )
+void Window::OnEdge( wxDirection direction )
 {
-    // wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-    // wxStaticText* statbox = new wxStaticText( this, wxID_ANY, wxString("Can't load the image"), wxPoint(0,size.GetY() - 22 ), wxSize(size.GetX(),22) ) ;
-    // statbox->SetBackgroundColour( *wxRED );
-    // statbox->SetForegroundColour( *wxWHITE );
-    // sizer->Add(statbox,0, wxALL);
-    // this->SetSizer(sizer);
-}
-
-// void Window::OnMouseWheel( wxMouseEvent& event )
-// {
-//     int scrolling = event.GetWheelDelta()/event.GetWheelRotation() * ConfRead("WheelInvert",-1);
-//     if ( ! OnArrow( wxVERTICAL, scrolling, true ) )
-//     {
-//         // if ( scrolling > -1 )
-//         //     Scroll(0,0);
-//         // else
-//         //     Scroll(0,GetVirtualSize().GetHeight());
-//     }
-// }
-
-bool IsKeyDown( wxKeyEvent &event, int val )
-{
-    return event.GetKeyCode() == val;
-}
-
-// void Window::OnKeyDown( wxKeyEvent& event )
-// {
-
-//     wxEventType key = event.GetKeyCode();
-//     int modVer = ConfRead("ArrowVerticalInvert",-1);
-//     int modHor = ConfRead("ArrowHorizontalInvert",-1 );
-
-//     bool IsUp = IsKeyDown( event, WXK_UP );
-//     bool IsDown = IsKeyDown( event, WXK_DOWN );
-//     bool IsRight = IsKeyDown( event, WXK_RIGHT );
-//     bool IsLeft = IsKeyDown( event, WXK_LEFT );
-
-//     if ( IsUp || IsDown || IsRight || IsLeft )
-//     {
-//         bool isInstant;
-//         wxOrientation orient = wxVERTICAL;
-//         int modifier = 0;
-
-//         if ( IsUp || IsDown )
-//         {
-//             orient = wxVERTICAL;
-//             modifier = modVer;
-//             isInstant = ConfRead("IsInstantOnVertical",false);
-//         }
-        
-//         if ( IsRight || IsLeft )
-//         {
-//             orient = wxHORIZONTAL;
-//             modifier = modHor;
-//             isInstant = ConfRead("IsInstantOnHorizontal",true);
-//         }
-
-//         // if left or down multiply modifier by -1 to 
-//         // make it scroll down or left
-//         if ( IsRight || IsDown )
-//             modifier *= -1;
-
-//         // if ( OnArrow( orient, modifier, isInstant ) == BITMAP_CHANGEPAGE )
-//         //     Scroll(wxPoint(0,0));
-        
-//         return;
-//     }
-//     event.Skip();
-// }
-
-// BITMAP_PAGES Window::OnArrow( wxOrientation orient, int modifier, bool isInstant )
-// {
-//     BITMAP_PAGES result = BITMAP_NOTCHANGED;
-//     if ( m_thread->IsOpened() || modifier != 0 )
-//     {
-//         const wxPoint& view = GetViewStart();
-
-//         // get per scroll step
-//         int step = ConfRead("ScrollStep", 300 ) * modifier;
-//         int ver = step * (orient == wxVERTICAL);
-//         int hor = step * (orient == wxHORIZONTAL);
-
-//         Scroll( view + wxPoint( hor , ver ) );
-
-//         static int onEdge;
-//         if ( view == GetViewStart() )
-//         {
-//             onEdge++;
-//             result = OnEdge( modifier, isInstant, onEdge );
-//             if ( result != BITMAP_NOTCHANGED || result != BITMAP_NOTLOADED )
-//             {
-//                 onEdge = 0;
-//             }
-//         } 
-//         else onEdge = 0;
-//     }    
-    
-//     return result;
-// } 
-
-BITMAP_PAGES Window::OnEdge( int modifier, bool isInstant, int onEdgeCount )
-{
-    BITMAP_PAGES result = BITMAP_NOTCHANGED;
-    size_t conf = ConfRead("ClickBeforeChangePage",1);
-
-    if ( (onEdgeCount > conf || isInstant) && modifier != 0 )
+    if ( m_bitmap )
     {
-        // wxCriticalSectionLocker locker( LoadThread::s_GLock );
-        result = m_bitmap->ChangePage(modifier);
+        int step = 0;
+        if ( direction == wxUP || direction == wxLEFT )
+            step = -1;
+        
+        if ( direction == wxDOWN || direction == wxRIGHT )
+            step = 1;
 
-        if ( result == BITMAP_ENDOFPAGE )
-            ChangeFolder(modifier);
+        BITMAP_PAGES status = m_bitmap->ChangePage( step );
+        int x = ( m_isFromRight ) ? GetVirtualSize().GetWidth() : 0;
+        if ( status == BITMAP_ENDOFPAGE )
+            if ( ChangeFolder( step ) )
+                Scroll(  GetVirtualSize().GetWidth() , 0 );
+        
+        if ( status == BITMAP_CHANGEPAGE )
+        {
+            if ( direction == wxUP )
+                Scroll( 0 , GetVirtualSize().GetHeight() );
+            
+            else if ( direction == wxDOWN )
+                Scroll( x, 0 );
+            
+            else if ( direction == wxLEFT )
+                Scroll( x, 0 );
+            
+            else if ( direction == wxRIGHT )
+                Scroll( x, 0 );
+        }
     }
 }
 
