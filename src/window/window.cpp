@@ -155,30 +155,33 @@ void ScrolledWindow::OnKeyDown( wxKeyEvent &event )
     // is pressed
     if ( ! event.HasAnyModifiers() )
     {
-        wxOrientation orient;
-        int modifier = 0;
+        if ( isUp || isDown || isLeft || isRight )
+        {
+            wxOrientation orient;
+            int modifier;
 
-        // set orientation to vertical
-        // if key is up or down
-        if ( isUp || isDown )
-            orient = wxVERTICAL;
-        
-        // set orientation to horizontal
-        // if key is left or right
-        if ( isLeft || isRight )
-            orient = wxHORIZONTAL;
-        
-        // set modifier to -1 
-        // if key is up or right
-        // negative to substract
-        // viewScroll
-        if ( isUp || isRight )
-            modifier = -1;
-        
-        if ( isDown || isLeft )
-            modifier = 1;
+            // set orientation to vertical
+            // if key is up or down
+            if ( isUp || isDown )
+                orient = wxVERTICAL;
+            
+            // set orientation to horizontal
+            // if key is left or right
+            if ( isLeft || isRight )
+                orient = wxHORIZONTAL;
+            
+            // set modifier to -1 
+            // if key is up or right
+            // negative to substract
+            // viewScroll
+            if ( isUp || isRight )
+                modifier = -1;
+            
+            if ( isDown || isLeft )
+                modifier = 1;
 
-        Scroll(orient,modifier * m_stepPerKey );
+            Scroll( orient, modifier * m_stepPerKey );
+        }
     }
 
     event.Skip();
@@ -252,15 +255,17 @@ void ScrolledWindow::AdjustScrollBar()
         -1
     );
 
+    m_viewStart.y = m_vScrollBar->GetThumbPosition();
     m_vScrollBar->SetScrollbar(
-        m_vScrollBar->GetThumbPosition(), 
+        GetViewStart().y,
         sz.GetHeight(), 
         GetVirtualSize().GetHeight(), 
         sz.GetHeight()
     );
 
+    m_viewStart.x = m_hScrollBar->GetThumbPosition();
     m_hScrollBar->SetScrollbar(
-        m_hScrollBar->GetThumbPosition(), 
+        GetViewStart().x,
         sz.GetWidth(), 
         GetVirtualSize().GetWidth(), 
         sz.GetWidth()
