@@ -326,26 +326,6 @@ BITMAP_PAGES Window::OnEdge( int modifier, bool isInstant, int onEdgeCount )
         if ( result == BITMAP_ENDOFPAGE )
             ChangeFolder(modifier);
     }
-    return result;
-
 }
-
-// void Window::OnMouseMotion( wxMouseEvent& event )
-// {
-//     static wxPoint mousePosition;
-//     const wxPoint& pos = event.GetPosition();
-//     if ( event.Dragging() )
-//     {
-//         if ( event.LeftIsDown() )
-//         {
-//             int y = mousePosition.y - pos.y;
-//             int x = mousePosition.x - pos.x;
-//             // const wxPoint& scrolled = GetViewStart();
-//             // Scroll( scrolled.x + ( x * 5 ), scrolled.y + ( y  * 5 ));
-//         }
-//     }
-//     mousePosition = pos;
-//     event.Skip();
-// }
 
 }

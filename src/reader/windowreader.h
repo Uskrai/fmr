@@ -90,14 +90,7 @@ class Window : public ScrolledWindow
 
         void OnThreadUpdate( wxCommandEvent &event ) { Refresh();};
         void OnThreadComplete( wxCommandEvent &event );
-        // void OnMouseMotion( wxMouseEvent& event );
-        // void OnMouseWheel( wxMouseEvent& event );
-        // void OnKeyDown( wxKeyEvent& event );
         
-        // return is ViewStart Changed 
-        // BITMAP_PAGES OnArrow( wxOrientation orient, int modifier, bool isInstant = false);
-        // return is Change Folder
-        BITMAP_PAGES OnEdge( int modifier, bool isInstant = false, int onEdgeCount = 0 );
 };
 
 };
