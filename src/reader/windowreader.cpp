@@ -102,9 +102,9 @@ void Window::Open( const wxString& path )
                 ReloadConfig();
                 size_t limitPrev = ConfRead("ImageMemoryLimitPrev", NO_LIMIT );
                 size_t limitNext = ConfRead("ImageMemoryLimitNext", NO_LIMIT );
+                size_t limitImage = ConfRead("ImageShowLimit", 1 );
 
-
-                Bitmap *bitmap = NewBitmap( handler->Size() );
+                Bitmap *bitmap = NewBitmap( limitImage, handler->Size() );
                 size_t idx = handler->Index( path );
 
                 LoadThread *thread;
@@ -152,14 +152,14 @@ Handler *Window::NewHandler( const wxString &path )
     return handler;
 }
 
-Bitmap *Window::NewBitmap( size_t size )
+Bitmap *Window::NewBitmap( size_t size, size_t limit )
 {
     Bitmap *bitmap = NULL;
     bitmap = new Bitmap( this );
 
     bitmap->SetLimit( size );
-    bitmap->Resize( size );
-    bitmap->GetAll().assign( size,  SBitmap() );
+    bitmap->Resize( limit );
+    bitmap->GetAll().assign( limit,  SBitmap() );
 
     int scale = ConfRead("ImageScaleFromOriginal", 100 );
     long pos = ConfRead("ImagePosition", long(BITMAP_VERTICAL | BITMAP_CENTERED) );

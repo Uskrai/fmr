@@ -82,9 +82,8 @@ class Window : public ScrolledWindow
         T ConfRead( wxString name, T def );
 
         Handler *NewHandler( const wxString &path );
-        Bitmap *NewBitmap( size_t size );
+        Bitmap *NewBitmap( size_t size, size_t limit );
 
-        int w,h;
         void Error( wxSize size ); 
         void OnDraw( wxDC& dc );
         wxDECLARE_EVENT_TABLE();
