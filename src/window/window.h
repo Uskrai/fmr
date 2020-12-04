@@ -50,12 +50,15 @@ class ScrolledWindow : public wxWindow
         // to scroll window
         void Scroll( const wxPoint &pos );
         void Scroll( int x, int y );
+        void LineUp( wxOrientation orient, int step );
+        void LineDown ( wxOrientation orient, int step );
         // to scroll window,
         // step will be added by 
         // ViewStart according to orientation.
         void Scroll( wxOrientation orient, int step );
 
         wxPoint GetViewStart() { return m_viewStart; }
+        int GetScrollPos( wxOrientation );
     
         void AdjustScrollBar();
     protected:
@@ -75,12 +78,14 @@ class ScrolledWindow : public wxWindow
         void OnMouseWheel( wxMouseEvent &event );
         void OnMouseMotion( wxMouseEvent &event );
         void OnScroll( wxScrollWinEvent &event );
+        void OnScrollThumbTrack( wxScrollEvent &event );
         virtual void OnDraw( wxDC &dc ) {};
 
         wxDECLARE_EVENT_TABLE();
         
         void DoScroll( wxOrientation orient, int step );
         void DoScroll( wxScrollBar *scrollbar, int step );
+        void DoScrollLine( wxEventType type, wxOrientation orient, int step );
 };
 
 #endif
