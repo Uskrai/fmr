@@ -18,47 +18,54 @@
 #ifndef FMR_BITMAP_BITMAP
 #define FMR_BITMAP_BITMAP
 
-#include <wx/bitmap.h>
-#include "bitmap/bmp.h"
 #include "base/vector.h"
+#include "bitmap/bmp.h"
 
+class wxWindow;
 class Bitmap
 {
     public:
-        void Clear();
-        bool IsExist( int first, int last ) const;
-
-        void SetLimit( size_t limit );
-
-        void Refresh();
-
-        virtual void RefreshPosition() = 0;
-        virtual void RefreshSize() = 0;
+        Bitmap( wxWindow* parent );
+        ~Bitmap();
+        void Add( wxImage& image, size_t idx );
 
         void SetName( size_t idx, wxString name )
             { GetAll()[idx].SetName(name); }
 
-        bool ChangePage( int step );
+        void SetFlags( int posFlags, int sizeFlags, int scaleParent )
+            {   SetPosition(posFlags);SetSize(sizeFlags), 
+                SetScaleParent( scaleParent );}
+        void SetScaleParent( int scale )
+            { m_scaleParent = scale; }
+        void SetSize( int flags ) 
+            { m_flagSize = flags; }
+        void SetPosition( int flags ) 
+            { m_flagPosition = flags; }
+            
+        void SetLimit( size_t limit );
+        void Resize( size_t limit );
+        void Clear();
+
+        void Refresh();
+        void RefreshPosition( );
+        void RefreshSize( );
+
+        BITMAP_PAGES ChangePage( int step );
         bool IsImageOk( int pos );
+        void MarkLoaded( size_t idx );
         bool NextPage();
         bool PrevPage();
 
         wxVector<SBitmap>& GetAll() { return m_item; }
-        const wxVector<SBitmap>& GetAll() const { return m_item; }
         
         wxVector<SBitmap*>& Get() { return m_itemPage; }
-        const wxVector<SBitmap*>& Get() const { return m_itemPage; }
 
-        const SBitmap* Get( const wxPoint& area, const wxPoint& position ) const;
         SBitmap* Get( const wxPoint& area, const wxPoint& position );
 
-        wxVector<const SBitmap*> Get( const wxPoint& area, const wxSize& size ) const;
         wxVector<SBitmap*> Get( const wxPoint& area, const wxSize& size );
 
-        virtual ~Bitmap() {};
-
     protected:
-
+        wxWindow* m_parent = NULL;
         wxVector<SBitmap> m_item;
         wxVector<SBitmap*> m_itemPage;
 
@@ -66,6 +73,16 @@ class Bitmap
         size_t m_limit = 1;
         size_t m_posFirst = 0 , m_posLast = 0;
 
+        int m_flagSize, m_flagPosition, m_scaleParent;
+        int m_maxWidth, m_maxHeight;
+
+        wxWindow* GetParent() { return m_parent; }
+        void Prepare( const wxImage& image, int pos, struct SBitmap& bmp );
+        void Exit( int i );
+
+        int Push( struct SBitmap& bmp );
+
+        int Centered( int width );
 };
 
 #endif

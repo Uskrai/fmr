@@ -16,27 +16,22 @@
  */
 
 #include "bitmap/bitmap.h"
+#include "bitmap/position.h"
+#include "bitmap/size.h"
 
-SBitmap G_BITMAP;
+#include <wx/window.h>
 
-void Bitmap::Clear()
+SBitmap G_BITMAP(true);
+
+Bitmap::Bitmap( wxWindow* parent )
 {
-    for ( auto& it : Get() )
-    {
-        it = &G_BITMAP;
-    }
-    m_posFirst = 0;
-    GetAll().clear();
-    Refresh();
+    this->m_parent = parent;
+    m_maxWidth = parent->GetClientSize().GetWidth();
 }
 
-void Bitmap::SetLimit( size_t limit )
+Bitmap::~Bitmap()
 {
-    Get().resize( limit );
-    m_posLast = ( limit < m_limit ) ? 
-        m_posLast - ( m_limit - limit ) : m_posLast;
-    m_limit = limit;
-    Refresh();
+
 }
 
 void Bitmap::Refresh()
@@ -48,32 +43,69 @@ void Bitmap::Refresh()
     {
         if ( Vector::IsExist( m_item, pos ) )
         {
-            if ( m_item.at(pos).IsOk() )
-            {
-                m_itemPage.at(i) = &m_item.at(pos);
-                i++;
-            }
+            m_itemPage.at(i) = &m_item.at(pos);
             pos++;
         }
         else 
         {
             m_itemPage.at(i) = &G_BITMAP;
-            i++;
         }
+        i++;
     }
     m_posLast = pos;
-    RefreshSize();
-    RefreshPosition();
 }
 
-bool Bitmap::NextPage()
+BITMAP_PAGES Bitmap::ChangePage( int step )
 {
-    return ChangePage( 1 );
+    // wont change image if there is an image that is not loaded
+    for ( const auto& it : Get() )
+        if ( ! it->IsLoaded() )
+            return BITMAP_NOTLOADED;
+
+    size_t &pos = m_posFirst;
+
+    size_t temp = pos;
+    
+    // if step positive, then pos is pos + image per page.
+    // else if pos less than image per page pos not zero,
+    // then pos is 0, else pos is pos - image per page.
+    pos = ( step > 0 ) 
+                ? pos + Get().size() 
+                    : ( pos < Get().size() && pos != 0 ) 
+                    ? 0 : pos - Get().size();
+    
+
+    bool isChanged = ( Vector::IsExist( m_item, pos ) );
+    
+    // if changed then pos stays,
+    // else return to before calculation.
+    pos = isChanged ? pos : temp;
+
+    if ( isChanged )
+    {
+        Refresh();
+        RefreshSize();
+        RefreshPosition();
+        GetParent()->Refresh();
+        return BITMAP_CHANGEPAGE;
+    }
+
+    return BITMAP_ENDOFPAGE;
+
 }
 
-bool Bitmap::PrevPage()
+void Bitmap::Resize( size_t limit )
 {
-    return ChangePage( -1 );
+    // use limit if m_limit is larger than limit
+    limit = m_limit > limit ? limit : m_limit;
+    Get().resize(limit);
+    Refresh();
+};
+
+void Bitmap::SetLimit( size_t limit )
+{
+    m_limit = limit;
+    Refresh();
 }
 
 bool Bitmap::IsImageOk( int pos )
@@ -81,75 +113,75 @@ bool Bitmap::IsImageOk( int pos )
     return Vector::IsExist(m_item,pos) && m_item.at(pos).IsOk(); 
 }
 
-bool Bitmap::ChangePage( int step )
+void Bitmap::MarkLoaded( size_t idx )
 {
-    size_t &pos = m_posFirst;
+    if ( Vector::IsExist(m_item,idx) )
+        m_item.at(idx).SetLoaded();
+}
 
-    size_t temp = pos;
-    size_t i = 0;
-    while ( i < m_limit )
-    {
-        if ( ! Vector::IsExist( m_item, pos + step ) )
-            break;
+void Bitmap::Prepare( const wxImage& image, int pos, struct SBitmap& bmp )
+{
+    bmp.SetBitmap( wxBitmap(image) );
+}
 
-        if ( IsImageOk( pos )  )
-            i++;
-
-        pos += step;
-    }
-    while ( !IsImageOk( pos ) )
-        pos++;
-
+void Bitmap::Add( wxImage& image, size_t idx )
+{
+    Size::Prepare( image, m_flagSize, m_parent, m_scaleParent );
+    struct SBitmap& bmp = m_item.at(idx);
+    bmp.SetBitmap( wxBitmap( image ) );
+    
+    m_maxWidth = ( bmp.GetWidth() > m_maxWidth ) ? bmp.GetWidth() : m_maxWidth;
+    
     Refresh();
-    if ( i == 0 )
-        return false;
-    return temp != pos;
+    if ( m_posFirst <= idx && idx <= m_posLast)
+    {
+        RefreshSize();
+        RefreshPosition();
+    }
+    GetParent()->Refresh();
 }
 
-const SBitmap* Bitmap::Get( const wxPoint& area, const wxPoint& position ) const
+int Bitmap::Centered( int width )
 {
+    int clientWidth = GetParent()->GetClientSize().GetWidth();
+
+    width = ( width < m_maxWidth ) ? width : m_maxWidth;
+
+    int pos = (clientWidth-width)/2;
+    if ( pos < 0 )
+        pos = 0;
+    
+    return pos;
+}
+
+void Bitmap::RefreshPosition()
+{
+    Position::Refresh( Get(), m_flagPosition, m_parent );
+}
+
+void Bitmap::RefreshSize()
+{
+    wxSize size;
     for ( const auto& it : Get() )
     {
-        if ( it->IsPointed( area, position ) ) return it;
+        if ( it->IsOk() )
+        {
+            if ( ! (m_flagSize & BITMAP_FITHEIGHT) )
+                size.SetHeight( it->GetHeight() + size.GetHeight() );
+            if ( ! (m_flagSize & BITMAP_FITWIDTH ) )
+                size.SetWidth( size.GetWidth() > it->GetWidth() ? size.GetWidth() : it->GetWidth() );
+        }
     }
-    return nullptr;
+    GetParent()->SetVirtualSize( size );
+    GetParent()->Refresh();
 }
 
-SBitmap* Bitmap::Get( const wxPoint& area, const wxPoint& position )
+void Bitmap::Clear()
 {
     for ( auto& it : Get() )
     {
-        if ( it->IsPointed( area, position ) ) return it;
+        it = &G_BITMAP;
     }
-    return nullptr;
-}
-
-wxVector<const SBitmap*> Bitmap::Get( const wxPoint& area, const wxSize& size ) const
-{
-    wxVector<const SBitmap*> bmp;
-    int i = 0;
-    for ( const auto& it : Get() )
-    {
-        if ( it->IsShown( area, size ) )
-            bmp.push_back(it);
-
-        i++;
-    }
-
-    return bmp;
-}
-
-wxVector<SBitmap*> Bitmap::Get( const wxPoint& area, const wxSize& size )
-{
-    int i = 0;
-    wxVector<SBitmap*> bmp;
-    for ( auto& it : Get() )
-    {
-        // skip not Ok Image;
-        if ( !it->IsOk() ) continue;
-        
-        bmp.push_back(it);
-        i++;
-    }
-    return bmp;
+    m_posFirst = 0;
+    GetAll().clear();
 }

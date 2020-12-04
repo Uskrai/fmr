@@ -14,29 +14,27 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef FMR_BITMAP_SIZE
+#define FMR_BITMAP_SIZE
 
-#ifndef FMR_BASE_PATH
-#define FMR_BASE_PATH
+#include "bitmap/bmp.h"
+#include <wx/scrolwin.h>
 
-#include <wx/filename.h>
-#include <iostream>
-inline namespace Path
+#define SizeFlagFilter( flag, func )    \
+    if ( flag & flags )                   \
+        return func( img, flags, parent, scale );
+
+#define SizeFunc( name )                \
+    float name( wxImage &img, int flags, wxWindow *parent, int scale )
+
+namespace Size
 {
-    const wxUniChar sep = wxFileName::GetPathSeparator();
-    
-    // return long path
-    wxString GetFullPath( wxString path );
-    // return directory name
-    wxString GetDirName( wxString path );
-    // return parent's path
-    wxString GetParent( const wxString& path );
-    // strip last separator
-    void RemoveDirSep( wxString& path );
-    // return Name without separator
-    wxString GetName( wxString path );
-    // return name with separator if directory
-    wxString GetNameWithSep( wxString path );
+    inline SizeFunc( Original ) { return 1;};
+    SizeFunc( FitAll );
+    SizeFunc( FitWidth );
+    SizeFunc( FitHeight );
 
-} // namespace Path
+    SizeFunc ( Prepare );
+};
 
 #endif

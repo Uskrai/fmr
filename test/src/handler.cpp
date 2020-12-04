@@ -28,9 +28,20 @@ void testHandler( Handler* handler )
 	std::cout << "Next : \t\t" << handler->GetNext() << '\n';
 	std::cout << "Prev : \t\t" << handler->GetPrev() << '\n';
 }
+
+void testSort( Handler* handler )
+{
+	handler->Traverse();
+	for ( const auto &it : handler->GetChild() )
+	{
+		std::cout << it << '\n';
+	}
+}
+
 void dfHandler()
 {
-	testHandler( new DefaultHandler(".") );
+	//testHandler( new DefaultHandler(".") );
+	testSort( new DefaultHandler("/home/uskrai/downloading/manga/onGoing/The Cuckoo's Fiancee/") );
 }
 
 void arcHandler()
@@ -41,5 +52,5 @@ void arcHandler()
 int main()
 {
 	dfHandler();
-	arcHandler();
+	//arcHandler();
 }

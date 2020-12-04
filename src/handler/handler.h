@@ -19,6 +19,7 @@
 
 #include <wx/stream.h>
 
+inline char DUMMY_BUFFER;
 class Handler 
 {
     public:     
@@ -41,7 +42,7 @@ class Handler
 
         virtual void Open( const wxString& path) = 0;
         // enumerate current opened file or dir
-        virtual void Traverse() = 0 ;
+        virtual void Traverse( bool GetStream = false ) = 0 ;
 
         virtual bool IsExist( size_t index ) = 0;
 

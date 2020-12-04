@@ -36,7 +36,7 @@ class Frame :
     public :
         Frame(const wxString& title, const wxPoint& pos, const wxSize& size,long style);
         
-        Panel* panel = NULL; 
+        Panel* m_panel = NULL; 
         wxBoxSizer* sizer;
 
     private:
@@ -47,6 +47,7 @@ class Frame :
         void OnExit(wxCommandEvent& event);
         void OnAbout(wxCommandEvent& event);
 
+        void OnClose( wxCloseEvent &event );
         void OpenFile(wxCommandEvent& event);
 
         wxStatusBar* StatusBar();

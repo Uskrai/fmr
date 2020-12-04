@@ -37,13 +37,19 @@ void ArchiveHandler::Open( const wxString& path )
     }
 }
 
+size_t ArchiveHandler::Index( const wxString& name )
+{
+    if ( name == m_name ) return 0;
+    return m_files.Index(name);
+}
+
 wxString ArchiveHandler::GetFromCurrent( int i )
 {
     if ( GetParent() )
     {
-        wxArrayString names = GetParent()->GetChild();
+        wxArrayString& names = GetParent()->GetChild();
         size_t idx = names.Index( Path::GetName( GetName() ));
-        if ( idx != size_t(-1) )
+        if ( idx != size_t(-1) && Vector::IsExist(names, idx + i ) )
             return GetParent()->GetName() + names.Item( idx + i );
     }
 
@@ -53,7 +59,7 @@ wxString ArchiveHandler::GetFromCurrent( int i )
 wxString ArchiveHandler::GetNext() { return GetFromCurrent(1); }
 wxString ArchiveHandler::GetPrev() { return GetFromCurrent(-1); }
 
-void ArchiveHandler::Traverse()
+void ArchiveHandler::Traverse( bool GetStream)
 {
     wxString path = m_name;
 
@@ -63,7 +69,7 @@ void ArchiveHandler::Traverse()
 
     Find( path, factory, instream );
 
-    wxArchiveInputStream* stream = factory->NewStream( instream );
+    wxArchiveInputStream* stream = factory->NewStream( *instream );
     wxArchiveEntry* entry;
 
     while ( (entry = stream->GetNextEntry()) != NULL )
@@ -77,8 +83,21 @@ void ArchiveHandler::Traverse()
     }
     m_files.Sort(Compare::Natural);
 
+    delete stream;
+    delete instream;
+
+    if ( GetStream ) TraverseStream();
+}
+
+void ArchiveHandler::TraverseStream()
+{
+    wxInputStream *instream;
+    const wxArchiveClassFactory* fct;
+    Find( m_name, fct, instream );
+    wxArchiveEntry *entry;
+    wxArchiveInputStream *stream = fct->NewStream( *instream );
+
     wxArrayString files = m_files;
-    stream = factory->NewStream( new wxFileInputStream(path) );
     while ( ( entry = stream->GetNextEntry()) )
     {
         for ( int i = 0; i < int(files.size()); i++ )
@@ -87,13 +106,19 @@ void ArchiveHandler::Traverse()
             {
                 wxMemoryOutputStream file;
                 stream->Read(file);
-                m_fstream.push_back( new wxMemoryInputStream(file) );
+                if ( file.GetSize() != 0  && file.IsOk())
+                    m_fstream.push_back( new wxMemoryInputStream(file) );
+                else
+                    m_fstream.push_back( new wxMemoryInputStream(&DUMMY_BUFFER, sizeof(DUMMY_BUFFER)) );
                 files.RemoveAt(i);
             }
         }
     }
-}
 
+    stream->CloseEntry();
+    delete stream;
+    delete instream;
+}
 
 bool ArchiveHandler::Find( wxString& path, const wxArchiveClassFactory*& factory, wxInputStream*& in )
 {
@@ -139,13 +164,10 @@ bool ArchiveHandler::CanHandle( wxString path )
 
 void ArchiveHandler::Clear()
 {
-    for ( auto& it : m_fstream )
-    {
-        it->~wxInputStream();
-    }
     m_fstream.clear();
     m_name = wxEmptyString;
     m_files.clear();
+    m_all.clear();
 }
 
 ArchiveHandler::~ArchiveHandler()

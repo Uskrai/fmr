@@ -19,28 +19,43 @@
 #define FMR_READER_WINDOW
 
 
-#include <wx/scrolwin.h>
+#include "window/window.h"
+#include <wx/event.h>
+
 #include "base/range.h"
 
+#include "bitmap/bitmap.h"
+
 class Config;
-class BitmapVertical;
 class Handler;
 class HandlerFactory;
+class wxScrollBar;
+class wxSizer;
 
 namespace Reader
 {
 
-class Thread;
+class LoadThread;
 
-class Window : public wxScrolledWindow
+class Window : public ScrolledWindow
 {
     // void Error( wxSize size );
     public:
+        Window( wxWindow *parent, wxWindowID id=wxID_ANY, 
+                const wxPoint &pos=wxDefaultPosition, 
+                const wxSize &size=wxDefaultSize, 
+                long style=wxTAB_TRAVERSAL, 
+                const wxString &name=wxPanelNameStr
+                );
         Window( wxWindow* parent, wxSize size );
         ~Window();
-        void Open( const wxString& path );
+        bool Destroy();
 
-        void ChangeFolder( int step );
+        bool Open( const wxString& path );
+        
+        void ReloadConfig();
+
+        bool ChangeFolder( int step );
         void Next();
         void Prev();
 
@@ -49,34 +64,35 @@ class Window : public wxScrolledWindow
         Handler* GetHandler() {return m_fileHandler;}
     private:
         //vector to bitmaps
-        BitmapVertical* m_bitmap;
+        Bitmap* m_bitmap = NULL;
         // reference to threading class
-        Thread* m_thread;
+        LoadThread *m_thread = NULL;
         // pointer to handler
         Handler* m_fileHandler = NULL;
         HandlerFactory* m_factory = NULL;
         // pointer to config files 
         Config* m_config;
+        // pointer to scrollbar
+        wxScrollBar *m_vScroll, *m_hScroll;
+        wxSizer *m_sizer;
 
         void Find( const wxString& path );
 
         template<typename T>
         T ConfRead( wxString name, T def );
 
-        int w,h;
+        Handler *NewHandler( const wxString &path );
+        Bitmap *NewBitmap( size_t size, size_t limit );
+
         void Error( wxSize size ); 
         void OnDraw( wxDC& dc );
         wxDECLARE_EVENT_TABLE();
-        void OnMouseMotion( wxMouseEvent& event );
-        wxPoint m_mousePosition;
-        void OnMouseWheel( wxMouseEvent& event );
-        void OnKeyDown( wxKeyEvent& event );
+
+        void OnEdge( wxDirection direction );
+
+        void OnThreadUpdate( wxCommandEvent &event ) { Refresh();};
+        void OnThreadComplete( wxCommandEvent &event );
         
-        // return is ViewStart Changed 
-        bool OnArrow( wxOrientation orient, int modifier, bool isInstant = false);
-        size_t m_onEdge;
-        // return is Change Folder
-        bool OnEdge( int modifier, bool isInstant = false );
 };
 
 };

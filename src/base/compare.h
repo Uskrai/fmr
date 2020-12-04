@@ -22,70 +22,15 @@
 
 #define StringCompareFunction( name ) int name ( const wxString& s1, const wxString& s2 )
 
-bool NotEnd( const wxString& str, size_t idx ) 
-    { return idx < str.size(); }
-
 namespace Compare
 {
-    wxString GetNonZero( const wxString& str, size_t& idx, char& chr )
-    {
-        size_t sz = idx;
-        while ( isdigit( str[idx + 1] ) )
-            idx++;
+    typedef wchar_t Char;
+    typedef std::wstring String;
 
-        while ( str[ sz ] == '0' )
-            sz++;
+    bool NotEnd( const wxString& str, size_t idx );
+    String GetNonZero( const String& str, size_t& idx, Char& chr );
+    StringCompareFunction( Natural );
 
-        chr = str[idx];
-        const wxString& tmp = str.SubString( sz, idx );
-        return ( tmp == "" ) ? "0" : tmp;
-    }
-
-    StringCompareFunction( Natural ) 
-    {
-        const wxString& first = s1.Lower();
-        const wxString& second = s2.Lower();
-        // idx for first, pos for second;
-        size_t idx = 0, pos = 0;
-        while ( NotEnd( first, idx ) && NotEnd( second, pos ) )
-        {
-            char fst = first[idx];
-            char scnd = second[pos];
-            
-            if ( isdigit(fst) && isdigit(scnd) )
-            {
-                const wxString& str1 = GetNonZero( first, idx, fst );
-                const wxString& str2 = GetNonZero( second, pos, scnd );
-
-                // if str1's len not equal str2's len
-                // will return whether str1 more or less than str2
-                if ( str1.size() != str2.size() ) 
-                    return str1.size() - str2.size();
-
-                size_t i = 0;
-                // only check str1 cuz the len is the same
-                while ( NotEnd(str1,i) )
-                {
-                    // will return whether str1 more or less
-                    // than str2 if the value not equal
-                    if ( str1[i] != str2[i] )
-                        return str1[i] - str2[i];
-                    i++;
-                }
-            }
-
-            if ( fst != scnd )
-            {
-                if ( idx != pos )
-                    return idx - pos;
-                return  fst - scnd;
-            }
-
-            idx++;pos++;
-        }
-
-        return 0;
-    }
 }
 
 #endif
