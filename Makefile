@@ -71,7 +71,7 @@ gui/panel.$(soext) : lib += reader/windowreader
 bitmap/bitmapvertical.$(soext) : lib += bitmap/bitmap
 reader/windowreader.$(soext) : lib += bitmap/bitmapvertical bitmap/bitmap
 reader/threadreader.$(soext) : lib += handler/handlerfactory bitmap/bitmapvertical
-handler/handler.o	: lib += handler/filehandler handler/archivehandler
+handler/handler.o	: lib += handler/defaulthandler handler/archivehandler
 
 $(filter-out config.$(soext), $(so)) : libs += base/config
 
@@ -81,15 +81,16 @@ $(addprefix build/, $(so) ) : build/%.$(soext): %.o
 
 # $(obj) : FLAGS := $(CXXFLAGS) $(wxFLAGS)
 
-bitmap/bitmapvertical.o : bitmap/bmp.h bitmap/bitmap.h
-handler/handler.o 	: handler/filehandler.h handler/archivehandler.h
-reader/threadreader.o	: handler/handler.h bitmap/bitmap.h
-reader/windowreader.o 	: bitmap/bitmapvertical.h bitmap/bitmap.h
+(filter-out $(addprefix bitmap/, bmp.o bitmap.o), $(bitmap) : $(addprefix bitmap, bmp.h bitmap.h)
+handler/handler.o 	: handler/defaulthandler.h handler/archivehandler.h
+reader/threadreader.o	: $(addprefix handler/, $(addsuffix .h, $(handler) ) ) bitmap/bitmap.h
+reader/windowreader.o 	: bitmap/bitmap.h bitmap/bitmapvertical.h
 gui/panel.o : reader/windowreader.h 
 gui/frame.o : gui/panel.h
 main/app.o : gui/frame.h
 
 $(filter-out config.o, $(obj) ) : base/config.h
+$(addsuffix .o, $(addprefix handler/, $(handler) ) ) : base/path.h base/vector.h
 obj : $(obj)
 
 $(addprefix build/, $(obj) ): build/%.o : %.cpp %.h 

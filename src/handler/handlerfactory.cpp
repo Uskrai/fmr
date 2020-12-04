@@ -25,22 +25,32 @@ HandlerType HandlerFactory::GetType()
     return m_type;
 }
 
+bool HandlerFactory::Is( const wxString& path1, const wxString& path2)
+{
+    HandlerType type1, type2;
+    Find( path1, type1 );
+    Find( path2, type2 );
+    return type1 == type2;
+}
+
+
 bool HandlerFactory::Find( const wxString& path )
 {
-    return Find( path, m_type );
+    HandlerType type;
+    return Find( path, type );
 }
 
 bool HandlerFactory::Find( const wxString& path, HandlerType& type )
 {
     if ( ArchiveHandler::CanHandle(path) )
     {
-        m_type = Archive;
+        type = Archive;
         return true;
     }
 
     if ( DefaultHandler::CanHandle(path) )
     {
-        m_type = Default;
+        type = Default;
         return true;
     }
     return false;

@@ -20,83 +20,194 @@
 #include "reader/threadreader.h"
 #include "base/config.h"
 
-#include "image/image.h"
-
-#include "bitmap/bitmapvertical.h"
-
-#include <wx/stattext.h>
-#include <wx/sizer.h>
-#include <wx/dc.h>
-
+#include "bitmap/bitmap.h"
 #include "handler/handlerfactory.h"
+
+
+#include <wx/log.h>
+#include <wx/scrolbar.h>
+#include <wx/sizer.h>
+#include <wx/dcclient.h>
+
+// TODO : Make separate thread controller
 
 namespace Reader
 {
 
-wxBEGIN_EVENT_TABLE( Window, wxScrolledWindow )
-    EVT_MOTION(Window::OnMouseMotion)
-    EVT_MOUSEWHEEL(Window::OnMouseWheel)
-    EVT_KEY_DOWN(Window::OnKeyDown)
+#define Free( var )         \
+    if ( var )              \
+    {                       \
+        delete var;         \
+        var = NULL;         \
+    }
+
+wxBEGIN_EVENT_TABLE( Window, ScrolledWindow )
+//     EVT_MOTION(Window::OnMouseMotion)
+//     EVT_MOUSEWHEEL(Window::OnMouseWheel)
+//     EVT_KEY_DOWN(Window::OnKeyDown)
+    EVT_COMMAND( wxID_ANY, EVT_COMMAND_LOADTHREAD_UPDATE, Window::OnThreadUpdate )
+    EVT_COMMAND( wxID_ANY, EVT_COMMAND_LOADTHREAD_COMPLETED, Window::OnThreadComplete)
 wxEND_EVENT_TABLE()
 
-Window::Window( wxWindow* parent, wxSize size ) :
-    wxScrolledWindow( parent, wxID_ANY, wxDefaultPosition, size )
+Window::Window( wxWindow* parent, wxWindowID id, const wxPoint & pos, 
+                const wxSize &size, long style, const wxString &name ) :
+    ScrolledWindow( parent, id, wxDefaultPosition, size, style, name )
 {
-    SetScrollRate(1,1);
-    SetVirtualSize(GetSize());
-
     m_config = Config::Get();
-
-    m_bitmap = new BitmapVertical(this);
-    m_factory = new HandlerFactory();
-    m_thread = new Thread( this, m_bitmap );
-
-    m_bitmap->SetLimit( ConfRead("ImageShowLimit", 1  ) );
-
-    int limitNext = ( ConfRead("ImageShowLimit", 1 ) > ConfRead("ImageMemoryLimitNext", NO_LIMIT ) ) ?
-                    ConfRead("ImageShowLimit",1) : ConfRead("ImageMemoryLimitNext", NO_LIMIT );
-
-    m_thread->SetLimit( ConfRead("ImageMemoryLimitPrev", NO_LIMIT ), limitNext );
 };
 
 Window::~Window()
 {
-    delete m_thread;
 }
 
-void Window::Open( wxString path )
+bool Window::Destroy()
 {
-    Clear(); 
-
-    m_factory->Find( path );
-    m_thread->SetHandler( m_factory->NewHandler() );
-
-    m_thread->Open( path );
+    Clear();
+    return wxWindow::Destroy();
 }
+
+void Window::Clear()
+{
+    if ( m_thread ) 
+    {
+        m_thread->Delete();
+        m_thread->Wait();
+    }
+    Free(m_thread)
+    Free(m_fileHandler)
+    Free(m_bitmap)
+}
+
+void Window::OnThreadComplete( wxCommandEvent &event )
+{
+}
+
+bool Window::Open( const wxString& path )
+{
+    // open if path is not empty
+    if ( path != wxEmptyString )
+    {
+        Handler *tempHandler = m_fileHandler;
+        Bitmap *tempBitmap = m_bitmap;
+        LoadThread *tempThread = m_thread;
+        SetVirtualSize( GetClientSize() + wxSize(1,0) );
+
+        Handler *handler = NewHandler( path );
+        // if handler found prepare for runing thread
+        if ( handler )
+        {
+            if ( handler->Size() > 0 )
+            {
+                m_config->Write("RecentlyOpened", path );
+                ReloadConfig();
+                size_t limitPrev = ConfRead("ImageMemoryLimitPrev", NO_LIMIT );
+                size_t limitNext = ConfRead("ImageMemoryLimitNext", NO_LIMIT );
+                size_t limitImage = ConfRead("ImageShowLimit", 1 );
+
+                Bitmap *bitmap = NewBitmap( limitImage, handler->Size() );
+                size_t idx = handler->Index( path );
+
+                LoadThread *thread;
+                thread = new LoadThread( this, wxTHREAD_JOINABLE );
+                thread->SetParameter( bitmap, handler, idx );
+                thread->SetLimit( limitPrev, limitNext );
+
+                if ( thread->Run() != wxTHREAD_NO_ERROR )
+                {
+                    wxLogError("Can't Create Thread");
+                    Free(handler)
+                    Free(bitmap)
+                    Free(thread)
+
+                    m_fileHandler = tempHandler;
+                    m_thread = tempThread;
+                    m_bitmap = tempBitmap;
+                    return false;
+                }
+
+                Clear();
+
+                m_fileHandler = handler;
+                m_bitmap = bitmap;
+                m_thread = thread;
+                return true;
+            }
+            else
+                wxLogStatus( path + " doesn't have any image");
+        } // end of if m_filehandler not null
+    } // end of if path not empty
+    return false;
+}
+
+Handler *Window::NewHandler( const wxString &path )
+{
+    Handler *handler = HandlerFactory::NewHandler(path);
+
+    if ( handler )
+    {
+        handler->Open(path);
+        handler->Traverse( true );
+        if ( handler->GetParent() )
+            handler->GetParent()->Traverse();
+    }
+    
+    return handler;
+}
+
+Bitmap *Window::NewBitmap( size_t size, size_t limit )
+{
+    Bitmap *bitmap = NULL;
+    bitmap = new Bitmap( this );
+
+    bitmap->SetLimit( size );
+    bitmap->Resize( limit );
+    bitmap->GetAll().assign( limit,  SBitmap() );
+
+    int scale = ConfRead("ImageScaleFromOriginal", 100 );
+    long pos = ConfRead("ImagePosition", long(BITMAP_VERTICAL | BITMAP_CENTERED) );
+    long sizeflag = ConfRead("ImageSize", long(BITMAP_ORIGINAL) );
+    bitmap->SetFlags(pos,sizeflag,scale);
+
+    return bitmap;
+}
+
+void Window::ReloadConfig()
+{
+    m_config->Flush();
+}
+
+bool Window::ChangeFolder( int step )
+{
+    wxString path = m_fileHandler->GetFromCurrent( step );
+
+    if ( path == wxEmptyString ) return false;
+
+    if ( Open( path ) ) return true;
+
+    return ChangeFolder( step + step );
+
+}
+
+void Window::Next() { Open( GetHandler()->GetNext()); }
+void Window::Prev() { Open( GetHandler()->GetPrev()); }
 
 void Window::Find( const wxString& path )
 {
 }
 
-void Window::Clear()
-{
-    m_thread->Clear();
-    m_bitmap->Clear();
-    Scroll(0,0);
-}
-
-void Window::OnDraw( wxDC& dc )
-{
+// void Window::OnDraw( wxDC& dc )
+void Window::OnDraw( wxDC &dc )
+{   
     dc.SetClippingRegion( GetViewStart(), GetClientSize() );
-    wxCriticalSectionLocker locker( m_thread->GetLock() );
-    int i = 0;
-    for ( const auto& it : m_bitmap->Get() )
+    wxCriticalSectionLocker locker( LoadThreadLock );
+    if ( m_bitmap )
     {
-        if ( it->IsOk() )
+        wxVector<SBitmap*> vec = m_bitmap->Get();
+        for ( const auto& it : vec )
         {
-            dc.DrawBitmap( it->GetBitmap() , it->GetPosition() );
+            if ( it->IsOk() )
+                dc.DrawBitmap( it->GetBitmap() , it->GetPosition() );
         }
-        i++;
     }
 }
 
@@ -106,104 +217,38 @@ T Window::ConfRead( wxString name, T def )
     return m_config->Read( wxString("Reader/") + name, def ); 
 }
 
-void Window::Error( wxSize size )
+void Window::OnEdge( wxDirection direction )
 {
-    wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-    wxStaticText* statbox = new wxStaticText( this, wxID_ANY, wxString("Can't load the image"), wxPoint(0,size.GetY() - 22 ), wxSize(size.GetX(),22) ) ;
-    statbox->SetBackgroundColour( *wxRED );
-    statbox->SetForegroundColour( *wxWHITE );
-    sizer->Add(statbox,0, wxALL);
-    this->SetSizer(sizer);
-}
-
-void Window::OnMouseWheel( wxMouseEvent& event )
-{
-    int scrolling = event.GetWheelDelta()/event.GetWheelRotation() * ConfRead("WheelInvert",-1);
-    OnArrow( wxVERTICAL, scrolling );
-    event.Skip();
-}
-
-void Window::OnKeyDown( wxKeyEvent& event )
-{
-    wxEventType key = event.GetKeyCode();
-    int def = this->m_config->Read("Invert",-1);
-    switch (key)
+    if ( m_bitmap )
     {
-        case WXK_UP:
-            return this->OnArrow( wxVERTICAL, this->ConfRead("ArrowVerticalInvert",def) * 1 );
-            break;
-        case WXK_DOWN:
-            return this->OnArrow( wxVERTICAL, this->ConfRead("ArrowVerticalInvert",def) * -1 );
-            break;
-        case WXK_LEFT:
-            return this->OnArrow( wxHORIZONTAL, this->ConfRead("ArrowHorizontalInvert",def) * 1 );
-            break;
-        case WXK_RIGHT:
-            return this->OnArrow( wxHORIZONTAL, this->ConfRead("ArrowHorizontalInvert",def) * -1 );
-            break;
-        default:
-            event.Skip();
-    }
-}
+        int step = 0;
+        if ( direction == wxUP || direction == wxLEFT )
+            step = -1;
+        
+        if ( direction == wxDOWN || direction == wxRIGHT )
+            step = 1;
 
-void Window::OnArrow( wxOrientation orient, int modifier )
-{
-    const wxPoint& view = GetViewStart();
-    switch ( orient )
-    {
-        case wxVERTICAL:
-            Scroll( -1, GetViewStart().y + ( ConfRead("ScrollStep",300) * modifier ) );
-            break;
-        case wxHORIZONTAL:
-            Scroll( GetViewStart().x + ( ConfRead("ScrollStep",300) * modifier ), -1 );
-            break;
-        default:
-            break;
-    }
-
-    if ( view == GetViewStart() )
-    {
-        OnEdge( modifier );
-    }
-} 
-
-void Window::OnEdge( int modifier )
-{
-    int conf = ConfRead("ClickBeforeChangePage",1);
-    if ( modifier > 0 )
-    {
-        if ( m_bitmap->Next() )
-            Scroll(0,0);
-        else
-            Next();
-    }
-    else if ( modifier < 0 )
-    {
-        if ( m_onEdge > conf )
+        BITMAP_PAGES status = m_bitmap->ChangePage( step );
+        int x = ( m_isFromRight ) ? GetVirtualSize().GetWidth() : 0;
+        if ( status == BITMAP_ENDOFPAGE )
+            if ( ChangeFolder( step ) )
+                Scroll(  GetVirtualSize().GetWidth() , 0 );
+        
+        if ( status == BITMAP_CHANGEPAGE )
         {
-            m_onEdge = 0;
-            if ( m_bitmap->Prev() )
-                Scroll( 0, GetVirtualSize().GetHeight() );
-            else Prev();
+            if ( direction == wxUP )
+                Scroll( 0 , GetVirtualSize().GetHeight() );
+            
+            else if ( direction == wxDOWN )
+                Scroll( x, 0 );
+            
+            else if ( direction == wxLEFT )
+                Scroll( x, 0 );
+            
+            else if ( direction == wxRIGHT )
+                Scroll( x, 0 );
         }
     }
-}
-
-void Window::OnMouseMotion( wxMouseEvent& event )
-{
-    const wxPoint& pos = event.GetPosition();
-    if ( event.Dragging() )
-    {
-        if ( event.LeftIsDown() )
-        {
-            int y = m_mousePosition.y - pos.y;
-            int x = m_mousePosition.x - pos.x;
-            const wxPoint& scrolled = GetViewStart();
-            Scroll( scrolled.x + ( x * 5 ), scrolled.y + ( y  * 5 ));
-        }
-    }
-    m_mousePosition = pos;
-    event.Skip();
 }
 
 }

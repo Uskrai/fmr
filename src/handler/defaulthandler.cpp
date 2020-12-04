@@ -19,7 +19,9 @@
 
 #include "handler/defaulthandler.h"
 #include <wx/wfstream.h>
-#include <iostream>
+
+#include "base/path.h"
+#include "base/compare.h"
 
 DefaultHandler::DefaultHandler( const wxString& path )
 {
@@ -27,39 +29,89 @@ DefaultHandler::DefaultHandler( const wxString& path )
 }
 void DefaultHandler::Open( const wxString& path )
 {
-    m_filename = path;
-}
+    m_name = Path::GetDirName(path);
 
-bool DefaultHandler::IsExist( int index )
-{
-    return (index >= 0 && index < int(m_fstream.size()));
-}
-
-int DefaultHandler::Index( const wxString& path )
-{
-    if ( m_files.size() > 0 )
+    wxString parent = Path::GetParent(m_name);
+    if ( parent != m_name )
     {
-        return m_files.Index( path.AfterLast( wxFileName::GetPathSeparator() ) ); 
-    }
-    return -1;
+        m_parent = new DefaultHandler( parent );
+        m_parentName = parent;
+    }    
 }
 
-void DefaultHandler::Traverse()
+wxInputStream* DefaultHandler::Item( size_t idx ) 
+{ 
+    return m_fstream.at(idx).get(); 
+}
+
+size_t DefaultHandler::IndexFilename( wxString path )
 {
-    dir.Open( wxPathOnly( m_filename ) );
+    return 0;
+}
+
+wxString DefaultHandler::GetFromCurrent( int i )
+{
+    if ( GetParent() )
+    {
+        wxString parent = GetParent()->GetName();
+        wxArrayString &name = GetParent()->GetChild();
+        size_t idx = name.Index( Path::GetName(m_name) );
+        if ( idx != size_t(-1) && Vector::IsExist(name, idx + i ) )
+        {
+            return GetParent()->GetName() + name.Item( idx + i );
+        }
+    }
+    return wxEmptyString;
+}
+
+wxString DefaultHandler::GetNext() { return GetFromCurrent( 1 ); }
+
+wxString DefaultHandler::GetPrev() { return GetFromCurrent( -1 ); }
+
+size_t DefaultHandler::Index( const wxString& path )
+{
+    size_t idx = m_files.Index( Path::GetName(path) );
     
+    idx = ( idx != size_t(-1) ) ? idx : 0;
+    return idx;
+}
+
+void DefaultHandler::Traverse( bool GetStream )
+{
+    dir.Open( wxPathOnly( m_name ) );
+    
+    if ( ! dir.IsOpened() ) return;
+
     wxString filename;
     bool entry = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
     GetAllFiles( dir, entry, filename, m_files );
-    m_files.Sort( wxCmpNaturalGeneric );
-    for ( const auto& it : m_files )
-    {
-        m_fstream.push_back( new wxFileInputStream( dir.GetNameWithSep() + it ) );
-    }
+    m_files.Sort( Compare::Natural );
+
     entry = dir.GetFirst(&filename,wxEmptyString, wxDIR_DIRS );
     GetAllFiles( dir, entry, filename, m_directory );
+    m_directory.Sort( Compare::Natural );
+    
+    m_all = m_directory;
+    for ( const auto& it : m_files )
+        m_all.push_back(it);
+
+    dir.Close();
+    if ( GetStream ) TraverseStream();
 }
 
+void DefaultHandler::TraverseStream()
+{
+    for ( const auto& it : m_files )
+    {
+        wxFileInputStream instream( Path::GetDirName(m_name) + it );
+        wxMemoryInputStream *mstream;
+        if ( instream.IsOk() && instream.GetSize() != 0 )
+            mstream = new wxMemoryInputStream( instream );
+        else 
+            mstream = new wxMemoryInputStream( &DUMMY_BUFFER, sizeof(DUMMY_BUFFER) );
+        m_fstream.push_back( std::shared_ptr<wxMemoryInputStream>(mstream) );
+    }
+}
 void DefaultHandler::GetAllFiles( wxDir& dir, bool& cont, wxString& filename, wxArrayString& array  )
 {
     while ( cont )
@@ -76,25 +128,20 @@ void DefaultHandler::GetAllFiles( wxDir& dir, bool& cont, wxString& filename, wx
     }
 }
 
-void DefaultHandler::GetAllFiles( const wxString& path, wxVector<wxInputStream*>& stream )
-{
-    wxArrayString arr;
-    wxDir::GetAllFiles( wxPathOnly(path), &arr );
-    for ( const auto& it : arr )
-    {
-        stream.push_back( new wxFileInputStream(it) );
-    }
-}
-
 void DefaultHandler::Clear()
 {
     m_fstream.clear();
     m_files.clear();
     m_directory.clear();
-    m_filename = wxEmptyString;
+}
+
+void DefaultHandler::Close()
+{
+    Clear();
+    m_name = wxEmptyString;
 }
 
 DefaultHandler::~DefaultHandler()
 {
-    this->Clear();
+    Close();
 }

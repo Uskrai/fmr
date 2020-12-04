@@ -117,7 +117,7 @@ void BitmapVertical::RefreshSize()
         if ( it->IsOk() )
         {
             size.SetHeight( it->GetHeight() + size.GetHeight() );
-            size.SetWidth( size.GetWidth() > it->GetWidth() ? size.GetWidth() : it->GetHeight() );
+            size.SetWidth( size.GetWidth() > it->GetWidth() ? size.GetWidth() : it->GetWidth() );
         }
     }
     GetParent()->SetVirtualSize( size );

@@ -18,6 +18,11 @@
 #include <wx/panel.h>
 
 class wxBoxSizer;
+
+enum WindowID
+{
+    ReaderWindow = wxID_HIGHEST + 1
+};
 namespace Reader{
     class Window;
 };
@@ -29,6 +34,7 @@ class Panel :
         Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ); 
 
         void LoadFile( wxString path );
+        bool Destroy();
     private:
         Reader::Window* m_reader = NULL;
         wxBoxSizer* sizer;

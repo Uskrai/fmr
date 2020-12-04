@@ -1,38 +1,40 @@
 /*
  *  Copyright (c) 2020 Uskrai
- *
+ *  
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *
+ *  
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *
+ *  
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef FMR_BITMAP_SIZE
+#define FMR_BITMAP_SIZE
 
-#ifndef VECTORHELPER
-#define VECTORHELPER
+#include "bitmap/bmp.h"
+#include <wx/scrolwin.h>
 
-#include <wx/vector.h>
-#include <wx/arrstr.h>
+#define SizeFlagFilter( flag, func )    \
+    if ( flag & flags )                   \
+        return func( img, flags, parent, scale );
 
-namespace Vector
+#define SizeFunc( name )                \
+    float name( wxImage &img, int flags, wxWindow *parent, int scale )
+
+namespace Size
 {
-    template< typename T>
-    inline bool IsExist( const wxVector<T>& vec, size_t idx )
-    {
-        return idx < vec.size();
-    }
+    inline SizeFunc( Original ) { return 1;};
+    SizeFunc( FitAll );
+    SizeFunc( FitWidth );
+    SizeFunc( FitHeight );
 
-    inline bool IsExist( const wxArrayString vec, size_t idx )
-    {
-        return idx < vec.size();
-    }
+    SizeFunc ( Prepare );
 };
 
 #endif

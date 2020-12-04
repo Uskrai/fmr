@@ -23,6 +23,8 @@
 #include <wx/archive.h>
 #include <wx/wfstream.h>
 #include <wx/mstream.h>
+#include "base/vector.h"
+#include "base/path.h"
 
 class ArchiveHandler 
     : public Handler
@@ -32,12 +34,25 @@ class ArchiveHandler
         ArchiveHandler( const wxString& path );
         void Open( const wxString& path );
 
-        bool IsExist( int index );
+        wxString GetName() { return m_name; }
+        Handler* GetParent() { return m_parent; }
+        wxString GetParentName() { return m_parentName; }
+        wxArrayString& GetChild() { return m_all; }
+
+        wxString GetFromCurrent( int i );
+        wxString GetNext();
+        wxString GetPrev();
+
+        bool IsExist( size_t index ) 
+            { return Vector::IsExist(m_fstream,index); }
         
-        void Traverse();
-        int Index( const wxString& name ) { return 0; } ;
-        int Size() { return m_fstream.size();} ;
-        wxInputStream* Item( int index ) { return m_fstream.at(index); };
+        void Traverse( bool GetStream = false );
+        void TraverseStream();
+        size_t Index( const wxString& name );
+        size_t Size() { return m_fstream.size();} ;
+
+        wxString ItemName( size_t idx ) { return m_files.Item(idx); }
+        wxInputStream* Item( size_t index ) { return m_fstream.at(index); }
         void Clear();
 
         ~ArchiveHandler();
@@ -46,8 +61,14 @@ class ArchiveHandler
     private:
         static bool Find( wxString& path, const wxArchiveClassFactory*& factory, wxInputStream*& in );
 
-        wxString m_filename;
+        Handler* m_parent;
+
+        wxString m_name;
+        wxString m_parentName;
+
         wxArrayString m_files;
+        wxArrayString m_all;
+
         wxVector<wxInputStream*> m_fstream;
 };
 

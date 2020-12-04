@@ -22,15 +22,18 @@
 #include <wx/filedlg.h>
 #include <wx/sizer.h>
 
+#include "base/config.h"
+#include <wx/event.h>
+
 enum {
-    PANEL = wxID_HIGHEST + 1,
+    PANEL = wxID_HIGHEST + 2001,
 };
 
 wxBEGIN_EVENT_TABLE(Frame, wxFrame)
     EVT_MENU(ID_Hello,      Frame::OnHello)
-    EVT_MENU(wxID_EXIT,     Frame::OnExit)
     EVT_MENU(wxID_ABOUT,    Frame::OnAbout)
     EVT_MENU(6001,          Frame::OpenFile)
+    EVT_CLOSE( Frame::OnClose )
 wxEND_EVENT_TABLE()
 
 
@@ -44,6 +47,12 @@ Frame::Frame(const wxString& title, const wxPoint& pos, const wxSize& size,long 
     this->sizer = new wxBoxSizer(wxHORIZONTAL);
     SetPanel();
     SetSizer( this->sizer );
+}
+
+void Frame::OnClose( wxCloseEvent &event )
+{
+    m_panel->Destroy();
+    event.Skip();
 }
 
 wxStatusBar* Frame::StatusBar()
@@ -84,13 +93,19 @@ wxMenu* Frame::MenuHelp()
 void Frame::OpenFile(wxCommandEvent& event)
 {  
     wxFileDialog* openDialog = new wxFileDialog(
-        this,_("Choose a file to open"),wxEmptyString,wxEmptyString,
-        _("All Files(*)|*|Images Files(*.jpg;*.png)|*.jpg;*.png|Archive Files (*.zip)|*.zip"),wxFD_OPEN,wxDefaultPosition
+        this,_("Choose a file to open"),
+        wxEmptyString, 
+        Config::Get()->Read("RecentlyOpened",wxString()),
+            _("All Files(*)|*| \
+            Images Files(*.jpg;*.png)|*.jpg;*.png|\
+            Archive Files (*.zip)|*.zip"
+            ),
+        wxFD_OPEN,wxDefaultPosition
     );
 
     if(openDialog->ShowModal() == wxID_OK)
     {
-        this->panel->LoadFile( openDialog->GetPath() );
+        m_panel->LoadFile( openDialog->GetPath() );
     }
     event.Skip();
     openDialog->Destroy();
@@ -98,14 +113,15 @@ void Frame::OpenFile(wxCommandEvent& event)
 
 void Frame::SetPanel()
 {
-    this->panel = new Panel( this, PANEL, wxPoint(-1,-1), this->GetClientSize() );
-    this->sizer->Add( this->panel, 1, wxALL );
+    m_panel = new Panel( this, PANEL, wxPoint(-1,-1), this->GetClientSize() );
+    this->sizer->Add( m_panel, 1, wxALL );
 }
 
 void Frame::OnExit(wxCommandEvent& event)
 {
     Close( true );
 }
+
 void Frame::OnAbout(wxCommandEvent& event)
 {
     // wxMessageBox( "This is a wxWidgets' Hello world sample",

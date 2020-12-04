@@ -20,6 +20,7 @@
 #include "base/config.h"
 
 #include <wx/display.h>
+#include <wx/image.h>
 
 #include <wx/stdpaths.h>
 
@@ -27,19 +28,18 @@ wxIMPLEMENT_APP(App);
 
 bool App::OnInit()
 {
+    SetAppName(PACKAGE_NAME);
     wxInitAllImageHandlers();
 
     this->config =  new Config
                     (  
                         wxEmptyString,
                         wxEmptyString,
-                        wxPathOnly (wxStandardPaths::Get().GetExecutablePath() ) +
-                        wxFileName::GetPathSeparator() +
-                        wxString("config.ini") 
+                        wxStandardPaths::Get().GetUserDataDir()
                     );
     Config::Set ( this->config );
     wxRect screen = wxDisplay().GetClientArea();
-    App::frame = new Frame("FMR",wxPoint(0,0),wxSize(screen.GetWidth(),screen.GetHeight()),wxDEFAULT_FRAME_STYLE);
+    App::frame = new Frame(PACKAGE_NAME,wxPoint(0,0),wxSize(screen.GetWidth(),screen.GetHeight()),wxDEFAULT_FRAME_STYLE);
     App::frame->Maximize(true);
     App::frame->Show(true);
     return true;

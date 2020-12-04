@@ -19,62 +19,44 @@
 #define FMR_READER_THREAD
 
 #include <wx/thread.h>
+#include <wx/event.h>
 #include <wx/string.h>
 
 #include "handler/handler.h"
 
-#include "base/vector.h"
-#include "base/range.h"
 
-class wxScrolledWindow;
-class BitmapVertical;
-class wxString;
+class wxWindow;
+class Bitmap;
 
+wxDECLARE_EVENT( EVT_COMMAND_LOADTHREAD_UPDATE, wxThreadEvent );
+wxDECLARE_EVENT( EVT_COMMAND_LOADTHREAD_COMPLETED, wxThreadEvent );
 namespace Reader
 {
 
-class Thread
-    : public wxThreadHelper
+inline wxCriticalSection LoadThreadLock;
+class LoadThread
+    : public wxThread
 {
     public:
-        Thread( wxScrolledWindow* parent, BitmapVertical* bitmap );
-        ~Thread();
+        LoadThread( wxWindow *parent, const wxThreadKind &type = wxTHREAD_DETACHED );
+        void SetParameter( Bitmap *bitmap, Handler *handler, size_t start );
+        void SetLimit( size_t prev, size_t next );
+        ~LoadThread();
 
-        void Open( const wxString& path );
+        wxThreadError Run();
 
-        void Clear();
-        void SetHandler( Handler* handler );
-        void SetLimit( int prev = NO_LIMIT , int next = NO_LIMIT ) { m_limitPrev = prev, m_limitNext = next; }
-
-        wxCriticalSection& GetLock() { return this->gCS; }
-        wxScrolledWindow* GetParent() { return m_parent; }
-        
+        wxCriticalSection &GetLock() { return LoadThreadLock; }
     protected:
-        wxCriticalSection gCS;
-        BitmapVertical* m_bitmap;
-        wxScrolledWindow* m_parent;
-        Handler* m_handler = NULL;
-        wxString m_path;
-        Handler* GetHandler(){ return m_handler; }
-
-        wxThread::ExitCode Entry();
-        void BitmapThread( bool& destroy );
-
-        int m_limitNext = NO_LIMIT, m_limitPrev = NO_LIMIT;
-        bool m_threadbmp = false;
-
-        bool TestDestroy();
-
-        bool IsExist( int idx );
-
-        bool LoadImage( size_t idx, bool isScroll = false );
-        void LoadBitmap( int current, int prev, int next, bool& isDestroyed );
-    
-    private:
-        template<typename T>
-        T ConfRead( const wxString& name, T def );
+        size_t m_start;
+        Bitmap *m_bitmap = NULL;
+        Handler *m_fHandler;
+        virtual ExitCode Entry();
+        wxWindow *m_parent;
 };
 
 };
+
+wxDEFINE_EVENT( EVT_COMMAND_LOADTHREAD_UPDATE, wxThreadEvent );
+wxDEFINE_EVENT( EVT_COMMAND_LOADTHREAD_COMPLETED, wxThreadEvent );
 
 #endif
