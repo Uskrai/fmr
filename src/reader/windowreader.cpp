@@ -42,9 +42,7 @@ namespace Reader
     }
 
 wxBEGIN_EVENT_TABLE( Window, ScrolledWindow )
-//     EVT_MOTION(Window::OnMouseMotion)
-//     EVT_MOUSEWHEEL(Window::OnMouseWheel)
-//     EVT_KEY_DOWN(Window::OnKeyDown)
+    EVT_MOTION( Window::OnMouseMotion )
     EVT_COMMAND( wxID_ANY, EVT_COMMAND_LOADTHREAD_UPDATE, Window::OnThreadUpdate )
     EVT_COMMAND( wxID_ANY, EVT_COMMAND_LOADTHREAD_COMPLETED, Window::OnThreadComplete)
 wxEND_EVENT_TABLE()

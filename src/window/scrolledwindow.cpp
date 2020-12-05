@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "window/window.h"
+#include "window/scrolledwindow.h"
 #include <wx/scrolbar.h>
 #include <wx/dc.h>
 #include <wx/dcclient.h>
@@ -322,7 +322,7 @@ void ScrolledWindow::OnMouseMotion( wxMouseEvent &event )
     // is pressed
     if ( ! event.HasAnyModifiers() )
     {
-        if ( event.Dragging() )
+        if ( event.Dragging() && event.LeftIsDown() && ! event.RightIsDown() && ! event.MiddleIsDown() )
         {
             wxPoint view = GetViewStart();
             view.x -= event.GetX() - lastPos.x;

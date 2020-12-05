@@ -19,7 +19,7 @@
 #define FMR_READER_WINDOW
 
 
-#include "window/window.h"
+#include "window/scrolledwindow.h"
 #include <wx/event.h>
 
 #include "base/range.h"
