@@ -67,9 +67,9 @@ bool Window::Destroy()
 
 void Window::Clear()
 {
-    if ( m_thread ) 
-        m_thread->Delete();
-    Free(m_thread)
+    if ( m_loadThread ) 
+        m_loadThread->Delete();
+    Free(m_loadThread)
     Free(m_fileHandler)
     Free(m_bitmap)
 }
@@ -92,7 +92,7 @@ void Window::OnDraw( wxDC &dc )
 
 void Window::OnThreadComplete( wxCommandEvent &event )
 {
-    Free(m_thread)
+    Free(m_loadThread)
 }
 
 bool Window::Open( const wxString& path )
@@ -102,7 +102,7 @@ bool Window::Open( const wxString& path )
     {
         Handler *tempHandler = m_fileHandler;
         Bitmap *tempBitmap = m_bitmap;
-        LoadThread *tempThread = m_thread;
+        LoadThread *tempThread = m_loadThread;
         SetVirtualSize( GetClientSize() + wxSize(1,0) );
 
         Handler *handler = NewHandler( path );
@@ -133,7 +133,7 @@ bool Window::Open( const wxString& path )
                     Free(thread)
 
                     m_fileHandler = tempHandler;
-                    m_thread = tempThread;
+                    m_loadThread = tempThread;
                     m_bitmap = tempBitmap;
                     return false;
                 }
@@ -142,7 +142,7 @@ bool Window::Open( const wxString& path )
 
                 m_fileHandler = handler;
                 m_bitmap = bitmap;
-                m_thread = thread;
+                m_loadThread = thread;
                 return true;
             }
             else

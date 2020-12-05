@@ -66,7 +66,7 @@ class Window : public ScrolledWindow
         //vector to bitmaps
         Bitmap* m_bitmap = NULL;
         // reference to threading class
-        LoadThread *m_thread = NULL;
+        LoadThread *m_loadThread = NULL;
         // pointer to handler
         Handler* m_fileHandler = NULL;
         HandlerFactory* m_factory = NULL;
