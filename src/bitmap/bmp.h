@@ -54,6 +54,7 @@ struct SBitmap
 {
     wxBitmap m_item = wxBitmap( wxSize(1,1) );
     wxString m_name = wxEmptyString;
+    size_t m_index = -1;
     wxPoint m_pos = wxPoint(0,0);
     bool m_isOk = false; // determine bitmap status
     bool m_isLoaded = false;
@@ -72,6 +73,7 @@ struct SBitmap
     wxSize GetSize() const;
 
     wxString GetName();
+    size_t GetIndex();
     int GetWidth() const;
     int GetHeight() const;
     int GetY() const;
@@ -80,6 +82,7 @@ struct SBitmap
     void SetBitmap( const wxBitmap& bmp );
     void SetLoaded( bool stat = true );
     void SetName( const wxString& name );
+    void SetIndex( size_t idx );
     void SetPosition( const wxPoint& pos );
     void SetY( int PosY );
     void SetX( int PosX );

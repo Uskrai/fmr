@@ -129,6 +129,7 @@ void Bitmap::Add( wxImage& image, size_t idx )
     Size::Prepare( image, m_flagSize, m_parent, m_scaleParent );
     struct SBitmap& bmp = m_item.at(idx);
     bmp.SetBitmap( wxBitmap( image ) );
+    bmp.SetIndex( idx );
     
     m_maxWidth = ( bmp.GetWidth() > m_maxWidth ) ? bmp.GetWidth() : m_maxWidth;
     

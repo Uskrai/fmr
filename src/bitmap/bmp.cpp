@@ -54,6 +54,7 @@ wxPoint SBitmap::GetPosition()  const { return m_pos; }
 wxSize SBitmap::GetSize() const { return wxSize( GetWidth(), GetHeight() ); }
 
 wxString SBitmap::GetName() { return m_name;}
+size_t SBitmap::GetIndex() { return m_index; }
 int SBitmap::GetWidth() const { return m_item.GetWidth(); }
 int SBitmap::GetHeight() const { return m_item.GetHeight(); }
 int SBitmap::GetY() const { return m_pos.y; }
@@ -62,6 +63,7 @@ int SBitmap::GetX() const { return m_pos.x; }
 void SBitmap::SetBitmap( const wxBitmap& bmp ) { m_item = bmp; m_isOk = true; SetLoaded(); }
 void SBitmap::SetLoaded( bool stat) { m_isLoaded = stat; }
 void SBitmap::SetName( const wxString& name ) { m_name = name;}
+void SBitmap::SetIndex( size_t idx ) { m_index = idx; }
 void SBitmap::SetPosition( const wxPoint& pos ) { m_pos = pos; }
 void SBitmap::SetY( int PosY ) { m_pos.y = PosY; }
 void SBitmap::SetX( int PosX ) { m_pos.x = PosX; }
