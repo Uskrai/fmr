@@ -93,7 +93,8 @@ wxThread::ExitCode LoadThread::Entry()
         CheckAndLoadImage( next, 1 );
         CheckAndLoadImage( prev, -1 );
     }
-
+    
+    wxQueueEvent( m_parent, new wxThreadEvent( EVT_COMMAND_LOADTHREAD_COMPLETED ) );
     return (wxThread::ExitCode)0;
 }
 

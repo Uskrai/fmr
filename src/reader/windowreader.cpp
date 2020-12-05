@@ -69,10 +69,7 @@ bool Window::Destroy()
 void Window::Clear()
 {
     if ( m_thread ) 
-    {
         m_thread->Delete();
-        m_thread->Wait();
-    }
     Free(m_thread)
     Free(m_fileHandler)
     Free(m_bitmap)
@@ -80,6 +77,7 @@ void Window::Clear()
 
 void Window::OnThreadComplete( wxCommandEvent &event )
 {
+    Free(m_thread)
 }
 
 bool Window::Open( const wxString& path )
@@ -199,9 +197,9 @@ void Window::Find( const wxString& path )
 void Window::OnDraw( wxDC &dc )
 {   
     dc.SetClippingRegion( GetViewStart(), GetClientSize() );
-    wxCriticalSectionLocker locker( LoadThreadLock );
     if ( m_bitmap )
     {
+        // wxCriticalSectionLocker locker( LoadThreadLock );
         wxVector<SBitmap*> vec = m_bitmap->Get();
         for ( const auto& it : vec )
         {
