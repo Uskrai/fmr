@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <wx/window.h>
+#include "window/scrolledwindow.h"
 #include "image/image.h"
 #include "bitmap/bitmap.h"
 #include "reader/threadreader.h"
@@ -42,7 +42,7 @@ bool IsExist( Handler *handler, size_t idx )
 namespace Reader
 {
 
-LoadThread::LoadThread( wxWindow *parent, const wxThreadKind &type ) 
+LoadThread::LoadThread( ScrolledWindow *parent, const wxThreadKind &type ) 
     : wxThread( type )
 {
     m_parent = parent;

@@ -25,7 +25,7 @@
 #include "handler/handler.h"
 
 
-class wxWindow;
+class ScrolledWindow;
 class Bitmap;
 
 wxDECLARE_EVENT( EVT_COMMAND_LOADTHREAD_UPDATE, wxThreadEvent );
@@ -38,7 +38,7 @@ class LoadThread
     : public wxThread
 {
     public:
-        LoadThread( wxWindow *parent, const wxThreadKind &type = wxTHREAD_DETACHED );
+        LoadThread( ScrolledWindow *parent, const wxThreadKind &type = wxTHREAD_DETACHED );
         void SetParameter( Bitmap *bitmap, Handler *handler, size_t start );
         void SetLimit( size_t prev, size_t next );
         ~LoadThread();
