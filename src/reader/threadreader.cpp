@@ -20,6 +20,10 @@
 #include "bitmap/bitmap.h"
 #include "reader/threadreader.h"
 
+wxDEFINE_EVENT( EVT_COMMAND_LOADTHREAD_UPDATE, wxThreadEvent );
+wxDEFINE_EVENT( EVT_COMMAND_LOADTHREAD_COMPLETED, wxThreadEvent );
+
+
 void LoadImage( Bitmap *bmp, wxInputStream &stream, size_t idx  )
 {
     if ( wxImage::CanRead(stream) )

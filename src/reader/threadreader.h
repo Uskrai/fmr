@@ -56,7 +56,4 @@ class LoadThread
 
 };
 
-wxDEFINE_EVENT( EVT_COMMAND_LOADTHREAD_UPDATE, wxThreadEvent );
-wxDEFINE_EVENT( EVT_COMMAND_LOADTHREAD_COMPLETED, wxThreadEvent );
-
 #endif
