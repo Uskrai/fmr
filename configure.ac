@@ -6,7 +6,7 @@ AC_PREREQ(2.69)
 
 AC_CONFIG_SRCDIR([src/main/app.cpp])
 
-AC_CONFIG_AUX_DIR(build-aux)
+AC_CONFIG_AUX_DIR(aux-build)
 
 # sets build, host variables and the same with _alias
 AC_CANONICAL_BUILD
@@ -17,9 +17,9 @@ AC_PROG_CC
 AC_PROG_CXX
 
 
-m4_include([build-aux/wxwin.m4])
-m4_include([build-aux/ax_cxx_compile_stdcxx.m4])
-m4_include([build-aux/ax_check_compile_flag.m4])
+m4_include([aux-build/wxwin.m4])
+m4_include([aux-build/ax_cxx_compile_stdcxx.m4])
+m4_include([aux-build/ax_check_compile_flag.m4])
 # notice that if --host was given but --build was not, cross_compiling is
 # only set to "maybe" and not "yes" and will be either set to "yes" later or
 # configure will exit with error in AC_PROG_CC so don't test for = "yes" here
