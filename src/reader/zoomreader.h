@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef FMR_READER_ZOOMREADER
+#define FMR_READER_ZOOMREADER
+
 #include <wx/thread.h>
 #include <wx/vector.h>
 
@@ -40,3 +43,5 @@ class ZoomThread :
         float m_scale;
         int m_id;
 };
+
+#endif
