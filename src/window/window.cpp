@@ -24,7 +24,11 @@
 wxBEGIN_EVENT_TABLE( ScrolledWindow, wxWindow )
     EVT_SIZE( ScrolledWindow::OnSize )
     EVT_PAINT( ScrolledWindow::OnPaint )
+#ifdef __WXMSW__
+    EVT_CHAR_HOOK( ScrolledWindow::OnKeyDown )
+#else
     EVT_KEY_DOWN( ScrolledWindow::OnKeyDown )
+#endif
     EVT_MOUSEWHEEL( ScrolledWindow::OnMouseWheel )
     EVT_MOTION( ScrolledWindow::OnMouseMotion )
     EVT_SCROLLWIN_LINEUP( ScrolledWindow::OnScrollLine )
