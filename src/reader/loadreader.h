@@ -28,8 +28,6 @@
 class ScrolledWindow;
 class Bitmap;
 
-wxDECLARE_EVENT( EVT_COMMAND_LOADTHREAD_UPDATE, wxThreadEvent );
-wxDECLARE_EVENT( EVT_COMMAND_LOADTHREAD_COMPLETED, wxThreadEvent );
 namespace Reader
 {
 

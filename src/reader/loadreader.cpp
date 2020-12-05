@@ -18,11 +18,9 @@
 #include "window/scrolledwindow.h"
 #include "image/image.h"
 #include "bitmap/bitmap.h"
+
+#include "thread/thread.h"
 #include "reader/loadreader.h"
-
-wxDEFINE_EVENT( EVT_COMMAND_LOADTHREAD_UPDATE, wxThreadEvent );
-wxDEFINE_EVENT( EVT_COMMAND_LOADTHREAD_COMPLETED, wxThreadEvent );
-
 
 void LoadImage( Bitmap *bmp, wxInputStream &stream, size_t idx  )
 {

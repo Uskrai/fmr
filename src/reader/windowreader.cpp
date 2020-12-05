@@ -17,6 +17,7 @@
 
 #include "reader/windowreader.h"
 
+#include "thread/thread.h"
 #include "reader/loadreader.h"
 #include "base/config.h"
 
