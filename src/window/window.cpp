@@ -284,9 +284,32 @@ void ScrolledWindow::OnMouseWheel( wxMouseEvent &event )
     int step = ( event.GetWheelDelta() / event.GetWheelRotation() ) * -1;
     // multiply by negative if invert
     // to reverse it
+    int temp = GetScrollPos( orient );
     step *= ( m_isMouseWheelInvert ) ? -1 : 1;
-
+    
     Scroll( orient, step * m_stepPerWheel );
+    
+    if ( temp == GetScrollPos( orient ) && step != 0 )
+    {
+        if ( orient == wxHORIZONTAL )
+        {
+            step *= ( m_isFromRight ) ?
+                -1 : 1;
+
+            if ( step > 0 )
+                OnEdge( wxRIGHT );
+            else if ( step < 0 )
+                OnEdge( wxLEFT );
+        }
+        if ( orient == wxVERTICAL )
+        {
+            if ( step > 0 )
+                OnEdge( wxDOWN );
+            else if ( step < 0 )
+                OnEdge( wxUP );
+        }
+    }
+
 
     event.Skip();
 }
