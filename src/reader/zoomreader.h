@@ -27,7 +27,7 @@ class ZoomThread :
     public wxThread
 {
     public :
-        ZoomThread( ScrolledWindow *parent, const wxThreadKind type = wxTHREAD_DETACHED );
+        ZoomThread( ScrolledWindow *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = wxID_ANY );
         ~ZoomThread();
 
         void SetParameter( Handler *handler, Bitmap *bitmap, float scale );
@@ -38,4 +38,5 @@ class ZoomThread :
         Handler *m_handler;
         Bitmap *m_bitmap;
         float m_scale;
+        int m_id;
 };

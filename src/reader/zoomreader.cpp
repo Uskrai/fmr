@@ -21,10 +21,11 @@
 #include "handler/handler.h"
 #include "bitmap/bitmap.h"
 
-ZoomThread::ZoomThread( ScrolledWindow *parent, const wxThreadKind type )
+ZoomThread::ZoomThread( ScrolledWindow *parent, const wxThreadKind type, int id )
     : wxThread(type)
 {
     m_parent = parent;
+    m_id = id;
 }
 
 void ZoomThread::SetParameter( Handler *handler, Bitmap *bitmap, float scale )
