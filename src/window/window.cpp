@@ -89,7 +89,7 @@ void ScrolledWindow::OnSize( wxSizeEvent &event )
 
 void ScrolledWindow::DoPrepareDC( wxDC &dc )
 {
-    dc.SetDeviceOrigin( m_viewStart.x, -m_viewStart.y );
+    dc.SetDeviceOrigin( -m_viewStart.x, -m_viewStart.y );
 }
 
 void ScrolledWindow::OnPaint( wxPaintEvent &event )
