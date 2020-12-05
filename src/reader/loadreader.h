@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_READER_THREAD
-#define FMR_READER_THREAD
+#ifndef FMR_READER_LOADTHREAD
+#define FMR_READER_LOADTHREAD
 
 #include <wx/thread.h>
 #include <wx/event.h>
