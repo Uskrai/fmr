@@ -17,5 +17,5 @@
 
 #include <wx/event.h>
 
-inline wxDEFINE_EVENT( EVT_COMMAND_LOADTHREAD_UPDATE, wxThreadEvent );
-inline wxDEFINE_EVENT( EVT_COMMAND_LOADTHREAD_COMPLETED, wxThreadEvent );
+inline wxDEFINE_EVENT( EVT_COMMAND_THREAD_UPDATE, wxThreadEvent );
+inline wxDEFINE_EVENT( EVT_COMMAND_THREAD_COMPLETED, wxThreadEvent );

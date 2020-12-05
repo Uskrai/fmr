@@ -79,7 +79,7 @@ wxThreadError LoadThread::Run()
         idx += step;                                    \
         wxQueueEvent( m_parent,                         \
             new wxThreadEvent(                          \
-                EVT_COMMAND_LOADTHREAD_UPDATE           \
+                EVT_COMMAND_THREAD_UPDATE               \
             ));                                         \
     }
 
@@ -92,7 +92,7 @@ wxThread::ExitCode LoadThread::Entry()
         CheckAndLoadImage( prev, -1 );
     }
     
-    wxQueueEvent( m_parent, new wxThreadEvent( EVT_COMMAND_LOADTHREAD_COMPLETED ) );
+    wxQueueEvent( m_parent, new wxThreadEvent( EVT_COMMAND_THREAD_COMPLETED ) );
     return (wxThread::ExitCode)0;
 }
 
