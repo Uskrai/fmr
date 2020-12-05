@@ -25,6 +25,8 @@ Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
 {
     this->sizer = new wxBoxSizer( wxHORIZONTAL );
     this->m_reader = new Reader::Window( this, ReaderWindow, wxDefaultPosition, GetClientSize(), 0, "Reader" );    
+    if ( ! m_reader->IsTransparentBackgroundSupported() )
+        m_reader->SetBackgroundColour( *wxBLACK );
     this->sizer->Add( m_reader, 1, wxALL | wxEXPAND );
     this->SetSizer( this->sizer );
 };
@@ -41,6 +43,7 @@ void Panel::LoadFile( wxString path )
 
 bool Panel::Destroy()
 {
-    m_reader->Destroy();
+    if ( m_reader )
+        m_reader->Destroy();
     return wxPanel::Destroy();
 }
