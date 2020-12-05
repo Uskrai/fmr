@@ -75,6 +75,22 @@ void Window::Clear()
     Free(m_bitmap)
 }
 
+void Window::OnDraw( wxDC &dc )
+{   
+    dc.SetClippingRegion( GetViewStart(), GetClientSize() );
+    if ( m_bitmap )
+    {
+        // wxCriticalSectionLocker locker( LoadThreadLock );
+        wxVector<SBitmap*> vec = m_bitmap->Get();
+        for ( const auto& it : vec )
+        {
+            if ( it->IsOk() )
+                dc.DrawBitmap( it->GetBitmap() , it->GetPosition() );
+        }
+    }
+}
+
+
 void Window::OnThreadComplete( wxCommandEvent &event )
 {
     Free(m_thread)
@@ -194,21 +210,6 @@ void Window::Find( const wxString& path )
 }
 
 // void Window::OnDraw( wxDC& dc )
-void Window::OnDraw( wxDC &dc )
-{   
-    dc.SetClippingRegion( GetViewStart(), GetClientSize() );
-    if ( m_bitmap )
-    {
-        // wxCriticalSectionLocker locker( LoadThreadLock );
-        wxVector<SBitmap*> vec = m_bitmap->Get();
-        for ( const auto& it : vec )
-        {
-            if ( it->IsOk() )
-                dc.DrawBitmap( it->GetBitmap() , it->GetPosition() );
-        }
-    }
-}
-
 template<typename T>
 T Window::ConfRead( wxString name, T def )
 { 
