@@ -46,6 +46,7 @@ class ScrolledWindow : public wxWindow
                 long style = 0,
                 const wxString &name = wxPanelNameStr
             );
+        void CreateScrollBar( wxOrientation orient );
         
         // to scroll window
         void Scroll( const wxPoint &pos );

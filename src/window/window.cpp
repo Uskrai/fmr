@@ -40,14 +40,18 @@ ScrolledWindow::ScrolledWindow( wxWindow *parent,
                                 long style,
                                 const wxString &name
                             )
+    : wxWindow( parent, id , pos, size, style, name )
 {
-    Create( parent, id, pos, size, style, name);
+    CreateScrollBar( wxBOTH );
+    SetVirtualSize(0,0);
 }
 
 ScrolledWindow::~ScrolledWindow()
 {
-    m_vScrollBar->Destroy();
-    m_hScrollBar->Destroy();
+    if ( m_vScrollBar )
+        m_vScrollBar->Destroy();
+    if ( m_hScrollBar )
+        m_hScrollBar->Destroy();
 }
 
 bool ScrolledWindow::Create(    wxWindow *parent, 
@@ -58,14 +62,19 @@ bool ScrolledWindow::Create(    wxWindow *parent,
                                 const wxString &name
                             ) 
 {
-    bool ret = wxWindow::Create( parent, id, pos, size, style, name );
-    if ( !m_vScrollBar ) 
-        m_vScrollBar = new wxScrollBar(this, VerticalScrollBar , wxDefaultPosition, wxDefaultSize, wxSB_VERTICAL );
-    if ( !m_hScrollBar )
-        m_hScrollBar = new wxScrollBar(this, HorizontalScrollBar , wxDefaultPosition, wxDefaultSize, wxSB_HORIZONTAL );
-    
+    bool ret = wxWindow::Create( parent, id,  pos, size, style, name );
+    CreateScrollBar( wxBOTH );
     SetVirtualSize(0,0);
     return ret;
+}
+
+void ScrolledWindow::CreateScrollBar( wxOrientation orient )
+{
+    if ( ( orient & wxVERTICAL ) && ! m_vScrollBar )
+        m_vScrollBar = new wxScrollBar( this, VerticalScrollBar, wxDefaultPosition, wxDefaultSize, wxSB_VERTICAL );
+    
+    if ( ( orient & wxHORIZONTAL ) && ! m_hScrollBar )
+        m_hScrollBar = new wxScrollBar( this, HorizontalScrollBar, wxDefaultPosition, wxDefaultSize, wxSB_HORIZONTAL );
 }
 
 void ScrolledWindow::OnSize( wxSizeEvent &event )
