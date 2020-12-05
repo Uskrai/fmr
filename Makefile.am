@@ -40,12 +40,12 @@ bitmap_LTLIBRARIES = libbitmap.la libsize.la libposition.la libbmp.la
 
 reader = src/reader
 readerdir = @abs_builddir@/reader   
-reader_LTLIBRARIES =  libthreadreader.la libwindowreader.la
+reader_LTLIBRARIES =  libloadreader.la libwindowreader.la
 
-    libthreadreader_la_SOURCES = $(reader)/threadreader.cpp
+    libloadreader_la_SOURCES = $(reader)/loadreader.cpp
 
     libwindowreader_la_SOURCES = $(reader)/windowreader.cpp
-    libwindowreader_la_LIBADD = libthreadreader.la libhandlerfactory.la libscrolledwindow.la libbitmap.la libbmp.la
+    libwindowreader_la_LIBADD = libloadreader.la libhandlerfactory.la libscrolledwindow.la libbitmap.la libbmp.la
 
 # make libraries for gui
 gui = src/gui

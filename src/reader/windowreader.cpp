@@ -17,7 +17,7 @@
 
 #include "reader/windowreader.h"
 
-#include "reader/threadreader.h"
+#include "reader/loadreader.h"
 #include "base/config.h"
 
 #include "bitmap/bitmap.h"

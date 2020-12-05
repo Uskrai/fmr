@@ -18,7 +18,7 @@
 #include "window/scrolledwindow.h"
 #include "image/image.h"
 #include "bitmap/bitmap.h"
-#include "reader/threadreader.h"
+#include "reader/loadreader.h"
 
 wxDEFINE_EVENT( EVT_COMMAND_LOADTHREAD_UPDATE, wxThreadEvent );
 wxDEFINE_EVENT( EVT_COMMAND_LOADTHREAD_COMPLETED, wxThreadEvent );
