@@ -107,9 +107,9 @@ void ArchiveHandler::TraverseStream()
                 wxMemoryOutputStream file;
                 stream->Read(file);
                 if ( file.GetSize() != 0  && file.IsOk())
-                    m_fstream.push_back( new wxMemoryInputStream(file) );
+                    m_fstream.push_back( std::shared_ptr<wxInputStream>( new wxMemoryInputStream(file)) );
                 else
-                    m_fstream.push_back( new wxMemoryInputStream(&DUMMY_BUFFER, sizeof(DUMMY_BUFFER)) );
+                    m_fstream.push_back( std::shared_ptr<wxInputStream>( new wxMemoryInputStream(&DUMMY_BUFFER, sizeof(DUMMY_BUFFER)) ) );
                 files.RemoveAt(i);
             }
         }

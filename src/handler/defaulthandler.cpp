@@ -39,9 +39,9 @@ void DefaultHandler::Open( const wxString& path )
     }    
 }
 
-wxInputStream* DefaultHandler::Item( size_t idx ) 
+std::shared_ptr<wxInputStream> DefaultHandler::Item( size_t idx ) 
 { 
-    return m_fstream.at(idx).get(); 
+    return m_fstream.at(idx);
 }
 
 size_t DefaultHandler::IndexFilename( wxString path )

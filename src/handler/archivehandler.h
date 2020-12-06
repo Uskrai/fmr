@@ -52,7 +52,8 @@ class ArchiveHandler
         size_t Size() { return m_fstream.size();} ;
 
         wxString ItemName( size_t idx ) { return m_files.Item(idx); }
-        wxInputStream* Item( size_t index ) { return m_fstream.at(index); }
+        std::shared_ptr<wxInputStream> Item( size_t index ) 
+            { return m_fstream.at(index); }
         void Clear();
 
         ~ArchiveHandler();
@@ -69,7 +70,7 @@ class ArchiveHandler
         wxArrayString m_files;
         wxArrayString m_all;
 
-        wxVector<wxInputStream*> m_fstream;
+        wxVector<std::shared_ptr<wxInputStream>> m_fstream;
 };
 
 #endif

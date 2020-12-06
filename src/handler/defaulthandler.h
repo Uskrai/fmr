@@ -52,7 +52,7 @@ class DefaultHandler
         wxString GetPrev();
 
         wxString ItemName( size_t idx ) { return m_files.Item(idx); }
-        wxInputStream* Item( size_t index );
+        std::shared_ptr<wxInputStream> Item( size_t index );
 
         size_t Index( const wxString& name );
         size_t IndexFilename( wxString path );

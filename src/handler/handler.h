@@ -18,6 +18,7 @@
 #define HANDLER_HANDLER
 
 #include <wx/stream.h>
+#include <memory>
 
 inline char DUMMY_BUFFER;
 class Handler 
@@ -53,7 +54,7 @@ class Handler
 
         virtual wxString ItemName( size_t idx ) = 0;
         // return files stream;
-        virtual wxInputStream* Item( size_t index ) = 0;
+        virtual std::shared_ptr<wxInputStream> Item( size_t index ) = 0;
 
         virtual size_t Size() = 0;
         virtual void Clear() = 0;
