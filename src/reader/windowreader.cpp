@@ -96,6 +96,15 @@ void Window::OnDraw( wxDC &dc )
     }
 }
 
+void Window::AdjustBitmap()
+{
+    if ( m_bitmap )
+    {
+        m_bitmap->RefreshSize();
+        m_bitmap->RefreshPosition();
+    }
+}
+
 void Window::DoSetNull( int id)
 {
     switch ( id )
@@ -111,12 +120,8 @@ void Window::DoSetNull( int id)
 
 void Window::OnThreadUpdate( wxCommandEvent &event )
 {
-    if ( m_bitmap )
-    {
-        m_bitmap->RefreshSize();
-        m_bitmap->RefreshPosition();
-        Refresh();
-    }
+    AdjustBitmap();
+    Refresh();
 }
 
 void Window::OnThreadComplete( wxCommandEvent &event )

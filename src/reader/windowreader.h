@@ -64,6 +64,8 @@ class Window : public ScrolledWindow
 
         Handler* GetHandler() {return m_fileHandler;}
         void DoSetNull( int id );
+    protected:
+        void AdjustBitmap();
     private:
         //vector to bitmaps
         Bitmap* m_bitmap = NULL;
@@ -78,8 +80,6 @@ class Window : public ScrolledWindow
         // pointer to scrollbar
         wxScrollBar *m_vScroll, *m_hScroll;
         wxSizer *m_sizer;
-
-        void Find( const wxString& path );
 
         template<typename T>
         T ConfRead( wxString name, T def );
