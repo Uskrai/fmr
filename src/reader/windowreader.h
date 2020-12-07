@@ -93,7 +93,7 @@ class Window : public ScrolledWindow
 
         void OnEdge( wxDirection direction );
 
-        void OnThreadUpdate( wxCommandEvent &event ) { Refresh();};
+        void OnThreadUpdate( wxCommandEvent &event );
         void OnThreadComplete( wxCommandEvent &event );
         
 };

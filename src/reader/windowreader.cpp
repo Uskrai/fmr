@@ -109,6 +109,16 @@ void Window::DoSetNull( int id)
     }
 }
 
+void Window::OnThreadUpdate( wxCommandEvent &event )
+{
+    if ( m_bitmap )
+    {
+        m_bitmap->RefreshSize();
+        m_bitmap->RefreshPosition();
+        Refresh();
+    }
+}
+
 void Window::OnThreadComplete( wxCommandEvent &event )
 {
     Free(m_loadThread)

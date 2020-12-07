@@ -19,6 +19,7 @@
 #define FMR_WINDOW_WINDOW
 
 #include <wx/window.h>
+#include <wx/timer.h>
 class wxScrollBar;
 
 enum ScrollBarId
@@ -26,11 +27,12 @@ enum ScrollBarId
     HorizontalScrollBar = wxID_HIGHEST + 20,
     VerticalScrollBar
 };
+const int ScrolledTimerID = VerticalScrollBar + 1;
 
 class ScrolledWindow : public wxWindow
 {
     public:
-        ScrolledWindow() : wxWindow(){};
+        ScrolledWindow() : wxWindow() {};
         ScrolledWindow( wxWindow *parent, 
                         wxWindowID id = wxID_ANY, 
                         const wxPoint &pos = wxDefaultPosition,
@@ -75,7 +77,8 @@ class ScrolledWindow : public wxWindow
         void DoPrepareDC( wxDC &dc );
 
         virtual void OnEdge( wxDirection direction ) {};
-    
+
+        wxTimer m_timer;
     private:
         void OnSize( wxSizeEvent &event );
         void OnPaint( wxPaintEvent &event );
@@ -83,6 +86,7 @@ class ScrolledWindow : public wxWindow
         void OnMouseWheel( wxMouseEvent &event );
         void OnMouseMotion( wxMouseEvent &event );
         void OnScrollThumbTrack( wxScrollEvent &event );
+        void OnSetVirtualSize( wxTimerEvent &event );
 
         void OnScrollLine( wxScrollWinEvent &event );
         void OnLineUp( wxScrollWinEvent &event );

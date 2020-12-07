@@ -135,12 +135,6 @@ void Bitmap::Add( wxImage& image, size_t idx )
     m_maxWidth = ( bmp.GetWidth() > m_maxWidth ) ? bmp.GetWidth() : m_maxWidth;
     
     Refresh();
-    if ( m_posFirst <= idx && idx <= m_posLast)
-    {
-        RefreshSize();
-        RefreshPosition();
-    }
-    GetParent()->Refresh();
 }
 
 int Bitmap::Centered( int width )
@@ -175,7 +169,6 @@ void Bitmap::RefreshSize()
         }
     }
     GetParent()->SetVirtualSize( size );
-    GetParent()->Refresh();
 }
 
 SBitmap *Bitmap::Get( const wxPoint &area, const wxPoint& position  )

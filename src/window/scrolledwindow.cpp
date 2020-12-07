@@ -35,6 +35,7 @@ wxBEGIN_EVENT_TABLE( ScrolledWindow, wxWindow )
     EVT_SCROLLWIN_LINEDOWN ( ScrolledWindow::OnScrollLine )
     EVT_COMMAND_SCROLL_THUMBTRACK( VerticalScrollBar, ScrolledWindow::OnScrollThumbTrack )
     EVT_COMMAND_SCROLL_THUMBTRACK( HorizontalScrollBar, ScrolledWindow::OnScrollThumbTrack )
+    EVT_TIMER( ScrolledTimerID, ScrolledWindow::OnSetVirtualSize)
 wxEND_EVENT_TABLE()
 
 ScrolledWindow::ScrolledWindow( wxWindow *parent, 
@@ -44,7 +45,7 @@ ScrolledWindow::ScrolledWindow( wxWindow *parent,
                                 long style,
                                 const wxString &name
                             )
-    : wxWindow( parent, id , pos, size, style, name )
+    : wxWindow( parent, id, pos, size, style, name )
 {
     CreateScrollBar( wxBOTH );
     SetVirtualSize(0,0);
@@ -67,6 +68,7 @@ bool ScrolledWindow::Create(    wxWindow *parent,
                             ) 
 {
     bool ret = wxWindow::Create( parent, id,  pos, size, style, name );
+    m_timer.SetOwner( this, ScrolledTimerID );
     CreateScrollBar( wxBOTH );
     SetVirtualSize(0,0);
     return ret;
@@ -403,9 +405,15 @@ void ScrolledWindow::AdjustScrollBar()
         m_vScrollBar->Show();
 }
 
+void ScrolledWindow::OnSetVirtualSize( wxTimerEvent &event )
+{
+    AdjustScrollBar();
+}
+
 void ScrolledWindow::DoSetVirtualSize( int width, int height )
 {
     m_virtualSize = wxSize(width,height);
-    AdjustScrollBar();
+    if ( ! m_timer.IsRunning() )
+        m_timer.StartOnce( 1000 );
 }
 
