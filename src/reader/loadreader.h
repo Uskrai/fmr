@@ -49,6 +49,7 @@ class LoadThread
         Bitmap *m_bitmap = NULL;
         Handler *m_fHandler;
         virtual ExitCode Entry();
+        void CheckAndLoadImage( size_t &idx, int step );
         wxWindow *m_parent;
 };
 

@@ -27,7 +27,7 @@ void LoadImage( Bitmap *bmp, wxInputStream &stream, size_t idx  )
     if ( wxImage::CanRead(stream) )
     {
         wxImage img(stream);
-        wxCriticalSectionLocker locker( Reader::LoadThreadLock );
+        wxCriticalSectionLocker locker( g_sLock );
         bmp->Add(img,idx);
     }
 }
@@ -71,17 +71,22 @@ wxThreadError LoadThread::Run()
     return wxThread::Run();
 }
 
-#define CheckAndLoadImage( idx, step )                  \
-    if ( IsExist(m_fHandler,idx) )                      \
-    {                                                   \
-        wxInputStream &stream = *m_fHandler->Item(idx); \
-        LoadImage(m_bitmap,stream,idx);                 \
-        idx += step;                                    \
-        wxQueueEvent( m_parent,                         \
-            new wxThreadEvent(                          \
-                EVT_COMMAND_THREAD_UPDATE               \
-            ));                                         \
+void LoadThread::CheckAndLoadImage( size_t& idx, int step )
+{
+    if ( IsExist( m_fHandler, idx ) )
+    {
+        std::shared_ptr<wxInputStream> stream;
+        stream = m_fHandler->Item(idx);
+        LoadImage( m_bitmap, *stream, idx );
+        idx += step;
+        wxQueueEvent( 
+            m_parent,
+            new wxThreadEvent(
+                EVT_COMMAND_THREAD_UPDATE
+            )
+        );
     }
+}
 
 wxThread::ExitCode LoadThread::Entry()
 {

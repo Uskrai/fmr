@@ -79,7 +79,7 @@ void Window::OnDraw( wxDC &dc )
     dc.SetClippingRegion( GetViewStart(), GetClientSize() );
     if ( m_bitmap )
     {
-        // wxCriticalSectionLocker locker( LoadThreadLock );
+        wxCriticalSectionLocker locker( g_sLock );
         wxVector<SBitmap*> vec = m_bitmap->Get();
         for ( const auto& it : vec )
         {

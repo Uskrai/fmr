@@ -23,5 +23,7 @@
 inline wxDEFINE_EVENT( EVT_COMMAND_THREAD_UPDATE, wxThreadEvent );
 inline wxDEFINE_EVENT( EVT_COMMAND_THREAD_COMPLETED, wxThreadEvent );
 
+inline wxCriticalSection g_sLock;
+
 
 #endif
