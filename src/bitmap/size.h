@@ -22,7 +22,7 @@
 
 #define SizeFlagFilter( flag, func )    \
     if ( flag & flags )                   \
-        return func( img, flags, parent, scale );
+        return roundf(func( img, flags, parent, scale ) * 100) / 100;
 
 #define SizeFunc( name )                \
     float name( wxImage &img, int flags, wxWindow *parent, int scale )
