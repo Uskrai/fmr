@@ -67,7 +67,7 @@ class DefaultHandler
         static bool CanHandle( wxString path ) { return true; }
     private:
 
-        wxVector<std::shared_ptr<wxMemoryInputStream>> m_fstream;
+        wxVector<std::shared_ptr<wxMemoryOutputStream>> m_fstream;
         int type;
         wxString m_name;
         wxString m_filename;

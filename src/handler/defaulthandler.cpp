@@ -41,7 +41,8 @@ void DefaultHandler::Open( const wxString& path )
 
 std::shared_ptr<wxInputStream> DefaultHandler::Item( size_t idx ) 
 { 
-    return m_fstream.at(idx);
+    auto stream = m_fstream.at(idx);
+    return std::shared_ptr<wxInputStream>( new wxMemoryInputStream( *stream ));
 }
 
 size_t DefaultHandler::IndexFilename( wxString path )
@@ -104,12 +105,12 @@ void DefaultHandler::TraverseStream()
     for ( const auto& it : m_files )
     {
         wxFileInputStream instream( Path::GetDirName(m_name) + it );
-        wxMemoryInputStream *mstream;
+        void *data;
+        wxMemoryOutputStream* stream = new wxMemoryOutputStream();
         if ( instream.IsOk() && instream.GetSize() != 0 )
-            mstream = new wxMemoryInputStream( instream );
-        else 
-            mstream = new wxMemoryInputStream( &DUMMY_BUFFER, sizeof(DUMMY_BUFFER) );
-        m_fstream.push_back( std::shared_ptr<wxMemoryInputStream>(mstream) );
+            stream->Write( instream );
+        else stream->Write( &DUMMY_BUFFER, sizeof(DUMMY_BUFFER) );
+        m_fstream.push_back( std::shared_ptr<wxMemoryOutputStream>(stream) );
     }
 }
 void DefaultHandler::GetAllFiles( wxDir& dir, bool& cont, wxString& filename, wxArrayString& array  )

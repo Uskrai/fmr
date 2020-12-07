@@ -43,6 +43,14 @@ size_t ArchiveHandler::Index( const wxString& name )
     return m_files.Index(name);
 }
 
+std::shared_ptr<wxInputStream> ArchiveHandler::Item( size_t index )
+{
+    auto stream = m_fstream.at(index);
+
+    wxMemoryInputStream *result = new wxMemoryInputStream( *stream );
+    return std::shared_ptr<wxInputStream>(result);
+}
+
 wxString ArchiveHandler::GetFromCurrent( int i )
 {
     if ( GetParent() )
@@ -95,28 +103,29 @@ void ArchiveHandler::TraverseStream()
     const wxArchiveClassFactory* fct;
     Find( m_name, fct, instream );
     wxArchiveEntry *entry;
-    wxArchiveInputStream *stream = fct->NewStream( *instream );
+    wxArchiveInputStream *archivestream = fct->NewStream( *instream );
 
     wxArrayString files = m_files;
-    while ( ( entry = stream->GetNextEntry()) )
+    while ( ( entry = archivestream->GetNextEntry()) )
     {
         for ( int i = 0; i < int(files.size()); i++ )
         {
             if ( entry->GetName() == files.Item(i) )
             {
-                wxMemoryOutputStream file;
-                stream->Read(file);
-                if ( file.GetSize() != 0  && file.IsOk())
-                    m_fstream.push_back( std::shared_ptr<wxInputStream>( new wxMemoryInputStream(file)) );
-                else
-                    m_fstream.push_back( std::shared_ptr<wxInputStream>( new wxMemoryInputStream(&DUMMY_BUFFER, sizeof(DUMMY_BUFFER)) ) );
+                wxMemoryOutputStream *ostream = new wxMemoryOutputStream();
+                ostream->Write( *archivestream );
+                if ( ostream->GetSize() == 0 || ! ostream->IsOk())
+                    ostream->Write( &DUMMY_BUFFER, sizeof(DUMMY_BUFFER) );
+                
+                m_fstream.push_back( std::shared_ptr<wxMemoryOutputStream>(ostream) );
+                    
                 files.RemoveAt(i);
             }
         }
     }
 
-    stream->CloseEntry();
-    delete stream;
+    archivestream->CloseEntry();
+    delete archivestream;
     delete instream;
 }
 
