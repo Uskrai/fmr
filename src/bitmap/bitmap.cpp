@@ -82,13 +82,7 @@ BITMAP_PAGES Bitmap::ChangePage( int step )
     pos = isChanged ? pos : temp;
 
     if ( isChanged )
-    {
-        Refresh();
-        RefreshSize();
-        RefreshPosition();
-        GetParent()->Refresh();
         return BITMAP_CHANGEPAGE;
-    }
 
     return BITMAP_ENDOFPAGE;
 

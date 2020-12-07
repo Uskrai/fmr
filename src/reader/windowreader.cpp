@@ -238,8 +238,10 @@ bool Window::ChangeFolder( int step )
 void Window::Next() { Open( GetHandler()->GetNext()); }
 void Window::Prev() { Open( GetHandler()->GetPrev()); }
 
-void Window::Find( const wxString& path )
-{
+template<typename T>
+T Window::ConfRead( wxString name, T def )
+{ 
+    return m_config->Read( wxString("Reader/") + name, def ); 
 }
 
 // void Window::OnDraw( wxDC& dc )
@@ -280,6 +282,10 @@ void Window::OnEdge( wxDirection direction )
             else if ( direction == wxRIGHT )
                 Scroll( x, 0 );
         }
+
+        AdjustBitmap();
+        AdjustScrollBar();
+        Refresh();
     }
 }
 
