@@ -178,6 +178,24 @@ void Bitmap::RefreshSize()
     GetParent()->Refresh();
 }
 
+SBitmap *Bitmap::Get( const wxPoint &area, const wxPoint& position  )
+{
+    for ( auto &it : Get() )
+        if ( it->IsPointed( area, position ) )
+            return it;
+    return NULL;
+}
+
+wxVector<SBitmap*> Bitmap::Get( const wxPoint &area, const wxSize &size )
+{
+    wxVector<SBitmap*> ret;
+    for ( auto &it : Get() )
+        if ( it->IsShown( area, size ) )
+            ret.push_back(it);
+        
+    return ret;
+}
+
 void Bitmap::Clear()
 {
     for ( auto& it : Get() )
