@@ -62,6 +62,8 @@ class ScrolledWindow : public wxWindow
         int GetScrollPos( wxOrientation );
     
         void AdjustScrollBar();
+
+        virtual void DoSetNull( int id ) {};
     protected:
         wxScrollBar *m_vScrollBar = NULL, *m_hScrollBar = NULL;
         wxPoint m_viewStart;

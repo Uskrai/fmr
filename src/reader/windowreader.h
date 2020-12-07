@@ -31,6 +31,7 @@ class Handler;
 class HandlerFactory;
 class wxScrollBar;
 class wxSizer;
+class ZoomThread;
 
 namespace Reader
 {
@@ -62,11 +63,13 @@ class Window : public ScrolledWindow
         void Clear();
 
         Handler* GetHandler() {return m_fileHandler;}
+        void DoSetNull( int id );
     private:
         //vector to bitmaps
         Bitmap* m_bitmap = NULL;
         // reference to threading class
         LoadThread *m_loadThread = NULL;
+        ZoomThread *m_zoomThread = NULL;
         // pointer to handler
         Handler* m_fileHandler = NULL;
         HandlerFactory* m_factory = NULL;

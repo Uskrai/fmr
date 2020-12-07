@@ -19,6 +19,7 @@
 
 #include "thread/thread.h"
 #include "reader/loadreader.h"
+#include "reader/zoomreader.h"
 #include "base/config.h"
 
 #include "bitmap/bitmap.h"
@@ -34,6 +35,12 @@
 
 namespace Reader
 {
+
+enum ThreadID
+{
+    LoadThreadID,
+    ZoomThreadID
+};
 
 #define Free( var )         \
     if ( var )              \
@@ -89,6 +96,18 @@ void Window::OnDraw( wxDC &dc )
     }
 }
 
+void Window::DoSetNull( int id)
+{
+    switch ( id )
+    {
+        case LoadThreadID:
+            m_loadThread = NULL;
+            break;
+        case ZoomThreadID:
+            m_zoomThread = NULL;
+            break;
+    }
+}
 
 void Window::OnThreadComplete( wxCommandEvent &event )
 {
