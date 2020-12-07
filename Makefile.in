@@ -188,9 +188,12 @@ am_libsize_la_OBJECTS = $(bitmap)/size.lo
 libsize_la_OBJECTS = $(am_libsize_la_OBJECTS)
 libwindowreader_la_DEPENDENCIES = libloadreader.la \
 	libhandlerfactory.la libscrolledwindow.la libbitmap.la \
-	libbmp.la
+	libbmp.la libzoomreader.la
 am_libwindowreader_la_OBJECTS = $(reader)/windowreader.lo
 libwindowreader_la_OBJECTS = $(am_libwindowreader_la_OBJECTS)
+libzoomreader_la_LIBADD =
+am_libzoomreader_la_OBJECTS = $(reader)/zoomreader.lo
+libzoomreader_la_OBJECTS = $(am_libzoomreader_la_OBJECTS)
 am_fmr_OBJECTS = src/main/app.$(OBJEXT)
 fmr_OBJECTS = $(am_fmr_OBJECTS)
 fmr_DEPENDENCIES = libframe.la
@@ -219,6 +222,7 @@ am__depfiles_remade = $(base)/$(DEPDIR)/compare.Plo \
 	$(handler)/$(DEPDIR)/handlerfactory.Plo \
 	$(reader)/$(DEPDIR)/loadreader.Plo \
 	$(reader)/$(DEPDIR)/windowreader.Plo \
+	$(reader)/$(DEPDIR)/zoomreader.Plo \
 	$(window)/$(DEPDIR)/scrolledwindow.Plo \
 	src/main/$(DEPDIR)/app.Po
 am__mv = mv -f
@@ -247,7 +251,7 @@ SOURCES = $(libarchivehandler_la_SOURCES) $(libbitmap_la_SOURCES) \
 	$(libpanel_la_SOURCES) $(libpath_la_SOURCES) \
 	$(libposition_la_SOURCES) $(libscrolledwindow_la_SOURCES) \
 	$(libsize_la_SOURCES) $(libwindowreader_la_SOURCES) \
-	$(fmr_SOURCES)
+	$(libzoomreader_la_SOURCES) $(fmr_SOURCES)
 DIST_SOURCES = $(libarchivehandler_la_SOURCES) $(libbitmap_la_SOURCES) \
 	$(libbmp_la_SOURCES) $(libcompare_la_SOURCES) \
 	$(libdefaulthandler_la_SOURCES) $(libframe_la_SOURCES) \
@@ -255,7 +259,7 @@ DIST_SOURCES = $(libarchivehandler_la_SOURCES) $(libbitmap_la_SOURCES) \
 	$(libpanel_la_SOURCES) $(libpath_la_SOURCES) \
 	$(libposition_la_SOURCES) $(libscrolledwindow_la_SOURCES) \
 	$(libsize_la_SOURCES) $(libwindowreader_la_SOURCES) \
-	$(fmr_SOURCES)
+	$(libzoomreader_la_SOURCES) $(fmr_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -471,10 +475,11 @@ libsize_la_SOURCES = $(bitmap)/size.cpp
 libposition_la_SOURCES = $(bitmap)/position.cpp
 reader = src/reader
 readerdir = @abs_builddir@/reader   
-reader_LTLIBRARIES = libloadreader.la libwindowreader.la
+reader_LTLIBRARIES = libloadreader.la libwindowreader.la libzoomreader.la
 libloadreader_la_SOURCES = $(reader)/loadreader.cpp
+libzoomreader_la_SOURCES = $(reader)/zoomreader.cpp
 libwindowreader_la_SOURCES = $(reader)/windowreader.cpp
-libwindowreader_la_LIBADD = libloadreader.la libhandlerfactory.la libscrolledwindow.la libbitmap.la libbmp.la
+libwindowreader_la_LIBADD = libloadreader.la libhandlerfactory.la libscrolledwindow.la libbitmap.la libbmp.la libzoomreader.la
 
 # make libraries for gui
 gui = src/gui
@@ -892,6 +897,11 @@ $(reader)/windowreader.lo: $(reader)/$(am__dirstamp) \
 
 libwindowreader.la: $(libwindowreader_la_OBJECTS) $(libwindowreader_la_DEPENDENCIES) $(EXTRA_libwindowreader_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(readerdir) $(libwindowreader_la_OBJECTS) $(libwindowreader_la_LIBADD) $(LIBS)
+$(reader)/zoomreader.lo: $(reader)/$(am__dirstamp) \
+	$(reader)/$(DEPDIR)/$(am__dirstamp)
+
+libzoomreader.la: $(libzoomreader_la_OBJECTS) $(libzoomreader_la_DEPENDENCIES) $(EXTRA_libzoomreader_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(readerdir) $(libzoomreader_la_OBJECTS) $(libzoomreader_la_LIBADD) $(LIBS)
 src/main/$(am__dirstamp):
 	@$(MKDIR_P) src/main
 	@: > src/main/$(am__dirstamp)
@@ -937,6 +947,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/handlerfactory.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/loadreader.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/windowreader.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/zoomreader.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/scrolledwindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/main/$(DEPDIR)/app.Po@am__quote@ # am--include-marker
 
@@ -1289,6 +1300,7 @@ distclean: distclean-am
 	-rm -f $(handler)/$(DEPDIR)/handlerfactory.Plo
 	-rm -f $(reader)/$(DEPDIR)/loadreader.Plo
 	-rm -f $(reader)/$(DEPDIR)/windowreader.Plo
+	-rm -f $(reader)/$(DEPDIR)/zoomreader.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolledwindow.Plo
 	-rm -f src/main/$(DEPDIR)/app.Po
 	-rm -f Makefile
@@ -1353,6 +1365,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f $(handler)/$(DEPDIR)/handlerfactory.Plo
 	-rm -f $(reader)/$(DEPDIR)/loadreader.Plo
 	-rm -f $(reader)/$(DEPDIR)/windowreader.Plo
+	-rm -f $(reader)/$(DEPDIR)/zoomreader.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolledwindow.Plo
 	-rm -f src/main/$(DEPDIR)/app.Po
 	-rm -f Makefile

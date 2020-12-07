@@ -18,12 +18,14 @@
 #ifndef FMR_READER_ZOOMREADER
 #define FMR_READER_ZOOMREADER
 
-#include <wx/thread.h>
-#include <wx/vector.h>
+#include "thread/thread.h"
+#include <functional>
 
 class ScrolledWindow;
 class Handler;
 class Bitmap;
+class wxImage;
+struct SBitmap;
 
 
 class ZoomThread :
@@ -32,6 +34,7 @@ class ZoomThread :
     public :
         ZoomThread( ScrolledWindow *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = wxID_ANY );
         ~ZoomThread();
+        static void Zoom( SBitmap *bmp, wxImage &img, float scale, std::function<bool()> NotDestroyed = []()->bool { return true; } );
 
         void SetParameter( Handler *handler, Bitmap *bitmap, float scale );
 
