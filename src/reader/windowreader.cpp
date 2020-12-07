@@ -38,7 +38,7 @@ namespace Reader
 
 enum ThreadID
 {
-    LoadThreadID,
+    LoadThreadID = wxID_HIGHEST + 30,
     ZoomThreadID
 };
 
