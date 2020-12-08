@@ -155,6 +155,15 @@ bool Window::Open( const wxString& path )
 
                 Bitmap *bitmap = NewBitmap( limitImage, handler->Size() );
                 size_t idx = handler->Index( path );
+                if ( handler->IsExist( idx ) )
+                {
+                    wxCriticalSectionLocker locker(g_sLock);
+                    auto stream = handler->Item(idx);
+                    LoadThread::LoadImage( bitmap, *stream, idx );
+                    AdjustBitmap();
+                    AdjustScrollBar();
+                    Refresh();
+                }
 
                 LoadThread *thread;
                 thread = new LoadThread( this, wxTHREAD_DETACHED, LoadThreadID );
