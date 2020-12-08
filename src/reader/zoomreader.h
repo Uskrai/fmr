@@ -29,10 +29,11 @@ struct SBitmap;
 
 
 class ZoomThread :
-    public wxThread
+    public BaseThread
 {
     public :
-        ZoomThread( ScrolledWindow *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = wxID_ANY );
+        ZoomThread( ScrolledWindow *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = wxID_ANY )
+            : BaseThread(parent,type,id){} ;
         ~ZoomThread();
         static void Zoom( SBitmap *bmp, wxImage &img, float scale, std::function<bool()> NotDestroyed = []()->bool { return true; } );
 
@@ -40,11 +41,9 @@ class ZoomThread :
 
     protected :
         virtual ExitCode Entry();
-        ScrolledWindow *m_parent;
         Handler *m_handler;
         Bitmap *m_bitmap;
         float m_scale;
-        int m_id;
 };
 
 #endif

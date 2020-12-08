@@ -21,13 +21,6 @@
 #include "handler/handler.h"
 #include "bitmap/bitmap.h"
 
-ZoomThread::ZoomThread( ScrolledWindow *parent, const wxThreadKind type, int id )
-    : wxThread(type)
-{
-    m_parent = parent;
-    m_id = id;
-}
-
 void ZoomThread::SetParameter( Handler *handler, Bitmap *bitmap, float scale )
 {
     m_handler = handler;
@@ -46,7 +39,6 @@ void ZoomThread::Zoom( SBitmap *bmp, wxImage &img, float  scaleadd, std::functio
     if ( img.IsOk() && f())
     {
         wxCriticalSectionLocker locker( g_sLock );
-        printf("zoom locked\n");
         wxSize size = img.GetSize();
         float scale = bmp->GetScale() + scaleadd;
         size.Scale( scale , scale );
@@ -59,7 +51,6 @@ void ZoomThread::Zoom( SBitmap *bmp, wxImage &img, float  scaleadd, std::functio
                 bmp->SetScale( scale );
             }
         }
-        printf("zoom unlocked\n");
     }
 }
 
@@ -89,12 +80,16 @@ wxThread::ExitCode ZoomThread::Entry()
 
                     wxQueueEvent( 
                         m_parent,
-                        new wxThreadEvent( EVT_COMMAND_THREAD_UPDATE )
+                        new wxThreadEvent( EVT_COMMAND_THREAD_UPDATE, m_id )
                     );
                 }
             }
             it->SetScale( scale );
         }
     } // if m_handler and m_bitmap not NULL
+    wxQueueEvent(
+        m_parent,
+        new wxThreadEvent( EVT_COMMAND_THREAD_COMPLETED, m_id )
+    );
     return (wxThread::ExitCode)0;
 }

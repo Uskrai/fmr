@@ -40,16 +40,6 @@ bool IsExist( Handler *handler, size_t idx )
 namespace Reader
 {
 
-LoadThread::LoadThread( ScrolledWindow *parent, const wxThreadKind &type ) 
-    : wxThread( type )
-{
-    m_parent = parent;
-}
-
-LoadThread::~LoadThread()
-{
-}
-
 void LoadThread::SetParameter( Bitmap *bitmap, Handler *handler, size_t start )
 {
     m_bitmap = bitmap;
@@ -82,7 +72,8 @@ void LoadThread::CheckAndLoadImage( size_t& idx, int step )
         wxQueueEvent( 
             m_parent,
             new wxThreadEvent(
-                EVT_COMMAND_THREAD_UPDATE
+                EVT_COMMAND_THREAD_UPDATE,
+                m_id
             )
         );
     }
@@ -97,7 +88,7 @@ wxThread::ExitCode LoadThread::Entry()
         CheckAndLoadImage( prev, -1 );
     }
     
-    wxQueueEvent( m_parent, new wxThreadEvent( EVT_COMMAND_THREAD_COMPLETED ) );
+    wxQueueEvent( m_parent, new wxThreadEvent( EVT_COMMAND_THREAD_COMPLETED, m_id ) );
     return (wxThread::ExitCode)0;
 }
 

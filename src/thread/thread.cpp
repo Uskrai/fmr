@@ -15,26 +15,20 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_THREAD_THREAD
-#define FMR_THREAD_THREAD
+#include "thread/thread.h"
 
-#include <wx/event.h>
-#include <wx/thread.h>
+#include "window/scrolledwindow.h"
 
-wxDECLARE_EVENT( EVT_COMMAND_THREAD_UPDATE, wxThreadEvent );
-wxDECLARE_EVENT( EVT_COMMAND_THREAD_COMPLETED, wxThreadEvent );
+wxDEFINE_EVENT( EVT_COMMAND_THREAD_UPDATE, wxThreadEvent );
+wxDEFINE_EVENT( EVT_COMMAND_THREAD_COMPLETED, wxThreadEvent );
 
-class ScrolledWindow;
-
-inline wxCriticalSection g_sLock;
-class BaseThread : public wxThread
+BaseThread::BaseThread( ScrolledWindow *parent, wxThreadKind type, int id )
 {
-    public:
-        BaseThread( ScrolledWindow *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = -1 );
-        ~BaseThread();
-    protected:
-        ScrolledWindow *m_parent;
-        int m_id;
-};
+    m_parent = parent;
+    m_id = id;
+}
 
-#endif
+BaseThread::~BaseThread()
+{
+    m_parent->DoSetNull(m_id);
+}

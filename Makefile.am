@@ -43,8 +43,10 @@ readerdir = @abs_builddir@/reader
 reader_LTLIBRARIES =  libloadreader.la libwindowreader.la libzoomreader.la
 
     libloadreader_la_SOURCES = $(reader)/loadreader.cpp
+    libloadreader_la_LIBADD = libthread.la 
 
     libzoomreader_la_SOURCES = $(reader)/zoomreader.cpp
+    libzoomreader_la_LIBADD = libthread.la 
 
     libwindowreader_la_SOURCES = $(reader)/windowreader.cpp
     libwindowreader_la_LIBADD = libloadreader.la libhandlerfactory.la libscrolledwindow.la libbitmap.la libbmp.la libzoomreader.la
@@ -64,6 +66,11 @@ window = src/window
 windowdir = @abs_builddir@/window
 window_LTLIBRARIES = libscrolledwindow.la
     libscrolledwindow_la_SOURCES = $(window)/scrolledwindow.cpp
+
+thread = src/thread
+threaddir = @abs_builddir@/thread
+thread_LTLIBRARIES = libthread.la
+    libthread_la_SOURCES = $(thread)/thread.cpp
 
 bin_PROGRAMS = fmr
 fmr_SOURCES = src/main/app.cpp

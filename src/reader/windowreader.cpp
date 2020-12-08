@@ -36,7 +36,7 @@
 namespace Reader
 {
 
-enum ThreadID
+enum ThreadID : int
 {
     LoadThreadID = wxID_HIGHEST + 30,
     ZoomThreadID
@@ -51,8 +51,10 @@ enum ThreadID
 
 wxBEGIN_EVENT_TABLE( Window, ScrolledWindow )
     EVT_MOTION( Window::OnMouseMotion )
-    EVT_COMMAND( wxID_ANY, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
-    EVT_COMMAND( wxID_ANY, EVT_COMMAND_THREAD_COMPLETED, Window::OnThreadComplete)
+    EVT_COMMAND( LoadThreadID, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
+    EVT_COMMAND( ZoomThreadID, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
+    EVT_COMMAND( ZoomThreadID, EVT_COMMAND_THREAD_COMPLETED, Window::OnZoomThreadCompleted )
+    EVT_COMMAND( LoadThreadID, EVT_COMMAND_THREAD_COMPLETED, Window::OnLoadThreadComplete )
 wxEND_EVENT_TABLE()
 
 Window::Window( wxWindow* parent, wxWindowID id, const wxPoint & pos, 

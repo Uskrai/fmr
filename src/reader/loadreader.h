@@ -18,8 +18,7 @@
 #ifndef FMR_READER_LOADTHREAD
 #define FMR_READER_LOADTHREAD
 
-#include <wx/thread.h>
-#include <wx/event.h>
+#include "thread/thread.h"
 #include <wx/string.h>
 
 #include "handler/handler.h"
@@ -33,13 +32,13 @@ namespace Reader
 
 inline wxCriticalSection LoadThreadLock;
 class LoadThread
-    : public wxThread
+    : public BaseThread
 {
     public:
-        LoadThread( ScrolledWindow *parent, const wxThreadKind &type = wxTHREAD_DETACHED );
+        LoadThread( ScrolledWindow *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = -1 ) 
+            : BaseThread( parent, type, id ){};
         void SetParameter( Bitmap *bitmap, Handler *handler, size_t start );
         void SetLimit( size_t prev, size_t next );
-        ~LoadThread();
 
         wxThreadError Run();
 
@@ -50,7 +49,6 @@ class LoadThread
         Handler *m_fHandler;
         virtual ExitCode Entry();
         void CheckAndLoadImage( size_t &idx, int step );
-        wxWindow *m_parent;
 };
 
 };
