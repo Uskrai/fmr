@@ -157,7 +157,7 @@ bool Window::Open( const wxString& path )
                 size_t idx = handler->Index( path );
 
                 LoadThread *thread;
-                thread = new LoadThread( this, wxTHREAD_JOINABLE );
+                thread = new LoadThread( this, wxTHREAD_DETACHED, LoadThreadID );
                 thread->SetParameter( bitmap, handler, idx );
                 thread->SetLimit( limitPrev, limitNext );
 
