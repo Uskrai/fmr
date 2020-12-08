@@ -19,6 +19,7 @@
 #include "image/image.h"
 #include "bitmap/bitmap.h"
 
+#include <wx/log.h>
 #include "thread/thread.h"
 #include "reader/loadreader.h"
 
@@ -78,6 +79,7 @@ void LoadThread::LoadImage( Bitmap *bmp, wxInputStream &stream, size_t idx  )
 
         if ( wxImage::CanRead(stream) )
         {
+            wxLogNull nuller;
             wxImage img(stream);
             wxCriticalSectionLocker locker( g_sLock );
             bmp->Add(img,idx);

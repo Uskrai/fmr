@@ -283,6 +283,7 @@ void Window::OnMouseMotion( wxMouseEvent &event )
                     if ( m_fileHandler->IsExist( bitmap->GetIndex() ) )
                     {
                         auto stream = m_fileHandler->Item( bitmap->GetIndex() );
+                        wxLogNull nuller;
                         wxImage image(*stream);
                         ZoomThread::Zoom( bitmap, image, scale );
                         AdjustBitmap();

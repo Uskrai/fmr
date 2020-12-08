@@ -20,6 +20,7 @@
 #include "window/scrolledwindow.h"
 #include "handler/handler.h"
 #include "bitmap/bitmap.h"
+#include "wx/log.h"
 
 void ZoomThread::SetParameter( Handler *handler, Bitmap *bitmap, float scale )
 {
@@ -68,6 +69,7 @@ wxThread::ExitCode ZoomThread::Entry()
             float scale = it->GetScale() + m_scale;
             if ( m_handler->IsExist( it->GetIndex() ) && !TestDestroy() )
             {
+                wxLogNull nuller;
                 auto stream = m_handler->Item( it->GetIndex() );
                 wxImage img( *stream );
 
