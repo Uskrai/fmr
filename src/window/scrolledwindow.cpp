@@ -47,6 +47,7 @@ ScrolledWindow::ScrolledWindow( wxWindow *parent,
                             )
     : wxWindow( parent, id, pos, size, style, name )
 {
+    m_timer.SetOwner( this, ScrolledTimerID );
     CreateScrollBar( wxBOTH );
     SetVirtualSize(0,0);
 }
@@ -197,6 +198,7 @@ void ScrolledWindow::OnScrollLine( wxScrollWinEvent &event )
     else if ( orient == wxHORIZONTAL )
         bar = m_hScrollBar;
     
+    AdjustScrollBar();
     if ( pos < 0 )
     {
         if ( orient == wxVERTICAL )
@@ -221,7 +223,6 @@ void ScrolledWindow::OnScrollLine( wxScrollWinEvent &event )
         direction = ( direction == wxLEFT ) ?
             wxRIGHT : wxLEFT;
         
-    
     OnEdge( direction );
 }
 
@@ -414,6 +415,6 @@ void ScrolledWindow::DoSetVirtualSize( int width, int height )
 {
     m_virtualSize = wxSize(width,height);
     if ( ! m_timer.IsRunning() )
-        m_timer.StartOnce( 1000 );
+        m_timer.StartOnce( 500 );
 }
 
