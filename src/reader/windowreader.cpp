@@ -139,6 +139,7 @@ bool Window::Open( const wxString& path )
         // if handler found prepare for runing thread
         if ( handler )
         {
+            m_isOpened = false;
             if ( handler->Size() > 0 )
             {
                 m_config->Write("RecentlyOpened", path );
@@ -164,6 +165,7 @@ bool Window::Open( const wxString& path )
                 thread->SetParameter( bitmap, handler, idx );
                 thread->SetLimit( limitPrev, limitNext );
 
+                m_isOpened = true;
                 if ( thread->Run() != wxTHREAD_NO_ERROR )
                 {
                     wxLogError("Can't Create Thread");
@@ -308,7 +310,7 @@ void Window::OnMouseMotion( wxMouseEvent &event )
 
 void Window::OnEdge( wxDirection direction )
 {
-    if ( m_bitmap )
+    if ( m_bitmap && m_isOpened )
     {
         int step = 0;
         if ( direction == wxUP || direction == wxLEFT )

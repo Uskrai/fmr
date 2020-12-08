@@ -80,6 +80,7 @@ class Window : public ScrolledWindow
         // pointer to scrollbar
         wxScrollBar *m_vScroll, *m_hScroll;
         wxSizer *m_sizer;
+        bool m_isOpened = false;
 
         template<typename T>
         T ConfRead( wxString name, T def );
