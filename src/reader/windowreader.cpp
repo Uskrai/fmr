@@ -54,7 +54,6 @@ wxBEGIN_EVENT_TABLE( Window, ScrolledWindow )
     EVT_COMMAND( LoadThreadID, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
     EVT_COMMAND( ZoomThreadID, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
     EVT_COMMAND( ZoomThreadID, EVT_COMMAND_THREAD_COMPLETED, Window::OnZoomThreadCompleted )
-    EVT_COMMAND( LoadThreadID, EVT_COMMAND_THREAD_COMPLETED, Window::OnLoadThreadComplete )
 wxEND_EVENT_TABLE()
 
 Window::Window( wxWindow* parent, wxWindowID id, const wxPoint & pos, 
@@ -250,11 +249,61 @@ T Window::ConfRead( wxString name, T def )
     return m_config->Read( wxString("Reader/") + name, def ); 
 }
 
-// void Window::OnDraw( wxDC& dc )
-template<typename T>
-T Window::ConfRead( wxString name, T def )
-{ 
-    return m_config->Read( wxString("Reader/") + name, def ); 
+static float scale = 1;
+void Window::OnMouseMotion( wxMouseEvent &event )
+{
+    static int y = -1;
+    if ( 
+        y != -1 
+        && event.Dragging() 
+        && event.MiddleIsDown() 
+        && ! event.RightIsDown() 
+        && ! event.LeftIsDown()
+        )
+    {
+        static int step;
+        step += y - event.GetPosition().y;
+        if ( step > 10 || step < -10)
+        {
+            if ( m_zoomThread ) 
+                m_zoomThread->Delete();
+            step = ( step > 0 ) ? 10 : -10;
+
+            float scale = (float(step) / 100);
+            // if no modifier(alt,shift,ctrl) pressed
+            // only zoom pointed ( with cursor ) bitmap
+            if( ! event.HasAnyModifiers() )
+            {
+                // get bitmap that is pointed
+                auto bitmap = m_bitmap->Get( GetViewStart(), event.GetPosition() );
+                if ( bitmap )
+                {
+                    if ( m_fileHandler->IsExist( bitmap->GetIndex() ) )
+                    {
+                        auto stream = m_fileHandler->Item( bitmap->GetIndex() );
+                        wxImage image(*stream);
+                        ZoomThread::Zoom( bitmap, image, scale );
+                        AdjustBitmap();
+                        AdjustScrollBar();
+                        Refresh();
+                    }
+                }
+            }
+            // if Ctrl is pressed then zoom all iamges
+            // shown in current page
+            else if ( event.GetModifiers() == wxMOD_CONTROL )
+            {
+                if ( m_zoomThread ) m_zoomThread->Delete();
+                m_zoomThread = new ZoomThread( this, wxTHREAD_DETACHED, ZoomThreadID );
+                m_zoomThread->SetParameter( m_fileHandler, m_bitmap, scale );
+                m_zoomThread->Run();
+            }
+
+            step = 0;
+        }
+    }
+    y = event.GetPosition().y;
+    event.Skip();
 }
 
 void Window::OnEdge( wxDirection direction )
