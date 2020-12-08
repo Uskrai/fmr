@@ -81,6 +81,7 @@ BITMAP_PAGES Bitmap::ChangePage( int step )
     // else return to before calculation.
     pos = isChanged ? pos : temp;
 
+    Refresh();
     if ( isChanged )
         return BITMAP_CHANGEPAGE;
 
