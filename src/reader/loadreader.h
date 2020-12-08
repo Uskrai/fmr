@@ -43,6 +43,7 @@ class LoadThread
         wxThreadError Run();
 
         wxCriticalSection &GetLock() { return LoadThreadLock; }
+        static void LoadImage( Bitmap *bmp, wxInputStream &stream, size_t idx );
     protected:
         size_t m_start;
         Bitmap *m_bitmap = NULL;

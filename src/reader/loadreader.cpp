@@ -22,16 +22,6 @@
 #include "thread/thread.h"
 #include "reader/loadreader.h"
 
-void LoadImage( Bitmap *bmp, wxInputStream &stream, size_t idx  )
-{
-    if ( wxImage::CanRead(stream) )
-    {
-        wxImage img(stream);
-        wxCriticalSectionLocker locker( g_sLock );
-        bmp->Add(img,idx);
-    }
-}
-
 bool IsExist( Handler *handler, size_t idx )
 {
     return handler->IsExist(idx);
@@ -76,6 +66,23 @@ void LoadThread::CheckAndLoadImage( size_t& idx, int step )
                 m_id
             )
         );
+    }
+}
+
+void LoadThread::LoadImage( Bitmap *bmp, wxInputStream &stream, size_t idx  )
+{
+    if ( Vector::IsExist( bmp->GetAll(), idx) )
+    {
+        if ( bmp->GetAll().at(idx).IsLoaded() )
+            return;
+
+        if ( wxImage::CanRead(stream) )
+        {
+            wxImage img(stream);
+            wxCriticalSectionLocker locker( g_sLock );
+            bmp->Add(img,idx);
+        }
+
     }
 }
 
