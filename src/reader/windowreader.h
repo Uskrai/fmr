@@ -94,8 +94,6 @@ class Window : public ScrolledWindow
         void OnEdge( wxDirection direction );
 
         void OnThreadUpdate( wxCommandEvent &event );
-        void OnLoadThreadComplete( wxCommandEvent &event );
-        void OnZoomThreadUpdate( wxCommandEvent &event ){ Refresh(); }
         void OnZoomThreadCompleted( wxCommandEvent &event ) { AdjustScrollBar(); };
         
 };

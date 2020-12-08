@@ -126,11 +126,6 @@ void Window::OnThreadUpdate( wxCommandEvent &event )
     Refresh();
 }
 
-void Window::OnThreadComplete( wxCommandEvent &event )
-{
-    Free(m_loadThread)
-}
-
 bool Window::Open( const wxString& path )
 {
     // open if path is not empty
