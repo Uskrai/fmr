@@ -318,11 +318,14 @@ void Window::OnEdge( wxDirection direction )
             step = 1;
 
         BITMAP_PAGES status = m_bitmap->ChangePage( step );
-        int x = ( m_isFromRight ) ? GetVirtualSize().GetWidth() : 0;
         if ( status == BITMAP_ENDOFPAGE )
             if ( ChangeFolder( step ) )
-                Scroll(  GetVirtualSize().GetWidth() , 0 );
+                status = BITMAP_CHANGEPAGE;
         
+        AdjustBitmap();
+        AdjustScrollBar();
+        
+        int x = ( m_isFromRight ) ? GetVirtualSize().GetWidth() : 0;
         if ( status == BITMAP_CHANGEPAGE )
         {
             if ( direction == wxUP )
@@ -338,8 +341,6 @@ void Window::OnEdge( wxDirection direction )
                 Scroll( x, 0 );
         }
 
-        AdjustBitmap();
-        AdjustScrollBar();
         Refresh();
     }
 }
