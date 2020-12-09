@@ -25,10 +25,17 @@ wxDEFINE_EVENT( EVT_COMMAND_THREAD_COMPLETED, wxThreadEvent );
 BaseThread::BaseThread( ScrolledWindow *parent, wxThreadKind type, int id )
 {
     m_parent = parent;
+    SetId(id);
+}
+
+void BaseThread::SetId( int id )
+{
+    wxCriticalSectionLocker locker(g_sLock);
     m_id = id;
 }
 
 BaseThread::~BaseThread()
 {
+    wxCriticalSectionLocker locker(g_sLock);
     m_parent->DoSetNull(m_id);
 }

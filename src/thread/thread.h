@@ -32,9 +32,37 @@ class BaseThread : public wxThread
     public:
         BaseThread( ScrolledWindow *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = -1 );
         ~BaseThread();
+
+        void SetId( int id );
     protected:
         ScrolledWindow *m_parent;
         int m_id;
 };
+
+namespace Thread
+{
+    template <typename T>
+    std::enable_if_t
+    <std::is_base_of<BaseThread, T>::value, bool> Delete( T *&thread, wxCriticalSection &lock )
+    {
+        {
+            wxCriticalSectionLocker locker(lock);
+            if ( thread )
+                if ( thread->Delete() != wxTHREAD_NO_ERROR )
+                    return false;
+        }
+
+        while (1)
+        {
+            {
+                wxCriticalSectionLocker locker(lock);
+                if ( !thread ) break;
+            }
+
+            wxThread::This()->Sleep(2);
+        }
+        return true;
+    }
+}
 
 #endif
