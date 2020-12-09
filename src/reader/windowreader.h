@@ -26,6 +26,8 @@
 
 #include "bitmap/bitmap.h"
 
+#include <memory>
+
 class Config;
 class Handler;
 class HandlerFactory;
@@ -62,31 +64,30 @@ class Window : public ScrolledWindow
 
         void Clear();
 
-        Handler* GetHandler() {return m_fileHandler;}
+        std::shared_ptr<Handler> GetHandler() {return m_fileHandler;}
         void DoSetNull( int id );
     protected:
         void AdjustBitmap();
     private:
-        //vector to bitmaps
-        Bitmap* m_bitmap = NULL;
         // reference to threading class
         LoadThread *m_loadThread = NULL;
         ZoomThread *m_zoomThread = NULL;
         // pointer to handler
-        Handler* m_fileHandler = NULL;
+        std::shared_ptr<Handler> m_fileHandler = NULL;
+        //vector to bitmaps
+        std::shared_ptr<Bitmap> m_bitmap = NULL;
         HandlerFactory* m_factory = NULL;
         // pointer to config files 
         Config* m_config;
         // pointer to scrollbar
-        wxScrollBar *m_vScroll, *m_hScroll;
         wxSizer *m_sizer;
         bool m_isOpened = false;
 
         template<typename T>
         T ConfRead( wxString name, T def );
 
-        Handler *NewHandler( const wxString &path );
-        Bitmap *NewBitmap( size_t size, size_t limit );
+        std::shared_ptr<Handler> NewHandler( const wxString &path );
+        std::shared_ptr<Bitmap> NewBitmap( size_t size, size_t limit );
 
         void Error( wxSize size ); 
         void OnDraw( wxDC& dc );

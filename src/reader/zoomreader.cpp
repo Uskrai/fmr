@@ -22,7 +22,7 @@
 #include "bitmap/bitmap.h"
 #include "wx/log.h"
 
-void ZoomThread::SetParameter( Handler *handler, Bitmap *bitmap, float scale )
+void ZoomThread::SetParameter( std::shared_ptr<Handler> handler, std::shared_ptr<Bitmap> bitmap, float scale )
 {
     m_handler = handler;
     m_bitmap = bitmap;

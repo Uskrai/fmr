@@ -20,6 +20,7 @@
 
 #include "thread/thread.h"
 #include <functional>
+#include <memory>
 
 class ScrolledWindow;
 class Handler;
@@ -37,12 +38,12 @@ class ZoomThread :
         ~ZoomThread();
         static void Zoom( SBitmap *bmp, wxImage &img, float scale, std::function<bool()> NotDestroyed = []()->bool { return true; } );
 
-        void SetParameter( Handler *handler, Bitmap *bitmap, float scale );
+        void SetParameter( std::shared_ptr<Handler> handler, std::shared_ptr<Bitmap> bitmap, float scale );
 
     protected :
         virtual ExitCode Entry();
-        Handler *m_handler;
-        Bitmap *m_bitmap;
+        std::shared_ptr<Handler> m_handler;
+        std::shared_ptr<Bitmap> m_bitmap;
         float m_scale;
 };
 

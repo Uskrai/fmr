@@ -31,7 +31,7 @@ bool IsExist( Handler *handler, size_t idx )
 namespace Reader
 {
 
-void LoadThread::SetParameter( Bitmap *bitmap, Handler *handler, size_t start )
+void LoadThread::SetParameter( std::shared_ptr<Handler> handler, std::shared_ptr<Bitmap> bitmap, size_t start )
 {
     m_bitmap = bitmap;
     m_fHandler = handler;
@@ -54,23 +54,27 @@ wxThreadError LoadThread::Run()
 
 void LoadThread::CheckAndLoadImage( size_t& idx, int step )
 {
-    if ( IsExist( m_fHandler, idx ) )
+    if ( m_fHandler->IsExist(idx) )
     {
         std::shared_ptr<wxInputStream> stream;
         stream = m_fHandler->Item(idx);
-        LoadImage( m_bitmap, *stream, idx );
+        if ( !TestDestroy() )
+            LoadImage( m_bitmap, *stream, idx );
         idx += step;
-        wxQueueEvent( 
-            m_parent,
-            new wxThreadEvent(
-                EVT_COMMAND_THREAD_UPDATE,
-                m_id
-            )
-        );
+        if ( !TestDestroy() )
+        {
+            wxQueueEvent( 
+                m_parent,
+                new wxThreadEvent(
+                    EVT_COMMAND_THREAD_UPDATE,
+                    m_id
+                )
+            );
+        }
     }
 }
 
-void LoadThread::LoadImage( Bitmap *bmp, wxInputStream &stream, size_t idx  )
+void LoadThread::LoadImage( std::shared_ptr<Bitmap> bmp, wxInputStream &stream, size_t idx  )
 {
     if ( Vector::IsExist( bmp->GetAll(), idx) )
     {
@@ -91,13 +95,13 @@ void LoadThread::LoadImage( Bitmap *bmp, wxInputStream &stream, size_t idx  )
 wxThread::ExitCode LoadThread::Entry()
 {
     size_t next = m_start, prev = next - 1;
-    while( !TestDestroy() && ( IsExist( m_fHandler, next ) || IsExist( m_fHandler, prev ) ) )
+    while( !TestDestroy() && ( m_fHandler->IsExist(next) ||  m_fHandler->IsExist(prev)  ) )
     {
         CheckAndLoadImage( next, 1 );
         CheckAndLoadImage( prev, -1 );
     }
-    
-    wxQueueEvent( m_parent, new wxThreadEvent( EVT_COMMAND_THREAD_COMPLETED, m_id ) );
+    if ( !TestDestroy() )
+        wxQueueEvent( m_parent, new wxThreadEvent( EVT_COMMAND_THREAD_COMPLETED, m_id ) );
     return (wxThread::ExitCode)0;
 }
 

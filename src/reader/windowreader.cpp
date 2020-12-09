@@ -77,17 +77,14 @@ void Window::Clear()
 {
     if ( m_loadThread ) 
         m_loadThread->Delete();
-    Free(m_loadThread)
-    Free(m_fileHandler)
-    Free(m_bitmap)
 }
 
 void Window::OnDraw( wxDC &dc )
 {   
     dc.SetClippingRegion( GetViewStart(), GetClientSize() );
+    wxCriticalSectionLocker locker( g_sLock );
     if ( m_bitmap )
     {
-        wxCriticalSectionLocker locker( g_sLock );
         wxVector<SBitmap*> vec = m_bitmap->Get();
         for ( const auto& it : vec )
         {
@@ -127,15 +124,13 @@ void Window::OnThreadUpdate( wxCommandEvent &event )
 
 bool Window::Open( const wxString& path )
 {
+    wxCriticalSectionLocker locker(g_sLock);
     // open if path is not empty
     if ( path != wxEmptyString )
     {
-        Handler *tempHandler = m_fileHandler;
-        Bitmap *tempBitmap = m_bitmap;
-        LoadThread *tempThread = m_loadThread;
         SetVirtualSize( GetClientSize() + wxSize(1,0) );
 
-        Handler *handler = NewHandler( path );
+        std::shared_ptr<Handler> handler = NewHandler( path );
         // if handler found prepare for runing thread
         if ( handler )
         {
@@ -148,7 +143,7 @@ bool Window::Open( const wxString& path )
                 size_t limitNext = ConfRead("ImageMemoryLimitNext", NO_LIMIT );
                 size_t limitImage = ConfRead("ImageShowLimit", 1 );
 
-                Bitmap *bitmap = NewBitmap( limitImage, handler->Size() );
+                std::shared_ptr<Bitmap> bitmap = NewBitmap( limitImage, handler->Size() );
                 size_t idx = handler->Index( path );
                 if ( handler->IsExist( idx ) )
                 {
@@ -159,23 +154,17 @@ bool Window::Open( const wxString& path )
                     AdjustScrollBar();
                     Refresh();
                 }
+                std::shared_ptr<Handler> handler = NewHandler( path );
 
                 LoadThread *thread;
                 thread = new LoadThread( this, wxTHREAD_DETACHED, LoadThreadID );
-                thread->SetParameter( bitmap, handler, idx );
+                thread->SetParameter( handler, bitmap, idx );
                 thread->SetLimit( limitPrev, limitNext );
 
                 m_isOpened = true;
                 if ( thread->Run() != wxTHREAD_NO_ERROR )
                 {
                     wxLogError("Can't Create Thread");
-                    Free(handler)
-                    Free(bitmap)
-                    Free(thread)
-
-                    m_fileHandler = tempHandler;
-                    m_loadThread = tempThread;
-                    m_bitmap = tempBitmap;
                     return false;
                 }
 
@@ -193,9 +182,10 @@ bool Window::Open( const wxString& path )
     return false;
 }
 
-Handler *Window::NewHandler( const wxString &path )
+std::shared_ptr<Handler> Window::NewHandler( const wxString &path )
 {
-    Handler *handler = HandlerFactory::NewHandler(path);
+    std::shared_ptr<Handler> handler;
+    handler = std::shared_ptr<Handler>(HandlerFactory::NewHandler(path));
 
     if ( handler )
     {
@@ -208,10 +198,10 @@ Handler *Window::NewHandler( const wxString &path )
     return handler;
 }
 
-Bitmap *Window::NewBitmap( size_t size, size_t limit )
+std::shared_ptr<Bitmap> Window::NewBitmap( size_t size, size_t limit )
 {
-    Bitmap *bitmap = NULL;
-    bitmap = new Bitmap( this );
+    std::shared_ptr<Bitmap> bitmap;
+    bitmap = std::make_shared<Bitmap>(Bitmap( this ));
 
     bitmap->SetLimit( size );
     bitmap->Resize( limit );

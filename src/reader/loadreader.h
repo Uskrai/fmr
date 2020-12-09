@@ -22,6 +22,7 @@
 #include <wx/string.h>
 
 #include "handler/handler.h"
+#include <memory>
 
 
 class ScrolledWindow;
@@ -37,17 +38,17 @@ class LoadThread
     public:
         LoadThread( ScrolledWindow *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = -1 ) 
             : BaseThread( parent, type, id ){};
-        void SetParameter( Bitmap *bitmap, Handler *handler, size_t start );
+        void SetParameter( std::shared_ptr<Handler> handler, std::shared_ptr<Bitmap> bitmap, size_t start );
         void SetLimit( size_t prev, size_t next );
 
         wxThreadError Run();
 
         wxCriticalSection &GetLock() { return LoadThreadLock; }
-        static void LoadImage( Bitmap *bmp, wxInputStream &stream, size_t idx );
+        static void LoadImage( std::shared_ptr<Bitmap> bmp, wxInputStream &stream, size_t idx );
     protected:
         size_t m_start;
-        Bitmap *m_bitmap = NULL;
-        Handler *m_fHandler;
+        std::shared_ptr<Bitmap> m_bitmap;
+        std::shared_ptr<Handler> m_fHandler;
         virtual ExitCode Entry();
         void CheckAndLoadImage( size_t &idx, int step );
 };
