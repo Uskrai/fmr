@@ -60,19 +60,6 @@ case "${host_os}" in
         ;;
 esac
 
-# if static and windows use -static -libgcc and -libstdc++
-if test "$enable_static" = "yes" && test "$build_windows" = "yes"; then
-	AX_CHECK_COMPILE_FLAG([-static-libstdc++], ,[
-		AC_MSG_ERROR([-static-libstdc++ flag needed])
-	], )
-	AX_CHECK_COMPILE_FLAG([-static-libgcc], ,[
-		AC_MSG_ERROR([-static-libgcc flag needed])
-	], )
-	AC_SUBST([AM_LDFLAGS],["-static-libstdc++ -static-libgcc"])
-
-fi
-
-
 AM_CONDITIONAL([SHARED], test "x$enable_shared" = "xyes")
 
 AX_CXX_COMPILE_STDCXX([17],[noext],[mandatory])
