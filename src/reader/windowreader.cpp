@@ -75,8 +75,8 @@ bool Window::Destroy()
 
 void Window::Clear()
 {
-    if ( m_loadThread ) 
-        m_loadThread->Delete();
+    Thread::Delete( m_loadThread, g_sLock );
+    Thread::Delete( m_zoomThread, g_sLock );
 }
 
 void Window::OnDraw( wxDC &dc )
@@ -168,7 +168,11 @@ bool Window::Open( const wxString& path )
                     return false;
                 }
 
-                Clear();
+                if ( m_loadThread )
+                {
+                    m_loadThread->SetId(-1);
+                    m_loadThread->Delete();
+                }
 
                 m_fileHandler = handler;
                 m_bitmap = bitmap;
@@ -286,7 +290,11 @@ void Window::OnMouseMotion( wxMouseEvent &event )
             // shown in current page
             else if ( event.GetModifiers() == wxMOD_CONTROL )
             {
-                if ( m_zoomThread ) m_zoomThread->Delete();
+                if ( m_zoomThread ) 
+                {
+                    m_zoomThread->SetId(-1);
+                    m_zoomThread->Delete();
+                }
                 m_zoomThread = new ZoomThread( this, wxTHREAD_DETACHED, ZoomThreadID );
                 m_zoomThread->SetParameter( m_fileHandler, m_bitmap, scale );
                 m_zoomThread->Run();
