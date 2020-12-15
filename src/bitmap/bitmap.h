@@ -27,7 +27,8 @@ class Bitmap
     public:
         Bitmap( wxWindow* parent );
         ~Bitmap();
-        void Add( wxImage& image, size_t idx );
+        float Prepare( wxImage& image );
+        void Add( wxImage& image, const size_t &idx, const float &scale);
 
         void SetName( size_t idx, wxString name )
             { GetAll()[idx].SetName(name); }
@@ -47,8 +48,8 @@ class Bitmap
         void Clear();
 
         void Refresh();
-        void RefreshPosition( );
-        void RefreshSize( );
+        void RefreshPosition( wxSize size );
+        wxSize GetSize( wxSize min );
 
         BITMAP_PAGES ChangePage( int step );
         bool IsImageOk( int pos );
@@ -77,7 +78,6 @@ class Bitmap
         int m_maxWidth, m_maxHeight;
 
         wxWindow* GetParent() { return m_parent; }
-        void Prepare( const wxImage& image, int pos, struct SBitmap& bmp );
         void Exit( int i );
 
         int Push( struct SBitmap& bmp );

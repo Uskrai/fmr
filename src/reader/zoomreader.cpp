@@ -77,8 +77,8 @@ wxThread::ExitCode ZoomThread::Entry()
 
                 if ( !TestDestroy() )
                 {
-                    m_bitmap->RefreshSize();
-                    m_bitmap->RefreshPosition();
+                    wxSize sz = m_bitmap->GetSize( m_parent->GetClientSize() );
+                    m_bitmap->RefreshPosition( sz );
 
                     wxQueueEvent( 
                         m_parent,

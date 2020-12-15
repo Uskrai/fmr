@@ -86,10 +86,10 @@ void Window::OnDraw( wxDC &dc )
     wxCriticalSectionLocker locker( g_sLock );
     if ( m_bitmap )
     {
-        wxVector<SBitmap*> vec = m_bitmap->Get();
+        wxVector<SBitmap*> vec = m_bitmap->Get( );
         for ( const auto& it : vec )
         {
-            if ( it->IsOk() )
+            if ( it->IsOk() && it->IsShown( GetViewStart(), GetClientSize() ) )
                 dc.DrawBitmap( it->GetBitmap() , it->GetPosition() );
         }
     }
@@ -111,8 +111,10 @@ void Window::AdjustBitmap()
 {
     if ( m_bitmap )
     {
-        m_bitmap->RefreshSize();
-        m_bitmap->RefreshPosition();
+        m_bitmap->Refresh();
+        wxSize sz = m_bitmap->GetSize( GetClientSize() );
+        m_bitmap->RefreshPosition( sz );
+        SetVirtualSize( sz );
     }
 }
 
@@ -150,22 +152,23 @@ bool Window::Open( const wxString& path )
             m_isOpened = false;
             if ( handler->Size() > 0 )
             {
-                m_config->Write("RecentlyOpened", path );
-                ReloadConfig();
                 size_t limitPrev = ConfRead("ImageMemoryLimitPrev", NO_LIMIT );
                 size_t limitNext = ConfRead("ImageMemoryLimitNext", NO_LIMIT );
                 size_t limitImage = ConfRead("ImageShowLimit", 1 );
 
                 std::shared_ptr<Bitmap> bitmap = NewBitmap( limitImage, handler->Size() );
+                wxSize sz;
                 size_t idx = handler->Index( path );
                 if ( handler->IsExist( idx ) )
                 {
                     wxCriticalSectionLocker locker(g_sLock);
                     auto stream = handler->Item(idx);
                     LoadThread::LoadImage( bitmap, *stream, idx );
-                    AdjustBitmap();
-                    AdjustScrollBar();
+                    bitmap->Refresh();
+                    sz = bitmap->GetSize( GetClientSize() );
+                    bitmap->RefreshPosition(sz);
                     Refresh();
+                    Scroll(0,0);
                 }
                 std::shared_ptr<Handler> handler = NewHandler( path );
 
@@ -180,6 +183,11 @@ bool Window::Open( const wxString& path )
                     wxLogError("Can't Create Thread");
                     return false;
                 }
+                SetVirtualSize( sz );
+                AdjustScrollBar();
+
+                m_config->Write("RecentlyOpened", path );
+                ReloadConfig();
 
                 if ( m_loadThread )
                 {

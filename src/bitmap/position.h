@@ -23,10 +23,10 @@ class wxWindow;
 
 #define CheckFlags( flag, func )    \
     if ( flags & flag )             \
-        { func( vec, flags, parent ); }
+        { func( vec, flags, size ); }
 
 #define PositionFunc( name )        \
-    void name( wxVector<SBitmap*> vec, int flags, wxWindow *parent )
+    void name( wxVector<SBitmap*> vec, int flags, wxSize size )
         
 namespace Position
 {

@@ -21,7 +21,8 @@
 
 #include <wx/window.h>
 
-SBitmap G_BITMAP(true);
+SBitmap LOADED_BITMAP(true);
+SBitmap NOTLOADED_BITMAP;
 
 Bitmap::Bitmap( wxWindow* parent )
 {
@@ -43,12 +44,17 @@ void Bitmap::Refresh()
     {
         if ( Vector::IsExist( m_item, pos ) )
         {
-            m_itemPage.at(i) = &m_item.at(pos);
+            SBitmap &bmp = m_item.at(pos);
+            
+            if ( bmp.IsOk() && bmp.IsLoaded() )
+                m_itemPage.at(i) = &m_item.at(pos);
+            else 
+                m_itemPage.at(i) = &NOTLOADED_BITMAP;
             pos++;
         }
         else 
         {
-            m_itemPage.at(i) = &G_BITMAP;
+            m_itemPage.at(i) = &LOADED_BITMAP;
         }
         i++;
     }
@@ -114,22 +120,19 @@ void Bitmap::MarkLoaded( size_t idx )
         m_item.at(idx).SetLoaded();
 }
 
-void Bitmap::Prepare( const wxImage& image, int pos, struct SBitmap& bmp )
+float Bitmap::Prepare( wxImage& image )
 {
-    bmp.SetBitmap( wxBitmap(image) );
+    return Size::Prepare( image, m_flagSize, m_parent, m_scaleParent );
 }
 
-void Bitmap::Add( wxImage& image, size_t idx )
+void Bitmap::Add( wxImage& image, const size_t &idx, const float& scale )
 {
-    float scale = Size::Prepare( image, m_flagSize, m_parent, m_scaleParent );
     struct SBitmap& bmp = m_item.at(idx);
     bmp.SetBitmap( wxBitmap( image ) );
     bmp.SetIndex( idx );
     bmp.SetScale( scale );
     
     m_maxWidth = ( bmp.GetWidth() > m_maxWidth ) ? bmp.GetWidth() : m_maxWidth;
-    
-    Refresh();
 }
 
 int Bitmap::Centered( int width )
@@ -145,12 +148,12 @@ int Bitmap::Centered( int width )
     return pos;
 }
 
-void Bitmap::RefreshPosition()
+void Bitmap::RefreshPosition( wxSize size )
 {
-    Position::Refresh( Get(), m_flagPosition, m_parent );
+    Position::Refresh( Get(), m_flagPosition, size );
 }
 
-void Bitmap::RefreshSize()
+wxSize Bitmap::GetSize( wxSize min )
 {
     wxSize size;
     for ( const auto& it : Get() )
@@ -163,7 +166,11 @@ void Bitmap::RefreshSize()
                 size.SetWidth( size.GetWidth() > it->GetWidth() ? size.GetWidth() : it->GetWidth() );
         }
     }
-    GetParent()->SetVirtualSize( size );
+    if ( size.GetHeight() < min.GetHeight() )
+        size.SetHeight( min.GetHeight() );
+    if ( size.GetWidth() < min.GetWidth() )
+        size.SetWidth( min.GetWidth() );
+    return size;
 }
 
 SBitmap *Bitmap::Get( const wxPoint &area, const wxPoint& position  )
@@ -188,7 +195,7 @@ void Bitmap::Clear()
 {
     for ( auto& it : Get() )
     {
-        it = &G_BITMAP;
+        it = &LOADED_BITMAP;
     }
     m_posFirst = 0;
     GetAll().clear();

@@ -53,12 +53,14 @@ class ScrolledWindow : public wxWindow
         // to scroll window
         void Scroll( const wxPoint &pos );
         void Scroll( int x, int y );
-        void LineUp( wxOrientation orient, int step );
-        void LineDown ( wxOrientation orient, int step );
-        // to scroll window,
         // step will be added by 
         // ViewStart according to orientation.
         void Scroll( wxOrientation orient, int step );
+        void LineUp( wxOrientation orient, int step );
+        void LineDown ( wxOrientation orient, int step );
+
+        void OnScroll( wxScrollWinEvent &event ){ }
+
 
         wxPoint GetViewStart() { return m_viewStart; }
         int GetScrollPos( wxOrientation );
@@ -96,7 +98,6 @@ class ScrolledWindow : public wxWindow
         wxDECLARE_EVENT_TABLE();
         
         void DoScroll( wxOrientation orient, int step );
-        void DoScroll( wxScrollBar *scrollbar, int step );
         void DoScrollLine( wxEventType type, wxOrientation orient, int step );
 };
 

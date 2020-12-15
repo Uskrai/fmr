@@ -27,7 +27,7 @@
 #define CalcCentered( coord, dimension )            \
         size_t dimension = 0, pos = 0, temp = 0;    \
         size_t prnt = 0;                            \
-        prnt = parent->GetVirtualSize().            \
+        prnt = size.                                \
                 Get ## dimension();                 \
         for ( const auto& it : vec )                \
             dimension += it->Get ## dimension();    \
@@ -46,7 +46,7 @@
         }                                           
 
 #define PositionFunction( name )            \
-    void Position::name( wxVector<SBitmap*> vec, int flags, wxWindow *parent )
+    void Position::name( wxVector<SBitmap*> vec, int flags, wxSize size )
 
 PositionFunction(Vertical)
 {
@@ -55,7 +55,6 @@ PositionFunction(Vertical)
 
 PositionFunction(Centered)
 {
-    wxSize size = parent->GetClientSize();
     int maxWidth = 0;
     for ( const auto& it : vec )
     {

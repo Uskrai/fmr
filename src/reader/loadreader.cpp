@@ -85,8 +85,10 @@ void LoadThread::LoadImage( std::shared_ptr<Bitmap> bmp, wxInputStream &stream, 
         {
             wxLogNull nuller;
             wxImage img(stream);
+            float scale = bmp->Prepare( img );
+
             wxCriticalSectionLocker locker( g_sLock );
-            bmp->Add(img,idx);
+            bmp->Add(img,idx,scale);
         }
 
     }
