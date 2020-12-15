@@ -50,6 +50,7 @@ enum ThreadID : int
     }
 
 wxBEGIN_EVENT_TABLE( Window, ScrolledWindow )
+    EVT_SIZE( Window::OnSize )
     EVT_MOTION( Window::OnMouseMotion )
     EVT_COMMAND( LoadThreadID, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
     EVT_COMMAND( ZoomThreadID, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
@@ -92,6 +93,18 @@ void Window::OnDraw( wxDC &dc )
                 dc.DrawBitmap( it->GetBitmap() , it->GetPosition() );
         }
     }
+}
+
+void Window::OnSize( wxSizeEvent &event )
+{
+    wxSize sz = event.GetSize();
+    if ( m_bitmap )
+        AdjustBitmap();
+    else 
+        SetVirtualSize( sz );
+    
+    Refresh();
+    event.Skip();
 }
 
 void Window::AdjustBitmap()

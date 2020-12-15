@@ -93,6 +93,7 @@ class Window : public ScrolledWindow
         void OnDraw( wxDC& dc );
         wxDECLARE_EVENT_TABLE();
 
+        void OnSize( wxSizeEvent &event );
         void OnMouseMotion( wxMouseEvent &event );
         void OnEdge( wxDirection direction );
 
