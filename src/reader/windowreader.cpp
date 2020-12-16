@@ -62,6 +62,9 @@ Window::Window( wxWindow* parent, wxWindowID id, const wxPoint & pos,
     ScrolledWindow( parent, id, wxDefaultPosition, size, style, name )
 {
     m_config = Config::Get();
+    CalcScrollStep( 
+        static_cast<ScrollingType>(ConfRead("ScrollType", int(SCROLL_BY_WINDOW) ) ) 
+    );
 };
 
 Window::~Window()
@@ -116,6 +119,26 @@ void Window::AdjustBitmap()
         m_bitmap->RefreshPosition( sz );
         SetVirtualSize( sz );
     }
+}
+
+void Window::CalcScrollStep( ScrollingType type )
+{
+    if ( type == SCROLL_BY_WINDOW )
+    {
+        int percent = ConfRead("ScrollPerKeyByWindow",30);
+        m_stepPerKey = GetClientSize().y * percent / 100 ;
+    }
+    else if ( type == SCROLL_BY_IMAGE )
+    {
+        // TODO : call this when changing virtual size
+        int percent = ConfRead("ScrollPerKeyByImage",20);
+        m_stepPerKey = GetVirtualSize().y * percent / 100;
+    }
+    else if ( type == SCROLL_BY_PIXEL )
+    {
+        m_stepPerKey = ConfRead("ScrollPerKeyByPixel",300);
+    }
+
 }
 
 void Window::DoSetNull( int id)

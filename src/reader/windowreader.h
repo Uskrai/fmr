@@ -38,6 +38,13 @@ class ZoomThread;
 namespace Reader
 {
 
+enum ScrollingType : int
+{
+    SCROLL_BY_WINDOW,
+    SCROLL_BY_IMAGE,
+    SCROLL_BY_PIXEL
+};
+
 class LoadThread;
 
 class Window : public ScrolledWindow
@@ -85,6 +92,8 @@ class Window : public ScrolledWindow
 
         template<typename T>
         T ConfRead( wxString name, T def );
+
+        void CalcScrollStep( ScrollingType type );
 
         std::shared_ptr<Handler> NewHandler( const wxString &path );
         std::shared_ptr<Bitmap> NewBitmap( size_t size, size_t limit );
