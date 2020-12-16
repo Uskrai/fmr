@@ -24,11 +24,7 @@
 wxBEGIN_EVENT_TABLE( ScrolledWindow, wxWindow )
     EVT_SIZE( ScrolledWindow::OnSize )
     EVT_PAINT( ScrolledWindow::OnPaint )
-#ifdef __WXMSW__
-    EVT_CHAR_HOOK( ScrolledWindow::OnKeyDown )
-#else
-    EVT_KEY_DOWN( ScrolledWindow::OnKeyDown )
-#endif
+    EVT_KEY_DOWN( ScrolledWindow::OnKey )
     EVT_MOUSEWHEEL( ScrolledWindow::OnMouseWheel )
     EVT_MOTION( ScrolledWindow::OnMouseMotion )
     EVT_SCROLLWIN_LINEUP( ScrolledWindow::OnScrollLine )
@@ -240,7 +236,7 @@ int ScrolledWindow::GetScrollPos( wxOrientation orient )
     return 0;
 }
 
-void ScrolledWindow::OnKeyDown( wxKeyEvent &event )
+void ScrolledWindow::OnKey( wxKeyEvent &event )
 {
     bool isUp = event.GetKeyCode() == WXK_UP;
     bool isDown = event.GetKeyCode() == WXK_DOWN;

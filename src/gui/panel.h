@@ -18,7 +18,7 @@
 #ifndef FMR_GUI_PANEL
 #define FMR_GUI_PANEL
 
-#include <wx/panel.h>
+#include <wx/window.h>
 #include "reader/window_reader.h"
 
 class wxBoxSizer;
@@ -32,7 +32,7 @@ enum WindowID
 };
 
 class Panel :
-    public wxPanel
+    public wxWindow
 {
     public: 
         Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ); 
@@ -40,8 +40,12 @@ class Panel :
         void LoadFile( wxString path );
         bool Destroy();
     private:
+        void OnKeyDown( wxKeyEvent &event );
+        void OnCharHook( wxKeyEvent &event );
         reader::Window* m_reader = NULL;
         wxBoxSizer* sizer;
+
+        wxDECLARE_EVENT_TABLE();
 
 };
 

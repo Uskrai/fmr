@@ -22,8 +22,13 @@
 namespace fmr
 {
 
+wxBEGIN_EVENT_TABLE( Panel, wxWindow )
+    EVT_KEY_DOWN( Panel::OnKeyDown )
+    EVT_CHAR_HOOK( Panel::OnCharHook )
+wxEND_EVENT_TABLE()
+
 Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
-    wxPanel( parent, id, position, size )
+    wxWindow( parent, id, position, size )
 {
     this->sizer = new wxBoxSizer( wxHORIZONTAL );
     this->m_reader = new reader::Window( this, ReaderWindow, wxDefaultPosition, GetClientSize(), 0, "Reader" );    
@@ -43,11 +48,24 @@ void Panel::LoadFile( wxString path )
     this->sizer->Add( m_reader, 1, wxALL | wxEXPAND );
 }
 
+void Panel::OnKeyDown( wxKeyEvent &event )
+{
+    printf("%d\n", event.GetKeyCode() );
+    event.Skip();
+}
+
+void Panel::OnCharHook( wxKeyEvent &event )
+{
+    OnKeyDown( event );
+    event.DoAllowNextEvent();
+    event.Skip();
+}
+
 bool Panel::Destroy()
 {
     if ( m_reader )
         m_reader->Destroy();
-    return wxPanel::Destroy();
+    return wxWindow::Destroy();
 }
 
 }; // namespace fmr

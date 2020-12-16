@@ -80,11 +80,11 @@ class ScrolledWindow : public wxWindow
 
         virtual void OnEdge( wxDirection direction ) {};
 
+        void OnKey( wxKeyEvent &event );
         wxTimer m_timer;
     private:
         void OnSize( wxSizeEvent &event );
         void OnPaint( wxPaintEvent &event );
-        void OnKeyDown( wxKeyEvent &event );
         void OnMouseWheel( wxMouseEvent &event );
         void OnMouseMotion( wxMouseEvent &event );
         void OnScrollThumbTrack( wxScrollEvent &event );
