@@ -14,33 +14,35 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef HANDLER_HANDLER_FACTORY
+#define HANDLER_HANDLER_FACTORY
 
-#include <wx/window.h>
+#include "handler/abstract_handler.h"
 
-namespace Explorer
+namespace fmr
 {
 
-class LoadThread;
+enum HandlerType
+{
+    Archive,
+    Default
+};
 
-class ImageWindow
-    : public wxWindow
+
+
+class HandlerFactory
 {
     public:
-        ImageWindow( 
-            wxWindow *parent, 
-            const wxWindowID &id = wxID_ANY,
-            const wxPoint &pos = wxDefaultPosition,
-            const wxSize &size = wxDefaultSize,
-            const long &style = 0,
-            const wxString &name = wxPanelNameStr
-        );
-    
-        void Open( const wxString &name );
-
-    protected:
-        LoadThread *m_loadThread;
-
-        
+        static bool Is( const wxString& path1, const wxString& path2);
+        static bool Find( const wxString& path );
+        static bool Find( const wxString& path, HandlerType& type );
+        static AbstractHandler* NewHandler( const wxString& path );
+        static AbstractHandler* NewHandler( const HandlerType& type );
+        AbstractHandler* NewHandler();
+        HandlerType GetType();
+    private:
+        HandlerType m_type;
 };
 
-};
+}; // namespace fmr
+#endif

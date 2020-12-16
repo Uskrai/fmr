@@ -25,6 +25,9 @@
 #include "base/config.h"
 #include <wx/event.h>
 
+namespace fmr
+{
+
 enum {
     PANEL = wxID_HIGHEST + 2001,
 };
@@ -132,3 +135,5 @@ void Frame::OnHello(wxCommandEvent& event)
 {
     // wxLogMessage("Hello world from wxWidgets!");
 }
+
+} // namespace fmr

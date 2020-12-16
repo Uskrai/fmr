@@ -15,17 +15,20 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "handler/archivehandler.h"
-#include "handler/defaulthandler.h"
-#include "base/path.h"
+#include "handler/wxarchive_handler.h"
+#include "handler/default_handler.h"
+
 #include "base/compare.h"
 
-ArchiveHandler::ArchiveHandler( const wxString& path )
+namespace fmr
+{
+
+WxArchiveHandler::WxArchiveHandler( const wxString& path )
 {
     Open( path );
 }
 
-void ArchiveHandler::Open( const wxString& path )
+void WxArchiveHandler::Open( const wxString& path )
 {
     m_name = path;
 
@@ -37,13 +40,13 @@ void ArchiveHandler::Open( const wxString& path )
     }
 }
 
-size_t ArchiveHandler::Index( const wxString& name )
+size_t WxArchiveHandler::Index( const wxString& name )
 {
     if ( name == m_name ) return 0;
     return m_files.Index(name);
 }
 
-std::shared_ptr<wxInputStream> ArchiveHandler::Item( size_t index )
+std::shared_ptr<wxInputStream> WxArchiveHandler::Item( size_t index )
 {
     auto stream = m_fstream.at(index);
 
@@ -51,7 +54,7 @@ std::shared_ptr<wxInputStream> ArchiveHandler::Item( size_t index )
     return std::shared_ptr<wxInputStream>(result);
 }
 
-wxString ArchiveHandler::GetFromCurrent( int i )
+wxString WxArchiveHandler::GetFromCurrent( int i )
 {
     if ( GetParent() )
     {
@@ -64,10 +67,10 @@ wxString ArchiveHandler::GetFromCurrent( int i )
     return wxEmptyString;
 }
 
-wxString ArchiveHandler::GetNext() { return GetFromCurrent(1); }
-wxString ArchiveHandler::GetPrev() { return GetFromCurrent(-1); }
+wxString WxArchiveHandler::GetNext() { return GetFromCurrent(1); }
+wxString WxArchiveHandler::GetPrev() { return GetFromCurrent(-1); }
 
-void ArchiveHandler::Traverse( bool GetStream)
+void WxArchiveHandler::Traverse( bool GetStream)
 {
     wxString path = m_name;
 
@@ -97,7 +100,7 @@ void ArchiveHandler::Traverse( bool GetStream)
     if ( GetStream ) TraverseStream();
 }
 
-void ArchiveHandler::TraverseStream()
+void WxArchiveHandler::TraverseStream()
 {
     wxInputStream *instream;
     const wxArchiveClassFactory* fct;
@@ -129,7 +132,7 @@ void ArchiveHandler::TraverseStream()
     delete instream;
 }
 
-bool ArchiveHandler::Find( wxString& path, const wxArchiveClassFactory*& factory, wxInputStream*& in )
+bool WxArchiveHandler::Find( wxString& path, const wxArchiveClassFactory*& factory, wxInputStream*& in )
 {
 
     factory = wxArchiveClassFactory::Find( path, wxSTREAM_FILEEXT );
@@ -162,16 +165,16 @@ bool ArchiveHandler::Find( wxString& path, const wxArchiveClassFactory*& factory
     return false;
 }
 
-bool ArchiveHandler::CanHandle( wxString path )
+bool WxArchiveHandler::CanHandle( wxString path )
 {
     wxInputStream* in;
     const wxArchiveClassFactory* factory;
-    bool result = ArchiveHandler::Find( path, factory, in );
+    bool result = WxArchiveHandler::Find( path, factory, in );
     if ( result ) delete in;
     return result;
 }
 
-void ArchiveHandler::Clear()
+void WxArchiveHandler::Clear()
 {
     m_fstream.clear();
     m_name = wxEmptyString;
@@ -179,7 +182,9 @@ void ArchiveHandler::Clear()
     m_all.clear();
 }
 
-ArchiveHandler::~ArchiveHandler()
+WxArchiveHandler::~WxArchiveHandler()
 {
     Clear();
 }
+
+}; // namespace fmr

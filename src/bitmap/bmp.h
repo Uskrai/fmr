@@ -20,6 +20,9 @@
 
 #include <wx/bitmap.h>
 
+namespace fmr
+{
+
 enum BITMAP_POSITION : int
 {
     BITMAP_VERTICAL     = 0x1,
@@ -90,5 +93,7 @@ struct SBitmap
     void SetY( int PosY );
     void SetX( int PosX );
 };
+
+}; // namespace fmr
 
 #endif

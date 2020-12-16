@@ -22,6 +22,10 @@
 #include "bitmap/bmp.h"
 
 class wxWindow;
+
+namespace fmr
+{
+
 class Bitmap
 {
     public:
@@ -84,5 +88,7 @@ class Bitmap
 
         int Centered( int width );
 };
+
+}; // namespace fmr
 
 #endif

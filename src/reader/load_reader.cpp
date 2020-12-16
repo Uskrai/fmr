@@ -15,23 +15,17 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "window/scrolledwindow.h"
-#include "image/image.h"
-#include "bitmap/bitmap.h"
+#include "reader/load_reader.h"
 
 #include <wx/log.h>
-#include "thread/thread.h"
-#include "reader/loadreader.h"
 
-bool IsExist( Handler *handler, size_t idx )
-{
-    return handler->IsExist(idx);
-}
-
-namespace Reader
+namespace fmr
 {
 
-void LoadThread::SetParameter( std::shared_ptr<Handler> handler, std::shared_ptr<Bitmap> bitmap, size_t start )
+namespace reader
+{
+
+void LoadThread::SetParameter( std::shared_ptr<AbstractHandler> handler, std::shared_ptr<Bitmap> bitmap, size_t start )
 {
     m_bitmap = bitmap;
     m_fHandler = handler;
@@ -107,4 +101,6 @@ wxThread::ExitCode LoadThread::Entry()
     return (wxThread::ExitCode)0;
 }
 
-} // namespace reader
+}; // namespace reader
+
+}; // namespace fmr

@@ -20,6 +20,9 @@
 #ifndef FMR_BASE_COMPARE
 #define FMR_BASE_COMPARE
 
+namespace fmr
+{
+
 #define StringCompareFunction( name ) int name ( const wxString& s1, const wxString& s2 )
 
 namespace Compare
@@ -33,4 +36,5 @@ namespace Compare
 
 }
 
+}; // namespace fmr
 #endif

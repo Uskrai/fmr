@@ -21,7 +21,7 @@
 
 // #include <wx/wfstream.h>
 
-#include "handler/handler.h"
+#include "handler/abstract_handler.h"
 #include "base/vector.h"
 
 #include <wx/dir.h>
@@ -32,8 +32,11 @@
 
 class wxDir;
 
+namespace fmr
+{
+
 class DefaultHandler
-    : public Handler
+    : public AbstractHandler
 {
     public:
         DefaultHandler(){}
@@ -43,7 +46,7 @@ class DefaultHandler
         void Traverse( bool GetStream = false );
         void TraverseStream();
 
-        Handler* GetParent() { return m_parent; }
+        AbstractHandler *GetParent() { return m_parent; }
         wxArrayString& GetChild() { return m_all; }
         wxString GetName() { return m_name; }
 
@@ -73,7 +76,7 @@ class DefaultHandler
         wxString m_filename;
         wxString m_parentName;
         
-        Handler* m_parent;
+        AbstractHandler* m_parent;
 
         wxArrayString m_all;
         wxArrayString m_files;
@@ -84,4 +87,5 @@ class DefaultHandler
 
 };
 
+};
 #endif

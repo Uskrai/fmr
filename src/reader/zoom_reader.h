@@ -19,15 +19,23 @@
 #define FMR_READER_ZOOMREADER
 
 #include "thread/thread.h"
+
+#include "bitmap/bmp.h"
+#include "bitmap/bitmap.h"
+#include "window/scrolledwindow.h"
+#include "handler/abstract_handler.h"
+
 #include <functional>
 #include <memory>
 
-class ScrolledWindow;
-class Handler;
-class Bitmap;
 class wxImage;
-struct SBitmap;
 
+
+namespace fmr
+{
+
+namespace reader
+{
 
 class ZoomThread :
     public BaseThread
@@ -38,13 +46,17 @@ class ZoomThread :
         ~ZoomThread();
         static void Zoom( SBitmap *bmp, wxImage &img, float scale, std::function<bool()> NotDestroyed = []()->bool { return true; } );
 
-        void SetParameter( std::shared_ptr<Handler> handler, std::shared_ptr<Bitmap> bitmap, float scale );
+        void SetParameter( std::shared_ptr<AbstractHandler> handler, std::shared_ptr<Bitmap> bitmap, float scale );
 
     protected :
         virtual ExitCode Entry();
-        std::shared_ptr<Handler> m_handler;
+        std::shared_ptr<AbstractHandler> m_handler;
         std::shared_ptr<Bitmap> m_bitmap;
         float m_scale;
 };
+
+}; // namespace reader
+
+}; // namespace fmr
 
 #endif

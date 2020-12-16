@@ -14,11 +14,10 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef HANDLER_ARCHIVEHANDLER
-#define HANDLER_ARCHIVEHANDLER
+#ifndef FMR_HANDLER_WX_ARCHIVE_HANDLER
+#define FMR_HANDLER_WX_ARCHIVE_HANDLER
 
-
-#include "handler/handler.h"
+#include "handler/abstract_handler.h"
 
 #include <wx/archive.h>
 #include <wx/wfstream.h>
@@ -26,16 +25,19 @@
 #include "base/vector.h"
 #include "base/path.h"
 
-class ArchiveHandler 
-    : public Handler
+namespace fmr
+{
+
+class WxArchiveHandler 
+    : public AbstractHandler
 {
     public:
-        ArchiveHandler() {}
-        ArchiveHandler( const wxString& path );
+        WxArchiveHandler() {}
+        WxArchiveHandler( const wxString& path );
         void Open( const wxString& path );
 
         wxString GetName() { return m_name; }
-        Handler* GetParent() { return m_parent; }
+        AbstractHandler *GetParent() { return m_parent; }
         wxString GetParentName() { return m_parentName; }
         wxArrayString& GetChild() { return m_all; }
 
@@ -55,13 +57,13 @@ class ArchiveHandler
         std::shared_ptr<wxInputStream> Item( size_t index );
         void Clear();
 
-        ~ArchiveHandler();
+        ~WxArchiveHandler();
 
         static bool CanHandle( wxString path );
     private:
         static bool Find( wxString& path, const wxArchiveClassFactory*& factory, wxInputStream*& in );
 
-        Handler* m_parent;
+        AbstractHandler *m_parent;
 
         wxString m_name;
         wxString m_parentName;
@@ -72,4 +74,5 @@ class ArchiveHandler
         wxVector<std::shared_ptr<wxMemoryOutputStream>> m_fstream;
 };
 
+}; // namespace fmr
 #endif

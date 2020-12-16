@@ -20,22 +20,25 @@
 
 
 #include "window/scrolledwindow.h"
-#include <wx/event.h>
+
 
 #include "base/range.h"
-
 #include "bitmap/bitmap.h"
+#include "thread/thread.h"
+#include "reader/load_reader.h"
+#include "reader/zoom_reader.h"
+#include "handler/abstract_handler.h"
 
+
+#include <wx/event.h>
 #include <memory>
 
-class Config;
-class Handler;
-class HandlerFactory;
-class wxScrollBar;
-class wxSizer;
-class ZoomThread;
+namespace fmr
+{
 
-namespace Reader
+class Config;
+
+namespace reader
 {
 
 enum ScrollingType : int
@@ -71,7 +74,7 @@ class Window : public ScrolledWindow
 
         void Clear();
 
-        std::shared_ptr<Handler> GetHandler() {return m_fileHandler;}
+        std::shared_ptr<AbstractHandler> GetHandler() {return m_fileHandler;}
         void DoSetNull( int id );
     protected:
         void AdjustBitmap();
@@ -80,10 +83,9 @@ class Window : public ScrolledWindow
         LoadThread *m_loadThread = NULL;
         ZoomThread *m_zoomThread = NULL;
         // pointer to handler
-        std::shared_ptr<Handler> m_fileHandler = NULL;
+        std::shared_ptr<AbstractHandler> m_fileHandler = NULL;
         //vector to bitmaps
         std::shared_ptr<Bitmap> m_bitmap = NULL;
-        HandlerFactory* m_factory = NULL;
         // pointer to config files 
         Config* m_config;
         // pointer to scrollbar
@@ -95,7 +97,7 @@ class Window : public ScrolledWindow
 
         void CalcScrollStep( ScrollingType type );
 
-        std::shared_ptr<Handler> NewHandler( const wxString &path );
+        std::shared_ptr<AbstractHandler> NewHandler( const wxString &path );
         std::shared_ptr<Bitmap> NewBitmap( size_t size, size_t limit );
 
         void Error( wxSize size ); 
@@ -111,5 +113,7 @@ class Window : public ScrolledWindow
         
 };
 
-};
+}; // namespace reader
+
+}; // namespace fmr
 #endif

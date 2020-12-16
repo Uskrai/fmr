@@ -17,6 +17,9 @@
 
 #include "bitmap/bmp.h"
 
+namespace fmr
+{
+
 SBitmap::SBitmap( bool isLoaded ) { m_isLoaded = isLoaded; }
 
 const wxBitmap& SBitmap::GetBitmap() const { return this->m_item; }
@@ -69,3 +72,6 @@ void SBitmap::SetScale( float scale ) { m_scale = scale; }
 void SBitmap::SetPosition( const wxPoint& pos ) { m_pos = pos; }
 void SBitmap::SetY( int PosY ) { m_pos.y = PosY; }
 void SBitmap::SetX( int PosX ) { m_pos.x = PosX; }
+
+
+}; // namespace fmr

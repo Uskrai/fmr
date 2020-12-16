@@ -14,22 +14,25 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef HANDLER_HANDLER
-#define HANDLER_HANDLER
+#ifndef FMR_HANDLER_ABSTRACT_HANDLER
+#define FMR_HANDLER_ABSTRACT_HANDLER
 
 #include <wx/stream.h>
 #include <memory>
 
+namespace fmr
+{
+
 inline char DUMMY_BUFFER;
-class Handler 
+class AbstractHandler 
 {
     public:     
-        Handler() {};
-        Handler( const wxString& path ) {};
-        virtual ~Handler() {};
+        AbstractHandler() {};
+        AbstractHandler( const wxString& path ) {};
+        virtual ~AbstractHandler() {};
 
         // return handler of Parent's Directory
-        virtual Handler* GetParent() = 0;
+        virtual AbstractHandler *GetParent() = 0;
 
         // return all directory and files in current dir
         virtual wxArrayString& GetChild() = 0;
@@ -59,5 +62,7 @@ class Handler
         virtual size_t Size() = 0;
         virtual void Clear() = 0;
 };
+
+}; // namespace fmr
 
 #endif

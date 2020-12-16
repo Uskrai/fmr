@@ -16,15 +16,17 @@
  */
 
 #include "gui/panel.h"
-#include "reader/windowreader.h"
 
 #include <wx/sizer.h>
+
+namespace fmr
+{
 
 Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
     wxPanel( parent, id, position, size )
 {
     this->sizer = new wxBoxSizer( wxHORIZONTAL );
-    this->m_reader = new Reader::Window( this, ReaderWindow, wxDefaultPosition, GetClientSize(), 0, "Reader" );    
+    this->m_reader = new reader::Window( this, ReaderWindow, wxDefaultPosition, GetClientSize(), 0, "Reader" );    
     if ( ! m_reader->IsTransparentBackgroundSupported() )
         m_reader->SetBackgroundColour( *wxBLACK );
     this->sizer->Add( m_reader, 1, wxALL | wxEXPAND );
@@ -47,3 +49,5 @@ bool Panel::Destroy()
         m_reader->Destroy();
     return wxPanel::Destroy();
 }
+
+}; // namespace fmr

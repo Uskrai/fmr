@@ -15,10 +15,13 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "handler/handlerfactory.h"
+#include "handler/handler_factory.h"
 
-#include "handler/defaulthandler.h"
-#include "handler/archivehandler.h"
+#include "handler/default_handler.h"
+#include "handler/wxarchive_handler.h"
+
+namespace fmr
+{
 
 HandlerType HandlerFactory::GetType()
 {
@@ -42,7 +45,7 @@ bool HandlerFactory::Find( const wxString& path )
 
 bool HandlerFactory::Find( const wxString& path, HandlerType& type )
 {
-    if ( ArchiveHandler::CanHandle(path) )
+    if ( WxArchiveHandler::CanHandle(path) )
     {
         type = Archive;
         return true;
@@ -56,7 +59,7 @@ bool HandlerFactory::Find( const wxString& path, HandlerType& type )
     return false;
 }
 
-Handler* HandlerFactory::NewHandler( const wxString& path )
+AbstractHandler* HandlerFactory::NewHandler( const wxString& path )
 {
     HandlerType type;
     if ( Find( path, type ) )
@@ -66,12 +69,12 @@ Handler* HandlerFactory::NewHandler( const wxString& path )
     return NULL;
 }
 
-Handler* HandlerFactory::NewHandler( const HandlerType& type )
+AbstractHandler* HandlerFactory::NewHandler( const HandlerType& type )
 {
     switch ( type )
     {
         case Archive:
-            return new ArchiveHandler();
+            return new WxArchiveHandler();
         case Default:
             return new DefaultHandler();
         default:
@@ -79,7 +82,9 @@ Handler* HandlerFactory::NewHandler( const HandlerType& type )
     }
 }
 
-Handler* HandlerFactory::NewHandler()
+AbstractHandler* HandlerFactory::NewHandler()
 {
     return NewHandler( m_type );
 }
+
+}; // namespace fmr

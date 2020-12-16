@@ -19,16 +19,22 @@
 #define FMR_READER_LOADTHREAD
 
 #include "thread/thread.h"
-#include <wx/string.h>
+#include "bitmap/bmp.h"
+#include "bitmap/bitmap.h"
+#include "window/scrolledwindow.h"
+#include "handler/abstract_handler.h"
 
-#include "handler/handler.h"
+#include <wx/string.h>
 #include <memory>
 
 
 class ScrolledWindow;
 class Bitmap;
 
-namespace Reader
+namespace fmr
+{
+
+namespace reader
 {
 
 inline wxCriticalSection LoadThreadLock;
@@ -38,7 +44,7 @@ class LoadThread
     public:
         LoadThread( ScrolledWindow *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = -1 ) 
             : BaseThread( parent, type, id ){};
-        void SetParameter( std::shared_ptr<Handler> handler, std::shared_ptr<Bitmap> bitmap, size_t start );
+        void SetParameter( std::shared_ptr<AbstractHandler> handler, std::shared_ptr<Bitmap> bitmap, size_t start );
         void SetLimit( size_t prev, size_t next );
 
         wxThreadError Run();
@@ -48,11 +54,12 @@ class LoadThread
     protected:
         size_t m_start;
         std::shared_ptr<Bitmap> m_bitmap;
-        std::shared_ptr<Handler> m_fHandler;
+        std::shared_ptr<AbstractHandler> m_fHandler;
         virtual ExitCode Entry();
         void CheckAndLoadImage( size_t &idx, int step );
 };
 
-};
+}; // namespace reader
 
+}; // namespace fmr
 #endif

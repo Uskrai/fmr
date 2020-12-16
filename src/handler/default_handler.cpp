@@ -17,11 +17,15 @@
  * 
  */
 
-#include "handler/defaulthandler.h"
+#include "handler/default_handler.h"
 #include <wx/wfstream.h>
 
 #include "base/path.h"
 #include "base/compare.h"
+
+namespace fmr
+{
+
 
 DefaultHandler::DefaultHandler( const wxString& path )
 {
@@ -146,3 +150,5 @@ DefaultHandler::~DefaultHandler()
 {
     Close();
 }
+
+}; // namespace fmr

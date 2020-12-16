@@ -21,6 +21,9 @@
 
 #include <wx/window.h>
 
+namespace fmr
+{
+
 SBitmap LOADED_BITMAP(true);
 SBitmap NOTLOADED_BITMAP;
 
@@ -200,3 +203,5 @@ void Bitmap::Clear()
     m_posFirst = 0;
     GetAll().clear();
 }
+
+} // namespace fmr

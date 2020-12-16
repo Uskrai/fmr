@@ -12,15 +12,15 @@ base_LTLIBRARIES = libcompare.la libpath.la
 
 handler = src/handler
 handlerdir = @abs_builddir@/handler
-handler_LTLIBRARIES = libdefaulthandler.la libarchivehandler.la libhandlerfactory.la
+handler_LTLIBRARIES = lib_default_handler.la lib_wxarchive_handler.la lib_handler_factory.la
 
-    libdefaulthandler_la_SOURCES = $(handler)/defaulthandler.cpp
+    lib_default_handler_la_SOURCES = $(handler)/default_handler.cpp
 
-    libarchivehandler_la_SOURCES = $(handler)/archivehandler.cpp
-    libarchivehandler_la_LIBADD = libdefaulthandler.la libcompare.la libpath.la
+    lib_wxarchive_handler_la_SOURCES = $(handler)/wxarchive_handler.cpp
+    lib_wxarchive_handler_la_LIBADD = lib_default_handler.la libcompare.la libpath.la
 
-    libhandlerfactory_la_SOURCES = $(handler)/handlerfactory.cpp
-    libhandlerfactory_la_LIBADD =  libdefaulthandler.la libarchivehandler.la libcompare.la libpath.la
+    lib_handler_factory_la_SOURCES = $(handler)/handler_factory.cpp
+    lib_handler_factory_la_LIBADD =  lib_default_handler.la lib_wxarchive_handler.la libcompare.la libpath.la
 
 
 
@@ -40,16 +40,16 @@ bitmap_LTLIBRARIES = libbitmap.la libsize.la libposition.la libbmp.la
 
 reader = src/reader
 readerdir = @abs_builddir@/reader   
-reader_LTLIBRARIES =  libloadreader.la libwindowreader.la libzoomreader.la
+reader_LTLIBRARIES =  lib_load_reader.la lib_window_reader.la lib_zoom_reader.la
 
-    libloadreader_la_SOURCES = $(reader)/loadreader.cpp
-    libloadreader_la_LIBADD = libthread.la 
+    lib_load_reader_la_SOURCES = $(reader)/load_reader.cpp
+    lib_load_reader_la_LIBADD = libthread.la 
 
-    libzoomreader_la_SOURCES = $(reader)/zoomreader.cpp
-    libzoomreader_la_LIBADD = libthread.la 
+    lib_zoom_reader_la_SOURCES = $(reader)/zoom_reader.cpp
+    lib_zoom_reader_la_LIBADD = libthread.la 
 
-    libwindowreader_la_SOURCES = $(reader)/windowreader.cpp
-    libwindowreader_la_LIBADD = libloadreader.la libhandlerfactory.la libscrolledwindow.la libbitmap.la libbmp.la libzoomreader.la
+    lib_window_reader_la_SOURCES = $(reader)/window_reader.cpp
+    lib_window_reader_la_LIBADD = lib_load_reader.la lib_handler_factory.la libscrolledwindow.la libbitmap.la libbmp.la lib_zoom_reader.la
 
 # make libraries for gui
 gui = src/gui
@@ -60,7 +60,7 @@ gui_LTLIBRARIES = libframe.la libpanel.la
     libframe_la_LIBADD = libpanel.la
     # make source and link for panel
     libpanel_la_SOURCES = $(gui)/panel.cpp
-    libpanel_la_LIBADD = libwindowreader.la
+    libpanel_la_LIBADD = lib_window_reader.la
 
 window = src/window
 windowdir = @abs_builddir@/window

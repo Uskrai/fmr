@@ -21,6 +21,9 @@
 #include "bitmap/bmp.h"  
 class wxWindow;
 
+namespace fmr
+{
+
 #define CheckFlags( flag, func )    \
     if ( flags & flag )             \
         { func( vec, flags, size ); }
@@ -35,5 +38,7 @@ namespace Position
     PositionFunc( Horizontal );
     PositionFunc( Refresh );
 };
+
+} // namespace fmr
 
 #endif

@@ -19,7 +19,9 @@
 #define FMR_CONFIG
 
 #include <wx/fileconf.h>
-#include <iostream>
+
+namespace fmr
+{
 
 class Config :
     private wxFileConfig
@@ -57,6 +59,8 @@ class Config :
         static Config* Get() { return Config::global; }
 
         static void Set( Config* pConfig ) { Config::global = pConfig; }
+};
+
 };
 
 #endif

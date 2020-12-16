@@ -15,14 +15,17 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reader/zoomreader.h"
+#include "reader/zoom_reader.h"
 
-#include "window/scrolledwindow.h"
-#include "handler/handler.h"
-#include "bitmap/bitmap.h"
 #include "wx/log.h"
 
-void ZoomThread::SetParameter( std::shared_ptr<Handler> handler, std::shared_ptr<Bitmap> bitmap, float scale )
+namespace fmr
+{
+
+namespace reader
+{
+
+void ZoomThread::SetParameter( std::shared_ptr<AbstractHandler> handler, std::shared_ptr<Bitmap> bitmap, float scale )
 {
     m_handler = handler;
     m_bitmap = bitmap;
@@ -95,3 +98,7 @@ wxThread::ExitCode ZoomThread::Entry()
     );
     return (wxThread::ExitCode)0;
 }
+
+}; // namespace fmr
+
+}; // namespace fmr

@@ -19,7 +19,10 @@
 #define FMR_BASE_PATH
 
 #include <wx/filename.h>
-#include <iostream>
+
+namespace fmr
+{
+
 inline namespace Path
 {
     const wxUniChar sep = wxFileName::GetPathSeparator();
@@ -39,4 +42,5 @@ inline namespace Path
 
 } // namespace Path
 
+} // namespace fmr
 #endif

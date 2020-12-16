@@ -15,22 +15,45 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_EXPLORER_LOADTHREAD
-#define FMR_EXPLORER_LOADTHREAD
+#ifndef FMR_EXPLORER_WINDOW
+#define FMR_EXPLORER_WINDOW
 
-#include "thread/thread.h"
+#include "window/scrolledwindow.h"
+#include "handler/abstract_handler.h"
+#include "handler/handler_factory.h"
+#include <vector>
 
-namespace Explorer
+class wxPanel;
+
+namespace fmr
 {
 
-class LoadThread
-    : public BaseThread
+namespace explorer
+{
+
+class Window 
+    : public ScrolledWindow
 {
     public:
+        Window( 
+            wxWindow *parent, 
+            const wxWindowID &id = wxID_ANY,
+            const wxPoint &pos = wxDefaultPosition,
+            const wxSize &size = wxDefaultSize,
+            const long &style = wxTAB_TRAVERSAL,
+            const wxString &name = wxPanelNameStr
+        );
+
         void Open( const wxString &name );
+    
+    protected:
+        AbstractHandler *m_fileHandler;
+        std::vector<wxPanel*> m_panel;
+
 };
 
 
-}; // end of namespace Explorer
+}; // namespace Explorer
 
+}; // namespace fmr
 #endif

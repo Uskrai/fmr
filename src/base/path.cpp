@@ -17,6 +17,9 @@
 
 #include "base/path.h"
 
+namespace fmr
+{
+
 namespace Path
 {
     wxString GetFullPath( wxString path )
@@ -84,3 +87,5 @@ namespace Path
     }
 
 }
+
+};

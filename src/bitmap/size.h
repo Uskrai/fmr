@@ -20,6 +20,9 @@
 #include "bitmap/bmp.h"
 #include <wx/scrolwin.h>
 
+namespace fmr
+{
+
 #define SizeFlagFilter( flag, func )    \
     if ( flag & flags )                   \
         return roundf(func( img, flags, parent, scale ) * 100) / 100;
@@ -37,4 +40,5 @@ namespace Size
     SizeFunc ( Prepare );
 };
 
+}; // namespace fmr
 #endif

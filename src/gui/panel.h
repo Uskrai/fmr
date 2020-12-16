@@ -15,16 +15,20 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef FMR_GUI_PANEL
+#define FMR_GUI_PANEL
+
 #include <wx/panel.h>
+#include "reader/window_reader.h"
 
 class wxBoxSizer;
+
+namespace fmr
+{
 
 enum WindowID
 {
     ReaderWindow = wxID_HIGHEST + 1
-};
-namespace Reader{
-    class Window;
 };
 
 class Panel :
@@ -36,7 +40,11 @@ class Panel :
         void LoadFile( wxString path );
         bool Destroy();
     private:
-        Reader::Window* m_reader = NULL;
+        reader::Window* m_reader = NULL;
         wxBoxSizer* sizer;
 
 };
+
+}; // namespace fmr
+
+#endif

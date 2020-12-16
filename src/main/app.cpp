@@ -24,7 +24,11 @@
 
 #include <wx/stdpaths.h>
 
-wxIMPLEMENT_APP(App);
+wxIMPLEMENT_APP(fmr::App);
+
+namespace fmr
+{
+
 
 bool App::OnInit()
 {
@@ -50,3 +54,5 @@ int App::OnExit()
     delete this->config;
     return 0;
 }
+
+}; // namespace fmr

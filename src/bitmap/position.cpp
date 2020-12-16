@@ -18,6 +18,9 @@
 #include "bitmap/position.h"
 #include <wx/window.h>
 
+namespace fmr
+{
+
 #define RefreshFunc( space )            \
     void Position::Refresh ## space     \
         ( wxVector<SBitmap*>& vec,      \
@@ -86,3 +89,5 @@ PositionFunction( Refresh )
 
     CheckFlags( BITMAP_CENTERED, Centered )
 }
+
+} // namespace fmr

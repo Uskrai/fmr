@@ -15,16 +15,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reader/windowreader.h"
+#include "reader/window_reader.h"
 
-#include "thread/thread.h"
-#include "reader/loadreader.h"
-#include "reader/zoomreader.h"
 #include "base/config.h"
-
 #include "bitmap/bitmap.h"
-#include "handler/handlerfactory.h"
-
+#include "handler/handler_factory.h"
 
 #include <wx/log.h>
 #include <wx/scrolbar.h>
@@ -33,7 +28,10 @@
 
 // TODO : Make separate thread controller
 
-namespace Reader
+namespace fmr
+{
+
+namespace reader
 {
 
 enum ThreadID : int
@@ -168,7 +166,7 @@ bool Window::Open( const wxString& path )
     {
         SetVirtualSize( GetClientSize() + wxSize(1,0) );
 
-        std::shared_ptr<Handler> handler = NewHandler( path );
+        std::shared_ptr<AbstractHandler> handler = NewHandler( path );
         // if handler found prepare for runing thread
         if ( handler )
         {
@@ -193,7 +191,7 @@ bool Window::Open( const wxString& path )
                     Refresh();
                     Scroll(0,0);
                 }
-                std::shared_ptr<Handler> handler = NewHandler( path );
+                std::shared_ptr<AbstractHandler> handler = NewHandler( path );
 
                 LoadThread *thread;
                 thread = new LoadThread( this, wxTHREAD_DETACHED, LoadThreadID );
@@ -230,10 +228,10 @@ bool Window::Open( const wxString& path )
     return false;
 }
 
-std::shared_ptr<Handler> Window::NewHandler( const wxString &path )
+std::shared_ptr<AbstractHandler> Window::NewHandler( const wxString &path )
 {
-    std::shared_ptr<Handler> handler;
-    handler = std::shared_ptr<Handler>(HandlerFactory::NewHandler(path));
+    std::shared_ptr<AbstractHandler> handler;
+    handler = std::shared_ptr<AbstractHandler>(HandlerFactory::NewHandler(path));
 
     if ( handler )
     {
@@ -390,4 +388,6 @@ void Window::OnEdge( wxDirection direction )
     }
 }
 
-}
+} // namespace reader
+
+}; // namespace fmr

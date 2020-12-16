@@ -14,33 +14,32 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef HANDLER_HANDLER_FACTORY
-#define HANDLER_HANDLER_FACTORY
 
-class Handler;
-class wxString;
+#include "explorer/load_explorer.h"
 
-
-enum HandlerType
+namespace fmr
 {
-    Archive,
-    Default
-};
 
-
-
-class HandlerFactory
+namespace explorer
 {
-    public:
-        static bool Is( const wxString& path1, const wxString& path2);
-        static bool Find( const wxString& path );
-        static bool Find( const wxString& path, HandlerType& type );
-        static Handler* NewHandler( const wxString& path );
-        static Handler* NewHandler( const HandlerType& type );
-        Handler* NewHandler();
-        HandlerType GetType();
-    private:
-        HandlerType m_type;
-};
 
-#endif
+void Load::Open( const wxString &name )
+{
+    AbstractHandler *handler = HandlerFactory::NewHandler(name);
+    
+    if ( handler )
+    {
+        handler->Traverse(true);
+        for ( const auto &it : handler->GetChild() )
+        {
+
+        }
+
+    }
+
+
+}
+
+}; // namespace explorer
+
+}; // namespace fmr

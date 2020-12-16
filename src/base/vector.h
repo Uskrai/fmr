@@ -21,6 +21,9 @@
 #include <wx/vector.h>
 #include <wx/arrstr.h>
 
+namespace fmr
+{
+
 namespace Vector
 {
     template< typename T>
@@ -34,5 +37,7 @@ namespace Vector
         return idx < vec.size();
     }
 };
+
+}; // namespace fmr
 
 #endif

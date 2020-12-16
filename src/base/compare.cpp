@@ -17,6 +17,8 @@
 
 #include "base/compare.h"
 
+namespace fmr
+{
 namespace Compare
 {
     bool NotEnd( const wxString& str, size_t idx ) 
@@ -86,4 +88,8 @@ namespace Compare
 
         return first.size() - second.size();
     }
-}
+
+} // namespace fmr
+
+
+} // namespace fmr

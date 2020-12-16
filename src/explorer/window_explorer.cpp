@@ -15,26 +15,35 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "explorer/imagewindow.h"
+#include "explorer/window_explorer.h"
+#include <wx/panel.h>
 
-namespace Explorer
+namespace fmr
 {
 
-ImageWindow::ImageWindow( 
+namespace explorer
+{
+
+Window::Window( 
         wxWindow *parent, 
         const wxWindowID &id,
         const wxPoint &pos,
         const wxSize &size,
         const long &style,
         const wxString &name
-)    : wxWindow( parent, id, pos, size, style, name )
+)   : ScrolledWindow( parent, id, pos, size, style, name)
 {
-
 }
 
-void ImageWindow::Open( const wxString &name )
+void Window::Open( const wxString &name )
 {
-    // m_loadThread = new
+    m_fileHandler = HandlerFactory::NewHandler( name ); 
+    m_fileHandler->Traverse();
+    for ( const auto &it : m_fileHandler->GetChild() )
+        m_panel.push_back( new wxPanel( this, wxID_ANY ));
 }
 
-}
+
+}; // namespace explorer
+
+}; // namespace fmr

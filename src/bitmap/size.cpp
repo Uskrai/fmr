@@ -17,6 +17,9 @@
 
 #include "bitmap/size.h"
 
+namespace fmr
+{
+
 #define FitOneSide( left, right)                    \
         wxSize size = parent->GetClientSize();      \
         wxSize imgsz = img.GetSize();               \
@@ -103,3 +106,5 @@ namespace Size
 
   
 };
+
+}; // namespace fmr

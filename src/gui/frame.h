@@ -19,11 +19,15 @@
 #define FMR_GUI_FRAME
 
 #include <wx/frame.h>
+#include "gui/panel.h"
+
 class wxBoxSizer;
 class wxMenuBar;
 class wxMenu;
 class wxStatusBar;
-class Panel;
+
+namespace fmr
+{
 
 enum
 {
@@ -59,5 +63,7 @@ class Frame :
         wxDECLARE_EVENT_TABLE();
 
 };
+
+}; // namespace fmr
 
 #endif

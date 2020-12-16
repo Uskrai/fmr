@@ -18,6 +18,10 @@
 #include <wx/app.h>
 
 class wxFrame;
+
+namespace fmr
+{
+    
 class Config;
 
 class App : 
@@ -30,3 +34,5 @@ class App :
         public:
             void OpenFile(wxString Path);
 };
+
+} // namespace fmr

@@ -15,29 +15,31 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "explorer/loadthread.h"
+#include "explorer/image_window_explorer.h"
 
-#include "handler/handler.h"
-#include "handler/handlerfactory.h"
-
-namespace Explorer
+namespace fmr
 {
 
-void LoadThread::Open( const wxString &name )
+namespace explorer
 {
-    Handler *handler = HandlerFactory::NewHandler(name);
-    
-    if ( handler )
-    {
-        handler->Traverse(true);
-        for ( const auto &it : handler->GetChild() )
-        {
 
-        }
-
-    }
-
+ImageWindow::ImageWindow( 
+        wxWindow *parent, 
+        const wxWindowID &id,
+        const wxPoint &pos,
+        const wxSize &size,
+        const long &style,
+        const wxString &name
+)    : wxWindow( parent, id, pos, size, style, name )
+{
 
 }
 
+void ImageWindow::Open( const wxString &name )
+{
+    // m_loadThread = new
 }
+
+}; // namespace explorer
+
+}; // namespace fmr
