@@ -19,6 +19,7 @@
 #include "handler/default_handler.h"
 
 #include "base/compare.h"
+#include <algorithm>
 
 namespace fmr
 {
@@ -43,25 +44,32 @@ void WxArchiveHandler::Open( const wxString& path )
 size_t WxArchiveHandler::Index( const wxString& name )
 {
     if ( name == m_name ) return 0;
-    return m_files.Index(name);
+
+    size_t idx = 0;
+    while( Vector::IsExist( m_all, idx ) )
+        if ( m_all.at(idx).GetName() == name )
+            return idx;
+            
+    return -1;
 }
 
-std::shared_ptr<wxInputStream> WxArchiveHandler::Item( size_t index )
+SStream &WxArchiveHandler::Item( size_t index )
 {
-    auto stream = m_fstream.at(index);
+    // auto stream = m_fstream.at(index);
 
-    wxMemoryInputStream *result = new wxMemoryInputStream( *stream );
-    return std::shared_ptr<wxInputStream>(result);
+    // wxMemoryInputStream *result = new wxMemoryInputStream( *stream );
+    // return std::shared_ptr<wxInputStream>(result);
+    return GetChild().at(index);
 }
 
 wxString WxArchiveHandler::GetFromCurrent( int i )
 {
     if ( GetParent() )
     {
-        wxArrayString& names = GetParent()->GetChild();
-        size_t idx = names.Index( Path::GetName( GetName() ));
-        if ( idx != size_t(-1) && Vector::IsExist(names, idx + i ) )
-            return GetParent()->GetName() + names.Item( idx + i );
+        auto &list_stream = GetParent()->GetChild();
+        size_t idx = GetParent()->Index( Path::GetName( GetName() ));
+        if ( idx != size_t(-1) && Vector::IsExist( GetParent()->GetChild(), idx + i ) )
+            return list_stream.at( idx + i ).GetName();
     }
 
     return wxEmptyString;
@@ -85,14 +93,11 @@ void WxArchiveHandler::Traverse( bool GetStream)
 
     while ( (entry = stream->GetNextEntry()) != NULL )
     {
-        if ( entry->IsDir() )
-        {
-            continue;
-        }
-
-        m_files.push_back( entry->GetName() );
+        m_all.push_back( SStream() );
+        m_all.back().SetName( entry->GetName() );
     }
-    m_files.Sort(Compare::Natural);
+
+    std::sort( m_all.begin(), m_all.end(), Compare::NaturalSortable );
 
     delete stream;
     delete instream;
@@ -108,24 +113,10 @@ void WxArchiveHandler::TraverseStream()
     wxArchiveEntry *entry;
     wxArchiveInputStream *archivestream = fct->NewStream( *instream );
 
-    wxArrayString files = m_files;
     while ( ( entry = archivestream->GetNextEntry()) )
-    {
-        for ( int i = 0; i < int(files.size()); i++ )
-        {
-            if ( entry->GetName() == files.Item(i) )
-            {
-                wxMemoryOutputStream *ostream = new wxMemoryOutputStream();
-                ostream->Write( *archivestream );
-                if ( ostream->GetSize() == 0 || ! ostream->IsOk())
-                    ostream->Write( &DUMMY_BUFFER, sizeof(DUMMY_BUFFER) );
-                
-                m_fstream.push_back( std::shared_ptr<wxMemoryOutputStream>(ostream) );
-                    
-                files.RemoveAt(i);
-            }
-        }
-    }
+        for ( int i = 0; i < int(m_all.size()); i++ )
+            if ( entry->GetName() == m_all.at(i).GetName() )
+                m_all.at(i).Open( archivestream );
 
     archivestream->CloseEntry();
     delete archivestream;

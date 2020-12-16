@@ -23,6 +23,7 @@
 #include "bitmap/bmp.h"
 #include "bitmap/bitmap.h"
 #include "window/scrolledwindow.h"
+#include "handler/struct_stream.h"
 #include "handler/abstract_handler.h"
 
 #include <functional>
@@ -45,6 +46,7 @@ class ZoomThread :
             : BaseThread(parent,type,id){} ;
         ~ZoomThread();
         static void Zoom( SBitmap *bmp, wxImage &img, float scale, std::function<bool()> NotDestroyed = []()->bool { return true; } );
+        static void Zoom( SBitmap *bmp, SStream &stream, float scale, std::function<bool()> NotDestroyed = []()->bool {return true;} );
 
         void SetParameter( std::shared_ptr<AbstractHandler> handler, std::shared_ptr<Bitmap> bitmap, float scale );
 

@@ -52,7 +52,6 @@ class LoadThread;
 
 class Window : public ScrolledWindow
 {
-    // void Error( wxSize size );
     public:
         Window( wxWindow *parent, wxWindowID id=wxID_ANY, 
                 const wxPoint &pos=wxDefaultPosition, 

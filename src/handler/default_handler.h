@@ -47,7 +47,7 @@ class DefaultHandler
         void TraverseStream();
 
         AbstractHandler *GetParent() { return m_parent; }
-        wxArrayString& GetChild() { return m_all; }
+        std::vector<struct SStream> &GetChild() { return m_all; }
         wxString GetName() { return m_name; }
 
         wxString GetFromCurrent( int i );
@@ -55,14 +55,14 @@ class DefaultHandler
         wxString GetPrev();
 
         wxString ItemName( size_t idx ) { return m_files.Item(idx); }
-        std::shared_ptr<wxInputStream> Item( size_t index );
+        struct SStream &Item( size_t index );
 
         size_t Index( const wxString& name );
         size_t IndexFilename( wxString path );
-        size_t Size() { return m_files.size(); }
+        size_t Size() { return m_all.size(); }
 
         bool IsExist( size_t index )
-                { return Vector::IsExist(m_fstream,index); }
+                { return Vector::IsExist(m_all,index); }
 
         void Clear();
         void Close();
@@ -70,7 +70,6 @@ class DefaultHandler
         static bool CanHandle( wxString path ) { return true; }
     private:
 
-        wxVector<std::shared_ptr<wxMemoryOutputStream>> m_fstream;
         int type;
         wxString m_name;
         wxString m_filename;
@@ -78,12 +77,13 @@ class DefaultHandler
         
         AbstractHandler* m_parent;
 
-        wxArrayString m_all;
+        std::vector<struct SStream> m_all;
         wxArrayString m_files;
         wxArrayString m_directory;
         wxDir dir;
         
         void GetAllFiles( wxDir& dir, bool& cont, wxString& filename, wxArrayString& array);
+        void GetAllFiles( wxDir &dir, bool &cont, wxString &filename, std::vector<SStream> &list_stream, bool isGetStream = false );
 
 };
 

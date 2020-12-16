@@ -23,17 +23,31 @@
 namespace fmr
 {
 
-#define StringCompareFunction( name ) int name ( const wxString& s1, const wxString& s2 )
 
+#define DeclareStringCompareFunction( name ) \
+    bool name ## Sortable ( const Sortable &s1, const Sortable &s2 );    \
+    bool name ## String ( const std::wstring &s1, const std::wstring &s2 )
+
+#define DefineStringCompareFunction( name ) \
+    bool name ## Sortable ( const Sortable &s1, const Sortable &s2 ) \
+        { return name ## String ( s1.GetString(), s2.GetString() ); }; \
+    bool name ## String ( const std::wstring &s1, const std::wstring &s2 )
+
+    
 namespace Compare
 {
     typedef wchar_t Char;
     typedef std::wstring String;
 
+    class Sortable 
+    {
+        public :
+            virtual String GetString() const = 0;
+    };
+
     bool NotEnd( const wxString& str, size_t idx );
     String GetNonZero( const String& str, size_t& idx, Char& chr );
-    StringCompareFunction( Natural );
-
+    DeclareStringCompareFunction( Natural );
 }
 
 }; // namespace fmr

@@ -25,6 +25,7 @@
 #include <wx/scrolbar.h>
 #include <wx/sizer.h>
 #include <wx/dcclient.h>
+#include <wx/wxcrtvararg.h>
 
 // TODO : Make separate thread controller
 
@@ -84,7 +85,7 @@ void Window::Clear()
 void Window::OnDraw( wxDC &dc )
 {   
     dc.SetClippingRegion( GetViewStart(), GetClientSize() );
-    wxCriticalSectionLocker locker( g_sLock );
+    // wxCriticalSectionLocker locker( g_sLock );
     if ( m_bitmap )
     {
         wxVector<SBitmap*> vec = m_bitmap->Get( );
@@ -160,7 +161,6 @@ void Window::OnThreadUpdate( wxCommandEvent &event )
 
 bool Window::Open( const wxString& path )
 {
-    wxCriticalSectionLocker locker(g_sLock);
     // open if path is not empty
     if ( path != wxEmptyString )
     {
@@ -182,9 +182,8 @@ bool Window::Open( const wxString& path )
                 size_t idx = handler->Index( path );
                 if ( handler->IsExist( idx ) )
                 {
-                    wxCriticalSectionLocker locker(g_sLock);
-                    auto stream = handler->Item(idx);
-                    LoadThread::LoadImage( bitmap, *stream, idx );
+                    LoadThread::LoadImage( bitmap, handler->Item(idx), idx );
+                    printf("owo\n");
                     bitmap->Refresh();
                     sz = bitmap->GetSize( GetClientSize() );
                     bitmap->RefreshPosition(sz);
@@ -320,8 +319,8 @@ void Window::OnMouseMotion( wxMouseEvent &event )
                     {
                         auto stream = m_fileHandler->Item( bitmap->GetIndex() );
                         wxLogNull nuller;
-                        wxImage image(*stream);
-                        ZoomThread::Zoom( bitmap, image, scale );
+
+                        ZoomThread::Zoom( bitmap, stream, scale );
                         AdjustBitmap();
                         AdjustScrollBar();
                         Refresh();

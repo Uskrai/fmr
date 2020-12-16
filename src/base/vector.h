@@ -18,8 +18,7 @@
 #ifndef VECTORHELPER
 #define VECTORHELPER
 
-#include <wx/vector.h>
-#include <wx/arrstr.h>
+#include "stddef.h"
 
 namespace fmr
 {
@@ -27,12 +26,7 @@ namespace fmr
 namespace Vector
 {
     template< typename T>
-    inline bool IsExist( const wxVector<T>& vec, size_t idx )
-    {
-        return idx < vec.size();
-    }
-
-    inline bool IsExist( const wxArrayString vec, size_t idx )
+    constexpr bool IsExist( const T& vec, size_t idx )
     {
         return idx < vec.size();
     }

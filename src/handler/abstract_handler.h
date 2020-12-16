@@ -17,13 +17,15 @@
 #ifndef FMR_HANDLER_ABSTRACT_HANDLER
 #define FMR_HANDLER_ABSTRACT_HANDLER
 
-#include <wx/stream.h>
+#include "handler/struct_stream.h"
+
 #include <memory>
+#include <vector>
+#include <wx/stream.h>
 
 namespace fmr
 {
 
-inline char DUMMY_BUFFER;
 class AbstractHandler 
 {
     public:     
@@ -35,7 +37,7 @@ class AbstractHandler
         virtual AbstractHandler *GetParent() = 0;
 
         // return all directory and files in current dir
-        virtual wxArrayString& GetChild() = 0;
+        virtual std::vector<struct SStream> &GetChild() = 0;
 
         // return opened path
         virtual wxString GetName() = 0;
@@ -50,14 +52,10 @@ class AbstractHandler
 
         virtual bool IsExist( size_t index ) = 0;
 
-        // search from files
-        // Index, ItemName, and Item should 
-        // return pos, filename, and stream respectively
+        // search from filename
         virtual size_t Index( const wxString& name ) = 0;
-
-        virtual wxString ItemName( size_t idx ) = 0;
         // return files stream;
-        virtual std::shared_ptr<wxInputStream> Item( size_t index ) = 0;
+        virtual struct SStream &Item( size_t index ) = 0;
 
         virtual size_t Size() = 0;
         virtual void Clear() = 0;

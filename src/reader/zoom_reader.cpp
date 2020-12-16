@@ -58,6 +58,16 @@ void ZoomThread::Zoom( SBitmap *bmp, wxImage &img, float  scaleadd, std::functio
     }
 }
 
+void ZoomThread::Zoom( SBitmap *bmp, SStream &stream, float scaleadd, std::function<bool()> f )
+{
+    if ( stream.IsOk() )
+    {
+        auto instream = stream.GetStream();
+        wxImage img( *instream );
+        Zoom( bmp, img, scaleadd, f );
+    }
+}
+
 wxThread::ExitCode ZoomThread::Entry()
 {
     if ( m_handler && m_bitmap )
@@ -74,9 +84,8 @@ wxThread::ExitCode ZoomThread::Entry()
             {
                 wxLogNull nuller;
                 auto stream = m_handler->Item( it->GetIndex() );
-                wxImage img( *stream );
 
-                Zoom( it, img, m_scale, TestNotDestroy);
+                Zoom( it, stream, m_scale, TestNotDestroy);
 
                 if ( !TestDestroy() )
                 {

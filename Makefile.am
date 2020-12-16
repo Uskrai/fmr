@@ -12,15 +12,18 @@ base_LTLIBRARIES = libcompare.la libpath.la
 
 handler = src/handler
 handlerdir = @abs_builddir@/handler
-handler_LTLIBRARIES = lib_default_handler.la lib_wxarchive_handler.la lib_handler_factory.la
+handler_LTLIBRARIES = lib_default_handler.la lib_wxarchive_handler.la lib_handler_factory.la lib_struct_stream.la
 
     lib_default_handler_la_SOURCES = $(handler)/default_handler.cpp
+    lib_default_handler_la_LIBADD = lib_struct_stream.la
 
     lib_wxarchive_handler_la_SOURCES = $(handler)/wxarchive_handler.cpp
     lib_wxarchive_handler_la_LIBADD = lib_default_handler.la libcompare.la libpath.la
 
     lib_handler_factory_la_SOURCES = $(handler)/handler_factory.cpp
     lib_handler_factory_la_LIBADD =  lib_default_handler.la lib_wxarchive_handler.la libcompare.la libpath.la
+
+    lib_struct_stream_la_SOURCES = $(handler)/struct_stream.cpp
 
 
 
@@ -46,7 +49,7 @@ reader_LTLIBRARIES =  lib_load_reader.la lib_window_reader.la lib_zoom_reader.la
     lib_load_reader_la_LIBADD = libthread.la 
 
     lib_zoom_reader_la_SOURCES = $(reader)/zoom_reader.cpp
-    lib_zoom_reader_la_LIBADD = libthread.la 
+    lib_zoom_reader_la_LIBADD = libthread.la lib_struct_stream.la
 
     lib_window_reader_la_SOURCES = $(reader)/window_reader.cpp
     lib_window_reader_la_LIBADD = lib_load_reader.la lib_handler_factory.la libscrolledwindow.la libbitmap.la libbmp.la lib_zoom_reader.la

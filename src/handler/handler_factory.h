@@ -28,8 +28,6 @@ enum HandlerType
     Default
 };
 
-
-
 class HandlerFactory
 {
     public:

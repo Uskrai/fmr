@@ -22,6 +22,7 @@
 #include "bitmap/bmp.h"
 #include "bitmap/bitmap.h"
 #include "window/scrolledwindow.h"
+#include "handler/struct_stream.h"
 #include "handler/abstract_handler.h"
 
 #include <wx/string.h>
@@ -51,6 +52,7 @@ class LoadThread
 
         wxCriticalSection &GetLock() { return LoadThreadLock; }
         static void LoadImage( std::shared_ptr<Bitmap> bmp, wxInputStream &stream, size_t idx );
+        static void LoadImage( std::shared_ptr<Bitmap> bmp, SStream &stream, size_t idx );
     protected:
         size_t m_start;
         std::shared_ptr<Bitmap> m_bitmap;

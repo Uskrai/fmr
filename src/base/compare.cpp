@@ -16,6 +16,7 @@
  */
 
 #include "base/compare.h"
+#include <algorithm>
 
 namespace fmr
 {
@@ -44,10 +45,14 @@ namespace Compare
         return ( tmp == "" ) ? L"0" : tmp;
     }
 
-    StringCompareFunction ( Natural )
+    DefineStringCompareFunction ( Natural )
     {
-        const String& first = s1.Lower().wx_str();
-        const String& second = s2.Lower().wx_str();
+        const String &first = wxString(s1).Lower().wx_str();
+        const String &second = wxString(s2).Lower().wx_str();
+
+        // const String& first = s1.Lower().wx_str();
+
+        // const String& second = s2.Lower().wx_str();
         // idx for first, pos for second;
         size_t idx = 0, pos = 0;
         while ( NotEnd( first, idx ) && NotEnd( second, pos ) )
@@ -63,7 +68,7 @@ namespace Compare
                 // if str1's len not equal str2's len
                 // will return whether str1 more or less than str2
                 if ( str1.size() != str2.size() ) 
-                    return str1.size() - str2.size();
+                    return str1.size() < str2.size();
 
                 size_t i = 0;
                 // only check str1 cuz the len is the same
@@ -72,21 +77,21 @@ namespace Compare
                     // will return whether str1 more or less
                     // than str2 if the value not equal
                     if ( str1[i] != str2[i] )
-                        return str1[i] - str2[i];
+                        return str1[i] < str2[i];
                     i++;
                 }
             }
             if ( fst != scnd )
             {
                 if ( idx != pos )
-                    return idx - pos;
-                return  fst - scnd;
+                    return idx < pos;
+                return  fst < scnd;
             }
 
             idx++;pos++;
         }
 
-        return first.size() - second.size();
+        return first.size() < second.size();
     }
 
 } // namespace fmr

@@ -141,7 +141,7 @@ LTLIBRARIES = $(base_LTLIBRARIES) $(bitmap_LTLIBRARIES) \
 	$(gui_LTLIBRARIES) $(handler_LTLIBRARIES) \
 	$(reader_LTLIBRARIES) $(thread_LTLIBRARIES) \
 	$(window_LTLIBRARIES)
-lib_default_handler_la_LIBADD =
+lib_default_handler_la_DEPENDENCIES = lib_struct_stream.la
 am__dirstamp = $(am__leading_dot)dirstamp
 am_lib_default_handler_la_OBJECTS = $(handler)/default_handler.lo
 lib_default_handler_la_OBJECTS = $(am_lib_default_handler_la_OBJECTS)
@@ -156,6 +156,9 @@ lib_handler_factory_la_OBJECTS = $(am_lib_handler_factory_la_OBJECTS)
 lib_load_reader_la_DEPENDENCIES = libthread.la
 am_lib_load_reader_la_OBJECTS = $(reader)/load_reader.lo
 lib_load_reader_la_OBJECTS = $(am_lib_load_reader_la_OBJECTS)
+lib_struct_stream_la_LIBADD =
+am_lib_struct_stream_la_OBJECTS = $(handler)/struct_stream.lo
+lib_struct_stream_la_OBJECTS = $(am_lib_struct_stream_la_OBJECTS)
 lib_window_reader_la_DEPENDENCIES = lib_load_reader.la \
 	lib_handler_factory.la libscrolledwindow.la libbitmap.la \
 	libbmp.la lib_zoom_reader.la
@@ -166,7 +169,7 @@ lib_wxarchive_handler_la_DEPENDENCIES = lib_default_handler.la \
 am_lib_wxarchive_handler_la_OBJECTS = $(handler)/wxarchive_handler.lo
 lib_wxarchive_handler_la_OBJECTS =  \
 	$(am_lib_wxarchive_handler_la_OBJECTS)
-lib_zoom_reader_la_DEPENDENCIES = libthread.la
+lib_zoom_reader_la_DEPENDENCIES = libthread.la lib_struct_stream.la
 am_lib_zoom_reader_la_OBJECTS = $(reader)/zoom_reader.lo
 lib_zoom_reader_la_OBJECTS = $(am_lib_zoom_reader_la_OBJECTS)
 libbitmap_la_DEPENDENCIES = libsize.la libposition.la libbmp.la
@@ -224,6 +227,7 @@ am__depfiles_remade = $(base)/$(DEPDIR)/compare.Plo \
 	$(gui)/$(DEPDIR)/panel.Plo \
 	$(handler)/$(DEPDIR)/default_handler.Plo \
 	$(handler)/$(DEPDIR)/handler_factory.Plo \
+	$(handler)/$(DEPDIR)/struct_stream.Plo \
 	$(handler)/$(DEPDIR)/wxarchive_handler.Plo \
 	$(reader)/$(DEPDIR)/load_reader.Plo \
 	$(reader)/$(DEPDIR)/window_reader.Plo \
@@ -252,7 +256,8 @@ am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(lib_default_handler_la_SOURCES) \
 	$(lib_handler_factory_la_SOURCES) \
-	$(lib_load_reader_la_SOURCES) $(lib_window_reader_la_SOURCES) \
+	$(lib_load_reader_la_SOURCES) $(lib_struct_stream_la_SOURCES) \
+	$(lib_window_reader_la_SOURCES) \
 	$(lib_wxarchive_handler_la_SOURCES) \
 	$(lib_zoom_reader_la_SOURCES) $(libbitmap_la_SOURCES) \
 	$(libbmp_la_SOURCES) $(libcompare_la_SOURCES) \
@@ -262,7 +267,8 @@ SOURCES = $(lib_default_handler_la_SOURCES) \
 	$(libthread_la_SOURCES) $(fmr_SOURCES)
 DIST_SOURCES = $(lib_default_handler_la_SOURCES) \
 	$(lib_handler_factory_la_SOURCES) \
-	$(lib_load_reader_la_SOURCES) $(lib_window_reader_la_SOURCES) \
+	$(lib_load_reader_la_SOURCES) $(lib_struct_stream_la_SOURCES) \
+	$(lib_window_reader_la_SOURCES) \
 	$(lib_wxarchive_handler_la_SOURCES) \
 	$(lib_zoom_reader_la_SOURCES) $(libbitmap_la_SOURCES) \
 	$(libbmp_la_SOURCES) $(libcompare_la_SOURCES) \
@@ -466,12 +472,14 @@ libcompare_la_SOURCES = $(base)/compare.cpp
 libpath_la_SOURCES = $(base)/path.cpp
 handler = src/handler
 handlerdir = @abs_builddir@/handler
-handler_LTLIBRARIES = lib_default_handler.la lib_wxarchive_handler.la lib_handler_factory.la
+handler_LTLIBRARIES = lib_default_handler.la lib_wxarchive_handler.la lib_handler_factory.la lib_struct_stream.la
 lib_default_handler_la_SOURCES = $(handler)/default_handler.cpp
+lib_default_handler_la_LIBADD = lib_struct_stream.la
 lib_wxarchive_handler_la_SOURCES = $(handler)/wxarchive_handler.cpp
 lib_wxarchive_handler_la_LIBADD = lib_default_handler.la libcompare.la libpath.la
 lib_handler_factory_la_SOURCES = $(handler)/handler_factory.cpp
 lib_handler_factory_la_LIBADD = lib_default_handler.la lib_wxarchive_handler.la libcompare.la libpath.la
+lib_struct_stream_la_SOURCES = $(handler)/struct_stream.cpp
 
 # make libraries for bitmap
 bitmap = src/bitmap
@@ -488,7 +496,7 @@ reader_LTLIBRARIES = lib_load_reader.la lib_window_reader.la lib_zoom_reader.la
 lib_load_reader_la_SOURCES = $(reader)/load_reader.cpp
 lib_load_reader_la_LIBADD = libthread.la 
 lib_zoom_reader_la_SOURCES = $(reader)/zoom_reader.cpp
-lib_zoom_reader_la_LIBADD = libthread.la 
+lib_zoom_reader_la_LIBADD = libthread.la lib_struct_stream.la
 lib_window_reader_la_SOURCES = $(reader)/window_reader.cpp
 lib_window_reader_la_LIBADD = lib_load_reader.la lib_handler_factory.la libscrolledwindow.la libbitmap.la libbmp.la lib_zoom_reader.la
 
@@ -868,6 +876,11 @@ $(reader)/load_reader.lo: $(reader)/$(am__dirstamp) \
 
 lib_load_reader.la: $(lib_load_reader_la_OBJECTS) $(lib_load_reader_la_DEPENDENCIES) $(EXTRA_lib_load_reader_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(readerdir) $(lib_load_reader_la_OBJECTS) $(lib_load_reader_la_LIBADD) $(LIBS)
+$(handler)/struct_stream.lo: $(handler)/$(am__dirstamp) \
+	$(handler)/$(DEPDIR)/$(am__dirstamp)
+
+lib_struct_stream.la: $(lib_struct_stream_la_OBJECTS) $(lib_struct_stream_la_DEPENDENCIES) $(EXTRA_lib_struct_stream_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(handlerdir) $(lib_struct_stream_la_OBJECTS) $(lib_struct_stream_la_LIBADD) $(LIBS)
 $(reader)/window_reader.lo: $(reader)/$(am__dirstamp) \
 	$(reader)/$(DEPDIR)/$(am__dirstamp)
 
@@ -1007,6 +1020,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(gui)/$(DEPDIR)/panel.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/default_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/handler_factory.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/struct_stream.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/wxarchive_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/load_reader.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/window_reader.Plo@am__quote@ # am--include-marker
@@ -1364,6 +1378,7 @@ distclean: distclean-am
 	-rm -f $(gui)/$(DEPDIR)/panel.Plo
 	-rm -f $(handler)/$(DEPDIR)/default_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/handler_factory.Plo
+	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
 	-rm -f $(reader)/$(DEPDIR)/load_reader.Plo
 	-rm -f $(reader)/$(DEPDIR)/window_reader.Plo
@@ -1431,6 +1446,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f $(gui)/$(DEPDIR)/panel.Plo
 	-rm -f $(handler)/$(DEPDIR)/default_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/handler_factory.Plo
+	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
 	-rm -f $(reader)/$(DEPDIR)/load_reader.Plo
 	-rm -f $(reader)/$(DEPDIR)/window_reader.Plo

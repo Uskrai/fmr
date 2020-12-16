@@ -50,10 +50,10 @@ void LoadThread::CheckAndLoadImage( size_t& idx, int step )
 {
     if ( m_fHandler->IsExist(idx) )
     {
-        std::shared_ptr<wxInputStream> stream;
+        SStream stream;
         stream = m_fHandler->Item(idx);
         if ( !TestDestroy() )
-            LoadImage( m_bitmap, *stream, idx );
+            LoadImage( m_bitmap, stream, idx );
         idx += step;
         if ( !TestDestroy() )
         {
@@ -81,11 +81,21 @@ void LoadThread::LoadImage( std::shared_ptr<Bitmap> bmp, wxInputStream &stream, 
             wxImage img(stream);
             float scale = bmp->Prepare( img );
 
-            wxCriticalSectionLocker locker( g_sLock );
+            // wxCriticalSectionLocker locker( g_sLock );
             bmp->Add(img,idx,scale);
         }
 
     }
+}
+
+void LoadThread::LoadImage( std::shared_ptr<Bitmap> bmp, SStream &stream, size_t idx )
+{
+    if ( stream.IsOk() )
+    {
+        auto instream = stream.GetStream();
+        LoadImage( bmp, *instream, idx );
+    }
+    else bmp->MarkLoaded(idx);
 }
 
 wxThread::ExitCode LoadThread::Entry()

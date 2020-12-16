@@ -18,12 +18,13 @@
 #define FMR_HANDLER_WX_ARCHIVE_HANDLER
 
 #include "handler/abstract_handler.h"
+#include "handler/struct_stream.h"
+#include "base/vector.h"
+#include "base/path.h"
 
 #include <wx/archive.h>
 #include <wx/wfstream.h>
 #include <wx/mstream.h>
-#include "base/vector.h"
-#include "base/path.h"
 
 namespace fmr
 {
@@ -39,7 +40,7 @@ class WxArchiveHandler
         wxString GetName() { return m_name; }
         AbstractHandler *GetParent() { return m_parent; }
         wxString GetParentName() { return m_parentName; }
-        wxArrayString& GetChild() { return m_all; }
+        std::vector<SStream> &GetChild() { return m_all; }
 
         wxString GetFromCurrent( int i );
         wxString GetNext();
@@ -54,7 +55,7 @@ class WxArchiveHandler
         size_t Size() { return m_fstream.size();} ;
 
         wxString ItemName( size_t idx ) { return m_files.Item(idx); }
-        std::shared_ptr<wxInputStream> Item( size_t index );
+        SStream &Item( size_t index );
         void Clear();
 
         ~WxArchiveHandler();
@@ -69,7 +70,7 @@ class WxArchiveHandler
         wxString m_parentName;
 
         wxArrayString m_files;
-        wxArrayString m_all;
+        std::vector<SStream> m_all;
 
         wxVector<std::shared_ptr<wxMemoryOutputStream>> m_fstream;
 };
