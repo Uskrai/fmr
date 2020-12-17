@@ -56,8 +56,8 @@ struct SStream
 
     bool IsOk() const;
 
-    std::wstring GetString() const { return GetName(); }
-    std::wstring GetName() const { return m_name; }
+    std::wstring GetString() const { return GetName().ToStdWstring(); }
+    wxString GetName() const { return m_name; }
     std::shared_ptr<AbstractHandler> GetHandler();
     std::shared_ptr<wxMemoryInputStream> GetStream();
     std::shared_ptr<wxMemoryOutputStream> GetOutputStream();
