@@ -23,6 +23,7 @@
 #include <wx/image.h>
 
 #include <wx/stdpaths.h>
+#include <clocale>
 
 wxIMPLEMENT_APP(fmr::App);
 
@@ -42,6 +43,7 @@ bool App::OnInit()
                         wxStandardPaths::Get().GetUserDataDir()
                     );
     Config::Set ( this->config );
+    std::locale::global( std::locale("") );
     wxRect screen = wxDisplay().GetClientArea();
     App::frame = new Frame(PACKAGE_NAME,wxPoint(0,0),wxSize(screen.GetWidth(),screen.GetHeight()),wxDEFAULT_FRAME_STYLE);
     App::frame->Maximize(true);
