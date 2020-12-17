@@ -54,6 +54,18 @@ reader_LTLIBRARIES =  lib_load_reader.la lib_window_reader.la lib_zoom_reader.la
     lib_window_reader_la_SOURCES = $(reader)/window_reader.cpp
     lib_window_reader_la_LIBADD = lib_load_reader.la lib_handler_factory.la libscrolledwindow.la libbitmap.la libbmp.la lib_zoom_reader.la
 
+explorer = src/explorer
+explorerdir = @abs_builddir@/explorer
+explorer_LTLIBRARIES = lib_window_explorer.la lib_image_window_explorer.la lib_load_explorer.la
+
+    lib_window_explorer_la_SOURCES = $(explorer)/window_explorer.cpp
+    lib_window_explorer_la_LIBADD = lib_image_window_explorer.la lib_load_explorer.la
+
+    lib_image_window_explorer_la_SOURCES = $(explorer)/image_window_explorer.cpp
+
+    lib_load_explorer_la_SOURCES = $(explorer)/load_explorer.cpp
+    lib_load_explorer_la_LIBADD = libthread.la
+
 # make libraries for gui
 gui = src/gui
 guidir = @abs_builddir@/gui
@@ -63,7 +75,7 @@ gui_LTLIBRARIES = libframe.la libpanel.la
     libframe_la_LIBADD = libpanel.la
     # make source and link for panel
     libpanel_la_SOURCES = $(gui)/panel.cpp
-    libpanel_la_LIBADD = lib_window_reader.la
+    libpanel_la_LIBADD = lib_window_reader.la lib_window_explorer.la
 
 window = src/window
 windowdir = @abs_builddir@/window

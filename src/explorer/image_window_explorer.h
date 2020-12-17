@@ -15,15 +15,18 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef FMR_EXPLORER_IMAGE_WINDOW
+#define FMR_EXPLORER_IMAGE_WINDOW
+
+#include "explorer/load_explorer.h"
 #include <wx/window.h>
+#include <memory>
 
 namespace fmr
 {
 
 namespace explorer
 {
-
-class LoadThread;
 
 class ImageWindow
     : public wxWindow
@@ -38,14 +41,14 @@ class ImageWindow
             const wxString &name = wxPanelNameStr
         );
     
-        void Open( const wxString &name );
-
+        void SetStream( SStream *stream )
+            { stream_ = stream; }
     protected:
-        LoadThread *m_loadThread;
-
-        
+        SStream *stream_;
 };
 
 }; // namespace fmr
 
 }; // namespace fmr
+
+#endif

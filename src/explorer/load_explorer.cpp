@@ -16,6 +16,8 @@
  */
 
 #include "explorer/load_explorer.h"
+#include <wx/image.h>
+#include <wx/filename.h>
 
 namespace fmr
 {
@@ -23,22 +25,50 @@ namespace fmr
 namespace explorer
 {
 
-void Load::Open( const wxString &name )
+void Load::SetParameter( std::vector<SStream> &list_stream )
 {
-    AbstractHandler *handler = HandlerFactory::NewHandler(name);
-    
-    if ( handler )
-    {
-        handler->Traverse(true);
-        for ( const auto &it : handler->GetChild() )
-        {
-
-        }
-
-    }
-
-
+    for ( auto &it : list_stream )
+        list_stream_.push_back( &it );
 }
+
+wxThread::ExitCode Load::Entry()
+{
+    for ( auto &it : list_stream_  )
+    {
+        if ( wxFileName::FileExists( it->GetName() ) && wxImage::CanRead(it->GetName()) )
+            it->Open( it->GetName() );
+        else
+            Find( it, it->GetName() );
+        
+        Update();
+    }
+    Completed();
+    return (wxThread::ExitCode)0;
+}
+
+bool Load::Find( SStream *target_stream, const wxString &folder )
+{
+    AbstractHandler *handler = HandlerFactory::NewHandler( folder );
+    handler->Traverse( true );
+    return Find( target_stream, handler->GetChild() );
+}
+
+bool Load::Find( SStream *target_stream, std::vector<SStream> &list_stream )
+{
+    for ( auto &it : list_stream )
+    {
+        if ( it.IsOk() )
+            target_stream->Open( it.GetOutputStream() );
+
+        else if ( wxFileName::Exists( it.GetName() ) )
+        {
+            if ( wxFileName::DirExists( it.GetName() ) )
+                return Find( target_stream, it.GetName() );
+        }    
+    }
+    return false;
+}
+
 
 }; // namespace explorer
 

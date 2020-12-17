@@ -32,7 +32,17 @@ class Load
     : public BaseThread
 {
     public:
-        void Open( const wxString &name );
+        Load( ScrolledWindow *parent, wxThreadKind type, int id )
+            : BaseThread( parent, type, id ){};
+        void SetParameter( std::vector<SStream> &list_stream );
+
+        // bool Find( SStream *target_stream, std::vector<SStream*> list_stream );
+        bool Find( SStream *target_stream, const wxString &folder );
+        bool Find( SStream *target_stream, std::vector<SStream> &list_stream );
+    private:
+        std::vector<SStream*> list_stream_;
+
+        ExitCode Entry();
 };
 
 

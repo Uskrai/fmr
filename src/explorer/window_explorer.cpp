@@ -16,13 +16,17 @@
  */
 
 #include "explorer/window_explorer.h"
-#include <wx/panel.h>
 
 namespace fmr
 {
 
 namespace explorer
 {
+
+wxBEGIN_EVENT_TABLE( Window, ScrolledWindow )
+        EVT_COMMAND( LoadThread, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
+        EVT_COMMAND( LoadThread, EVT_COMMAND_THREAD_COMPLETED, Window::OnThreadUpdate )
+wxEND_EVENT_TABLE()
 
 Window::Window( 
         wxWindow *parent, 
@@ -35,12 +39,42 @@ Window::Window(
 {
 }
 
+bool Window::Destroy()
+{
+    wxCriticalSection lock;
+    Thread::Delete( load_thread_, lock );
+    return wxWindow::Destroy();
+}
+
+void Window::DoSetNull( int id )
+{
+    switch ( id )
+    {
+        case LoadThread:
+            load_thread_ = NULL;
+    }
+}
+
 void Window::Open( const wxString &name )
 {
-    m_fileHandler = HandlerFactory::NewHandler( name ); 
-    m_fileHandler->Traverse();
-    for ( const auto &it : m_fileHandler->GetChild() )
-        m_panel.push_back( new wxPanel( this, wxID_ANY ));
+    handler_ = HandlerFactory::NewHandler( name ); 
+    handler_->Open( name );
+    handler_->Traverse(true);
+    list_stream_ = handler_->GetChild();
+    for ( auto &it : list_stream_ )
+    {
+        list_panel_.push_back( new ImageWindow( this, wxID_ANY ));
+        list_panel_.back()->SetStream( &it );
+    }
+
+    load_thread_ = new Load( this, wxTHREAD_DETACHED, LoadThread );
+    load_thread_->SetParameter( list_stream_ );
+    load_thread_->Run();
+}
+
+void Window::OnThreadUpdate( wxCommandEvent &event )
+{
+    DoSetNull(event.GetId());
 }
 
 

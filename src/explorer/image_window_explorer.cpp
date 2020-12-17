@@ -35,11 +35,6 @@ ImageWindow::ImageWindow(
 
 }
 
-void ImageWindow::Open( const wxString &name )
-{
-    // m_loadThread = new
-}
-
 }; // namespace explorer
 
 }; // namespace fmr

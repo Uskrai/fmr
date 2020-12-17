@@ -16,26 +16,39 @@
  */
 
 #include "gui/panel.h"
+#include "base/config.h"
+#include "handler/abstract_handler.h"
 
 #include <wx/sizer.h>
 
 namespace fmr
 {
 
-wxBEGIN_EVENT_TABLE( Panel, wxWindow )
-    EVT_KEY_DOWN( Panel::OnKeyDown )
+wxBEGIN_EVENT_TABLE( Panel, wxPanel )
     EVT_CHAR_HOOK( Panel::OnCharHook )
 wxEND_EVENT_TABLE()
 
 Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
-    wxWindow( parent, id, position, size )
+    wxPanel( parent, id, position, size )
 {
     this->sizer = new wxBoxSizer( wxHORIZONTAL );
     this->m_reader = new reader::Window( this, ReaderWindow, wxDefaultPosition, GetClientSize(), 0, "Reader" );    
     if ( ! m_reader->IsTransparentBackgroundSupported() )
         m_reader->SetBackgroundColour( *wxBLACK );
     this->sizer->Add( m_reader, 1, wxALL | wxEXPAND );
-    this->SetSizer( this->sizer );
+
+    explorer_ = new explorer::Window(
+        this,
+        ExplorerWindow,
+        wxDefaultPosition,
+        GetClientSize(),
+        0,
+        "Explorer"
+    );
+    explorer_->Hide();
+    sizer->Add( explorer_, 1, wxALL | wxEXPAND );
+
+    SetSizer( this->sizer );
 };
 
 void Panel::LoadFile( wxString path )
@@ -44,19 +57,29 @@ void Panel::LoadFile( wxString path )
 
     m_reader->Open( path );
 
-
     this->sizer->Add( m_reader, 1, wxALL | wxEXPAND );
-}
-
-void Panel::OnKeyDown( wxKeyEvent &event )
-{
-    printf("%d\n", event.GetKeyCode() );
-    event.Skip();
 }
 
 void Panel::OnCharHook( wxKeyEvent &event )
 {
-    OnKeyDown( event );
+    if ( event.GetKeyCode() == WXK_BACK )
+    {
+        wxString path;
+        if ( m_reader )
+        {
+            if ( m_reader->GetHandler() )
+                path = m_reader->GetHandler()->GetName();
+            m_reader->Hide();
+        }
+
+        if ( path == "" )
+            path = Config::Get()->Read("RecentlyOpened", wxString() );
+        
+        explorer_->Show();
+        explorer_->Open( path );
+        return;
+        
+    }
     event.DoAllowNextEvent();
     event.Skip();
 }
@@ -65,6 +88,8 @@ bool Panel::Destroy()
 {
     if ( m_reader )
         m_reader->Destroy();
+    if ( explorer_ )
+        explorer_->Destroy();
     return wxWindow::Destroy();
 }
 
