@@ -34,6 +34,27 @@ void BaseThread::SetId( int id )
     m_id = id;
 }
 
+void BaseThread::Update()
+{
+    wxQueueEvent( 
+        m_parent,
+        new wxThreadEvent(
+            EVT_COMMAND_THREAD_UPDATE,
+            m_id
+        )
+    );
+}
+
+void BaseThread::Completed()
+{
+    wxQueueEvent(
+        m_parent,
+        new wxThreadEvent(
+            EVT_COMMAND_THREAD_COMPLETED
+        )
+    );
+}
+
 BaseThread::~BaseThread()
 {
     wxCriticalSectionLocker locker(g_sLock);

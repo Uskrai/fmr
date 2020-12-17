@@ -183,7 +183,6 @@ bool Window::Open( const wxString& path )
                 if ( handler->IsExist( idx ) )
                 {
                     LoadThread::LoadImage( bitmap, handler->Item(idx), idx );
-                    printf("owo\n");
                     bitmap->Refresh();
                     sz = bitmap->GetSize( GetClientSize() );
                     bitmap->RefreshPosition(sz);

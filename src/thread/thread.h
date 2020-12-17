@@ -27,6 +27,7 @@ wxDECLARE_EVENT( EVT_COMMAND_THREAD_COMPLETED, wxThreadEvent );
 class ScrolledWindow;
 
 inline wxCriticalSection g_sLock;
+
 class BaseThread : public wxThread
 {
     public:
@@ -35,6 +36,8 @@ class BaseThread : public wxThread
 
         void SetId( int id );
     protected:
+        void Update();
+        void Completed();
         ScrolledWindow *m_parent;
         int m_id;
 };
