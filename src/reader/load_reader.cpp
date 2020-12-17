@@ -48,7 +48,7 @@ wxThreadError LoadThread::Run()
 
 void LoadThread::CheckAndLoadImage( size_t& idx, int step )
 {
-    if ( m_fHandler->IsExist(idx) )
+    if ( !TestDestroy() && m_fHandler->IsExist(idx) )
     {
         SStream stream;
         stream = m_fHandler->Item(idx);
@@ -56,15 +56,7 @@ void LoadThread::CheckAndLoadImage( size_t& idx, int step )
             LoadImage( m_bitmap, stream, idx );
         idx += step;
         if ( !TestDestroy() )
-        {
-            wxQueueEvent( 
-                m_parent,
-                new wxThreadEvent(
-                    EVT_COMMAND_THREAD_UPDATE,
-                    m_id
-                )
-            );
-        }
+            Update();
     }
 }
 
@@ -105,9 +97,12 @@ wxThread::ExitCode LoadThread::Entry()
     {
         CheckAndLoadImage( next, 1 );
         CheckAndLoadImage( prev, -1 );
+        if ( TestDestroy() )
+            break;
     }
-    if ( !TestDestroy() )
-        wxQueueEvent( m_parent, new wxThreadEvent( EVT_COMMAND_THREAD_COMPLETED, m_id ) );
+
+    if ( !TestDestroy())
+        Completed();
     return (wxThread::ExitCode)0;
 }
 

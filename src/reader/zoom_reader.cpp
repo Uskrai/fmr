@@ -88,23 +88,15 @@ wxThread::ExitCode ZoomThread::Entry()
                 Zoom( it, stream, m_scale, TestNotDestroy);
 
                 if ( !TestDestroy() )
-                {
-                    wxSize sz = m_bitmap->GetSize( m_parent->GetClientSize() );
-                    m_bitmap->RefreshPosition( sz );
-
-                    wxQueueEvent( 
-                        m_parent,
-                        new wxThreadEvent( EVT_COMMAND_THREAD_UPDATE, m_id )
-                    );
-                }
+                    Update();
             }
             it->SetScale( scale );
         }
     } // if m_handler and m_bitmap not NULL
-    wxQueueEvent(
-        m_parent,
-        new wxThreadEvent( EVT_COMMAND_THREAD_COMPLETED, m_id )
-    );
+
+    if ( !TestDestroy() )
+        Completed();
+
     return (wxThread::ExitCode)0;
 }
 
