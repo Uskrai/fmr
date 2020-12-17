@@ -49,6 +49,7 @@ struct SStream
     void Open( wxInputStream *stream );
     void Open( const wxMemoryOutputStream &stream );
     void Open( wxMemoryOutputStream *stream );
+    void Open( std::shared_ptr<wxMemoryOutputStream> stream );
 
     void SetName( const wxString &name );
     void SetName( const std::wstring &name );

@@ -83,6 +83,11 @@ void SStream::Open( const wxMemoryOutputStream &stream )
     Open( data, length );
 }
 
+void SStream::Open( std::shared_ptr<wxMemoryOutputStream> stream )
+{
+    m_stream = stream;
+}
+
 void SStream::Open( wxMemoryOutputStream *stream )
 {
     if ( stream )
