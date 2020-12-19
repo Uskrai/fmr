@@ -19,8 +19,32 @@
 
 #include "window/scrolledwindow.h"
 
+namespace fmr
+{
+
 wxDEFINE_EVENT( EVT_COMMAND_THREAD_UPDATE, wxThreadEvent );
 wxDEFINE_EVENT( EVT_COMMAND_THREAD_COMPLETED, wxThreadEvent );
+
+bool ThreadController::DeleteThread( wxThread * const &thread, wxCriticalSection &lock )
+{
+    {
+        wxCriticalSectionLocker locker(lock);
+        if ( thread )
+            if ( thread->Delete() != wxTHREAD_NO_ERROR )
+                return false;
+    }
+
+    while (1)
+    {
+        {
+            wxCriticalSectionLocker locker(lock);
+            if ( !thread ) break;
+        }
+
+        wxThread::This()->Sleep(1);
+    }
+    return true;
+}
 
 BaseThread::BaseThread( ScrolledWindow *parent, wxThreadKind type, int id )
 {
@@ -60,3 +84,5 @@ BaseThread::~BaseThread()
     wxCriticalSectionLocker locker(g_sLock);
     m_parent->DoSetNull(m_id);
 }
+
+}; // namespace fmr

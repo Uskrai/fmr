@@ -50,7 +50,8 @@ enum ScrollingType : int
 
 class LoadThread;
 
-class Window : public ScrolledWindow
+class Window : 
+    public ScrolledWindow, ThreadController
 {
     public:
         Window( wxWindow *parent, wxWindowID id=wxID_ANY, 
@@ -74,6 +75,7 @@ class Window : public ScrolledWindow
         void Clear();
 
         std::shared_ptr<AbstractHandler> GetHandler() {return m_fileHandler;}
+        wxThread *GetThread( int id );
         void DoSetNull( int id );
     protected:
         void AdjustBitmap();

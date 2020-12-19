@@ -39,7 +39,7 @@ enum ThreadID
 };
 
 class Window 
-    : public ScrolledWindow
+    : public ScrolledWindow, ThreadController
 {
     public:
         Window( 
@@ -52,6 +52,8 @@ class Window
         );
 
         void Open( const wxString &name );
+
+        wxThread *GetThread( int id );
         void DoSetNull( int id );
     
         bool Destroy();

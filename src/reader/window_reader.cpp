@@ -78,14 +78,14 @@ bool Window::Destroy()
 
 void Window::Clear()
 {
-    Thread::Delete( m_loadThread, g_sLock );
-    Thread::Delete( m_zoomThread, g_sLock );
+    DeleteThread( m_loadThread, g_sLock );
+    DeleteThread( m_zoomThread, g_sLock );
 }
 
 void Window::OnDraw( wxDC &dc )
 {   
     dc.SetClippingRegion( GetViewStart(), GetClientSize() );
-    // wxCriticalSectionLocker locker( g_sLock );
+    wxCriticalSectionLocker locker( g_sLock );
     if ( m_bitmap )
     {
         wxVector<SBitmap*> vec = m_bitmap->Get( );
@@ -111,7 +111,8 @@ void Window::OnSize( wxSizeEvent &event )
 
 void Window::AdjustBitmap()
 {
-    if ( m_bitmap )
+    wxCriticalSectionLocker locker(g_sLock);
+    if ( m_bitmap && m_loadThread )
     {
         m_bitmap->Refresh();
         wxSize sz = m_bitmap->GetSize( GetClientSize() );
@@ -138,6 +139,17 @@ void Window::CalcScrollStep( ScrollingType type )
         m_stepPerKey = ConfRead("ScrollPerKeyByPixel",300);
     }
 
+}
+
+wxThread *Window::GetThread( int id )
+{
+    switch ( id )
+    {
+        case LoadThreadID:
+            return m_loadThread;
+        case ZoomThreadID:
+            return m_zoomThread;
+    }
 }
 
 void Window::DoSetNull( int id)

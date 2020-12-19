@@ -42,8 +42,17 @@ Window::Window(
 bool Window::Destroy()
 {
     wxCriticalSection lock;
-    Thread::Delete( load_thread_, lock );
+    DeleteThread( load_thread_, lock );
     return wxWindow::Destroy();
+}
+
+wxThread *Window::GetThread( int id )
+{
+    switch ( id )
+    {
+        case LoadThread:
+            return load_thread_;
+    }
 }
 
 void Window::DoSetNull( int id )

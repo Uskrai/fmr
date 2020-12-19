@@ -28,6 +28,18 @@ class ScrolledWindow;
 
 inline wxCriticalSection g_sLock;
 
+namespace fmr
+{
+
+class ThreadController
+{
+    public:
+        virtual void DoSetNull( int id ) = 0;
+        virtual wxThread *GetThread( int id ) = 0;
+
+        bool DeleteThread( wxThread * const &thread, wxCriticalSection &lock );
+}; 
+
 class BaseThread : public wxThread
 {
     public:
@@ -42,30 +54,6 @@ class BaseThread : public wxThread
         int m_id;
 };
 
-namespace Thread
-{
-    template <typename T>
-    std::enable_if_t
-    <std::is_base_of<BaseThread, T>::value, bool> Delete( T *&thread, wxCriticalSection &lock )
-    {
-        {
-            wxCriticalSectionLocker locker(lock);
-            if ( thread )
-                if ( thread->Delete() != wxTHREAD_NO_ERROR )
-                    return false;
-        }
-
-        while (1)
-        {
-            {
-                wxCriticalSectionLocker locker(lock);
-                if ( !thread ) break;
-            }
-
-            wxThread::This()->Sleep(2);
-        }
-        return true;
-    }
-}
+}; // namespace fmr
 
 #endif
