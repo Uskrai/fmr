@@ -28,15 +28,15 @@ namespace fmr
 namespace explorer
 {
 
-class Load
+class LoadThread
     : public BaseThread
 {
     public:
-        Load( ScrolledWindow *parent, wxThreadKind type, int id )
+        LoadThread( ThreadController *parent, wxThreadKind type, int id )
             : BaseThread( parent, type, id ){};
         void SetParameter( std::vector<SStream> &list_stream );
 
-        // bool Find( SStream *target_stream, std::vector<SStream*> list_stream );
+        bool Find( SStream *target_stream, std::vector<SStream*> list_stream );
         bool Find( SStream *target_stream, const wxString &folder );
         bool Find( SStream *target_stream, std::vector<SStream> &list_stream );
     private:

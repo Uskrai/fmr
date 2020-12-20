@@ -25,13 +25,13 @@ namespace fmr
 namespace explorer
 {
 
-void Load::SetParameter( std::vector<SStream> &list_stream )
+void LoadThread::SetParameter( std::vector<SStream> &list_stream )
 {
     for ( auto &it : list_stream )
         list_stream_.push_back( &it );
 }
 
-wxThread::ExitCode Load::Entry()
+wxThread::ExitCode LoadThread::Entry()
 {
     for ( auto &it : list_stream_  )
     {
@@ -46,14 +46,14 @@ wxThread::ExitCode Load::Entry()
     return (wxThread::ExitCode)0;
 }
 
-bool Load::Find( SStream *target_stream, const wxString &folder )
+bool LoadThread::Find( SStream *target_stream, const wxString &folder )
 {
     AbstractHandler *handler = HandlerFactory::NewHandler( folder );
     handler->Traverse( true );
     return Find( target_stream, handler->GetChild() );
 }
 
-bool Load::Find( SStream *target_stream, std::vector<SStream> &list_stream )
+bool LoadThread::Find( SStream *target_stream, std::vector<SStream> &list_stream )
 {
     for ( auto &it : list_stream )
     {
