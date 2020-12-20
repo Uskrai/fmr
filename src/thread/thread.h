@@ -31,10 +31,14 @@ inline wxCriticalSection g_sLock;
 namespace fmr
 {
 
+wxDECLARE_EVENT( EVT_COMMAND_THREAD_UPDATE, wxThreadEvent );
+wxDECLARE_EVENT( EVT_COMMAND_THREAD_COMPLETED, wxThreadEvent );
+
 class ThreadController
     : public virtual wxEvtHandler
 {
     public:
+        ~ThreadController(){}
         virtual void DoSetNull( int id ) = 0;
         virtual wxThread *GetThread( int id ) = 0;
 
