@@ -26,7 +26,7 @@ namespace Path
     {
         wxFileName name(path);
         if ( path.StartsWith('.') )
-            path = wxFileName::GetCwd() + sep + path.AfterFirst(sep);
+            path = wxFileName::GetCwd() + Separator + path.AfterFirst( Separator );
     
         RemoveDirSep(path);
         if ( name.DirExists(path) )
@@ -40,10 +40,10 @@ namespace Path
     wxString GetDirName( wxString path )
     {
         path = GetFullPath(path);
-        if ( path.EndsWith(sep) )
+        if ( path.EndsWith(Separator) )
             return path;
 
-        size_t idx = path.rfind( sep );
+        size_t idx = path.rfind( Separator );
         return path.SubString( 0, idx );
     }
 
@@ -54,35 +54,35 @@ namespace Path
 
         RemoveDirSep(name);
 
-        return name.SubString(0,name.rfind(sep));
+        return name.SubString(0,name.rfind(Separator));
     }
 
-    // strip last separator
+    // strip last Separatorarator
     void RemoveDirSep( wxString& path )
     {
-        if ( path.EndsWith(sep) )
+        if ( path.EndsWith(Separator) )
             path.RemoveLast();
     }
 
-    // return Name without separator
+    // return Name without Separatorarator
     wxString GetName( wxString path )
     {
         RemoveDirSep(path);
         
-        wxString name = path.SubString( path.rfind(sep) + 1, -1 );
+        wxString name = path.SubString( path.rfind(Separator) + 1, -1 );
 
         return name;
     }
 
-    // return name with separator if directory
+    // return name with Separatorarator if directory
     wxString GetNameWithSep( wxString path )
     {
-        bool isDir = path.EndsWith(sep);
+        bool isDir = path.EndsWith(Separator);
         if( isDir )
             path.RemoveLast();
         
         wxString name = GetName(path);
-        name = isDir ? name + sep : name;
+        name = isDir ? name + Separator : name;
         return name;
     }
 

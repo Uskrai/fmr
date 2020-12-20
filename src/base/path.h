@@ -25,7 +25,7 @@ namespace fmr
 
 inline namespace Path
 {
-    const wxUniChar sep = wxFileName::GetPathSeparator();
+    const wxUniChar Separator = wxFileName::GetPathSeparator(); 
     
     // return long path
     wxString GetFullPath( wxString path );
