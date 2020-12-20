@@ -32,6 +32,7 @@ namespace fmr
 {
 
 class ThreadController
+    : public virtual wxEvtHandler
 {
     public:
         virtual void DoSetNull( int id ) = 0;
@@ -43,14 +44,14 @@ class ThreadController
 class BaseThread : public wxThread
 {
     public:
-        BaseThread( ScrolledWindow *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = -1 );
+        BaseThread( ThreadController *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = -1 );
         ~BaseThread();
 
         void SetId( int id );
     protected:
         void Update();
         void Completed();
-        ScrolledWindow *m_parent;
+        ThreadController *m_parent = NULL;
         int m_id;
 };
 

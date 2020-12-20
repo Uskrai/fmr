@@ -46,7 +46,7 @@ bool ThreadController::DeleteThread( wxThread * const &thread, wxCriticalSection
     return true;
 }
 
-BaseThread::BaseThread( ScrolledWindow *parent, wxThreadKind type, int id )
+BaseThread::BaseThread( ThreadController *parent, wxThreadKind type, int id )
 {
     m_parent = parent;
     SetId(id);
