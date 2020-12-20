@@ -149,75 +149,48 @@ void Window::OnThreadUpdate( wxCommandEvent &event )
 
 bool Window::Open( const wxString& path )
 {
-    // open if path is not empty
-    if ( path != wxEmptyString )
+    is_opened_ = false;
+    auto open_bitmap = NewBitmap();
+
+    controller_.SetBitmap( open_bitmap );
+    ControllerExit open_status = controller_.Open( path );
+
+    if ( open_status == kControllerSuccess )
     {
-        SetVirtualSize( GetClientSize() + wxSize(1,0) );
+        ReloadConfig();
+        bitmap_ = controller_.GetBitmap();
+        file_handler_ = controller_.GetHandler();
+        AdjustBitmap();
+        Scroll(0,0);
+        Refresh();
 
-        std::shared_ptr<AbstractHandler> handler = NewHandler( path );
-        // if handler found prepare for runing thread
-        if ( handler )
-        {
-            m_isOpened = false;
-            if ( handler->Size() > 0 )
-            {
-                size_t limitPrev = ConfRead("ImageMemoryLimitPrev", NO_LIMIT );
-                size_t limitNext = ConfRead("ImageMemoryLimitNext", NO_LIMIT );
-                size_t limitImage = ConfRead("ImageShowLimit", 1 );
+        AdjustScrollBar();
+        config_->Write( "RecentlyOpened", path );
+        config_->Flush();
+        is_opened_ = true;
+        return true;
+    }
 
-                std::shared_ptr<Bitmap> bitmap = NewBitmap( limitImage, handler->Size() );
-                wxSize sz;
-                size_t idx = handler->Index( path );
-                if ( handler->IsExist( idx ) )
-                {
-                    LoadThread::LoadImage( bitmap, handler->Item(idx), idx );
-                    bitmap->Refresh();
-                    sz = bitmap->GetSize( GetClientSize() );
-                    bitmap->RefreshPosition(sz);
-                    Refresh();
-                    Scroll(0,0);
-                }
-                std::shared_ptr<AbstractHandler> handler = NewHandler( path );
+    controller_.SetBitmap( bitmap_ );
+    controller_.SetHandler( file_handler_ );
 
-                LoadThread *thread;
-                thread = new LoadThread( this, wxTHREAD_DETACHED, LoadThreadID );
-                thread->SetParameter( handler, bitmap, idx );
-                thread->SetLimit( limitPrev, limitNext );
+    if ( open_status == kControllerCantRunThread )
+        wxLogError( "Can't Create a Thread");
 
-                m_isOpened = true;
-                if ( thread->Run() != wxTHREAD_NO_ERROR )
-                {
-                    wxLogError("Can't Create Thread");
-                    return false;
-                }
-                SetVirtualSize( sz );
-                AdjustScrollBar();
+    if ( open_status == kControllerFolderEmpty )
+        wxLogStatus("%ls doesn't contain any images", path );
 
-                m_config->Write("RecentlyOpened", path );
-                ReloadConfig();
+    if ( file_handler_ )
+        is_opened_ = true;
 
-                if ( m_loadThread )
-                {
-                    m_loadThread->SetId(-1);
-                    m_loadThread->Delete();
-                }
-
-                m_fileHandler = handler;
-                m_bitmap = bitmap;
-                m_loadThread = thread;
-                return true;
-            }
-            else
-                wxLogStatus( path + " doesn't have any image");
-        } // end of if m_filehandler not null
-    } // end of if path not empty
     return false;
 }
 
 std::shared_ptr<AbstractHandler> Window::NewHandler( const wxString &path )
 {
-    std::shared_ptr<AbstractHandler> handler;
-    handler = std::shared_ptr<AbstractHandler>(HandlerFactory::NewHandler(path));
+    auto handler = std::shared_ptr<AbstractHandler>(
+            HandlerFactory::NewHandler(path)
+    );
 
     if ( handler )
     {
@@ -230,15 +203,12 @@ std::shared_ptr<AbstractHandler> Window::NewHandler( const wxString &path )
     return handler;
 }
 
-std::shared_ptr<Bitmap> Window::NewBitmap( size_t size, size_t limit )
+std::shared_ptr<Bitmap> Window::NewBitmap()
 {
     std::shared_ptr<Bitmap> bitmap;
     bitmap = std::make_shared<Bitmap>(Bitmap( this ));
 
-    bitmap->SetLimit( size );
-    bitmap->Resize( limit );
-    bitmap->GetAll().assign( limit,  SBitmap() );
-
+    size_t image_show_limit = ConfRead("ImageShowLimit", 1 );
     int scale = ConfRead("ImageScaleFromOriginal", 100 );
     long pos = ConfRead("ImagePosition", long(BITMAP_VERTICAL | BITMAP_CENTERED) );
     long sizeflag = ConfRead("ImageSize", long(BITMAP_ORIGINAL) );
