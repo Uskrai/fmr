@@ -51,6 +51,8 @@ ControllerExit Controller::Open( const wxString &path )
         return kControllerHandlerNotFound;
 
     opened_handler->Traverse( true );
+    if ( opened_handler->GetParent() )
+        opened_handler->GetParent()->Traverse();
 
     if ( opened_handler->Size() == 0 )
         return kControllerFolderEmpty;
