@@ -60,7 +60,7 @@ Window::Window( wxWindow* parent, wxWindowID id, const wxPoint & pos,
                 const wxSize &size, long style, const wxString &name ) :
     ScrolledWindow( parent, id, wxDefaultPosition, size, style, name )
 {
-    m_config = Config::Get();
+    config_ = Config::Get();
     CalcScrollStep( 
         static_cast<ScrollingType>(ConfRead("ScrollType", int(SCROLL_BY_WINDOW) ) ) 
     );
@@ -86,9 +86,9 @@ void Window::OnDraw( wxDC &dc )
 {   
     dc.SetClippingRegion( GetViewStart(), GetClientSize() );
     wxCriticalSectionLocker locker( g_sLock );
-    if ( m_bitmap )
+    if ( bitmap_ )
     {
-        wxVector<SBitmap*> vec = m_bitmap->Get( );
+        wxVector<SBitmap*> vec = bitmap_->Get( );
         for ( const auto& it : vec )
         {
             if ( it->IsOk() && it->IsShown( GetViewStart(), GetClientSize() ) )
@@ -100,7 +100,7 @@ void Window::OnDraw( wxDC &dc )
 void Window::OnSize( wxSizeEvent &event )
 {
     wxSize sz = event.GetSize();
-    if ( m_bitmap )
+    if ( bitmap_ )
         AdjustBitmap();
     else 
         SetVirtualSize( sz );
@@ -112,11 +112,11 @@ void Window::OnSize( wxSizeEvent &event )
 void Window::AdjustBitmap()
 {
     wxCriticalSectionLocker locker(g_sLock);
-    if ( m_bitmap && m_loadThread )
+    if ( bitmap_ )
     {
-        m_bitmap->Refresh();
-        wxSize sz = m_bitmap->GetSize( GetClientSize() );
-        m_bitmap->RefreshPosition( sz );
+        bitmap_->Refresh();
+        wxSize sz = bitmap_->GetSize( GetClientSize() );
+        bitmap_->RefreshPosition( sz );
         SetVirtualSize( sz );
     }
 }
@@ -139,30 +139,6 @@ void Window::CalcScrollStep( ScrollingType type )
         m_stepPerKey = ConfRead("ScrollPerKeyByPixel",300);
     }
 
-}
-
-wxThread *Window::GetThread( int id )
-{
-    switch ( id )
-    {
-        case LoadThreadID:
-            return m_loadThread;
-        case ZoomThreadID:
-            return m_zoomThread;
-    }
-}
-
-void Window::DoSetNull( int id)
-{
-    switch ( id )
-    {
-        case LoadThreadID:
-            m_loadThread = NULL;
-            break;
-        case ZoomThreadID:
-            m_zoomThread = NULL;
-            break;
-    }
 }
 
 void Window::OnThreadUpdate( wxCommandEvent &event )
@@ -267,18 +243,19 @@ std::shared_ptr<Bitmap> Window::NewBitmap( size_t size, size_t limit )
     long pos = ConfRead("ImagePosition", long(BITMAP_VERTICAL | BITMAP_CENTERED) );
     long sizeflag = ConfRead("ImageSize", long(BITMAP_ORIGINAL) );
     bitmap->SetFlags(pos,sizeflag,scale);
+    bitmap->SetLimit( image_show_limit );
 
     return bitmap;
 }
 
 void Window::ReloadConfig()
 {
-    m_config->Flush();
+    config_->Flush();
 }
 
 bool Window::ChangeFolder( int step )
 {
-    wxString path = m_fileHandler->GetFromCurrent( step );
+    wxString path = file_handler_->GetFromCurrent( step );
 
     if ( path == wxEmptyString ) return false;
 
@@ -294,74 +271,74 @@ void Window::Prev() { Open( GetHandler()->GetPrev()); }
 template<typename T>
 T Window::ConfRead( wxString name, T def )
 { 
-    return m_config->Read( wxString("Reader/") + name, def ); 
+    return config_->Read( wxString("Reader/") + name, def ); 
 }
 
 static float scale = 1;
 void Window::OnMouseMotion( wxMouseEvent &event )
 {
-    static int y = -1;
-    if ( 
-        y != -1 
-        && event.Dragging() 
-        && event.MiddleIsDown() 
-        && ! event.RightIsDown() 
-        && ! event.LeftIsDown()
-        )
-    {
-        static int step;
-        step += y - event.GetPosition().y;
-        if ( step > 10 || step < -10)
-        {
-            if ( m_zoomThread ) 
-                m_zoomThread->Delete();
-            step = ( step > 0 ) ? 10 : -10;
+    // static int y = -1;
+    // if ( 
+    //     y != -1 
+    //     && event.Dragging() 
+    //     && event.MiddleIsDown() 
+    //     && ! event.RightIsDown() 
+    //     && ! event.LeftIsDown()
+    //     )
+    // {
+    //     static int step;
+    //     step += y - event.GetPosition().y;
+    //     if ( step > 10 || step < -10)
+    //     {
+    //         if ( m_zoomThread ) 
+    //             m_zoomThread->Delete();
+    //         step = ( step > 0 ) ? 10 : -10;
 
-            float scale = (float(step) / 100);
-            // if no modifier(alt,shift,ctrl) pressed
-            // only zoom pointed ( with cursor ) bitmap
-            if( ! event.HasAnyModifiers() )
-            {
-                // get bitmap that is pointed
-                auto bitmap = m_bitmap->Get( GetViewStart(), event.GetPosition() );
-                if ( bitmap )
-                {
-                    if ( m_fileHandler->IsExist( bitmap->GetIndex() ) )
-                    {
-                        auto stream = m_fileHandler->Item( bitmap->GetIndex() );
-                        wxLogNull nuller;
+    //         float scale = (float(step) / 100);
+    //         // if no modifier(alt,shift,ctrl) pressed
+    //         // only zoom pointed ( with cursor ) bitmap
+    //         if( ! event.HasAnyModifiers() )
+    //         {
+    //             // get bitmap that is pointed
+    //             auto bitmap = bitmap_->Get( GetViewStart(), event.GetPosition() );
+    //             if ( bitmap )
+    //             {
+    //                 if ( file_handler_->IsExist( bitmap->GetIndex() ) )
+    //                 {
+    //                     auto stream = file_handler_->Item( bitmap->GetIndex() );
+    //                     wxLogNull nuller;
 
-                        ZoomThread::Zoom( bitmap, stream, scale );
-                        AdjustBitmap();
-                        AdjustScrollBar();
-                        Refresh();
-                    }
-                }
-            }
-            // if Ctrl is pressed then zoom all iamges
-            // shown in current page
-            else if ( event.GetModifiers() == wxMOD_CONTROL )
-            {
-                if ( m_zoomThread ) 
-                {
-                    m_zoomThread->SetId(-1);
-                    m_zoomThread->Delete();
-                }
-                m_zoomThread = new ZoomThread( this, wxTHREAD_DETACHED, ZoomThreadID );
-                m_zoomThread->SetParameter( m_fileHandler, m_bitmap, scale );
-                m_zoomThread->Run();
-            }
+    //                     ZoomThread::Zoom( bitmap, stream, scale );
+    //                     AdjustBitmap();
+    //                     AdjustScrollBar();
+    //                     Refresh();
+    //                 }
+    //             }
+    //         }
+    //         // if Ctrl is pressed then zoom all iamges
+    //         // shown in current page
+    //         else if ( event.GetModifiers() == wxMOD_CONTROL )
+    //         {
+    //             if ( m_zoomThread ) 
+    //             {
+    //                 m_zoomThread->SetId(-1);
+    //                 m_zoomThread->Delete();
+    //             }
+    //             // m_zoomThread = new ZoomThread( this, wxTHREAD_DETACHED, ZoomThreadID );
+    //             // m_zoomThread->SetParameter( file_handler_, bitmap_, scale );
+    //             // m_zoomThread->Run();
+    //         }
 
-            step = 0;
-        }
-    }
-    y = event.GetPosition().y;
-    event.Skip();
+    //         step = 0;
+    //     }
+    // }
+    // y = event.GetPosition().y;
+    // event.Skip();
 }
 
 void Window::OnEdge( wxDirection direction )
 {
-    if ( m_bitmap && m_isOpened )
+    if ( bitmap_ && m_isOpened )
     {
         int step = 0;
         if ( direction == wxUP || direction == wxLEFT )
@@ -370,7 +347,7 @@ void Window::OnEdge( wxDirection direction )
         if ( direction == wxDOWN || direction == wxRIGHT )
             step = 1;
 
-        BITMAP_PAGES status = m_bitmap->ChangePage( step );
+        BITMAP_PAGES status = bitmap_->ChangePage( step );
         if ( status == BITMAP_ENDOFPAGE )
             if ( ChangeFolder( step ) )
                 status = BITMAP_CHANGEPAGE;
