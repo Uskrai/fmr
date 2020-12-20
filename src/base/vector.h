@@ -30,6 +30,13 @@ namespace Vector
     {
         return idx < vec.size();
     }
+
+    template<typename T>
+    void Push( const T&source, T& destination )
+    {
+        for ( const auto &it : source )
+            destination.push_back( it );
+    }
 };
 
 }; // namespace fmr
