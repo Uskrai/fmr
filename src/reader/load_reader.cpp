@@ -27,9 +27,24 @@ namespace reader
 
 void LoadThread::SetParameter( std::shared_ptr<AbstractHandler> handler, std::shared_ptr<Bitmap> bitmap, size_t start )
 {
-    m_bitmap = bitmap;
-    m_fHandler = handler;
-    m_start = start;
+    SetBitmap( bitmap );
+    SetHandler( handler );
+    SetStart( start );
+}
+
+void LoadThread::SetHandler( std::shared_ptr<AbstractHandler> handler )
+{
+    file_handler_ = handler;
+}
+
+void LoadThread::SetBitmap( std::shared_ptr<Bitmap> bitmap )
+{
+    bitmap_ = bitmap;
+}
+
+void LoadThread::SetStart( size_t start )
+{
+    load_start_ = start;
 }
 
 void LoadThread::SetLimit( size_t prev, size_t next )
@@ -40,7 +55,7 @@ wxThreadError LoadThread::Run()
 {
     // prevent thread from running if
     // m_bitmap or m_fHandler is not set
-    if ( m_bitmap == NULL ||  m_fHandler == NULL )
+    if ( GetBitmap() == NULL ||  GetHandler() == NULL )
         return wxTHREAD_MISC_ERROR;
 
     return wxThread::Run();
@@ -48,12 +63,12 @@ wxThreadError LoadThread::Run()
 
 void LoadThread::LoadImage( size_t& idx, int step )
 {
-    if ( !TestDestroy() && m_fHandler->IsExist(idx) )
+    if ( !TestDestroy() && GetHandler()->IsExist(idx) )
     {
         SStream stream;
-        stream = m_fHandler->Item(idx);
+        stream = GetHandler()->Item(idx);
         if ( !TestDestroy() )
-            LoadImage( m_bitmap, stream, idx );
+            LoadImage( GetBitmap(), stream, idx );
         idx += step;
         if ( !TestDestroy() )
             Update();
@@ -102,8 +117,8 @@ void LoadThread::LoadImage( std::shared_ptr<AbstractHandler> handler, std::share
 
 wxThread::ExitCode LoadThread::Entry()
 {
-    size_t next = m_start, prev = next - 1;
-    while( !TestDestroy() && ( m_fHandler->IsExist(next) ||  m_fHandler->IsExist(prev)  ) )
+    size_t next = load_start_, prev = next - 1;
+    while( !TestDestroy() && ( GetHandler()->IsExist(next) ||  GetHandler()->IsExist(prev)  ) )
     {
         LoadImage( next, 1 );
         LoadImage( prev, -1 );

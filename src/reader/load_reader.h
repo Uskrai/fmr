@@ -45,7 +45,13 @@ class LoadThread
         LoadThread( ThreadController *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = -1 ) 
             : BaseThread( parent, type, id ){};
         void SetParameter( std::shared_ptr<AbstractHandler> handler, std::shared_ptr<Bitmap> bitmap, size_t start );
+        void SetHandler( std::shared_ptr<AbstractHandler> handler );
+        void SetBitmap( std::shared_ptr<Bitmap> bitmap );
+        void SetStart( size_t start );
         void SetLimit( size_t prev, size_t next );
+
+        std::shared_ptr<AbstractHandler> GetHandler() { return file_handler_; }
+        std::shared_ptr<Bitmap> GetBitmap() { return bitmap_; }
 
         wxThreadError Run();
 
@@ -54,9 +60,9 @@ class LoadThread
         static void LoadImage( std::shared_ptr<Bitmap> bmp, wxInputStream &stream, size_t idx );
         static void LoadImage( std::shared_ptr<Bitmap> bmp, SStream &stream, size_t idx );
     protected:
-        size_t m_start;
-        std::shared_ptr<Bitmap> m_bitmap;
-        std::shared_ptr<AbstractHandler> m_fHandler;
+        size_t load_start_;
+        std::shared_ptr<Bitmap> bitmap_;
+        std::shared_ptr<AbstractHandler> file_handler_;
         virtual ExitCode Entry();
         void LoadImage( size_t &idx, int step );
 };
