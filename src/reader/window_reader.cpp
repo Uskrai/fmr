@@ -25,8 +25,6 @@
 #include <wx/scrolbar.h>
 #include <wx/sizer.h>
 #include <wx/dcclient.h>
-#include <wx/wxcrtvararg.h>
-
 // TODO : Make separate thread controller
 
 namespace fmr
@@ -78,8 +76,6 @@ bool Window::Destroy()
 
 void Window::Clear()
 {
-    DeleteThread( m_loadThread, g_sLock );
-    DeleteThread( m_zoomThread, g_sLock );
 }
 
 void Window::OnDraw( wxDC &dc )
@@ -303,12 +299,12 @@ void Window::OnMouseMotion( wxMouseEvent &event )
     //     }
     // }
     // y = event.GetPosition().y;
-    // event.Skip();
+    event.Skip();
 }
 
 void Window::OnEdge( wxDirection direction )
 {
-    if ( bitmap_ && m_isOpened )
+    if ( bitmap_ && is_opened_ )
     {
         int step = 0;
         if ( direction == wxUP || direction == wxLEFT )
