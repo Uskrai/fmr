@@ -52,12 +52,12 @@ wxBEGIN_EVENT_TABLE( ThreadController, wxEvtHandler )
     EVT_COMMAND( wxID_ANY, EVT_COMMAND_THREAD_COMPLETED, ThreadController::OnCompleted )
 wxEND_EVENT_TABLE()
 
-bool ThreadController::DeleteThread( wxThread * const &thread, wxCriticalSection &lock )
+bool ThreadController::DeleteThread( int thread_id, wxCriticalSection &lock )
 {
     {
         wxCriticalSectionLocker locker(lock);
-        if ( thread )
-            if ( thread->Delete() != wxTHREAD_NO_ERROR )
+        if ( GetThread(  thread_id ))
+            if ( GetThread( thread_id )->Delete() != wxTHREAD_NO_ERROR )
                 return false;
     }
 
@@ -65,10 +65,9 @@ bool ThreadController::DeleteThread( wxThread * const &thread, wxCriticalSection
     {
         {
             wxCriticalSectionLocker locker(lock);
-            if ( !thread ) break;
+            if ( ! GetThread( thread_id) ) break;
         }
-
-        wxThread::This()->Sleep(1);
+        wxThread::This()->Sleep(2);
     }
     return true;
 }
