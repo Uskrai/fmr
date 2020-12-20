@@ -55,6 +55,13 @@ ControllerExit Controller::Open( const wxString &path )
     if ( opened_handler->Size() == 0 )
         return kControllerFolderEmpty;
 
+    size_t size = opened_handler->Size();
+    bitmap_->Resize( size );
+    bitmap_->GetAll().assign(
+        size,
+        SBitmap()
+    );
+
     size_t idx = opened_handler->Index( path );
     LoadThread::LoadImage( opened_handler, bitmap_, idx );
     Update( kLoadThreadID );
