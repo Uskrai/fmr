@@ -57,6 +57,7 @@ class Controller
 {
     public:
         Controller( wxWindow *parent );
+        ~Controller();
 
         ControllerExit Open( const wxString &path );
 
@@ -72,6 +73,7 @@ class Controller
         std::shared_ptr<const Bitmap> GetBitmap() const { return bitmap_; }
         std::shared_ptr<const AbstractHandler> GetHandler() const { return handler_; }
 
+        wxEvtHandler *GetParent(){ return parent_; }
         wxThread *GetThread( int id );
         void DoSetNull( int id );
     
@@ -80,8 +82,8 @@ class Controller
         std::shared_ptr<AbstractHandler> handler_ = NULL;
         std::shared_ptr<Bitmap> bitmap_ = NULL;
 
-        LoadThread *load_thread_;
-        ZoomThread *zoom_thread_;
+        LoadThread *load_thread_ = NULL;
+        ZoomThread *zoom_thread_ = NULL;
 
 }; // class Controller
 

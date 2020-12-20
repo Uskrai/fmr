@@ -29,6 +29,12 @@ Controller::Controller( wxWindow *parent )
     parent_ = parent;
 }
 
+Controller::~Controller()
+{
+    DeleteThread( kLoadThreadID, g_sLock );
+    DeleteThread( kZoomThreadID, g_sLock );
+}
+
 ControllerExit Controller::Open( const wxString &path )
 {
     if ( path.IsEmpty() )
@@ -51,15 +57,23 @@ ControllerExit Controller::Open( const wxString &path )
 
     size_t idx = opened_handler->Index( path );
     LoadThread::LoadImage( opened_handler, bitmap_, idx );
-
-    if ( load_thread_ )
-        load_thread_->Delete();
+    Update( kLoadThreadID );
     
-    load_thread_ = new LoadThread( this, wxTHREAD_DETACHED, kLoadThreadID );
-    load_thread_->SetParameter( opened_handler, bitmap_, idx );
+    auto thread = new LoadThread( this, wxTHREAD_DETACHED, kLoadThreadID );
+    thread->SetParameter( opened_handler, bitmap_, idx );
     
-    if ( load_thread_->Run() != wxTHREAD_NO_ERROR )
+    if ( thread->Run() != wxTHREAD_NO_ERROR )
+    {
+        thread->SetId( -1 );
+        thread->Delete();
         return kControllerCantRunThread;
+    }
+
+    if( load_thread_ )
+        load_thread_->Delete();
+
+    handler_ = opened_handler;
+    load_thread_ = thread;
     
     return kControllerSuccess;
 }
@@ -69,7 +83,6 @@ void Controller::Zoom( const wxPoint &area, const wxPoint &pos, const Controller
 
 }
 
-
 void Controller::SetBitmap( std::shared_ptr<Bitmap> bitmap )
 {
     bitmap_ = bitmap;
@@ -78,6 +91,31 @@ void Controller::SetBitmap( std::shared_ptr<Bitmap> bitmap )
 void Controller::SetHandler( std::shared_ptr<AbstractHandler> handler )
 {
     handler_ = handler;
+}
+
+wxThread *Controller::GetThread( int id )
+{
+    switch ( id )
+    {
+        case kLoadThreadID:
+            return load_thread_;
+        case kZoomThreadID:
+            return zoom_thread_;
+    }
+    return NULL;
+}
+
+void Controller::DoSetNull( int id )
+{
+    switch ( id )
+    {
+        case kLoadThreadID:
+            load_thread_ = NULL;
+            break;
+        case kZoomThreadID:
+            zoom_thread_ = NULL;
+            break;
+    }
 }
 
 } // namespace reader
