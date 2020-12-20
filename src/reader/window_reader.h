@@ -76,8 +76,6 @@ class Window :
         void Clear();
 
         std::shared_ptr<AbstractHandler> GetHandler() {return file_handler_;}
-        wxThread *GetThread( int id );
-        void DoSetNull( int id );
     protected:
         void AdjustBitmap();
     private:
