@@ -43,7 +43,7 @@ bitmap_LTLIBRARIES = libbitmap.la libsize.la libposition.la libbmp.la
 
 reader = src/reader
 readerdir = @abs_builddir@/reader   
-reader_LTLIBRARIES =  lib_load_reader.la lib_window_reader.la lib_zoom_reader.la
+reader_LTLIBRARIES =  lib_load_reader.la lib_window_reader.la lib_zoom_reader.la lib_controller_reader.la
 
     lib_load_reader_la_SOURCES = $(reader)/load_reader.cpp
     lib_load_reader_la_LIBADD = libthread.la 
@@ -51,8 +51,11 @@ reader_LTLIBRARIES =  lib_load_reader.la lib_window_reader.la lib_zoom_reader.la
     lib_zoom_reader_la_SOURCES = $(reader)/zoom_reader.cpp
     lib_zoom_reader_la_LIBADD = libthread.la lib_struct_stream.la
 
+    lib_controller_reader_la_SOURCES = $(reader)/controller_reader.cpp
+    lib_controller_reader_la_LIBADD = lib_load_reader.la lib_handler_factory.la libbitmap.la lib_zoom_reader.la libthread.la
+
     lib_window_reader_la_SOURCES = $(reader)/window_reader.cpp
-    lib_window_reader_la_LIBADD = lib_load_reader.la lib_handler_factory.la libscrolledwindow.la libbitmap.la libbmp.la lib_zoom_reader.la
+    lib_window_reader_la_LIBADD = lib_load_reader.la lib_handler_factory.la libscrolledwindow.la libbitmap.la libbmp.la lib_zoom_reader.la lib_controller_reader.la libthread.la
 
 explorer = src/explorer
 explorerdir = @abs_builddir@/explorer
