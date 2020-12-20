@@ -59,10 +59,13 @@ reader_LTLIBRARIES =  lib_load_reader.la lib_window_reader.la lib_zoom_reader.la
 
 explorer = src/explorer
 explorerdir = @abs_builddir@/explorer
-explorer_LTLIBRARIES = lib_window_explorer.la lib_image_window_explorer.la lib_load_explorer.la
+explorer_LTLIBRARIES = lib_window_explorer.la lib_controller_explorer.la lib_image_window_explorer.la lib_load_explorer.la
 
     lib_window_explorer_la_SOURCES = $(explorer)/window_explorer.cpp
-    lib_window_explorer_la_LIBADD = lib_image_window_explorer.la lib_load_explorer.la
+    lib_window_explorer_la_LIBADD = lib_controller_explorer.la lib_image_window_explorer.la lib_load_explorer.la
+
+    lib_controller_explorer_la_SOURCES = $(explorer)/controller_explorer.cpp
+    lib_controller_explorer_la_LIBADD = lib_load_explorer.la
 
     lib_image_window_explorer_la_SOURCES = $(explorer)/image_window_explorer.cpp
 

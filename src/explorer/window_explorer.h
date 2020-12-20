@@ -19,11 +19,11 @@
 #define FMR_EXPLORER_WINDOW
 
 #include "window/scrolledwindow.h"
-#include "explorer/load_explorer.h"
+#include "explorer/controller_explorer.h"
 #include "explorer/image_window_explorer.h"
 #include "handler/abstract_handler.h"
-#include "handler/handler_factory.h"
-#include <vector>
+#include <wx/grid.h>
+#include <memory>
 
 class wxPanel;
 
@@ -32,11 +32,6 @@ namespace fmr
 
 namespace explorer
 {
-
-enum ThreadID
-{
-    LoadThread = wxID_HIGHEST + 40
-};
 
 class Window 
     : public wxGrid
@@ -53,13 +48,10 @@ class Window
 
         void Open( const wxString &name );
 
-        wxThread *GetThread( int id );
-        void DoSetNull( int id );
-    
         bool Destroy();
     protected:
-        AbstractHandler *handler_;
-        Load *load_thread_ = NULL;
+        Controller controller_ = Controller( this );
+        std::shared_ptr<AbstractHandler> handler_;
         std::vector<ImageWindow*> list_panel_;
         std::vector<SStream> list_stream_;
 

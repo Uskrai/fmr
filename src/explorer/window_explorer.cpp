@@ -23,9 +23,9 @@ namespace fmr
 namespace explorer
 {
 
-wxBEGIN_EVENT_TABLE( Window, ScrolledWindow )
-        EVT_COMMAND( LoadThread, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
-        EVT_COMMAND( LoadThread, EVT_COMMAND_THREAD_COMPLETED, Window::OnThreadUpdate )
+wxBEGIN_EVENT_TABLE( Window, wxGrid )
+        EVT_COMMAND( kLoadThreadID, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
+        EVT_COMMAND( kLoadThreadID, EVT_COMMAND_THREAD_COMPLETED, Window::OnThreadUpdate )
 wxEND_EVENT_TABLE()
 
 Window::Window( 
@@ -43,33 +43,18 @@ Window::Window(
 
 bool Window::Destroy()
 {
-    wxCriticalSection lock;
-    DeleteThread( load_thread_, lock );
     return wxWindow::Destroy();
-}
-
-wxThread *Window::GetThread( int id )
-{
-    switch ( id )
-    {
-        case LoadThread:
-            return load_thread_;
-    }
-}
-
-void Window::DoSetNull( int id )
-{
-    switch ( id )
-    {
-        case LoadThread:
-            load_thread_ = NULL;
-    }
 }
 
 void Window::Open( const wxString &name )
 {
-    handler_ = HandlerFactory::NewHandler( name ); 
-    handler_->Open( name );
+    if ( name.IsEmpty() )
+        return;
+
+    handler_ = std::shared_ptr<AbstractHandler>(
+        HandlerFactory::NewHandler( name )
+    );
+
     handler_->Traverse(true);
     list_stream_ = handler_->GetChild();
     for ( auto &it : list_stream_ )
@@ -78,14 +63,12 @@ void Window::Open( const wxString &name )
         list_panel_.back()->SetStream( &it );
     }
 
-    load_thread_ = new Load( this, wxTHREAD_DETACHED, LoadThread );
-    load_thread_->SetParameter( list_stream_ );
-    load_thread_->Run();
+    controller_.SetHandler( handler_ );
+    controller_.Load();
 }
 
 void Window::OnThreadUpdate( wxCommandEvent &event )
 {
-    DoSetNull(event.GetId());
 }
 
 
