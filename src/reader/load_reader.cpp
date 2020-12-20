@@ -46,7 +46,7 @@ wxThreadError LoadThread::Run()
     return wxThread::Run();
 }
 
-void LoadThread::CheckAndLoadImage( size_t& idx, int step )
+void LoadThread::LoadImage( size_t& idx, int step )
 {
     if ( !TestDestroy() && m_fHandler->IsExist(idx) )
     {
@@ -90,13 +90,23 @@ void LoadThread::LoadImage( std::shared_ptr<Bitmap> bmp, SStream &stream, size_t
     else bmp->MarkLoaded(idx);
 }
 
+void LoadThread::LoadImage( std::shared_ptr<AbstractHandler> handler, std::shared_ptr<Bitmap> bitmap, size_t idx )
+{
+    if ( ! handler->IsExist(idx) )
+        return;
+    
+    SStream &stream = handler->Item( idx );
+
+    LoadThread::LoadImage( bitmap, stream, idx );
+}
+
 wxThread::ExitCode LoadThread::Entry()
 {
     size_t next = m_start, prev = next - 1;
     while( !TestDestroy() && ( m_fHandler->IsExist(next) ||  m_fHandler->IsExist(prev)  ) )
     {
-        CheckAndLoadImage( next, 1 );
-        CheckAndLoadImage( prev, -1 );
+        LoadImage( next, 1 );
+        LoadImage( prev, -1 );
         if ( TestDestroy() )
             break;
     }

@@ -21,7 +21,6 @@
 #include "thread/thread.h"
 #include "bitmap/bmp.h"
 #include "bitmap/bitmap.h"
-#include "window/scrolledwindow.h"
 #include "handler/struct_stream.h"
 #include "handler/abstract_handler.h"
 
@@ -43,7 +42,7 @@ class LoadThread
     : public BaseThread
 {
     public:
-        LoadThread( ScrolledWindow *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = -1 ) 
+        LoadThread( ThreadController *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = -1 ) 
             : BaseThread( parent, type, id ){};
         void SetParameter( std::shared_ptr<AbstractHandler> handler, std::shared_ptr<Bitmap> bitmap, size_t start );
         void SetLimit( size_t prev, size_t next );
@@ -51,6 +50,7 @@ class LoadThread
         wxThreadError Run();
 
         wxCriticalSection &GetLock() { return LoadThreadLock; }
+        static void LoadImage( std::shared_ptr<AbstractHandler> handler, std::shared_ptr<Bitmap> bmp, size_t idx );
         static void LoadImage( std::shared_ptr<Bitmap> bmp, wxInputStream &stream, size_t idx );
         static void LoadImage( std::shared_ptr<Bitmap> bmp, SStream &stream, size_t idx );
     protected:
@@ -58,7 +58,7 @@ class LoadThread
         std::shared_ptr<Bitmap> m_bitmap;
         std::shared_ptr<AbstractHandler> m_fHandler;
         virtual ExitCode Entry();
-        void CheckAndLoadImage( size_t &idx, int step );
+        void LoadImage( size_t &idx, int step );
 };
 
 }; // namespace reader
