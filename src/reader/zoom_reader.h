@@ -42,7 +42,7 @@ class ZoomThread :
     public BaseThread
 {
     public :
-        ZoomThread( ScrolledWindow *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = wxID_ANY )
+        ZoomThread( ThreadController *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = wxID_ANY )
             : BaseThread(parent,type,id){} ;
         ~ZoomThread();
         static void Zoom( SBitmap *bmp, wxImage &img, float scale, std::function<bool()> NotDestroyed = []()->bool { return true; } );
