@@ -21,11 +21,6 @@
 #include <wx/event.h>
 #include <wx/thread.h>
 
-wxDECLARE_EVENT( EVT_COMMAND_THREAD_UPDATE, wxThreadEvent );
-wxDECLARE_EVENT( EVT_COMMAND_THREAD_COMPLETED, wxThreadEvent );
-
-class ScrolledWindow;
-
 inline wxCriticalSection g_sLock;
 
 namespace fmr
@@ -35,14 +30,24 @@ wxDECLARE_EVENT( EVT_COMMAND_THREAD_UPDATE, wxThreadEvent );
 wxDECLARE_EVENT( EVT_COMMAND_THREAD_COMPLETED, wxThreadEvent );
 
 class ThreadController
-    : public virtual wxEvtHandler
+    : public wxEvtHandler
 {
     public:
         ~ThreadController(){}
+        virtual wxEvtHandler *GetParent() = 0;
         virtual void DoSetNull( int id ) = 0;
         virtual wxThread *GetThread( int id ) = 0;
 
         bool DeleteThread( wxThread * const &thread, wxCriticalSection &lock );
+
+        void Update( int id );
+        void Completed( int id );
+
+        void OnUpdate( wxCommandEvent &event );
+        void OnCompleted( wxCommandEvent &event );
+    
+    protected:
+        wxDECLARE_EVENT_TABLE();
 }; 
 
 class BaseThread : public wxThread

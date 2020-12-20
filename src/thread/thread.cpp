@@ -25,6 +25,33 @@ namespace fmr
 wxDEFINE_EVENT( EVT_COMMAND_THREAD_UPDATE, wxThreadEvent );
 wxDEFINE_EVENT( EVT_COMMAND_THREAD_COMPLETED, wxThreadEvent );
 
+void ThreadUpdate( wxEvtHandler *dest, int thread_id )
+{
+    wxQueueEvent( 
+        dest,
+        new wxThreadEvent(
+            EVT_COMMAND_THREAD_UPDATE,
+            thread_id
+        )
+    );
+}
+
+void ThreadCompleted( wxEvtHandler *dest, int thread_id )
+{
+    wxQueueEvent(
+        dest,
+        new wxThreadEvent(
+            EVT_COMMAND_THREAD_COMPLETED,
+            thread_id
+        )
+    );
+}
+
+wxBEGIN_EVENT_TABLE( ThreadController, wxEvtHandler )
+    EVT_COMMAND( wxID_ANY, EVT_COMMAND_THREAD_UPDATE, ThreadController::OnUpdate )
+    EVT_COMMAND( wxID_ANY, EVT_COMMAND_THREAD_COMPLETED, ThreadController::OnCompleted )
+wxEND_EVENT_TABLE()
+
 bool ThreadController::DeleteThread( wxThread * const &thread, wxCriticalSection &lock )
 {
     {
@@ -46,6 +73,32 @@ bool ThreadController::DeleteThread( wxThread * const &thread, wxCriticalSection
     return true;
 }
 
+void ThreadController::Update( int id )
+{
+    ThreadUpdate(
+        GetParent(),
+        id
+    );
+}
+
+void ThreadController::Completed( int id )
+{
+    ThreadCompleted(
+        GetParent(),
+        id
+    );
+}
+
+void ThreadController::OnUpdate( wxCommandEvent &event )
+{
+    Update( event.GetId() );
+}
+
+void ThreadController::OnCompleted( wxCommandEvent &event )
+{
+    Completed( event.GetId() );
+}
+
 BaseThread::BaseThread( ThreadController *parent, wxThreadKind type, int id )
 {
     m_parent = parent;
@@ -60,24 +113,14 @@ void BaseThread::SetId( int id )
 
 void BaseThread::Update()
 {
-    wxQueueEvent( 
-        m_parent,
-        new wxThreadEvent(
-            EVT_COMMAND_THREAD_UPDATE,
-            m_id
-        )
-    );
+    ThreadUpdate( m_parent, m_id );
 }
 
 void BaseThread::Completed()
 {
-    wxQueueEvent(
-        m_parent,
-        new wxThreadEvent(
-            EVT_COMMAND_THREAD_COMPLETED
-        )
-    );
+    ThreadCompleted( m_parent, m_id );
 }
+
 
 BaseThread::~BaseThread()
 {
