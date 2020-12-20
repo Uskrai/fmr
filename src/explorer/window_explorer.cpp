@@ -35,8 +35,10 @@ Window::Window(
         const wxSize &size,
         const long &style,
         const wxString &name
-)   : ScrolledWindow( parent, id, pos, size, style, name)
+)   : wxGrid( parent, id, pos, size, style, name)
 {
+    HideColLabels();
+    HideRowLabels();
 }
 
 bool Window::Destroy()

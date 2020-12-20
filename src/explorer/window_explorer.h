@@ -39,7 +39,7 @@ enum ThreadID
 };
 
 class Window 
-    : public ScrolledWindow, ThreadController
+    : public wxGrid
 {
     public:
         Window( 
