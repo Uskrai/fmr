@@ -61,12 +61,15 @@ bool HandlerFactory::Find( const wxString& path, HandlerType& type )
 
 AbstractHandler* HandlerFactory::NewHandler( const wxString& path )
 {
+    AbstractHandler *handler = NULL;
     HandlerType type;
     if ( Find( path, type ) )
     {
-        return NewHandler( type );
+        handler = NewHandler( type );
+        handler->Open(path);
+
     }    
-    return NULL;
+    return handler;
 }
 
 AbstractHandler* HandlerFactory::NewHandler( const HandlerType& type )
