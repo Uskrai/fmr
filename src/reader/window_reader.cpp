@@ -171,13 +171,13 @@ bool Window::Open( const wxString& path )
     controller_.SetHandler( file_handler_ );
 
     if ( open_status == kControllerCantRunThread )
-        wxLogError( "Can't Create a Thread");
+        { wxLogError( "Can't Create a Thread"); }
 
     if ( open_status == kControllerFolderEmpty )
-        wxLogStatus("%ls doesn't contain any images", path );
+        { wxLogStatus("%ls doesn't contain any images", path ); }
 
     if ( file_handler_ )
-        is_opened_ = true;
+        { is_opened_ = true; }
 
     return false;
 }
@@ -240,7 +240,7 @@ T Window::ConfRead( wxString name, T def )
     return config_->Read( wxString("Reader/") + name, def ); 
 }
 
-static float scale = 1;
+// static float scale = 1;
 void Window::OnMouseMotion( wxMouseEvent &event )
 {
     // static int y = -1;

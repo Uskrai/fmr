@@ -77,8 +77,8 @@ void SStream::Open( wxInputStream *stream )
 
 void SStream::Open( const wxMemoryOutputStream &stream )
 {
-    void *data;
-    size_t length;
+    void *data = NULL;
+    size_t length = 0;
     stream.CopyTo( data, length );
     Open( data, length );
 }
@@ -122,9 +122,6 @@ std::shared_ptr<AbstractHandler> SStream::GetHandler()
 
 std::shared_ptr<wxMemoryInputStream> SStream::GetStream()
 {
-    void *data = &DUMMY_BUFFER;
-    size_t length = sizeof(DUMMY_BUFFER);
-
     std::shared_ptr<wxMemoryInputStream> stream;
     if ( m_stream->IsOk() && m_stream->GetSize() != 0 )
         stream = std::shared_ptr<wxMemoryInputStream>( 

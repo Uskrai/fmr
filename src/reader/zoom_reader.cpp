@@ -49,7 +49,7 @@ void ZoomThread::Zoom( SBitmap *bmp, wxImage &img, float  scaleadd, std::functio
         if ( img.IsOk() && img.GetSize() != size && f())
         {
             img.Rescale( size.GetWidth(), size.GetHeight() );
-            if ( img.IsOk() && img.GetSize() != bmp->GetSize() & f() )
+            if ( img.IsOk() && ( img.GetSize() != bmp->GetSize() ) & f() )
             {
                 bmp->SetBitmap( wxBitmap(img) );
                 bmp->SetScale( scale );
