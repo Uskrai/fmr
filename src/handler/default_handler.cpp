@@ -23,7 +23,6 @@
 #include "base/path.h"
 #include "base/compare.h"
 #include <algorithm>
-#include <wx/wxcrtvararg.h>
 
 namespace fmr
 {
@@ -62,7 +61,7 @@ wxString DefaultHandler::GetFromCurrent( int i )
         std::vector<SStream> &list_stream = GetParent()->GetChild();
         size_t idx = GetParent()->Index( GetName() );
         if ( idx != size_t(-1) && Vector::IsExist(list_stream, idx + i ) )
-            return list_stream.at(idx).GetName();
+            return list_stream.at( idx + i ).GetName();
     }
     return wxEmptyString;
 }
@@ -73,6 +72,9 @@ wxString DefaultHandler::GetPrev() { return GetFromCurrent( -1 ); }
 
 size_t DefaultHandler::Index( const wxString& path )
 {
+    if ( path == GetName() )
+        return 0;
+    
     size_t idx = 0;
     while( Vector::IsExist( m_all, idx) )
     {
@@ -80,7 +82,7 @@ size_t DefaultHandler::Index( const wxString& path )
             return idx;
         idx++;
     }
-    return idx;    
+    return -1;
 }
 
 void DefaultHandler::Traverse( bool GetStream )
@@ -90,8 +92,45 @@ void DefaultHandler::Traverse( bool GetStream )
     if ( ! dir.IsOpened() ) return;
 
     wxString filename;
-    bool entry = dir.GetFirst(&filename, wxEmptyString );
-    GetAllFiles( dir, entry, filename, m_all );
+    
+    std::vector<struct SStream> directory, files;
+    GetAllFiles( directory, wxDIR_DIRS | wxDIR_HIDDEN );
+    GetAllFiles( files, wxDIR_FILES | wxDIR_HIDDEN );
+    
+    auto copy = [this]( std::vector<struct SStream> &target1, std::vector<struct SStream> &target2 ) -> void
+    {
+        for ( auto &it : target1 )
+            m_all.push_back( it );
+        for ( auto &it : target2 )
+            m_all.push_back( it );
+    };
+
+    auto sort = [this]( std::vector<struct SStream> &target ) -> void
+    {
+        std::sort( target.begin(), target.end(), Compare::NaturalSortable );
+    };
+
+
+    if ( sort_flag_ == kSortAll )
+    {
+        copy( directory, files );
+        sort( m_all );
+    }
+    else
+    {
+        sort( directory );
+        sort( files );
+
+        if ( sort_flag_ == kSortDirFirst )
+        {
+            copy( directory, files );
+        }
+        else if ( sort_flag_ == kSortFileFirst )
+        {
+            copy( files, directory );
+        }
+    }
+
 
     std::sort( m_all.begin(), m_all.end(), Compare::NaturalSortable );
 
@@ -105,31 +144,19 @@ void DefaultHandler::TraverseStream()
         it.Open( it.GetName() );
 }
 
-void DefaultHandler::GetAllFiles( wxDir &dir, bool &cont, wxString &filename, std::vector<SStream> &list_stream, bool isGetStream )
+void DefaultHandler::GetAllFiles( std::vector<struct SStream> &vec_stream, int dir_flags )
 {
+    wxString filename;
+    bool cont = dir.GetFirst( &filename, wxEmptyString, dir_flags );
     while ( cont )
     {
-        wxFileName name(filename);
-        m_all.push_back( SStream() );
-        m_all.back().SetName( dir.GetNameWithSep() + filename );
+        filename =  Path::GetFullPath( dir.GetNameWithSep() + filename );
+        SStream stream;
+        stream.SetName( filename );
+        vec_stream.push_back( stream );
 
-        cont = dir.GetNext(&filename);
-    }
-}
 
-void DefaultHandler::GetAllFiles( wxDir& dir, bool& cont, wxString& filename, wxArrayString& array  )
-{
-    while ( cont )
-    {
-        wxFileName name(filename);
-        if ( name.IsDir() )
-        {
-            array.push_back( name.GetFullPath() );
-        }
-        else {
-            array.push_back( name.GetFullName() );
-        }
-        cont = dir.GetNext(&filename);
+        cont = dir.GetNext( &filename );
     }
 }
 

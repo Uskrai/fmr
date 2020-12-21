@@ -78,12 +78,12 @@ class DefaultHandler
         AbstractHandler* m_parent;
 
         std::vector<struct SStream> m_all;
+        HandlerSortFirst sort_flag_ = kSortFileFirst;
         wxArrayString m_files;
         wxArrayString m_directory;
         wxDir dir;
         
-        void GetAllFiles( wxDir& dir, bool& cont, wxString& filename, wxArrayString& array);
-        void GetAllFiles( wxDir &dir, bool &cont, wxString &filename, std::vector<SStream> &list_stream, bool isGetStream = false );
+        void GetAllFiles( std::vector<struct SStream> &vec_stream, int dir_get_flag );
 
 };
 
