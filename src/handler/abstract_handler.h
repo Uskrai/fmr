@@ -26,6 +26,13 @@
 namespace fmr
 {
 
+enum HandlerSortFirst
+{
+    kSortFileFirst,
+    kSortDirFirst,
+    kSortAll
+};
+
 class AbstractHandler 
 {
     public:     
