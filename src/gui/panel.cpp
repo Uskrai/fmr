@@ -45,6 +45,7 @@ Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
         0,
         "Explorer"
     );
+    explorer_->SetDefaultCellBackgroundColour( *wxBLACK );
     explorer_->Hide();
     sizer->Add( explorer_, 1, wxALL | wxEXPAND );
 
