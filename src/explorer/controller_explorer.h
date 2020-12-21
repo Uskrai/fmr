@@ -54,7 +54,7 @@ class Controller
     private:
         wxWindow *parent_;
         std::shared_ptr<AbstractHandler> handler_;
-        LoadThread *load_thread_;
+        LoadThread *load_thread_ = NULL;
 };
 
 }; // namespace explorer
