@@ -96,23 +96,24 @@ void SStream::Open( wxMemoryOutputStream *stream )
 
 void SStream::SetName( const wxString &name )
 {
-    SetName( name.ToStdWstring() );
+    m_name = name;
 }
 
 void SStream::SetName( const std::wstring &name )
 {
-    m_name = name;
-}
-
-bool SStream::IsOk() const
-{
-    return m_stream->IsOk() && 
-        m_stream->GetSize() != 0;
+    SetName( name );
 }
 
 void SStream::SetName( const std::string &name )
 {
     SetName( wxString(name) );
+}
+
+
+bool SStream::IsOk() const
+{
+    return m_stream->IsOk() && 
+        m_stream->GetSize() != 0;
 }
 
 std::shared_ptr<AbstractHandler> SStream::GetHandler() 

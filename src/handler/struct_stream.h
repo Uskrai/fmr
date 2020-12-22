@@ -57,15 +57,15 @@ struct SStream
 
     bool IsOk() const;
 
-    std::wstring GetString() const { return m_name; }
-    wxString GetName() const { return m_name; }
+    std::wstring GetString() const { return m_name.ToStdWstring(); }
+    const wxString &GetName() const { return m_name; }
     std::shared_ptr<AbstractHandler> GetHandler();
     std::shared_ptr<wxMemoryInputStream> GetStream() const ;
     std::shared_ptr<wxMemoryOutputStream> GetOutputStream();
 
     std::shared_ptr<wxMemoryOutputStream> m_stream;
     std::shared_ptr<AbstractHandler> m_handler;
-    std::wstring m_name;
+    wxString m_name;
 };
 
 }; // namespace fmr
