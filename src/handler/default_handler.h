@@ -46,23 +46,25 @@ class DefaultHandler
         void Traverse( bool GetStream = false );
         void TraverseStream();
 
-        AbstractHandler *GetParent() { return m_parent; }
-        std::vector<struct SStream> &GetChild() { return m_all; }
-        wxString GetName() { return m_name; }
+        const AbstractHandler *GetParent() const;
+        AbstractHandler *GetParent();
 
-        wxString GetFromCurrent( int i );
-        wxString GetNext();
-        wxString GetPrev();
+        const std::vector<struct SStream> &GetChild() const;
+        std::vector<struct SStream> &GetChild();
+        const wxString &GetName() const;
 
-        wxString ItemName( size_t idx ) { return m_files.Item(idx); }
+        wxString GetFromCurrent( int i ) const;
+        wxString GetNext() const;
+        wxString GetPrev() const;
+
+        wxString ItemName( size_t idx );
+        const struct SStream &Item( size_t index ) const;
         struct SStream &Item( size_t index );
 
-        size_t Index( const wxString& name );
-        size_t IndexFilename( wxString path );
-        size_t Size() { return m_all.size(); }
+        size_t Index( const wxString& name ) const;
+        size_t Size() const;
 
-        bool IsExist( size_t index )
-                { return Vector::IsExist(m_all,index); }
+        bool IsExist( size_t index ) const;
 
         void Clear();
         void Close();

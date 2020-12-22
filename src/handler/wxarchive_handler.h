@@ -37,24 +37,26 @@ class WxArchiveHandler
         WxArchiveHandler( const wxString& path );
         void Open( const wxString& path );
 
-        wxString GetName() { return m_name; }
-        AbstractHandler *GetParent() { return m_parent; }
-        wxString GetParentName() { return m_parentName; }
-        std::vector<SStream> &GetChild() { return m_all; }
+        const wxString &GetName() const;
 
-        wxString GetFromCurrent( int i );
-        wxString GetNext();
-        wxString GetPrev();
+        const AbstractHandler *GetParent() const;
+        AbstractHandler *GetParent();
 
-        bool IsExist( size_t index ) 
-            { return Vector::IsExist(m_fstream,index); }
+        const std::vector<SStream> &GetChild() const;
+        std::vector<SStream> &GetChild();
+
+        wxString GetFromCurrent( int i ) const;
+        wxString GetNext() const;
+        wxString GetPrev() const;
+
+        bool IsExist( size_t index ) const;
         
         void Traverse( bool GetStream = false );
         void TraverseStream();
-        size_t Index( const wxString& name );
-        size_t Size() { return m_fstream.size();} ;
+        size_t Index( const wxString& name ) const;
+        size_t Size() const;
 
-        wxString ItemName( size_t idx ) { return m_files.Item(idx); }
+        const SStream &Item( size_t index ) const;
         SStream &Item( size_t index );
         void Clear();
 
@@ -69,10 +71,7 @@ class WxArchiveHandler
         wxString m_name;
         wxString m_parentName;
 
-        wxArrayString m_files;
         std::vector<SStream> m_all;
-
-        wxVector<std::shared_ptr<wxMemoryOutputStream>> m_fstream;
 };
 
 }; // namespace fmr

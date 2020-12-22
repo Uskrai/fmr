@@ -44,21 +44,44 @@ void DefaultHandler::Open( const wxString& path )
     }    
 }
 
+const wxString &DefaultHandler::GetName() const
+    { return m_name; }
+
+const AbstractHandler *DefaultHandler::GetParent() const
+    { return m_parent; }
+
+AbstractHandler *DefaultHandler::GetParent()
+    { return m_parent; }
+
+const std::vector<SStream> &DefaultHandler::GetChild() const
+    { return m_all; }
+
+std::vector<SStream> &DefaultHandler::GetChild()
+    { return m_all; }
+
+const SStream &DefaultHandler::Item( size_t idx ) const
+    { return m_all.at(idx); }
+
 SStream &DefaultHandler::Item( size_t idx ) 
-{ 
-    return m_all.at(idx);
-}
+    { return m_all.at(idx); }
 
-size_t DefaultHandler::IndexFilename( wxString path )
-{
-    return 0;
-}
+size_t DefaultHandler::Size() const
+    { return GetChild().size(); }
 
-wxString DefaultHandler::GetFromCurrent( int i )
+bool DefaultHandler::IsExist( size_t idx ) const
+    { return Vector::IsExist( GetChild(), idx ); }
+
+wxString DefaultHandler::GetNext() const
+    { return GetFromCurrent(1); }
+
+wxString DefaultHandler::GetPrev() const
+    { return GetFromCurrent(-1); }
+
+wxString DefaultHandler::GetFromCurrent( int i ) const
 {
     if ( GetParent() )
     {
-        std::vector<SStream> &list_stream = GetParent()->GetChild();
+        const std::vector<SStream> &list_stream = GetParent()->GetChild();
         size_t idx = GetParent()->Index( GetName() );
         if ( idx != size_t(-1) && Vector::IsExist(list_stream, idx + i ) )
             return list_stream.at( idx + i ).GetName();
@@ -66,11 +89,7 @@ wxString DefaultHandler::GetFromCurrent( int i )
     return wxEmptyString;
 }
 
-wxString DefaultHandler::GetNext() { return GetFromCurrent( 1 ); }
-
-wxString DefaultHandler::GetPrev() { return GetFromCurrent( -1 ); }
-
-size_t DefaultHandler::Index( const wxString& path )
+size_t DefaultHandler::Index( const wxString& path ) const
 {
     if ( path == GetName() )
         return 0;

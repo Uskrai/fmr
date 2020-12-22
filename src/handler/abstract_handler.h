@@ -41,30 +41,33 @@ class AbstractHandler
         virtual ~AbstractHandler() {};
 
         // return handler of Parent's Directory
+        virtual const AbstractHandler *GetParent() const = 0; 
         virtual AbstractHandler *GetParent() = 0;
 
         // return all directory and files in current dir
+        virtual const std::vector<struct SStream> &GetChild() const = 0;
         virtual std::vector<struct SStream> &GetChild() = 0;
 
         // return opened path
-        virtual wxString GetName() = 0;
-        virtual wxString GetFromCurrent( int step ) = 0;
+        virtual const wxString &GetName() const = 0;
+        virtual wxString GetFromCurrent( int step ) const = 0;
         // return next or prev folder / file
-        virtual wxString GetNext() = 0;
-        virtual wxString GetPrev() = 0;
+        virtual wxString GetNext() const = 0;
+        virtual wxString GetPrev() const = 0;
 
         virtual void Open( const wxString& path) = 0;
         // enumerate current opened file or dir
         virtual void Traverse( bool GetStream = false ) = 0 ;
 
-        virtual bool IsExist( size_t index ) = 0;
+        virtual bool IsExist( size_t index ) const = 0;
 
         // search from filename
-        virtual size_t Index( const wxString& name ) = 0;
+        virtual size_t Index( const wxString& name ) const = 0;
         // return files stream;
+        virtual const struct SStream &Item( size_t index ) const = 0;
         virtual struct SStream &Item( size_t index ) = 0;
 
-        virtual size_t Size() = 0;
+        virtual size_t Size() const = 0;
         virtual void Clear() = 0;
 };
 

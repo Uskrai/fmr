@@ -120,7 +120,7 @@ std::shared_ptr<AbstractHandler> SStream::GetHandler()
     return m_handler;
 }
 
-std::shared_ptr<wxMemoryInputStream> SStream::GetStream()
+std::shared_ptr<wxMemoryInputStream> SStream::GetStream() const
 {
     std::shared_ptr<wxMemoryInputStream> stream;
     if ( m_stream->IsOk() && m_stream->GetSize() != 0 )

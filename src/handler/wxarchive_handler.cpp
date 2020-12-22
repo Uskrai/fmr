@@ -41,42 +41,63 @@ void WxArchiveHandler::Open( const wxString& path )
     }
 }
 
-size_t WxArchiveHandler::Index( const wxString& name )
+size_t WxArchiveHandler::Index( const wxString& name ) const
 {
     if ( name == m_name ) return 0;
 
     size_t idx = 0;
-    while( Vector::IsExist( m_all, idx ) )
+    while( Vector::IsExist( GetChild(), idx ) )
         if ( m_all.at(idx).GetName() == name )
             return idx;
             
     return -1;
 }
 
+const wxString &WxArchiveHandler::GetName() const
+    { return m_name; }
+
+const AbstractHandler *WxArchiveHandler::GetParent() const
+    { return m_parent; }
+
+AbstractHandler *WxArchiveHandler::GetParent()
+    { return m_parent; }
+
+const std::vector<SStream> &WxArchiveHandler::GetChild() const
+    { return m_all; }
+
+std::vector<SStream> &WxArchiveHandler::GetChild()
+    { return m_all; }
+
+const SStream &WxArchiveHandler::Item( size_t index ) const
+    { return GetChild().at(index); }
+
 SStream &WxArchiveHandler::Item( size_t index )
-{
-    // auto stream = m_fstream.at(index);
+    { return GetChild().at(index); }
 
-    // wxMemoryInputStream *result = new wxMemoryInputStream( *stream );
-    // return std::shared_ptr<wxInputStream>(result);
-    return GetChild().at(index);
-}
+size_t WxArchiveHandler::Size() const
+    { return GetChild().size(); }
 
-wxString WxArchiveHandler::GetFromCurrent( int i )
+bool WxArchiveHandler::IsExist( size_t index ) const
+    { return Vector::IsExist( GetChild(), index  ); }
+
+wxString WxArchiveHandler::GetNext() const
+    { return GetFromCurrent(1); }
+
+wxString WxArchiveHandler::GetPrev() const
+    { return GetFromCurrent(-1); }
+
+wxString WxArchiveHandler::GetFromCurrent( int i ) const
 {
     if ( GetParent() )
     {
         auto &list_stream = GetParent()->GetChild();
         size_t idx = GetParent()->Index( Path::GetName( GetName() ));
-        if ( idx != size_t(-1) && Vector::IsExist( GetParent()->GetChild(), idx + i ) )
+        if ( idx != size_t(-1) && Vector::IsExist( list_stream, idx + i ) )
             return list_stream.at( idx + i ).GetName();
     }
 
     return wxEmptyString;
 }
-
-wxString WxArchiveHandler::GetNext() { return GetFromCurrent(1); }
-wxString WxArchiveHandler::GetPrev() { return GetFromCurrent(-1); }
 
 void WxArchiveHandler::Traverse( bool GetStream)
 {
@@ -167,10 +188,8 @@ bool WxArchiveHandler::CanHandle( wxString path )
 
 void WxArchiveHandler::Clear()
 {
-    m_fstream.clear();
     m_name = wxEmptyString;
-    m_files.clear();
-    m_all.clear();
+    GetChild().clear();
 }
 
 WxArchiveHandler::~WxArchiveHandler()
