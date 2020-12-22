@@ -16,8 +16,12 @@
  */
 
 #include "explorer/load_explorer.h"
+#include "bitmap/image_util.h"
+#include "handler/abstract_handler.h"
+#include "handler/handler_factory.h"
 #include <wx/image.h>
 #include <wx/filename.h>
+#include <iostream>
 
 namespace fmr
 {
@@ -43,23 +47,31 @@ wxThread::ExitCode LoadThread::Entry()
 
 bool LoadThread::Find( StreamBitmap &item )
 {
-    AbstractHandler *handler = HandlerFactory::NewHandler( folder );
-    handler->Traverse( true );
-    return Find( target_stream, handler->GetChild() );
-}
-
-bool LoadThread::Find( SStream *target_stream, std::vector<SStream> &list_stream )
-{
-    for ( auto &it : list_stream )
+    wxImage img;
+    if ( image_util::Load( img, *item.stream ) )
     {
-        if ( it.IsOk() )
-            target_stream->Open( it.GetOutputStream() );
+        image_util::Rescale( img, wxSize(300,300) );
+        item.bitmap->SetBitmap( img );
+        return true;
+    }
+    else
+    {
+        std::shared_ptr<AbstractHandler> handler(
+            HandlerFactory::NewHandler( item.stream->GetName() )
+        );
+        if ( !handler )
+            return false;
 
-        else if ( wxFileName::Exists( it.GetName() ) )
+        if ( item.stream->GetName() != handler->GetName() )
         {
-            if ( wxFileName::DirExists( it.GetName() ) )
-                return Find( target_stream, it.GetName() );
-        }    
+            for ( auto &it : handler->GetChild() )
+            {
+                StreamBitmap temp;
+                temp.stream = &it;
+                temp.bitmap = item.bitmap;
+                return Find( temp );
+            }
+        }
     }
     return false;
 }
