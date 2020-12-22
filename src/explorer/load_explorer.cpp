@@ -25,28 +25,23 @@ namespace fmr
 namespace explorer
 {
 
-void LoadThread::SetParameter( std::vector<SStream> &list_stream )
+void LoadThread::SetParameter( std::vector<StreamBitmap> &list_stream )
 {
-    for ( auto &it : list_stream )
-        list_stream_.push_back( &it );
+    list_stream_ = list_stream;
 }
 
 wxThread::ExitCode LoadThread::Entry()
 {
     for ( auto &it : list_stream_  )
     {
-        if ( wxFileName::FileExists( it->GetName() ) && wxImage::CanRead(it->GetName()) )
-            it->Open( it->GetName() );
-        else
-            Find( it, it->GetName() );
-        
+        Find( it );
         Update();
     }
     Completed();
     return (wxThread::ExitCode)0;
 }
 
-bool LoadThread::Find( SStream *target_stream, const wxString &folder )
+bool LoadThread::Find( StreamBitmap &item )
 {
     AbstractHandler *handler = HandlerFactory::NewHandler( folder );
     handler->Traverse( true );
@@ -68,7 +63,6 @@ bool LoadThread::Find( SStream *target_stream, std::vector<SStream> &list_stream
     }
     return false;
 }
-
 
 }; // namespace explorer
 

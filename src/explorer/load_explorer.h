@@ -18,6 +18,7 @@
 #ifndef FMR_EXPLORER_LOADTHREAD
 #define FMR_EXPLORER_LOADTHREAD
 
+#include "explorer/common.h"
 #include "thread/thread.h"
 #include "handler/abstract_handler.h"
 #include "handler/handler_factory.h"
@@ -34,13 +35,11 @@ class LoadThread
     public:
         LoadThread( ThreadController *parent, wxThreadKind type, int id )
             : BaseThread( parent, type, id ){};
-        void SetParameter( std::vector<SStream> &list_stream );
+        void SetParameter( std::vector<StreamBitmap> &list_stream );
 
-        bool Find( SStream *target_stream, std::vector<SStream*> list_stream );
-        bool Find( SStream *target_stream, const wxString &folder );
-        bool Find( SStream *target_stream, std::vector<SStream> &list_stream );
+        bool Find( StreamBitmap &item );
     private:
-        std::vector<SStream*> list_stream_;
+        std::vector<StreamBitmap> list_stream_;
 
         ExitCode Entry();
 };

@@ -18,8 +18,9 @@
 #ifndef FMR_EXPLORER_IMAGE_WINDOW
 #define FMR_EXPLORER_IMAGE_WINDOW
 
+#include "explorer/common.h"
 #include "explorer/load_explorer.h"
-#include <wx/window.h>
+#include <wx/grid.h>
 #include <memory>
 
 namespace fmr
@@ -29,22 +30,21 @@ namespace explorer
 {
 
 class ImageWindow
-    : public wxWindow
+    : public wxGridCellRenderer
 {
     public:
-        ImageWindow( 
-            wxWindow *parent, 
-            const wxWindowID &id = wxID_ANY,
-            const wxPoint &pos = wxDefaultPosition,
-            const wxSize &size = wxDefaultSize,
-            const long &style = 0,
-            const wxString &name = wxPanelNameStr
-        );
-    
-        void SetStream( SStream *stream )
-            { stream_ = stream; }
+        ImageWindow(){};
+        ImageWindow( StreamBitmap *stream_bitmap );
+        ImageWindow( const ImageWindow &other  );
+
+        wxGridCellRenderer *Clone() const { return new ImageWindow( *this ); }
+        void SetStreamBitmap( StreamBitmap *stream );
+
+        void Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col, bool isSelected );
+        wxSize GetBestSize( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, int row, int col );
     protected:
-        SStream *stream_;
+        StreamBitmap *stream_bitmap_ = NULL;
+        wxGridCellAutoWrapStringRenderer string_wrapper_;
 };
 
 }; // namespace fmr

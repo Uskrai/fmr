@@ -18,6 +18,7 @@
 #ifndef FMR_EXPLORER_WINDOW
 #define FMR_EXPLORER_WINDOW
 
+#include "explorer/common.h"
 #include "window/scrolledwindow.h"
 #include "explorer/controller_explorer.h"
 #include "explorer/image_window_explorer.h"
@@ -52,8 +53,10 @@ class Window
     protected:
         Controller controller_ = Controller( this );
         std::shared_ptr<AbstractHandler> handler_;
-        std::vector<ImageWindow*> list_panel_;
-        std::vector<SStream> list_stream_;
+        std::vector<SBitmap> list_bitmap_;
+
+
+        std::vector<wxGridCellCoords> list_cell_pos_;
 
         void OnThreadUpdate( wxCommandEvent &event );
 

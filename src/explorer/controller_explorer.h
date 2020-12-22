@@ -18,9 +18,10 @@
 #ifndef FMR_EXPLORER_CONTROLLER_EXPLORER
 #define FMR_EXPLORER_CONTROLLER_EXPLORER
 
+#include "explorer/common.h"
 #include "thread/thread.h"
 #include "explorer/load_explorer.h"
-#include "handler/abstract_handler.h"
+#include "handler/struct_stream.h"
 #include <wx/window.h>
 #include <memory>
 
@@ -43,7 +44,7 @@ class Controller
         Controller( wxWindow *parent )
         { parent_ = parent; }
         ~Controller();
-        void SetHandler( std::shared_ptr<AbstractHandler> handler );
+        void SetParameter( std::vector<StreamBitmap> &list_stream );
 
         void Load();
 
@@ -53,7 +54,7 @@ class Controller
     
     private:
         wxWindow *parent_;
-        std::shared_ptr<AbstractHandler> handler_;
+        std::vector<StreamBitmap> list_stream_;
         LoadThread *load_thread_ = NULL;
 };
 

@@ -30,7 +30,7 @@ handler_LTLIBRARIES = lib_default_handler.la lib_wxarchive_handler.la lib_handle
 # make libraries for bitmap
 bitmap = src/bitmap
 bitmapdir = @abs_builddir@/bitmap
-bitmap_LTLIBRARIES = libbitmap.la libsize.la libposition.la libbmp.la
+bitmap_LTLIBRARIES = libbitmap.la libsize.la libposition.la libbmp.la lib_image_util.la
 
     libbmp_la_SOURCES = $(bitmap)/bmp.cpp
     # make source and link for bitmap
@@ -39,6 +39,9 @@ bitmap_LTLIBRARIES = libbitmap.la libsize.la libposition.la libbmp.la
 
     libsize_la_SOURCES = $(bitmap)/size.cpp
 
+    lib_image_util_la_SOURCES = $(bitmap)/image_util.cpp
+    lib_image_util_la_LIBADD = lib_struct_stream.la
+
     libposition_la_SOURCES = $(bitmap)/position.cpp
 
 reader = src/reader
@@ -46,7 +49,7 @@ readerdir = @abs_builddir@/reader
 reader_LTLIBRARIES =  lib_load_reader.la lib_window_reader.la lib_zoom_reader.la lib_controller_reader.la
 
     lib_load_reader_la_SOURCES = $(reader)/load_reader.cpp
-    lib_load_reader_la_LIBADD = libthread.la 
+    lib_load_reader_la_LIBADD = libthread.la lib_image_util.la
 
     lib_zoom_reader_la_SOURCES = $(reader)/zoom_reader.cpp
     lib_zoom_reader_la_LIBADD = libthread.la lib_struct_stream.la
@@ -70,7 +73,7 @@ explorer_LTLIBRARIES = lib_window_explorer.la lib_controller_explorer.la lib_ima
     lib_image_window_explorer_la_SOURCES = $(explorer)/image_window_explorer.cpp
 
     lib_load_explorer_la_SOURCES = $(explorer)/load_explorer.cpp
-    lib_load_explorer_la_LIBADD = libthread.la
+    lib_load_explorer_la_LIBADD = libthread.la lib_image_util.la
 
 # make libraries for gui
 gui = src/gui

@@ -39,6 +39,8 @@ Window::Window(
 {
     HideColLabels();
     HideRowLabels();
+    DisableCellEditControl();
+    EnableEditing( false );
 }
 
 bool Window::Destroy()
@@ -56,14 +58,46 @@ void Window::Open( const wxString &name )
     );
 
     handler_->Traverse(true);
-    list_stream_ = handler_->GetChild();
-    for ( auto &it : list_stream_ )
+
+    wxSize sz = GetSize();
+
+    int column = sz.GetWidth() / 300;
+    int row = ceil(double(handler_->Size()) / double(column));
+
+    SetDefaultColSize( 300 );
+    SetDefaultRowSize( 300 );
+    CreateGrid( row, column );
+
+    list_bitmap_.clear();
+    list_bitmap_.assign( handler_->Size(), SBitmap() );
+
+    std::vector<StreamBitmap> list_item;
+    list_item.assign( handler_->Size(), StreamBitmap() );
+    size_t idx = 0;
+    for ( auto &it : handler_->GetChild() )
     {
-        list_panel_.push_back( new ImageWindow( this, wxID_ANY ));
-        list_panel_.back()->SetStream( &it );
+        list_item.at(idx).stream = &it;
+        list_item.at(idx).bitmap = &list_bitmap_.at(idx);
+        idx++;
     }
 
-    controller_.SetHandler( handler_ );
+    int cur_row = 0;
+    int cur_col = 0;
+    for ( auto &it : list_item )
+    {
+        auto renderer =  new ImageWindow( &it );
+        SetCellRenderer( cur_row, cur_col, renderer );
+
+        list_cell_pos_.push_back( wxGridCellCoords( cur_row, cur_col ) );
+        cur_col++;
+        if ( cur_col >= column )
+        {
+            cur_row += 1;
+            cur_col = 0;
+        }
+    }
+
+    controller_.SetParameter( list_item );
     controller_.Load();
 }
 

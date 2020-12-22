@@ -48,18 +48,15 @@ wxThread *Controller::GetThread( int id )
     return NULL;
 }
 
-void Controller::SetHandler( std::shared_ptr<AbstractHandler> handler )
+void Controller::SetParameter( std::vector<StreamBitmap> &list_stream )
 {
-    handler_ = handler;
+    list_stream_ = list_stream;
 }
 
 void Controller::Load()
 {
-    if ( ! handler_ )
-        return;
-    
     load_thread_ = new LoadThread( this, wxTHREAD_DETACHED, kLoadThreadID );
-
+    load_thread_->SetParameter( list_stream_ );
     load_thread_->Run();
 }
 

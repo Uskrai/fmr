@@ -16,6 +16,8 @@
  */
 
 #include "explorer/image_window_explorer.h"
+#include "bitmap/bmp.h"
+#include <wx/dc.h>
 
 namespace fmr
 {
@@ -23,16 +25,31 @@ namespace fmr
 namespace explorer
 {
 
-ImageWindow::ImageWindow( 
-        wxWindow *parent, 
-        const wxWindowID &id,
-        const wxPoint &pos,
-        const wxSize &size,
-        const long &style,
-        const wxString &name
-)    : wxWindow( parent, id, pos, size, style, name )
+ImageWindow::ImageWindow( StreamBitmap *stream_bitmap )
 {
+    SetStreamBitmap( stream_bitmap );
+}
 
+ImageWindow::ImageWindow( const ImageWindow &other )
+{
+    SetStreamBitmap( other.stream_bitmap_ );
+}
+
+void ImageWindow::SetStreamBitmap( StreamBitmap *stream_bitmap )
+{
+    stream_bitmap_ = stream_bitmap;
+}
+
+void ImageWindow::Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col, bool isSelected )
+{
+    // SBitmap bmp;
+    // if ( stream_ )
+        // dc.DrawLabel( stream_->GetName() , bmp.GetBitmap(), rect );
+}
+
+wxSize ImageWindow::GetBestSize( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, int row, int col )
+{
+    return wxSize(300,300);
 }
 
 }; // namespace explorer
