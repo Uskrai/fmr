@@ -74,6 +74,16 @@ namespace image_util
      * @param original_image Original image to resize
      */
     bool Rescale( SBitmap &bmp, wxImage &original_image, float scale, wxImageResizeQuality image_qualitry = wxIMAGE_QUALITY_NORMAL );
+
+    /**
+     * @brief rescale image while retaining aspect ratio
+     * this will ignore size with negative value
+     *
+     * @param image 
+     * @param maximum_size maximum page for the image to resize to
+     * 
+     */
+    bool Rescale( wxImage &image, wxSize maximum_size, wxImageResizeQuality image_quality = wxIMAGE_QUALITY_NORMAL );
     //@}
 }
 

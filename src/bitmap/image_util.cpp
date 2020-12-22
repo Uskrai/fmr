@@ -62,10 +62,10 @@ namespace image_util
 
         wxSize scaled_size = image.GetSize().Scale( scale, scale );
 
-        if ( original_size == scaled_size )
+        if ( original_size != scaled_size )
             image.Rescale( scaled_size.GetWidth(), scaled_size.GetHeight(), image_quality );
 
-        return original_size == scaled_size;
+        return original_size != scaled_size;
     }
 
     bool Rescale( SBitmap &bmp, wxImage &img, float scale, wxImageResizeQuality image_quality )
@@ -82,7 +82,32 @@ namespace image_util
         return true;
     }
 
+    float scaling( float original, float dest )
+    {
+        return (dest / original);
+    }
 
+    bool Rescale( wxImage &image, wxSize max_size, wxImageResizeQuality image_quality )
+    {
+        wxSize image_size = image.GetSize();
+
+        float scale_height = scaling(
+            image_size.GetHeight(), max_size.GetHeight()
+        );
+
+        float scale_width = scaling(
+            image_size.GetWidth(), max_size.GetWidth()
+        );
+
+        float scale = 1;
+        if ( scale_height > scale_width && max_size.GetWidth() > -1 )
+            scale = scale_width;
+        else if ( max_size.GetHeight() > -1 )
+            scale = scale_height;
+
+
+        return Rescale( image, scale, image_quality );
+    }
 
 
 }
