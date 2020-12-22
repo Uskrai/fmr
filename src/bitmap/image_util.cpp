@@ -1,0 +1,90 @@
+/*
+ *  Copyright (c) 2020 Uskrai
+ *  
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "bitmap/image_util.h"
+#include <wx/log.h>
+
+namespace fmr
+{
+
+namespace image_util
+{
+    bool Load( wxImage &image, wxInputStream &stream )
+    {
+        if ( ! wxImage::CanRead( stream ) )
+            return false;
+
+        wxLogNull nuller;
+        return image.LoadFile( stream );
+    }
+
+    bool Load( wxImage &image, const SStream &stream )
+    {
+        std::shared_ptr<wxInputStream> input_stream;
+        if ( ! stream.IsOk() )
+            return false;
+
+        input_stream = stream.GetStream();
+
+        if ( input_stream )
+            return Load( image, *input_stream );
+
+        return false;
+    }
+
+    bool Load( wxImage &image, const AbstractHandler &handler, size_t index )
+    {
+        if ( ! handler.IsExist( index ) )
+            return false;
+
+        return Load( image, handler.Item( index ) );
+    }
+
+    bool Rescale( wxImage &image, float scale, wxImageResizeQuality image_quality )
+    {
+        wxSize original_size = image.GetSize();
+        if ( scale <= 0 && image.IsOk() )
+            return false;
+
+        wxSize scaled_size = image.GetSize().Scale( scale, scale );
+
+        if ( original_size == scaled_size )
+            image.Rescale( scaled_size.GetWidth(), scaled_size.GetHeight(), image_quality );
+
+        return original_size == scaled_size;
+    }
+
+    bool Rescale( SBitmap &bmp, wxImage &img, float scale, wxImageResizeQuality image_quality )
+    {
+        if ( ! Rescale( img, scale, image_quality ) )
+            return false;
+
+        if ( img.GetSize() == bmp.GetSize() )
+            return false;
+
+        bmp.SetBitmap( img );
+        bmp.SetScale( scale );
+
+        return true;
+    }
+
+
+
+
+}
+
+}; // namespace fmr
