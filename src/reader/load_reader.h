@@ -56,8 +56,7 @@ class LoadThread
         wxThreadError Run();
 
         wxCriticalSection &GetLock() { return LoadThreadLock; }
-        static void LoadImage( std::shared_ptr<AbstractHandler> handler, std::shared_ptr<Bitmap> bmp, size_t idx );
-        static void LoadImage( std::shared_ptr<Bitmap> bmp, wxInputStream &stream, size_t idx );
+        static void LoadImage( std::shared_ptr<Bitmap> bmp, std::shared_ptr<AbstractHandler> handler, size_t idx, wxCriticalSection &lock );
         static void LoadImage( std::shared_ptr<Bitmap> bmp, SStream &stream, size_t idx );
     protected:
         size_t load_start_;

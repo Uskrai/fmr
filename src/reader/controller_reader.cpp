@@ -65,7 +65,7 @@ ControllerExit Controller::Open( const wxString &path )
     );
 
     size_t idx = opened_handler->Index( path );
-    LoadThread::LoadImage( opened_handler, bitmap_, idx );
+    LoadThread::LoadImage( bitmap_, opened_handler, idx, g_sLock );
     Update( kLoadThreadID );
     
     auto thread = new LoadThread( this, wxTHREAD_DETACHED, kLoadThreadID );

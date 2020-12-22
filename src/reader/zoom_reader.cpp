@@ -17,6 +17,7 @@
 
 #include "reader/zoom_reader.h"
 
+#include "bitmap/image_util.h"
 #include "wx/log.h"
 
 namespace fmr
@@ -38,44 +39,10 @@ ZoomThread::~ZoomThread()
     m_parent->DoSetNull( m_id );
 }
 
-void ZoomThread::Zoom( SBitmap *bmp, wxImage &img, float  scaleadd, std::function<bool()> f )
-{
-    if ( img.IsOk() && f())
-    {
-        wxCriticalSectionLocker locker( g_sLock );
-        wxSize size = img.GetSize();
-        float scale = bmp->GetScale() + scaleadd;
-        size.Scale( scale , scale );
-        if ( img.IsOk() && img.GetSize() != size && f())
-        {
-            img.Rescale( size.GetWidth(), size.GetHeight() );
-            if ( img.IsOk() && ( img.GetSize() != bmp->GetSize() ) & f() )
-            {
-                bmp->SetBitmap( wxBitmap(img) );
-                bmp->SetScale( scale );
-            }
-        }
-    }
-}
-
-void ZoomThread::Zoom( SBitmap *bmp, SStream &stream, float scaleadd, std::function<bool()> f )
-{
-    if ( stream.IsOk() )
-    {
-        auto instream = stream.GetStream();
-        wxImage img( *instream );
-        Zoom( bmp, img, scaleadd, f );
-    }
-}
-
 wxThread::ExitCode ZoomThread::Entry()
 {
     if ( m_handler && m_bitmap )
     {
-        auto TestNotDestroy = [this]() -> bool 
-        {
-            return !TestDestroy();
-        };
         auto bitmap = m_bitmap->Get();
         for ( auto &it : bitmap )
         {
@@ -85,10 +52,10 @@ wxThread::ExitCode ZoomThread::Entry()
                 wxLogNull nuller;
                 auto stream = m_handler->Item( it->GetIndex() );
 
-                Zoom( it, stream, m_scale, TestNotDestroy);
-
-                if ( !TestDestroy() )
-                    Update();
+                wxImage img;
+                image_util::Load( img, stream );
+                image_util::Rescale( *it, img, it->GetScale() );
+                Update();
             }
             it->SetScale( scale );
         }

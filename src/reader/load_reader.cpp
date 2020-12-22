@@ -16,7 +16,7 @@
  */
 
 #include "reader/load_reader.h"
-
+#include "bitmap/image_util.h"
 #include <wx/log.h>
 
 namespace fmr
@@ -63,56 +63,29 @@ wxThreadError LoadThread::Run()
 
 void LoadThread::LoadImage( size_t& idx, int step )
 {
-    if ( !TestDestroy() && GetHandler()->IsExist(idx) )
-    {
-        SStream stream;
-        stream = GetHandler()->Item(idx);
-        if ( !TestDestroy() )
-            LoadImage( GetBitmap(), stream, idx );
-        idx += step;
-        if ( !TestDestroy() )
-            Update();
-    }
+    LoadImage( GetBitmap(), GetHandler(), idx, g_sLock );
+    Update();
+    idx += step;
 }
 
-void LoadThread::LoadImage( std::shared_ptr<Bitmap> bmp, wxInputStream &stream, size_t idx  )
+void LoadThread::LoadImage( std::shared_ptr<Bitmap> bmp, std::shared_ptr<AbstractHandler> handler, size_t idx, wxCriticalSection &lock )
 {
-    if ( Vector::IsExist( bmp->GetAll(), idx) )
-    {
-        if ( bmp->GetAll().at(idx).IsLoaded() )
-            return;
-
-        if ( wxImage::CanRead(stream) )
-        {
-            wxLogNull nuller;
-            wxImage img(stream);
-            float scale = bmp->Prepare( img );
-
-            // wxCriticalSectionLocker locker( g_sLock );
-            bmp->Add(img,idx,scale);
-        }
-
-    }
-}
-
-void LoadThread::LoadImage( std::shared_ptr<Bitmap> bmp, SStream &stream, size_t idx )
-{
-    if ( stream.IsOk() )
-    {
-        auto instream = stream.GetStream();
-        LoadImage( bmp, *instream, idx );
-    }
-    else bmp->MarkLoaded(idx);
-}
-
-void LoadThread::LoadImage( std::shared_ptr<AbstractHandler> handler, std::shared_ptr<Bitmap> bitmap, size_t idx )
-{
-    if ( ! handler->IsExist(idx) )
+    if ( !bmp && !handler )
         return;
-    
-    SStream &stream = handler->Item( idx );
 
-    LoadThread::LoadImage( bitmap, stream, idx );
+    if ( ! Vector::IsExist( bmp->GetAll(), idx  ) )
+        return;
+
+    if ( bmp->GetAll().at( idx ).IsLoaded() )
+        return;
+
+    wxImage img;
+    if ( ! image_util::Load( img, *handler, idx ) )
+        return bmp->MarkLoaded( idx );
+
+    wxCriticalSectionLocker locker(lock);
+    float scale = bmp->Prepare( img );
+    bmp->Add( img, idx, scale );
 }
 
 wxThread::ExitCode LoadThread::Entry()
