@@ -26,6 +26,7 @@ namespace fmr
 
 wxBEGIN_EVENT_TABLE( Panel, wxPanel )
     EVT_CHAR_HOOK( Panel::OnCharHook )
+    EVT_COMMAND( wxID_ANY, EVT_OPEN_FILE, Panel::OnExplorerOpenFile )
 wxEND_EVENT_TABLE()
 
 Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
@@ -52,13 +53,21 @@ Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
     SetSizer( this->sizer );
 };
 
-void Panel::LoadFile( wxString path )
+bool Panel::LoadFile( wxString path )
 {
-    this->sizer->Clear();
+    bool ret = m_reader->Open( path );
+    m_reader->Show();
+    if ( ret )
+        m_reader->SetFocus();
 
-    m_reader->Open( path );
+    if ( ret && explorer_ )
+    {
+        explorer_->Hide();
+        explorer_->Clear();
+    }
 
-    this->sizer->Add( m_reader, 1, wxALL | wxEXPAND );
+
+    return ret;
 }
 
 void Panel::OnCharHook( wxKeyEvent &event )
@@ -78,11 +87,23 @@ void Panel::OnCharHook( wxKeyEvent &event )
         
         explorer_->Show();
         explorer_->Open( path );
+        sizer->Layout();
         return;
         
     }
     event.DoAllowNextEvent();
     event.Skip();
+}
+
+void Panel::OnExplorerOpenFile( wxCommandEvent &event )
+{
+    explorer_->Hide();
+    if ( LoadFile(event.GetString() ) )
+    {
+        explorer_->Clear();
+    }
+    else
+        explorer_->Show();
 }
 
 bool Panel::Destroy()

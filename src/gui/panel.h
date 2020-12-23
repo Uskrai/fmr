@@ -39,11 +39,12 @@ class Panel :
     public: 
         Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ); 
 
-        void LoadFile( wxString path );
+        bool LoadFile( wxString path );
         bool Destroy();
     private:
         void OnKeyDown( wxKeyEvent &event );
         void OnCharHook( wxKeyEvent &event );
+        void OnExplorerOpenFile( wxCommandEvent &event );
         reader::Window* m_reader = NULL;
         explorer::Window *explorer_ = NULL;
         wxBoxSizer* sizer;
