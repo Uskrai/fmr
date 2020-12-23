@@ -78,12 +78,12 @@ void SStream::Open( void *data, size_t length )
 
 void SStream::Open( const wxString &name )
 {
-    if ( wxFileName::Exists(name) )
+    if ( wxFileName::FileExists(name) )
     {
         wxFileInputStream stream(name);
         m_stream->Write( stream );
-        SetName( name );
     }
+    SetName( name );
 }
 
 void SStream::Open( wxInputStream *stream )
