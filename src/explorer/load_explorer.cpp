@@ -21,7 +21,6 @@
 #include "handler/handler_factory.h"
 #include <wx/image.h>
 #include <wx/filename.h>
-#include <iostream>
 
 namespace fmr
 {
@@ -52,6 +51,10 @@ wxThread::ExitCode LoadThread::Entry()
 bool LoadThread::Find( StreamBitmap &item )
 {
     wxImage img;
+
+    if ( ! item.stream->IsOk() )
+        item.stream->Open( item.stream->GetName() );
+
     if ( !TestDestroy() && image_util::Load( img, *item.stream ) )
     {
         if ( !TestDestroy() )
@@ -63,17 +66,24 @@ bool LoadThread::Find( StreamBitmap &item )
     }
     else
     {
+        HandlerType type;
+        HandlerFactory::Find( item.stream->GetName(), type );
         std::shared_ptr<AbstractHandler> handler(
-            HandlerFactory::NewHandler( item.stream->GetName() )
+            HandlerFactory::NewHandler( type )
         );
+
         if ( !handler )
             return false;
 
+        handler->Open( item.stream->GetName() );
+
         if ( item.stream->GetName() == handler->GetName() && !TestDestroy() )
         {
-            handler->Traverse( true );
+            bool isGetStream = type != kHandlerDefault;
+            handler->Traverse( isGetStream );
             for ( auto &it : handler->GetChild() )
             {
+                printf("%d\n", it.IsOk() );
                 if ( TestDestroy() )
                     break;
 
