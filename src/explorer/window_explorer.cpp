@@ -26,6 +26,8 @@ namespace explorer
 wxBEGIN_EVENT_TABLE( Window, wxGrid )
         EVT_COMMAND( kLoadThreadID, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
         EVT_COMMAND( kLoadThreadID, EVT_COMMAND_THREAD_COMPLETED, Window::OnThreadUpdate )
+        EVT_CHAR_HOOK( Window::OnGridEnter )
+        EVT_GRID_SELECT_CELL( Window::OnGridSelect )
 wxEND_EVENT_TABLE()
 
 Window::Window( 
@@ -42,7 +44,10 @@ Window::Window(
     DisableCellEditControl();
     EnableEditing( false );
     SetCellHighlightColour( *wxWHITE );
+    SetGridLineColour( *wxBLACK );
     CreateGrid( 0, 0 );
+    grid_table_ = new wxGridStringTable();
+    SetTable( grid_table_, true );
 }
 
 bool Window::Destroy()
@@ -59,6 +64,8 @@ void Window::Open( const wxString &name )
         HandlerFactory::NewHandler( name )
     );
 
+    Clear();
+
     handler_->Traverse(true);
 
     int column = 5;
@@ -68,11 +75,9 @@ void Window::Open( const wxString &name )
     SetDefaultRowSize( size );
     SetDefaultColSize( size );
 
-    auto table = new wxGridStringTable();
-    table->AppendRows( row );
-    table->AppendCols( column );
-
-    SetTable( table, true );
+    grid_table_->Clear();
+    grid_table_->AppendRows( row );
+    grid_table_->AppendCols( column );
 
     std::vector<StreamBitmap> list_item;
     list_item.assign( handler_->Size(), StreamBitmap() );
@@ -87,6 +92,7 @@ void Window::Open( const wxString &name )
         idx++;
     }
 
+    SetGridCursor(0,0);
     handler_->Clear();
 
     int cur_row = 0;
@@ -107,12 +113,26 @@ void Window::Open( const wxString &name )
         }
     }
 
+    list_item_ = list_item;
     controller_.SetParameter( list_item );
     controller_.Load();
+    Refresh();
 }
 
-void Window::OnThreadUpdate( wxCommandEvent &event )
+void Window::Clear()
 {
+    handler_->Clear();
+    list_cell_pos_.clear();
+    list_item_.clear();
+    if ( grid_table_->GetRowsCount() > 0 )
+        grid_table_->DeleteRows( 0, grid_table_->GetRowsCount() );
+    if ( grid_table_->GetColsCount() > 0 )
+        grid_table_->DeleteCols( 0, grid_table_->GetColsCount() );
+}
+
+void Window::OnGridSelect( wxGridEvent &event )
+{
+    selected_cell_.Set( event.GetRow(), event.GetCol() );
 }
 
 

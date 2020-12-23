@@ -49,11 +49,13 @@ class Window
 
         void Open( const wxString &name );
 
+        void Clear();
         bool Destroy();
     protected:
         Controller controller_ = Controller( this );
         std::shared_ptr<AbstractHandler> handler_;
         std::vector<SBitmap> list_bitmap_;
+        std::vector<StreamBitmap> list_item_;
 
 
         std::vector<wxGridCellCoords> list_cell_pos_;
