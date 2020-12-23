@@ -38,8 +38,12 @@ wxThread::ExitCode LoadThread::Entry()
 {
     for ( auto &it : list_stream_  )
     {
-        Find( it );
+        if (!TestDestroy() )
+            Find( it );
+
         Update();
+        if ( TestDestroy() )
+            break;
     }
     Completed();
     return (wxThread::ExitCode)0;
@@ -48,10 +52,13 @@ wxThread::ExitCode LoadThread::Entry()
 bool LoadThread::Find( StreamBitmap &item )
 {
     wxImage img;
-    if ( image_util::Load( img, *item.stream ) )
+    if ( !TestDestroy() && image_util::Load( img, *item.stream ) )
     {
-        image_util::Rescale( img, wxSize(300,300) );
-        item.bitmap->SetBitmap( img );
+        if ( !TestDestroy() )
+            image_util::Rescale( img, wxSize(300,300) );
+
+        if ( !TestDestroy() )
+            item.bitmap->SetBitmap( img );
         return true;
     }
     else
@@ -62,15 +69,18 @@ bool LoadThread::Find( StreamBitmap &item )
         if ( !handler )
             return false;
 
-        if ( item.stream->GetName() == handler->GetName() )
+        if ( item.stream->GetName() == handler->GetName() && !TestDestroy() )
         {
             handler->Traverse( true );
             for ( auto &it : handler->GetChild() )
             {
+                if ( TestDestroy() )
+                    break;
+
                 StreamBitmap temp;
                 temp.stream = &it;
                 temp.bitmap = item.bitmap;
-                if ( Find( temp ) )
+                if ( !TestDestroy() && Find( temp ) )
                     return true;
             }
         }
