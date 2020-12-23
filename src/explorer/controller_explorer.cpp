@@ -55,6 +55,9 @@ void Controller::SetParameter( std::vector<StreamBitmap> &list_stream )
 
 void Controller::Load()
 {
+    if( load_thread_ )
+        DeleteThread( kLoadThreadID, g_sLock );
+
     load_thread_ = new LoadThread( this, wxTHREAD_DETACHED, kLoadThreadID );
     load_thread_->SetParameter( list_stream_ );
     load_thread_->Run();
