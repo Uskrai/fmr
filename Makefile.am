@@ -71,6 +71,7 @@ explorer_LTLIBRARIES = lib_window_explorer.la lib_controller_explorer.la lib_ima
     lib_controller_explorer_la_LIBADD = lib_load_explorer.la
 
     lib_image_window_explorer_la_SOURCES = $(explorer)/image_window_explorer.cpp
+    lib_image_window_explorer_la_LIBADD = libpath.la
 
     lib_load_explorer_la_SOURCES = $(explorer)/load_explorer.cpp
     lib_load_explorer_la_LIBADD = libthread.la lib_image_util.la

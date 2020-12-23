@@ -168,7 +168,7 @@ lib_handler_factory_la_OBJECTS = $(am_lib_handler_factory_la_OBJECTS)
 lib_image_util_la_DEPENDENCIES = lib_struct_stream.la
 am_lib_image_util_la_OBJECTS = $(bitmap)/image_util.lo
 lib_image_util_la_OBJECTS = $(am_lib_image_util_la_OBJECTS)
-lib_image_window_explorer_la_LIBADD =
+lib_image_window_explorer_la_DEPENDENCIES = libpath.la
 am_lib_image_window_explorer_la_OBJECTS =  \
 	$(explorer)/image_window_explorer.lo
 lib_image_window_explorer_la_OBJECTS =  \
@@ -554,6 +554,7 @@ lib_window_explorer_la_LIBADD = lib_controller_explorer.la lib_image_window_expl
 lib_controller_explorer_la_SOURCES = $(explorer)/controller_explorer.cpp
 lib_controller_explorer_la_LIBADD = lib_load_explorer.la
 lib_image_window_explorer_la_SOURCES = $(explorer)/image_window_explorer.cpp
+lib_image_window_explorer_la_LIBADD = libpath.la
 lib_load_explorer_la_SOURCES = $(explorer)/load_explorer.cpp
 lib_load_explorer_la_LIBADD = libthread.la lib_image_util.la
 

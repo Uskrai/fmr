@@ -71,7 +71,7 @@ void ImageWindow::Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRe
 
     if ( stream_ )
     {
-        wxString filename = stream_->GetName().AfterLast( Path::Separator );
+        wxString filename = Path::GetName( stream_->GetName() );
         txt_size = dc.GetTextExtent( filename );
         if ( txt_size.GetWidth() > rect.GetWidth() )
         {
@@ -82,7 +82,6 @@ void ImageWindow::Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRe
         filename_rect = filename_rect.CenterIn( txt_rect );
 
         dc.DrawText( filename, filename_rect.GetPosition() );
-
     }
 
 }
