@@ -18,6 +18,7 @@
  */
 
 #include "handler/default_handler.h"
+#include "handler/handler_factory.h"
 #include <wx/wfstream.h>
 
 #include "base/path.h"
@@ -160,7 +161,14 @@ void DefaultHandler::Traverse( bool GetStream )
 void DefaultHandler::TraverseStream()
 {
     for ( auto &it : m_all )
+    {
+        HandlerType type;
+        HandlerFactory::Find( it.GetName(), type );
+        if ( type != kHandlerDefault )
+            continue;
+
         it.Open( it.GetName() );
+    }
 }
 
 void DefaultHandler::GetAllFiles( std::vector<struct SStream> &vec_stream, int dir_flags )
