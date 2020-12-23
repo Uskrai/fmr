@@ -41,6 +41,8 @@ Window::Window(
     HideRowLabels();
     DisableCellEditControl();
     EnableEditing( false );
+    SetCellHighlightColour( *wxWHITE );
+    CreateGrid( 0, 0 );
 }
 
 bool Window::Destroy()
@@ -59,20 +61,22 @@ void Window::Open( const wxString &name )
 
     handler_->Traverse(true);
 
-    wxSize sz = GetSize();
-
-    int column = sz.GetWidth() / 300;
+    int column = 5;
     int row = ceil(double(handler_->Size()) / double(column));
 
-    SetDefaultColSize( 300 );
-    SetDefaultRowSize( 300 );
-    CreateGrid( row, column );
+    int size = GetSize().GetWidth() / column;
+    SetDefaultRowSize( size );
+    SetDefaultColSize( size );
 
-    list_bitmap_.clear();
-    list_bitmap_.assign( handler_->Size(), SBitmap() );
+    auto table = new wxGridStringTable();
+    table->AppendRows( row );
+    table->AppendCols( column );
+
+    SetTable( table, true );
 
     std::vector<StreamBitmap> list_item;
     list_item.assign( handler_->Size(), StreamBitmap() );
+
     size_t idx = 0;
     for ( auto &it : handler_->GetChild() )
     {
