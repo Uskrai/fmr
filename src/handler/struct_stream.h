@@ -23,13 +23,10 @@
 
 #include "base/compare.h"
 #include "handler/abstract_handler.h"
-
 #include <wx/mstream.h>
 class wxString;
 class wxInputStream;
 class wxOutputStream;
-class wxMemoryInputStream;
-class wxMemoryOutputStream;
 class AbstractHandler;
 
 namespace fmr
@@ -43,6 +40,10 @@ struct SStream
     SStream( wxInputStream *stream );
     SStream( const wxOutputStream &stream);
     SStream( wxOutputStream *stream );
+    SStream( const SStream &copy );
+    SStream( SStream &&move );
+
+    SStream &operator=( const SStream &copy );
 
     void Open( void *data = NULL, size_t length = 0 );
     void Open( const wxString &name );

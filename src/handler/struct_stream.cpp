@@ -50,6 +50,25 @@ SStream::SStream( wxInputStream *stream )
     Open(stream);
 }
 
+SStream::SStream( const SStream &copy )
+{
+    Open( copy.m_stream );
+    SetName( copy.m_name );
+}
+
+SStream::SStream( SStream &&move )
+{
+    m_stream = std::move( move.m_stream );
+    m_name = std::move( move.m_name );
+}
+
+SStream &SStream::operator = ( const SStream &copy )
+{
+    Open( copy.m_stream );
+    SetName( copy.m_name );
+    return *this;
+}
+
 void SStream::Open( void *data, size_t length )
 {
     m_stream = std::shared_ptr<wxMemoryOutputStream>(
@@ -77,15 +96,20 @@ void SStream::Open( wxInputStream *stream )
 
 void SStream::Open( const wxMemoryOutputStream &stream )
 {
+
     void *data = NULL;
     size_t length = 0;
-    stream.CopyTo( data, length );
+
+    if ( stream.IsOk() && stream.GetSize() != 0 )
+        stream.CopyTo( data, length );
+
     Open( data, length );
 }
 
 void SStream::Open( std::shared_ptr<wxMemoryOutputStream> stream )
 {
-    m_stream = stream;
+    if ( !stream ) return;
+    Open( *stream );
 }
 
 void SStream::Open( wxMemoryOutputStream *stream )
