@@ -62,14 +62,16 @@ bool LoadThread::Find( StreamBitmap &item )
         if ( !handler )
             return false;
 
-        if ( item.stream->GetName() != handler->GetName() )
+        if ( item.stream->GetName() == handler->GetName() )
         {
+            handler->Traverse( true );
             for ( auto &it : handler->GetChild() )
             {
                 StreamBitmap temp;
                 temp.stream = &it;
                 temp.bitmap = item.bitmap;
-                return Find( temp );
+                if ( Find( temp ) )
+                    return true;
             }
         }
     }
