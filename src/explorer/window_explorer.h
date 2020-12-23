@@ -50,6 +50,7 @@ class Window
             const wxString &name = wxPanelNameStr
         );
 
+        bool Open( std::shared_ptr<AbstractHandler> handler );
         bool Open( const wxString &name );
 
         void Clear();

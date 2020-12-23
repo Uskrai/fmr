@@ -16,6 +16,7 @@
  */
 
 #include "explorer/window_explorer.h"
+#include <wx/filename.h>
 
 namespace fmr
 {
@@ -58,35 +59,32 @@ bool Window::Destroy()
     return wxWindow::Destroy();
 }
 
-bool Window::Open( const wxString &name )
+bool Window::Open( std::shared_ptr<AbstractHandler> handler )
 {
-    if ( name.IsEmpty() )
+    if ( !handler )
         return false;
 
-    handler_ = std::shared_ptr<AbstractHandler>(
-        HandlerFactory::NewHandler( name )
-    );
-
-    Clear();
-
-    handler_->Traverse(true);
+    handler->Traverse( false );
 
     int column = 5;
-    int row = ceil(double(handler_->Size()) / double(column));
+    int row = ceil(double(handler->Size()) / double(column));
+
+    Clear();
 
     int size = GetSize().GetWidth() / column;
     SetDefaultRowSize( size );
     SetDefaultColSize( size );
 
-    grid_table_->Clear();
-    grid_table_->AppendRows( row );
-    grid_table_->AppendCols( column );
+
+    GetTable()->AppendRows( row );
+    GetTable()->AppendCols( column );
+
 
     std::vector<StreamBitmap> list_item;
-    list_item.assign( handler_->Size(), StreamBitmap() );
+    list_item.assign( handler->Size(), StreamBitmap() );
 
     size_t idx = 0;
-    for ( auto &it : handler_->GetChild() )
+    for ( auto &it : handler->GetChild() )
     {
         list_item.at(idx).stream =
             new SStream( std::move(it) );
@@ -96,7 +94,7 @@ bool Window::Open( const wxString &name )
     }
 
     SetGridCursor(0,0);
-    handler_->Clear();
+    handler->Clear();
 
     int cur_row = 0;
     int cur_col = 0;
@@ -116,6 +114,7 @@ bool Window::Open( const wxString &name )
         }
     }
 
+
     list_item_ = list_item;
     controller_.SetParameter( list_item );
     controller_.Load();
@@ -123,9 +122,26 @@ bool Window::Open( const wxString &name )
     return true;
 }
 
+bool Window::Open( const wxString &name )
+{
+    if ( name.IsEmpty() )
+        return false;
+
+    auto handler = std::shared_ptr<AbstractHandler>(
+        HandlerFactory::NewHandler( name )
+    );
+
+    if ( Open( handler ) )
+    {
+        handler_ = handler;
+        return true;
+    }
+
+    return false;
+}
+
 void Window::Clear()
 {
-    handler_->Clear();
     list_cell_pos_.clear();
     list_item_.clear();
     if ( grid_table_->GetRowsCount() > 0 )
@@ -150,21 +166,28 @@ void Window::OnGridEnter( wxKeyEvent &event )
             if ( it == selected_cell_ )
             {
                 wxString path = list_item_.at(idx).stream->GetName();
-                if ( ! Open( path ) )
-                {
+                auto handler = std::shared_ptr<AbstractHandler>(
+                    HandlerFactory::NewHandler( path )
+                );
 
-                    wxCommandEvent *open_event = new wxCommandEvent(
-                            EVT_COMMAND_THREAD_COMPLETED,
-                            GetGridWindow()->GetId()
-                    );
+                handler->Traverse( true );
 
-                    open_event->SetString( path );
+                if ( wxFileName::DirExists( path ) )
+                    for ( const auto &it : handler->GetChild() )
+                        if ( ! wxImage::CanRead( *it.GetStream() ) )
+                            return void( Open( path ) );
 
-                    wxQueueEvent(
-                        GetGridWindow()->GetParent(),
-                        open_event
-                    );
-                }
+                wxCommandEvent *open_event = new wxCommandEvent(
+                        EVT_OPEN_FILE,
+                        GetId()
+                );
+
+                open_event->SetString( path );
+
+                wxQueueEvent(
+                    GetParent(),
+                    open_event
+                );
             }
             idx++;
         }
