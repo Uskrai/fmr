@@ -24,8 +24,9 @@ namespace fmr
 
 enum HandlerType
 {
-    Archive,
-    Default
+    kHandlerWxArchive,
+    kHandlerDefault,
+    kHandlerNotFound
 };
 
 class HandlerFactory

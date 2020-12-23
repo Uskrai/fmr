@@ -45,15 +45,16 @@ bool HandlerFactory::Find( const wxString& path )
 
 bool HandlerFactory::Find( const wxString& path, HandlerType& type )
 {
+    type = kHandlerNotFound;
     if ( WxArchiveHandler::CanHandle(path) )
     {
-        type = Archive;
+        type = kHandlerWxArchive;
         return true;
     }
 
     if ( DefaultHandler::CanHandle(path) )
     {
-        type = Default;
+        type = kHandlerDefault;
         return true;
     }
     return false;
@@ -76,9 +77,9 @@ AbstractHandler* HandlerFactory::NewHandler( const HandlerType& type )
 {
     switch ( type )
     {
-        case Archive:
+        case kHandlerWxArchive:
             return new WxArchiveHandler();
-        case Default:
+        case kHandlerDefault:
             return new DefaultHandler();
         default:
             return NULL;
