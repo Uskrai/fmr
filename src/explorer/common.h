@@ -29,8 +29,8 @@ namespace explorer
 
 struct StreamBitmap
 {
-    SBitmap *bitmap;
-    SStream *stream;
+    SBitmap *bitmap = NULL;
+    SStream *stream = NULL;
 };
 
 }; // namespace explorer
