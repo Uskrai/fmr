@@ -77,14 +77,23 @@ void Panel::OnCharHook( wxKeyEvent &event )
         wxString path;
         if ( m_reader )
         {
-            if ( m_reader->GetHandler() )
-                path = m_reader->GetHandler()->GetName();
+            std::shared_ptr<AbstractHandler> handler = NULL;
+            handler = m_reader->GetHandler();
+            if ( handler )
+                path = handler->GetName();
+
+
+            if ( handler && handler->GetParent() )
+                path = handler->GetParent()->GetName();
             m_reader->Hide();
         }
 
         if ( path == "" )
+        {
             path = Config::Get()->Read("RecentlyOpened", wxString() );
-        
+            path = Path::GetParent(path);
+        }
+
         explorer_->Show();
         explorer_->Open( path );
         sizer->Layout();
