@@ -18,6 +18,7 @@
 #include "explorer/image_window_explorer.h"
 #include "bitmap/bmp.h"
 #include <wx/dc.h>
+#include "base/path.h"
 
 namespace fmr
 {
@@ -25,26 +26,65 @@ namespace fmr
 namespace explorer
 {
 
-ImageWindow::ImageWindow( StreamBitmap *stream_bitmap )
+ImageWindow::ImageWindow( const StreamBitmap &stream_bitmap )
 {
-    SetStreamBitmap( stream_bitmap );
+    SetStream( stream_bitmap.stream );
+    SetBitmap( stream_bitmap.bitmap );
 }
 
 ImageWindow::ImageWindow( const ImageWindow &other )
 {
-    SetStreamBitmap( other.stream_bitmap_ );
+    stream_ = new SStream( other.stream_ );
+    bitmap_ = new SBitmap( other.bitmap_ );
 }
 
-void ImageWindow::SetStreamBitmap( StreamBitmap *stream_bitmap )
+void ImageWindow::SetBitmap( SBitmap *bmp )
 {
-    stream_bitmap_ = stream_bitmap;
+    bitmap_ = bmp;
+}
+
+void ImageWindow::SetStream( SStream *stream )
+{
+    stream_ = stream;
 }
 
 void ImageWindow::Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col, bool isSelected )
 {
-    // SBitmap bmp;
-    // if ( stream_ )
-        // dc.DrawLabel( stream_->GetName() , bmp.GetBitmap(), rect );
+    wxRect bmp_rect( rect );
+    wxRect txt_rect( rect );
+
+    wxSize bmp_size = bmp_rect.GetSize();
+    bmp_size.Scale( 1, 0.8 );
+    bmp_rect.SetSize( bmp_size );
+
+    wxSize txt_size = txt_rect.GetSize();
+    txt_size.Scale( 1, 0.2 );
+    txt_rect.SetSize( txt_size );
+    txt_rect.SetPosition( bmp_rect.GetBottomLeft() );
+
+    if ( bitmap_->IsOk() )
+    {
+        wxRect bitmap_rect = wxRect( bitmap_->GetPosition(), bitmap_->GetSize() );
+        bitmap_rect = bitmap_rect.CenterIn( bmp_rect );
+        dc.DrawBitmap( bitmap_->GetBitmap(), bitmap_rect.GetPosition() );
+    }
+
+    if ( stream_ )
+    {
+        wxString filename = stream_->GetName().AfterLast( Path::Separator );
+        txt_size = dc.GetTextExtent( filename );
+        if ( txt_size.GetWidth() > rect.GetWidth() )
+        {
+            // todo : wrap string
+        };
+        wxRect filename_rect = wxRect();
+        filename_rect.SetSize( txt_size );
+        filename_rect = filename_rect.CenterIn( txt_rect );
+
+        dc.DrawText( filename, filename_rect.GetPosition() );
+
+    }
+
 }
 
 wxSize ImageWindow::GetBestSize( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, int row, int col )

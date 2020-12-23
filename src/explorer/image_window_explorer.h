@@ -34,16 +34,19 @@ class ImageWindow
 {
     public:
         ImageWindow(){};
-        ImageWindow( StreamBitmap *stream_bitmap );
+        ImageWindow( const StreamBitmap &stream_bitmap );
         ImageWindow( const ImageWindow &other  );
 
+        void SetBitmap( SBitmap *bmp );
+        void SetStream( SStream *stream );
+
         wxGridCellRenderer *Clone() const { return new ImageWindow( *this ); }
-        void SetStreamBitmap( StreamBitmap *stream );
 
         void Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col, bool isSelected );
         wxSize GetBestSize( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, int row, int col );
     protected:
-        StreamBitmap *stream_bitmap_ = NULL;
+        SStream *stream_ = NULL;
+        SBitmap *bitmap_ = NULL;
         wxGridCellAutoWrapStringRenderer string_wrapper_;
 };
 

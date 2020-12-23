@@ -76,16 +76,22 @@ void Window::Open( const wxString &name )
     size_t idx = 0;
     for ( auto &it : handler_->GetChild() )
     {
-        list_item.at(idx).stream = &it;
-        list_item.at(idx).bitmap = &list_bitmap_.at(idx);
+        list_item.at(idx).stream =
+            new SStream( std::move(it) );
+        list_item.at(idx).bitmap =
+            new SBitmap();
         idx++;
     }
+
+    handler_->Clear();
 
     int cur_row = 0;
     int cur_col = 0;
     for ( auto &it : list_item )
     {
-        auto renderer =  new ImageWindow( &it );
+        auto renderer =  new ImageWindow();
+        renderer->SetBitmap( it.bitmap );
+        renderer->SetStream( it.stream );
         SetCellRenderer( cur_row, cur_col, renderer );
 
         list_cell_pos_.push_back( wxGridCellCoords( cur_row, cur_col ) );
