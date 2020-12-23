@@ -20,8 +20,11 @@
 namespace fmr
 {
 
+wxDEFINE_EVENT( EVT_OPEN_FILE, wxCommandEvent );
+
 namespace explorer
 {
+
 
 wxBEGIN_EVENT_TABLE( Window, wxGrid )
         EVT_COMMAND( kLoadThreadID, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
@@ -55,10 +58,10 @@ bool Window::Destroy()
     return wxWindow::Destroy();
 }
 
-void Window::Open( const wxString &name )
+bool Window::Open( const wxString &name )
 {
     if ( name.IsEmpty() )
-        return;
+        return false;
 
     handler_ = std::shared_ptr<AbstractHandler>(
         HandlerFactory::NewHandler( name )
@@ -117,6 +120,7 @@ void Window::Open( const wxString &name )
     controller_.SetParameter( list_item );
     controller_.Load();
     Refresh();
+    return true;
 }
 
 void Window::Clear()
@@ -128,6 +132,55 @@ void Window::Clear()
         grid_table_->DeleteRows( 0, grid_table_->GetRowsCount() );
     if ( grid_table_->GetColsCount() > 0 )
         grid_table_->DeleteCols( 0, grid_table_->GetColsCount() );
+}
+
+void Window::OnThreadUpdate( wxCommandEvent &event )
+{
+    Refresh();
+}
+
+void Window::OnGridEnter( wxKeyEvent &event )
+{
+    int key_code = event.GetKeyCode();
+    if ( key_code == WXK_RETURN || key_code == WXK_NUMPAD_ENTER )
+    {
+        size_t idx = 0;
+        for( const auto &it : list_cell_pos_ )
+        {
+            if ( it == selected_cell_ )
+            {
+                wxString path = list_item_.at(idx).stream->GetName();
+                if ( ! Open( path ) )
+                {
+
+                    wxCommandEvent *open_event = new wxCommandEvent(
+                            EVT_COMMAND_THREAD_COMPLETED,
+                            GetGridWindow()->GetId()
+                    );
+
+                    open_event->SetString( path );
+
+                    wxQueueEvent(
+                        GetGridWindow()->GetParent(),
+                        open_event
+                    );
+                }
+            }
+            idx++;
+        }
+        return;
+    }
+
+    if ( key_code == WXK_BACK )
+    {
+        if ( handler_->GetParent() )
+        {
+            wxString name = handler_->GetParent()->GetName();
+            Open( name );
+        }
+        return;
+    }
+    event.Skip();
 }
 
 void Window::OnGridSelect( wxGridEvent &event )

@@ -31,8 +31,11 @@ class wxPanel;
 namespace fmr
 {
 
+wxDECLARE_EVENT( EVT_OPEN_FILE, wxCommandEvent );
+
 namespace explorer
 {
+
 
 class Window 
     : public wxGrid
@@ -47,7 +50,7 @@ class Window
             const wxString &name = wxPanelNameStr
         );
 
-        void Open( const wxString &name );
+        bool Open( const wxString &name );
 
         void Clear();
         bool Destroy();
@@ -57,11 +60,15 @@ class Window
         std::vector<SBitmap> list_bitmap_;
         std::vector<StreamBitmap> list_item_;
 
+        wxGridTableBase *grid_table_;
 
         std::vector<wxGridCellCoords> list_cell_pos_;
 
         void OnThreadUpdate( wxCommandEvent &event );
+        void OnGridEnter( wxKeyEvent &event );
+        void OnGridSelect( wxGridEvent &event );
 
+        wxGridCellCoords selected_cell_;
         wxDECLARE_EVENT_TABLE();
 };
 
