@@ -225,7 +225,19 @@ void Window::Select( const wxString &name )
 
 void Window::OnGridSelect( wxGridEvent &event )
 {
-    selected_cell_.Set( event.GetRow(), event.GetCol() );
+    wxGridCellCoords eve( event.GetRow(), event.GetCol() );
+
+    bool is_change = false;
+    for ( const auto &it : list_cell_pos_ )
+        if ( event.GetRow() == it.GetRow() && event.GetCol() == it.GetCol())
+            is_change = true;
+
+    if ( is_change )
+        selected_cell_.Set( event.GetRow(), event.GetCol() );
+    else
+        event.Veto();
+
+    Refresh();
 }
 
 
