@@ -55,12 +55,12 @@ void Controller::SetParameter( std::vector<StreamBitmap> &list_stream )
 
 void Controller::Load()
 {
-    if( load_thread_ )
-        DeleteThread( kLoadThreadID, g_sLock );
+    if( find_thread_ )
+        DeleteThread( kFindThreadID, g_sLock );
 
-    load_thread_ = new LoadThread( this, wxTHREAD_DETACHED, kLoadThreadID );
-    load_thread_->SetParameter( list_stream_ );
-    load_thread_->Run();
+    find_thread_ = new FindThread( this, wxTHREAD_DETACHED, kFindThreadID );
+    find_thread_->SetParameter( list_stream_ );
+    find_thread_->Run();
 }
 
 };

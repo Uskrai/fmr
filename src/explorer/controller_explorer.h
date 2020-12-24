@@ -20,6 +20,7 @@
 
 #include "explorer/common.h"
 #include "thread/thread.h"
+#include "explorer/find_explorer.h"
 #include "explorer/load_explorer.h"
 #include "handler/struct_stream.h"
 #include <wx/window.h>
@@ -33,7 +34,8 @@ namespace explorer
 
 enum ThreadID
 {
-    kLoadThreadID = wxID_HIGHEST + 40
+    kFindThreadID = wxID_HIGHEST + 40,
+    kLoadThreadID
 };
 
 
@@ -55,6 +57,7 @@ class Controller
     private:
         wxWindow *parent_;
         std::vector<StreamBitmap> list_stream_;
+        FindThread *find_thread_ = NULL;
         LoadThread *load_thread_ = NULL;
 };
 

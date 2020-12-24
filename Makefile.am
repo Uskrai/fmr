@@ -62,19 +62,19 @@ reader_LTLIBRARIES =  lib_load_reader.la lib_window_reader.la lib_zoom_reader.la
 
 explorer = src/explorer
 explorerdir = @abs_builddir@/explorer
-explorer_LTLIBRARIES = lib_window_explorer.la lib_controller_explorer.la lib_image_window_explorer.la lib_load_explorer.la
+explorer_LTLIBRARIES = lib_window_explorer.la lib_controller_explorer.la lib_image_window_explorer.la lib_find_explorer.la
 
     lib_window_explorer_la_SOURCES = $(explorer)/window_explorer.cpp
-    lib_window_explorer_la_LIBADD = lib_controller_explorer.la lib_image_window_explorer.la lib_load_explorer.la
+    lib_window_explorer_la_LIBADD = lib_controller_explorer.la lib_image_window_explorer.la lib_find_explorer.la
 
     lib_controller_explorer_la_SOURCES = $(explorer)/controller_explorer.cpp
-    lib_controller_explorer_la_LIBADD = lib_load_explorer.la
+    lib_controller_explorer_la_LIBADD = lib_find_explorer.la
 
     lib_image_window_explorer_la_SOURCES = $(explorer)/image_window_explorer.cpp
     lib_image_window_explorer_la_LIBADD = libpath.la
 
-    lib_load_explorer_la_SOURCES = $(explorer)/load_explorer.cpp
-    lib_load_explorer_la_LIBADD = libthread.la lib_image_util.la
+    lib_find_explorer_la_SOURCES = $(explorer)/find_explorer.cpp
+    lib_find_explorer_la_LIBADD = libthread.la lib_image_util.la
 
 # make libraries for gui
 gui = src/gui

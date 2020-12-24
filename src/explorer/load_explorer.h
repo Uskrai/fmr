@@ -15,14 +15,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_EXPLORER_LOADTHREAD
-#define FMR_EXPLORER_LOADTHREAD
+#ifndef FMR_EXPLORER_LOAD_EXPLORER
+#define FMR_EXPLORER_LOAD_EXPLORER
 
-#include "explorer/common.h"
 #include "thread/thread.h"
-#include "handler/abstract_handler.h"
-#include "handler/handler_factory.h"
-
 namespace fmr
 {
 
@@ -33,19 +29,13 @@ class LoadThread
     : public BaseThread
 {
     public:
-        LoadThread( ThreadController *parent, wxThreadKind type, int id )
-            : BaseThread( parent, type, id ){};
-        void SetParameter( std::vector<StreamBitmap> &list_stream );
-
-        bool Find( StreamBitmap &item );
-    private:
-        std::vector<StreamBitmap> list_stream_;
+        LoadThread( ThreadController *parent, wxThreadKind kind = wxTHREAD_DETACHED, int id = wxID_ANY )
+        : BaseThread( parent, kind, id ) {};
 
         ExitCode Entry();
 };
 
-
-}; // end of namespace Explorer
+}; // namespace explorer
 
 }; // namespace fmr
 

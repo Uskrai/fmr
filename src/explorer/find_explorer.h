@@ -15,7 +15,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "explorer/load_explorer.h"
+#ifndef FMR_EXPLORER_LOADTHREAD
+#define FMR_EXPLORER_LOADTHREAD
+
+#include "explorer/common.h"
+#include "thread/thread.h"
+#include "handler/struct_stream.h"
+#include "handler/abstract_handler.h"
+#include "handler/handler_factory.h"
 
 namespace fmr
 {
@@ -23,11 +30,24 @@ namespace fmr
 namespace explorer
 {
 
-wxThread::ExitCode LoadThread::Entry()
+class FindThread
+    : public BaseThread
 {
-    return (wxThread::ExitCode)0;
-}
+    public:
+        FindThread( ThreadController *parent, wxThreadKind type, int id )
+            : BaseThread( parent, type, id ){};
+        void SetParameter( std::vector<StreamBitmap> &list_stream );
 
-}
+        bool Find( StreamBitmap &item );
+    private:
+        std::vector<StreamBitmap> list_stream_;
+
+        ExitCode Entry();
+};
+
+
+}; // end of namespace Explorer
 
 }; // namespace fmr
+
+#endif
