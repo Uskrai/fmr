@@ -100,7 +100,7 @@ void ThreadController::OnCompleted( wxCommandEvent &event )
 
 BaseThread::BaseThread( ThreadController *parent, wxThreadKind type, int id )
 {
-    m_parent = parent;
+    parent_ = parent;
     SetId(id);
 }
 
@@ -112,19 +112,20 @@ void BaseThread::SetId( int id )
 
 void BaseThread::Update()
 {
-    ThreadUpdate( m_parent, m_id );
+    ThreadUpdate( GetParent(), m_id );
 }
 
 void BaseThread::Completed()
 {
-    ThreadCompleted( m_parent, m_id );
+    ThreadCompleted( GetParent(), m_id );
 }
 
 
 BaseThread::~BaseThread()
 {
     wxCriticalSectionLocker locker(g_sLock);
-    m_parent->DoSetNull(m_id);
+    if ( GetParent() )
+        GetParent()->DoSetNull(m_id);
 }
 
 }; // namespace fmr

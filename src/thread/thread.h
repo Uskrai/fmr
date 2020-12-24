@@ -57,10 +57,11 @@ class BaseThread : public wxThread
         ~BaseThread();
 
         void SetId( int id );
+        ThreadController *GetParent(){ return parent_; }
     protected:
         void Update();
         void Completed();
-        ThreadController *m_parent = NULL;
+        ThreadController *parent_ = NULL;
         int m_id;
 };
 

@@ -33,12 +33,6 @@ void ZoomThread::SetParameter( std::shared_ptr<AbstractHandler> handler, std::sh
     m_scale = scale;
 }
 
-ZoomThread::~ZoomThread()
-{
-    wxCriticalSectionLocker locker(g_sLock);
-    m_parent->DoSetNull( m_id );
-}
-
 wxThread::ExitCode ZoomThread::Entry()
 {
     if ( m_handler && m_bitmap )

@@ -44,7 +44,6 @@ class ZoomThread :
     public :
         ZoomThread( ThreadController *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = wxID_ANY )
             : BaseThread(parent,type,id){} ;
-        ~ZoomThread();
         void SetParameter( std::shared_ptr<AbstractHandler> handler, std::shared_ptr<Bitmap> bitmap, float scale );
 
     protected :
