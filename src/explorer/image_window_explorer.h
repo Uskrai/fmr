@@ -40,6 +40,11 @@ class ImageWindow
         void SetBitmap( SBitmap *bmp );
         void SetStream( SStream *stream );
 
+        const SStream *GetStream() const;
+        SStream *GetStream();
+        const SBitmap *GetBitmap() const;
+        SBitmap *GetBitmap();
+
         wxGridCellRenderer *Clone() const { return new ImageWindow( *this ); }
 
         void Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col, bool isSelected );

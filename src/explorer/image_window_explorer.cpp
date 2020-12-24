@@ -48,6 +48,18 @@ void ImageWindow::SetStream( SStream *stream )
     stream_ = stream;
 }
 
+const SStream *ImageWindow::GetStream() const
+    { return stream_; }
+
+SStream *ImageWindow::GetStream()
+    { return stream_; }
+
+const SBitmap *ImageWindow::GetBitmap() const
+    { return bitmap_; }
+
+SBitmap *ImageWindow::GetBitmap()
+    { return bitmap_; }
+
 void ImageWindow::Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col, bool isSelected )
 {
     wxRect bmp_rect( rect );
