@@ -83,7 +83,6 @@ bool LoadThread::Find( StreamBitmap &item )
             handler->Traverse( isGetStream );
             for ( auto &it : handler->GetChild() )
             {
-                printf("%d\n", it.IsOk() );
                 if ( TestDestroy() )
                     break;
 

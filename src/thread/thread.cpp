@@ -99,6 +99,7 @@ void ThreadController::OnCompleted( wxCommandEvent &event )
 }
 
 BaseThread::BaseThread( ThreadController *parent, wxThreadKind type, int id )
+    : wxThread( type )
 {
     parent_ = parent;
     SetId(id);
