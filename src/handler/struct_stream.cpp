@@ -99,9 +99,13 @@ void SStream::Open( const wxMemoryOutputStream &stream )
 
     void *data = NULL;
     size_t length = 0;
+    auto buffer = stream.GetOutputStreamBuffer();
 
-    if ( stream.IsOk() && stream.GetSize() != 0 )
-        stream.CopyTo( data, length );
+    if ( buffer )
+    {
+        data = buffer->GetBufferStart();
+        length = buffer->GetBufferSize();
+    }
 
     Open( data, length );
 }
