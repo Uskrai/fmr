@@ -201,8 +201,10 @@ void Window::OnGridEnter( wxKeyEvent &event )
     {
         if ( handler_->GetParent() )
         {
+            wxString curr_name = handler_->GetName();
             wxString name = handler_->GetParent()->GetName();
             Open( name );
+            Select( curr_name );
         }
         return;
     }

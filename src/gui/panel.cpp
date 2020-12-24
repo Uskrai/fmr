@@ -16,6 +16,7 @@
  */
 
 #include "gui/panel.h"
+#include "base/path.h"
 #include "base/config.h"
 #include "handler/abstract_handler.h"
 
@@ -74,7 +75,7 @@ void Panel::OnCharHook( wxKeyEvent &event )
 {
     if ( event.GetKeyCode() == WXK_BACK )
     {
-        wxString path;
+        wxString path, select_path;
         if ( m_reader )
         {
             std::shared_ptr<AbstractHandler> handler = NULL;
@@ -82,6 +83,7 @@ void Panel::OnCharHook( wxKeyEvent &event )
             if ( handler )
                 path = handler->GetName();
 
+            select_path = path;
 
             if ( handler && handler->GetParent() )
                 path = handler->GetParent()->GetName();
@@ -91,14 +93,18 @@ void Panel::OnCharHook( wxKeyEvent &event )
         if ( path == "" )
         {
             path = Config::Get()->Read("RecentlyOpened", wxString() );
+
+            if ( select_path == "" )
+                select_path = path;
+
             path = Path::GetParent(path);
         }
 
         explorer_->Show();
         explorer_->Open( path );
+        explorer_->Select( select_path );
         sizer->Layout();
         return;
-        
     }
     event.DoAllowNextEvent();
     event.Skip();
