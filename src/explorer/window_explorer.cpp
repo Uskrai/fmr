@@ -206,6 +206,20 @@ void Window::OnGridEnter( wxKeyEvent &event )
     event.Skip();
 }
 
+void Window::Select( const wxString &name )
+{
+    size_t idx = 0;
+    for ( const auto &it : list_cell_pos_ )
+    {
+        auto renderer = list_renderer_[idx];
+        if ( renderer->GetStream() )
+            if ( renderer->GetStream()->GetName() == name )
+                return GoToCell( it );
+
+        idx++;
+    }
+}
+
 void Window::OnGridSelect( wxGridEvent &event )
 {
     selected_cell_.Set( event.GetRow(), event.GetCol() );

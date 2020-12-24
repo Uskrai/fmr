@@ -53,6 +53,8 @@ class Window
         bool Open( std::shared_ptr<AbstractHandler> handler );
         bool Open( const wxString &name );
 
+        void Select( const wxString &name );
+
         void Clear();
         bool Destroy();
     protected:
