@@ -62,6 +62,7 @@ class Window
         std::shared_ptr<AbstractHandler> handler_;
         std::vector<SBitmap> list_bitmap_;
         std::vector<StreamBitmap> list_item_;
+        std::vector<ImageWindow*> list_renderer_;
 
         wxGridTableBase *grid_table_;
 

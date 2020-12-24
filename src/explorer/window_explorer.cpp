@@ -106,6 +106,8 @@ bool Window::Open( std::shared_ptr<AbstractHandler> handler )
         SetCellRenderer( cur_row, cur_col, renderer );
 
         list_cell_pos_.push_back( wxGridCellCoords( cur_row, cur_col ) );
+        list_renderer_.push_back( renderer );
+
         cur_col++;
         if ( cur_col >= column )
         {
@@ -144,6 +146,7 @@ void Window::Clear()
 {
     list_cell_pos_.clear();
     list_item_.clear();
+    list_renderer_.clear();
     if ( grid_table_->GetRowsCount() > 0 )
         grid_table_->DeleteRows( 0, grid_table_->GetRowsCount() );
     if ( grid_table_->GetColsCount() > 0 )
