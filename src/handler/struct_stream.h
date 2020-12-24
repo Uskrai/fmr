@@ -24,6 +24,7 @@
 #include "base/compare.h"
 #include "handler/abstract_handler.h"
 #include <wx/mstream.h>
+#include <wx/event.h>
 class wxString;
 class wxInputStream;
 class wxOutputStream;
@@ -68,6 +69,35 @@ struct SStream
     std::shared_ptr<AbstractHandler> m_handler;
     wxString m_name;
 };
+
+class StreamEvent
+    : public wxCommandEvent
+{
+    public:
+        StreamEvent( wxEventType comand_type, int id = 0 )
+            : wxCommandEvent( comand_type, id ) {};
+        StreamEvent( const StreamEvent &other );
+        StreamEvent( StreamEvent &&other );
+        wxEvent *Clone(){ return new StreamEvent( *this ); }
+
+        void SetStream( const SStream &stream );
+        void SetStream( SStream &&other );
+        void SetIndex( size_t index );
+
+        const SStream &GetStream() const;
+        SStream &GetStream();
+        size_t GetIndex();
+    private:
+        SStream stream_;
+        size_t index_;
+};
+
+typedef void (wxEvtHandler::*StreamEventFunction)(StreamEvent&);
+
+#define StreamEventHandler( func ) wxEVENT_HANDLER_CAST( StreamEventFunction, func )
+
+#define EVT_STREAM( id, type, func ) \
+    wx__DECLARE_EVT1( type, id, StreamEventHandler(func) )
 
 }; // namespace fmr
 

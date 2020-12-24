@@ -165,4 +165,36 @@ std::shared_ptr<wxMemoryOutputStream> SStream::GetOutputStream()
     return m_stream;
 }
 
+StreamEvent::StreamEvent( const StreamEvent &other )
+    : wxCommandEvent( other.GetEventType(), other.GetId() )
+{
+    SetStream( other.stream_ );
+    SetIndex( other.index_ );
+}
+
+StreamEvent::StreamEvent( StreamEvent &&other )
+    : wxCommandEvent( other.GetEventType(), other.GetId() )
+{
+    SetStream( other.stream_ );
+    index_ = std::move(other.index_);
+}
+
+void StreamEvent::SetStream( const SStream &stream )
+    { stream_ = stream; }
+
+void StreamEvent::SetStream( SStream &&stream )
+    { stream_ = std::move( stream ); }
+
+void StreamEvent::SetIndex( size_t index )
+    { index_ = index; }
+
+const SStream &StreamEvent::GetStream() const
+    { return stream_; }
+
+SStream &StreamEvent::GetStream()
+    { return stream_; }
+
+size_t StreamEvent::GetIndex()
+    { return index_; }
+
 }; // namespace fmr
