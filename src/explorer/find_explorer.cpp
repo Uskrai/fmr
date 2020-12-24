@@ -59,7 +59,28 @@ bool FindThread::Find( StreamBitmap &item )
 
     if ( wxImage::CanRead( *item.stream->GetStream() ) )
     {
+        StreamEvent *event = new StreamEvent( EVT_STREAM_FOUND, m_id );
+        size_t idx = 0, index = 0;
 
+        for ( const auto &it : list_stream_ )
+        {
+            if ( it.bitmap == item.bitmap )
+            {
+                idx = index;
+                break;
+            }
+            index++;
+        }
+
+
+        event->SetIndex( idx );
+        event->SetStream( *item.stream );
+        wxQueueEvent(
+            GetParent(),
+            event
+        );
+
+        return true;
     }
     else
     {
