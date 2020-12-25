@@ -35,9 +35,6 @@ Controller::Controller( wxWindow *parent )
 {
     parent_ = parent;
 
-    load_thread_ = new LoadThread( this, wxTHREAD_DETACHED, kLoadThreadID );
-    if ( load_thread_->Run() != wxTHREAD_NO_ERROR )
-        wxLogMessage( "Can't Create Thread" );
 }
 
 Controller::~Controller()
@@ -97,19 +94,21 @@ void Controller::OnUpdate( wxCommandEvent &event )
 void Controller::SetThumbSize( const wxSize &size )
 {
     thumb_size_ = size;
-    if ( load_thread_ )
-        load_thread_->SetSize( thumb_size_ );
 }
 
 void Controller::Load()
 {
     DeleteThread( kFindThreadID, g_sLock );
+    DeleteThread( kLoadThreadID, g_sLock );
 
-    if( load_thread_ )
-        load_thread_->Clear();
 
     find_thread_ = new FindThread( this, wxTHREAD_DETACHED, kFindThreadID );
     find_thread_->SetParameter( list_stream_ );
+
+    load_thread_ = new LoadThread( this, wxTHREAD_DETACHED, kLoadThreadID );
+    load_thread_->SetSize( thumb_size_ );
+
+    load_thread_->Run();
     find_thread_->Run();
 }
 

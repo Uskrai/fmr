@@ -69,8 +69,9 @@ wxThread::ExitCode LoadThread::Entry()
         if ( load_queue_.size() > 0 && !TestDestroy() )
         {
             StreamBitmap &stream = load_queue_.front();
+            std::shared_ptr<wxInputStream> input_stream = stream.stream->GetStream();
 
-            if ( !TestDestroy() && wxImage::CanRead( *stream.stream->GetStream() ) )
+            if ( !TestDestroy() && wxImage::CanRead( *input_stream ) )
             {
                 Load( stream );
             }
@@ -80,16 +81,18 @@ wxThread::ExitCode LoadThread::Entry()
                     HandlerFactory::NewHandler( stream.stream->GetHandlerPath() )
                 );
 
+                if ( !TestDestroy() )
                 handler->Traverse( true );
 
                 size_t index = handler->Index( stream.stream->GetName() );
 
-                if ( handler->IsExist( index ) )
+                if ( handler->IsExist( index ) && !TestDestroy() )
                     stream.stream = std::shared_ptr<SStream>(
                         new SStream( handler->Item( index ) )
                     );
 
-                Load( stream );
+                if ( !TestDestroy() )
+                    Load( stream );
             }
 
             Update();
