@@ -62,6 +62,7 @@ class Controller
         wxSize thumb_size_;
 
         void OnFound( StreamEvent &event );
+        void OnUpdate( wxCommandEvent &event );
         wxDECLARE_EVENT_TABLE();
 };
 

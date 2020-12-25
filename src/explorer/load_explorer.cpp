@@ -73,7 +73,6 @@ wxThread::ExitCode LoadThread::Entry()
             if ( !TestDestroy() && wxImage::CanRead( *stream.stream->GetStream() ) )
             {
                 Load( stream );
-                Update();
             }
             else
             {
@@ -93,6 +92,7 @@ wxThread::ExitCode LoadThread::Entry()
                 Load( stream );
             }
 
+            Update();
             load_queue_.pop();
         }
     }

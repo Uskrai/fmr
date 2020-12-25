@@ -28,6 +28,7 @@ namespace explorer
 
 wxBEGIN_EVENT_TABLE( Controller, ThreadController )
     EVT_STREAM( kFindThreadID, EVT_STREAM_FOUND, Controller::OnFound )
+    EVT_COMMAND( kLoadThreadID, EVT_COMMAND_THREAD_UPDATE, Controller::OnUpdate )
 wxEND_EVENT_TABLE()
 
 Controller::Controller( wxWindow *parent )
@@ -86,6 +87,11 @@ void Controller::OnFound( StreamEvent &event )
         if ( load_thread_ )
             load_thread_->Push( stream );
     }
+}
+
+void Controller::OnUpdate( wxCommandEvent &event )
+{
+    Update( event.GetId() );
 }
 
 void Controller::SetThumbSize( const wxSize &size )
