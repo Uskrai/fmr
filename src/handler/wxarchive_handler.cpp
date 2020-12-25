@@ -46,10 +46,13 @@ size_t WxArchiveHandler::Index( const wxString& name ) const
     if ( name == m_name ) return 0;
 
     size_t idx = 0;
-    while( Vector::IsExist( GetChild(), idx ) )
-        if ( m_all.at(idx).GetName() == name )
+    for ( const auto &it : GetChild() )
+    {
+        if ( it.GetName() == name )
             return idx;
-            
+        idx++;
+    }
+
     return -1;
 }
 
