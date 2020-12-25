@@ -80,15 +80,14 @@ class StreamEvent
         StreamEvent( StreamEvent &&other );
         wxEvent *Clone(){ return new StreamEvent( *this ); }
 
-        void SetStream( const SStream &stream );
-        void SetStream( SStream &&other );
+        void SetStream( std::shared_ptr<SStream> stream );
         void SetIndex( size_t index );
 
-        const SStream &GetStream() const;
-        SStream &GetStream();
+        const std::shared_ptr<SStream> GetStream() const;
+        std::shared_ptr<SStream> GetStream();
         size_t GetIndex();
     private:
-        SStream stream_;
+        std::shared_ptr<SStream> stream_;
         size_t index_;
 };
 

@@ -183,19 +183,16 @@ StreamEvent::StreamEvent( StreamEvent &&other )
     index_ = std::move(other.index_);
 }
 
-void StreamEvent::SetStream( const SStream &stream )
+void StreamEvent::SetStream( std::shared_ptr<SStream> stream )
     { stream_ = stream; }
-
-void StreamEvent::SetStream( SStream &&stream )
-    { stream_ = std::move( stream ); }
 
 void StreamEvent::SetIndex( size_t index )
     { index_ = index; }
 
-const SStream &StreamEvent::GetStream() const
+const std::shared_ptr<SStream> StreamEvent::GetStream() const
     { return stream_; }
 
-SStream &StreamEvent::GetStream()
+std::shared_ptr<SStream> StreamEvent::GetStream()
     { return stream_; }
 
 size_t StreamEvent::GetIndex()
