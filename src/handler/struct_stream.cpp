@@ -54,12 +54,14 @@ SStream::SStream( const SStream &copy )
 {
     Open( copy.m_stream );
     SetName( copy.m_name );
+    SetHandlerPath( copy.handler_path_ );
 }
 
 SStream::SStream( SStream &&move )
 {
     m_stream = std::move( move.m_stream );
     m_name = std::move( move.m_name );
+    handler_path_ = std::move( move.handler_path_ );
 }
 
 SStream &SStream::operator = ( const SStream &copy )
@@ -136,6 +138,9 @@ void SStream::SetName( const std::string &name )
 {
     SetName( wxString(name) );
 }
+
+void SStream::SetHandlerPath( const wxString &path )
+    { handler_path_ = path; }
 
 
 bool SStream::IsOk() const

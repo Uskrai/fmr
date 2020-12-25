@@ -116,6 +116,7 @@ void WxArchiveHandler::Traverse( bool GetStream)
     {
         m_all.push_back( SStream() );
         m_all.back().SetName( entry->GetName() );
+        m_all.back().SetHandlerPath( GetName() );
     }
 
     std::sort( m_all.begin(), m_all.end(), Compare::NaturalSortable );

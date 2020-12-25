@@ -25,7 +25,7 @@
 #include "handler/abstract_handler.h"
 #include <wx/mstream.h>
 #include <wx/event.h>
-class wxString;
+
 class wxInputStream;
 class wxOutputStream;
 class AbstractHandler;
@@ -57,17 +57,20 @@ struct SStream
     void SetName( const std::wstring &name );
     void SetName( const std::string &name );
 
+    void SetHandlerPath( const wxString &path );
+
     bool IsOk() const;
 
     std::wstring GetString() const { return m_name.ToStdWstring(); }
-    const wxString &GetName() const { return m_name; }
+    const wxString &GetName() const { return m_name; };
+    const wxString &GetHandlerPath() const { return handler_path_; }
     std::shared_ptr<AbstractHandler> GetHandler();
     std::shared_ptr<wxMemoryInputStream> GetStream() const ;
     std::shared_ptr<wxMemoryOutputStream> GetOutputStream();
 
     std::shared_ptr<wxMemoryOutputStream> m_stream;
     std::shared_ptr<AbstractHandler> m_handler;
-    wxString m_name;
+    wxString m_name, handler_path_;
 };
 
 class StreamEvent

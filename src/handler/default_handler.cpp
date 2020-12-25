@@ -180,6 +180,7 @@ void DefaultHandler::GetAllFiles( std::vector<struct SStream> &vec_stream, int d
         filename =  Path::GetFullPath( dir.GetNameWithSep() + filename );
         SStream stream;
         stream.SetName( filename );
+        stream.SetHandlerPath( GetName() );
         vec_stream.push_back( stream );
 
 
