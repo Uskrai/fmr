@@ -34,6 +34,12 @@ struct StreamBitmap
     std::shared_ptr<SStream> stream = NULL;
 };
 
+struct StringDraw
+{
+    wxString filename;
+    wxRect rect;
+};
+
 }; // namespace explorer
 
 }; // namespace fmr

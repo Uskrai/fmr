@@ -70,6 +70,46 @@ wxSize ImageWindow::GetBestBitmapSize( const wxSize &size )
     return best_size;
 }
 
+std::vector<StringDraw> SplitString( std::wstring string, const wxSize &size, wxDC &dc )
+{
+    std::vector<StringDraw> list_string;
+
+
+    StringDraw string_draw;
+
+    wxString per_space_string, per_char_string;
+
+    for ( const auto &it : string )
+    {
+        per_char_string += it;
+        wxSize text_extent = dc.GetTextExtent( per_space_string + per_char_string );
+
+        if ( text_extent.GetWidth() > size.GetWidth() )
+        {
+            string_draw.filename = std::move( per_space_string );
+
+            list_string.push_back( string_draw );
+
+            per_space_string = "";
+        }
+
+
+        if ( it == ' ' )
+        {
+            per_space_string += std::move(per_char_string);
+            per_char_string = "";
+
+        }
+    }
+
+    per_space_string +=  std::move( per_char_string );
+    string_draw.filename = std::move( per_space_string );
+
+    list_string.push_back( string_draw );
+
+    return list_string;
+}
+
 void ImageWindow::Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col, bool isSelected )
 {
     wxRect bmp_rect( rect );
@@ -80,7 +120,7 @@ void ImageWindow::Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRe
     wxSize txt_size = txt_rect.GetSize();
     txt_size.Scale( 1, 0.2 );
     txt_rect.SetSize( txt_size );
-    txt_rect.SetTop( bmp_rect.GetBottom() );
+    txt_rect.SetTop( bmp_rect.GetBottom() + 5 );
 
     if ( bitmap_->IsOk() )
     {
@@ -92,17 +132,24 @@ void ImageWindow::Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRe
 
     if ( stream_ )
     {
-        wxString filename = Path::GetName( stream_->GetName() );
-        txt_size = dc.GetTextExtent( filename );
-        if ( txt_size.GetWidth() > rect.GetWidth() )
-        {
-            // todo : wrap string
-        };
-        wxRect filename_rect = wxRect();
-        filename_rect.SetSize( txt_size );
-        filename_rect = filename_rect.CenterIn( txt_rect );
+        std::vector<StringDraw> filename;
 
-        dc.DrawText( filename, filename_rect.GetPosition() );
+        filename = SplitString( Path::GetName( stream_->GetName() ).ToStdWstring(), txt_size, dc );
+
+        wxPoint text_pos = txt_rect.GetTopLeft();
+
+        wxRect string_rect;
+
+        for ( const auto & it : filename )
+        {
+            string_rect.SetSize( dc.GetTextExtent( it.filename ) );
+            string_rect = string_rect.CenterIn( txt_rect );
+            string_rect.SetTop( text_pos.y );
+
+            dc.DrawText( it.filename, string_rect.GetPosition() );
+
+            text_pos = string_rect.GetBottomLeft();
+        }
     }
 
 }
