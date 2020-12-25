@@ -94,7 +94,7 @@ wxString WxArchiveHandler::GetFromCurrent( int i ) const
     if ( GetParent() )
     {
         auto &list_stream = GetParent()->GetChild();
-        size_t idx = GetParent()->Index( Path::GetName( GetName() ));
+        size_t idx = GetParent()->Index( GetName() );
         if ( idx != size_t(-1) && Vector::IsExist( list_stream, idx + i ) )
             return list_stream.at( idx + i ).GetName();
     }
