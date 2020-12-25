@@ -16,6 +16,9 @@
  */
 
 #include "explorer/controller_explorer.h"
+#include "base/vector.h"
+
+#include <wx/log.h>
 
 namespace fmr
 {
@@ -23,9 +26,23 @@ namespace fmr
 namespace explorer
 {
 
+wxBEGIN_EVENT_TABLE( Controller, ThreadController )
+    EVT_STREAM( kFindThreadID, EVT_STREAM_FOUND, Controller::OnFound )
+wxEND_EVENT_TABLE()
+
+Controller::Controller( wxWindow *parent )
+{
+    parent_ = parent;
+
+    load_thread_ = new LoadThread( this, wxTHREAD_DETACHED, kLoadThreadID );
+    if ( load_thread_->Run() != wxTHREAD_NO_ERROR )
+        wxLogMessage( "Can't Create Thread" );
+}
+
 Controller::~Controller()
 {
     DeleteThread( kLoadThreadID, g_sLock );
+    DeleteThread( kFindThreadID, g_sLock );
 }
 
 void Controller::DoSetNull( int id )
@@ -34,6 +51,9 @@ void Controller::DoSetNull( int id )
     {
         case kLoadThreadID:
             load_thread_ = NULL;
+            break;
+        case kFindThreadID:
+            find_thread_ = NULL;
             break;
     };
 }
@@ -44,6 +64,8 @@ wxThread *Controller::GetThread( int id )
     {
         case kLoadThreadID:
             return load_thread_;
+        case kFindThreadID:
+            return find_thread_;
     }
     return NULL;
 }
@@ -53,15 +75,39 @@ void Controller::SetParameter( std::vector<StreamBitmap> &list_stream )
     list_stream_ = list_stream;
 }
 
+void Controller::OnFound( StreamEvent &event )
+{
+    if ( Vector::IsExist(  list_stream_, event.GetIndex() ))
+    {
+
+        StreamBitmap stream = list_stream_[ event.GetIndex() ];
+        stream.stream = event.GetStream();
+
+        if ( load_thread_ )
+            load_thread_->Push( stream );
+    }
+}
+
+void Controller::SetThumbSize( const wxSize &size )
+{
+    thumb_size_ = size;
+    if ( load_thread_ )
+        load_thread_->SetSize( thumb_size_ );
+}
+
 void Controller::Load()
 {
-    if( find_thread_ )
-        DeleteThread( kFindThreadID, g_sLock );
+    DeleteThread( kFindThreadID, g_sLock );
+
+    if( load_thread_ )
+        load_thread_->Clear();
 
     find_thread_ = new FindThread( this, wxTHREAD_DETACHED, kFindThreadID );
     find_thread_->SetParameter( list_stream_ );
     find_thread_->Run();
 }
+
+
 
 };
 

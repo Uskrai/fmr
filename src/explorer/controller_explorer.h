@@ -40,13 +40,13 @@ enum ThreadID
 
 
 class Controller
-    : ThreadController
+    : public ThreadController
 {
     public:
-        Controller( wxWindow *parent )
-        { parent_ = parent; }
+        Controller( wxWindow *parent );
         ~Controller();
         void SetParameter( std::vector<StreamBitmap> &list_stream );
+        void SetThumbSize( const wxSize &size );
 
         void Load();
 
@@ -59,6 +59,10 @@ class Controller
         std::vector<StreamBitmap> list_stream_;
         FindThread *find_thread_ = NULL;
         LoadThread *load_thread_ = NULL;
+        wxSize thumb_size_;
+
+        void OnFound( StreamEvent &event );
+        wxDECLARE_EVENT_TABLE();
 };
 
 }; // namespace explorer

@@ -20,6 +20,7 @@
 
 #include "bitmap/bmp.h"
 #include "handler/struct_stream.h"
+#include <memory>
 
 namespace fmr
 {
@@ -29,8 +30,8 @@ namespace explorer
 
 struct StreamBitmap
 {
-    SBitmap *bitmap = NULL;
-    SStream *stream = NULL;
+    std::shared_ptr<SBitmap> bitmap = NULL;
+    std::shared_ptr<SStream> stream = NULL;
 };
 
 }; // namespace explorer

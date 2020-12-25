@@ -37,21 +37,23 @@ class ImageWindow
         ImageWindow( const StreamBitmap &stream_bitmap );
         ImageWindow( const ImageWindow &other  );
 
-        void SetBitmap( SBitmap *bmp );
-        void SetStream( SStream *stream );
+        void SetBitmap( std::shared_ptr<SBitmap> bmp );
+        void SetStream( std::shared_ptr<SStream> stream );
 
-        const SStream *GetStream() const;
-        SStream *GetStream();
-        const SBitmap *GetBitmap() const;
-        SBitmap *GetBitmap();
+        const std::shared_ptr<SStream> GetStream() const;
+        std::shared_ptr<SStream> GetStream();
+        const std::shared_ptr<SBitmap> GetBitmap() const;
+        std::shared_ptr<SBitmap> GetBitmap();
 
         wxGridCellRenderer *Clone() const { return new ImageWindow( *this ); }
+
+        static wxSize GetBestBitmapSize( const wxSize &size );
 
         void Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col, bool isSelected );
         wxSize GetBestSize( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, int row, int col );
     protected:
-        SStream *stream_ = NULL;
-        SBitmap *bitmap_ = NULL;
+        std::shared_ptr<SStream> stream_ = NULL;
+        std::shared_ptr<SBitmap> bitmap_ = NULL;
         wxGridCellAutoWrapStringRenderer string_wrapper_;
 };
 

@@ -19,6 +19,10 @@
 #define FMR_EXPLORER_LOAD_EXPLORER
 
 #include "thread/thread.h"
+#include "explorer/common.h"
+
+#include <queue>
+
 namespace fmr
 {
 
@@ -33,6 +37,17 @@ class LoadThread
         : BaseThread( parent, kind, id ) {};
 
         ExitCode Entry();
+
+        void SetSize( const wxSize &size );
+        void SetImageQuality( wxImageResizeQuality quality );
+        void Clear();
+
+        void Push( StreamBitmap &stream_bitmap );
+    private:
+        std::queue<StreamBitmap> load_queue_;
+
+        wxSize image_size_;
+        wxImageResizeQuality image_quality_ = wxIMAGE_QUALITY_NORMAL;
 };
 
 }; // namespace explorer

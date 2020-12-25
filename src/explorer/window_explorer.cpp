@@ -75,6 +75,12 @@ bool Window::Open( std::shared_ptr<AbstractHandler> handler )
     SetDefaultRowSize( size );
     SetDefaultColSize( size );
 
+    wxSize best_bitmap_size = ImageWindow::GetBestBitmapSize(
+        wxSize( size, size )
+    );
+
+    controller_.SetThumbSize( best_bitmap_size );
+
 
     GetTable()->AppendRows( row );
     GetTable()->AppendCols( column );
@@ -87,9 +93,9 @@ bool Window::Open( std::shared_ptr<AbstractHandler> handler )
     for ( auto &it : handler->GetChild() )
     {
         list_item.at(idx).stream =
-            new SStream( std::move(it) );
+            std::shared_ptr<SStream>( new SStream( std::move(it) ) );
         list_item.at(idx).bitmap =
-            new SBitmap();
+            std::shared_ptr<SBitmap>( new SBitmap() );
         idx++;
     }
 

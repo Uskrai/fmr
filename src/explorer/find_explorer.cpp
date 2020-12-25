@@ -16,7 +16,6 @@
  */
 
 #include "explorer/find_explorer.h"
-#include "bitmap/image_util.h"
 #include "handler/abstract_handler.h"
 #include "handler/handler_factory.h"
 #include <wx/image.h>
@@ -72,9 +71,9 @@ bool FindThread::Find( StreamBitmap &item )
             index++;
         }
 
-
         event->SetIndex( idx );
-        event->SetStream( *item.stream );
+        event->SetStream( std::shared_ptr<SStream>(item.stream) );
+
         wxQueueEvent(
             GetParent(),
             event
@@ -106,10 +105,15 @@ bool FindThread::Find( StreamBitmap &item )
                     break;
 
                 StreamBitmap temp;
-                temp.stream = &it;
+                temp.stream = std::shared_ptr<SStream>(
+                    new SStream( it )
+                );
+
                 temp.bitmap = item.bitmap;
                 if ( !TestDestroy() && Find( temp ) )
+                {
                     return true;
+                }
             }
         }
     }

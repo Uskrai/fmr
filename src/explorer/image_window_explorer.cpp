@@ -34,51 +34,60 @@ ImageWindow::ImageWindow( const StreamBitmap &stream_bitmap )
 
 ImageWindow::ImageWindow( const ImageWindow &other )
 {
-    stream_ = new SStream( other.stream_ );
-    bitmap_ = new SBitmap( other.bitmap_ );
+    stream_ = std::make_shared<SStream>
+        ( SStream( *other.stream_ ) );
+
+    bitmap_ = std::make_shared<SBitmap>
+        ( SBitmap( *other.bitmap_ ) );
 }
 
-void ImageWindow::SetBitmap( SBitmap *bmp )
+void ImageWindow::SetBitmap( std::shared_ptr<SBitmap> bmp )
 {
     bitmap_ = bmp;
 }
 
-void ImageWindow::SetStream( SStream *stream )
+void ImageWindow::SetStream( std::shared_ptr<SStream> stream )
 {
     stream_ = stream;
 }
 
-const SStream *ImageWindow::GetStream() const
+const std::shared_ptr<SStream> ImageWindow::GetStream() const
     { return stream_; }
 
-SStream *ImageWindow::GetStream()
+std::shared_ptr<SStream> ImageWindow::GetStream()
     { return stream_; }
 
-const SBitmap *ImageWindow::GetBitmap() const
+const std::shared_ptr<SBitmap> ImageWindow::GetBitmap() const
     { return bitmap_; }
 
-SBitmap *ImageWindow::GetBitmap()
+std::shared_ptr<SBitmap> ImageWindow::GetBitmap()
     { return bitmap_; }
+
+wxSize ImageWindow::GetBestBitmapSize( const wxSize &size )
+{
+    wxSize best_size = size;
+    best_size.Scale( 1, 0.8 );
+    return best_size;
+}
 
 void ImageWindow::Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col, bool isSelected )
 {
     wxRect bmp_rect( rect );
     wxRect txt_rect( rect );
 
-    wxSize bmp_size = bmp_rect.GetSize();
-    bmp_size.Scale( 1, 0.8 );
-    bmp_rect.SetSize( bmp_size );
+    bmp_rect.SetSize( GetBestBitmapSize( rect.GetSize() ) );
 
     wxSize txt_size = txt_rect.GetSize();
     txt_size.Scale( 1, 0.2 );
     txt_rect.SetSize( txt_size );
-    txt_rect.SetPosition( bmp_rect.GetBottomLeft() );
+    txt_rect.SetTop( bmp_rect.GetBottom() );
 
     if ( bitmap_->IsOk() )
     {
         wxRect bitmap_rect = wxRect( bitmap_->GetPosition(), bitmap_->GetSize() );
         bitmap_rect = bitmap_rect.CenterIn( bmp_rect );
         dc.DrawBitmap( bitmap_->GetBitmap(), bitmap_rect.GetPosition() );
+
     }
 
     if ( stream_ )
