@@ -51,7 +51,9 @@ void Bitmap::Refresh()
             
             if ( bmp.IsOk() && bmp.IsLoaded() )
                 m_itemPage.at(i) = &m_item.at(pos);
-            else 
+            else if ( bmp.IsLoaded() )
+                m_itemPage.at(i) = &LOADED_BITMAP;
+            else
                 m_itemPage.at(i) = &NOTLOADED_BITMAP;
             pos++;
         }
