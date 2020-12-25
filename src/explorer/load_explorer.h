@@ -37,6 +37,7 @@ class LoadThread
         : BaseThread( parent, kind, id ) {};
 
         ExitCode Entry();
+        void Load( StreamBitmap &stream );
 
         void SetSize( const wxSize &size );
         void SetImageQuality( wxImageResizeQuality quality );

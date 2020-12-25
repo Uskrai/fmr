@@ -17,6 +17,7 @@
 
 #include "explorer/load_explorer.h"
 #include "bitmap/image_util.h"
+#include "handler/handler_factory.h"
 
 namespace fmr
 {
@@ -44,27 +45,52 @@ void LoadThread::Clear()
     load_queue_ = std::queue<StreamBitmap>();
 }
 
+void LoadThread::Load( StreamBitmap &stream )
+{
+    wxImage image;
+    if ( ! wxImage::CanRead( *stream.stream->GetStream() ) )
+        return;
+
+    if ( !TestDestroy() )
+        image_util::Load( image, *stream.stream->GetStream() );
+
+    if ( image.IsOk() && !TestDestroy() )
+        image_util::Rescale( image, image_size_, image_quality_ );
+
+    if ( image.IsOk() && !TestDestroy() )
+        stream.bitmap->SetBitmap( image );
+
+}
+
 wxThread::ExitCode LoadThread::Entry()
 {
     while ( !TestDestroy() )
     {
-        if ( load_queue_.size() > 0 )
+        if ( load_queue_.size() > 0 && !TestDestroy() )
         {
             StreamBitmap &stream = load_queue_.front();
-            wxImage image;
 
-            if ( wxImage::CanRead( *stream.stream->GetStream() ) )
+            if ( !TestDestroy() && wxImage::CanRead( *stream.stream->GetStream() ) )
             {
-                if ( !TestDestroy() )
-                    image_util::Load( image, *stream.stream->GetStream() );
-
-                if ( image.IsOk() && !TestDestroy() )
-                    image_util::Rescale( image, image_size_, image_quality_ );
-
-                if ( image.IsOk() && !TestDestroy() )
-                    stream.bitmap->SetBitmap( image );
-
+                Load( stream );
                 Update();
+            }
+            else
+            {
+                std::shared_ptr<AbstractHandler> handler(
+                    HandlerFactory::NewHandler( stream.stream->GetHandlerPath() )
+                );
+
+                handler->Traverse( true );
+
+                size_t index = handler->Index( stream.stream->GetName() );
+
+                if ( handler->IsExist( index ) )
+                    stream.stream = std::shared_ptr<SStream>(
+                        new SStream( handler->Item( index ) )
+                    );
+
+                Load( stream );
             }
 
             load_queue_.pop();
