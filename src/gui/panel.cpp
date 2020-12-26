@@ -33,11 +33,11 @@ wxEND_EVENT_TABLE()
 Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
     wxPanel( parent, id, position, size )
 {
-    this->sizer = new wxBoxSizer( wxHORIZONTAL );
-    this->m_reader = new reader::Window( this, ReaderWindow, wxDefaultPosition, GetClientSize(), 0, "Reader" );    
-    if ( ! m_reader->IsTransparentBackgroundSupported() )
-        m_reader->SetBackgroundColour( *wxBLACK );
-    this->sizer->Add( m_reader, 1, wxALL | wxEXPAND );
+    sizer_ = new wxBoxSizer( wxHORIZONTAL );
+    reader_ = new reader::Window( this, ReaderWindow, wxDefaultPosition, GetClientSize(), 0, "Reader" );    
+    if ( ! reader_->IsTransparentBackgroundSupported() )
+        reader_->SetBackgroundColour( *wxBLACK );
+    sizer_->Add( reader_, 1, wxALL | wxEXPAND );
 
     explorer_ = new explorer::Window(
         this,
@@ -49,17 +49,17 @@ Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
     );
     explorer_->SetDefaultCellBackgroundColour( *wxBLACK );
     explorer_->Hide();
-    sizer->Add( explorer_, 1, wxALL | wxEXPAND );
+    sizer_->Add( explorer_, 1, wxALL | wxEXPAND );
 
-    SetSizer( this->sizer );
+    SetSizer( sizer_ );
 };
 
 bool Panel::LoadFile( wxString path )
 {
-    bool ret = m_reader->Open( path );
-    m_reader->Show();
+    bool ret = reader_->Open( path );
+    reader_->Show();
     if ( ret )
-        m_reader->SetFocus();
+        reader_->SetFocus();
 
     if ( ret && explorer_ )
     {
@@ -76,10 +76,10 @@ void Panel::OnCharHook( wxKeyEvent &event )
     if ( event.GetKeyCode() == WXK_BACK )
     {
         wxString path, select_path;
-        if ( m_reader )
+        if ( reader_ )
         {
             std::shared_ptr<AbstractHandler> handler = NULL;
-            handler = m_reader->GetHandler();
+            handler = reader_->GetHandler();
             if ( handler )
                 path = handler->GetName();
 
@@ -87,7 +87,7 @@ void Panel::OnCharHook( wxKeyEvent &event )
 
             if ( handler && handler->GetParent() )
                 path = handler->GetParent()->GetName();
-            m_reader->Hide();
+            reader_->Hide();
         }
 
         if ( path == "" )
@@ -100,13 +100,13 @@ void Panel::OnCharHook( wxKeyEvent &event )
             path = Path::GetParent(path);
         }
 
-        if ( m_reader )
-            m_reader->Clear();
+        if ( reader_ )
+            reader_->Clear();
 
         explorer_->Show();
         explorer_->Open( path );
         explorer_->Select( select_path );
-        sizer->Layout();
+        sizer_->Layout();
         return;
     }
     event.DoAllowNextEvent();
@@ -126,8 +126,8 @@ void Panel::OnExplorerOpenFile( wxCommandEvent &event )
 
 bool Panel::Destroy()
 {
-    if ( m_reader )
-        m_reader->Destroy();
+    if ( reader_ )
+        reader_->Destroy();
     if ( explorer_ )
         explorer_->Destroy();
     return wxWindow::Destroy();
