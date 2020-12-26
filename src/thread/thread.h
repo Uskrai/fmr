@@ -38,6 +38,8 @@ class ThreadController
         virtual void DoSetNull( int id ) = 0;
         virtual wxThread *GetThread( int id ) = 0;
 
+        bool Delete( int thread_id, wxCriticalSection &lock );
+        bool Wait( int thread_id, wxCriticalSection &lock );
         bool DeleteThread( int thread_id, wxCriticalSection &lock );
 
         void Update( int id );
