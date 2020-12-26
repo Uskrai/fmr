@@ -40,18 +40,20 @@ void DefaultHandler::Open( const wxString& path )
     wxString parent = Path::GetParent(m_name);
     if ( parent != m_name )
     {
-        m_parent = new DefaultHandler( parent );
+        m_parent = std::shared_ptr<AbstractHandler>( 
+            new DefaultHandler( parent )
+        );
         m_parentName = parent;
-    }    
+    }
 }
 
 const wxString &DefaultHandler::GetName() const
     { return m_name; }
 
-const AbstractHandler *DefaultHandler::GetParent() const
+const std::shared_ptr<AbstractHandler> DefaultHandler::GetParent() const
     { return m_parent; }
 
-AbstractHandler *DefaultHandler::GetParent()
+std::shared_ptr<AbstractHandler> DefaultHandler::GetParent()
     { return m_parent; }
 
 const std::vector<SStream> &DefaultHandler::GetChild() const

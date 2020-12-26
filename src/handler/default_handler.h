@@ -46,8 +46,8 @@ class DefaultHandler
         void Traverse( bool GetStream = false );
         void TraverseStream();
 
-        const AbstractHandler *GetParent() const;
-        AbstractHandler *GetParent();
+        const std::shared_ptr<AbstractHandler> GetParent() const;
+        std::shared_ptr<AbstractHandler> GetParent();
 
         const std::vector<struct SStream> &GetChild() const;
         std::vector<struct SStream> &GetChild();
@@ -77,7 +77,7 @@ class DefaultHandler
         wxString m_filename;
         wxString m_parentName;
         
-        AbstractHandler* m_parent;
+        std::shared_ptr<AbstractHandler> m_parent;
 
         std::vector<struct SStream> m_all;
         HandlerSortFirst sort_flag_ = kSortFileFirst;

@@ -41,8 +41,8 @@ class AbstractHandler
         virtual ~AbstractHandler() {};
 
         // return handler of Parent's Directory
-        virtual const AbstractHandler *GetParent() const = 0; 
-        virtual AbstractHandler *GetParent() = 0;
+        virtual const std::shared_ptr<AbstractHandler> GetParent() const = 0; 
+        virtual std::shared_ptr<AbstractHandler> GetParent() = 0;
 
         // return all directory and files in current dir
         virtual const std::vector<struct SStream> &GetChild() const = 0;

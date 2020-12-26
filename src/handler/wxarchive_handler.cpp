@@ -36,7 +36,9 @@ void WxArchiveHandler::Open( const wxString& path )
     wxString parent = Path::GetParent(path);
     if ( parent != m_name )
     {
-        m_parent = new DefaultHandler(parent);
+        m_parent = std::shared_ptr<AbstractHandler>(
+            new DefaultHandler(parent)
+        );
         m_parentName = parent;
     }
 }
@@ -59,10 +61,10 @@ size_t WxArchiveHandler::Index( const wxString& name ) const
 const wxString &WxArchiveHandler::GetName() const
     { return m_name; }
 
-const AbstractHandler *WxArchiveHandler::GetParent() const
+const std::shared_ptr<AbstractHandler> WxArchiveHandler::GetParent() const
     { return m_parent; }
 
-AbstractHandler *WxArchiveHandler::GetParent()
+std::shared_ptr<AbstractHandler> WxArchiveHandler::GetParent()
     { return m_parent; }
 
 const std::vector<SStream> &WxArchiveHandler::GetChild() const

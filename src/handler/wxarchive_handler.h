@@ -39,8 +39,8 @@ class WxArchiveHandler
 
         const wxString &GetName() const;
 
-        const AbstractHandler *GetParent() const;
-        AbstractHandler *GetParent();
+        const std::shared_ptr<AbstractHandler> GetParent() const;
+        std::shared_ptr<AbstractHandler> GetParent();
 
         const std::vector<SStream> &GetChild() const;
         std::vector<SStream> &GetChild();
@@ -66,7 +66,7 @@ class WxArchiveHandler
     private:
         static bool Find( wxString& path, const wxArchiveClassFactory*& factory, wxInputStream*& in );
 
-        AbstractHandler *m_parent;
+        std::shared_ptr<AbstractHandler> m_parent;
 
         wxString m_name;
         wxString m_parentName;
