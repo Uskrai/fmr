@@ -21,6 +21,8 @@
 #include <wx/image.h>
 #include <wx/filename.h>
 
+#include <memory>
+
 namespace fmr
 {
 
@@ -66,7 +68,9 @@ bool FindThread::Find( StreamBitmap &item )
 
     if ( wxImage::CanRead( *item.stream->GetStream() ) )
     {
-        StreamEvent *event = new StreamEvent( EVT_STREAM_FOUND, m_id );
+        std::unique_ptr<StreamEvent> event = std::make_unique<StreamEvent>(
+            StreamEvent( EVT_STREAM_FOUND, m_id )
+        );
         size_t idx = 0, index = 0;
 
         TEST_RETURN();
@@ -88,7 +92,7 @@ bool FindThread::Find( StreamBitmap &item )
 
         wxQueueEvent(
             GetParent(),
-            event
+            event.release()
         );
 
         TEST_RETURN();
