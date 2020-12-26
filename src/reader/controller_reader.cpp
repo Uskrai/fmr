@@ -127,6 +127,12 @@ void Controller::DoSetNull( int id )
     }
 }
 
+void Controller::Clear()
+{
+    Delete( kLoadThreadID, g_sLock );
+    Delete( kZoomThreadID, g_sLock );
+}
+
 } // namespace reader
 
 } // namespace fmr

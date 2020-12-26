@@ -53,6 +53,8 @@ class Controller
         wxEvtHandler *GetParent() { return parent_; }
         wxThread *GetThread( int id );
         void DoSetNull( int id );
+
+        void Clear();
     
     private:
         wxWindow *parent_;

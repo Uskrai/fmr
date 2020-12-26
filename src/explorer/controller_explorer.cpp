@@ -68,6 +68,12 @@ wxThread *Controller::GetThread( int id )
     return NULL;
 }
 
+void Controller::Clear()
+{
+    Delete( kLoadThreadID, g_sLock );
+    Delete( kFindThreadID, g_sLock );
+}
+
 void Controller::SetParameter( std::vector<StreamBitmap> &list_stream )
 {
     list_stream_ = list_stream;
