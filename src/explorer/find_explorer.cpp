@@ -53,13 +53,23 @@ bool FindThread::Find( StreamBitmap &item )
 {
     wxImage img;
 
+    #define TEST_RETURN()   \
+        if ( TestDestroy() ) return false
+
+    TEST_RETURN();
+
+
     if ( ! item.stream->IsOk() )
         item.stream->Open( item.stream->GetName() );
+
+    TEST_RETURN();
 
     if ( wxImage::CanRead( *item.stream->GetStream() ) )
     {
         StreamEvent *event = new StreamEvent( EVT_STREAM_FOUND, m_id );
         size_t idx = 0, index = 0;
+
+        TEST_RETURN();
 
         for ( const auto &it : list_stream_ )
         {
@@ -71,6 +81,8 @@ bool FindThread::Find( StreamBitmap &item )
             index++;
         }
 
+        TEST_RETURN();
+
         event->SetIndex( idx );
         event->SetStream( std::shared_ptr<SStream>(item.stream) );
 
@@ -79,10 +91,13 @@ bool FindThread::Find( StreamBitmap &item )
             event
         );
 
+        TEST_RETURN();
+
         return true;
     }
     else
     {
+        TEST_RETURN();
         HandlerType type;
         HandlerFactory::Find( item.stream->GetName(), type );
 
@@ -93,27 +108,33 @@ bool FindThread::Find( StreamBitmap &item )
         if ( !handler )
             return false;
 
+        TEST_RETURN();
+
         handler->Open( item.stream->GetName() );
 
-        if ( item.stream->GetName() == handler->GetName() && !TestDestroy() )
+        if ( item.stream->GetName() == handler->GetName() )
         {
+            TEST_RETURN();
+
             bool isGetStream = type != kHandlerDefault;
             handler->Traverse( isGetStream );
+
+            TEST_RETURN();
+
             for ( auto &it : handler->GetChild() )
             {
-                if ( TestDestroy() )
-                    break;
+                TEST_RETURN();
 
                 StreamBitmap temp;
                 temp.stream = std::shared_ptr<SStream>(
                     new SStream( it )
                 );
 
+                TEST_RETURN();
+
                 temp.bitmap = item.bitmap;
                 if ( !TestDestroy() && Find( temp ) )
-                {
                     return true;
-                }
             }
         }
     }
