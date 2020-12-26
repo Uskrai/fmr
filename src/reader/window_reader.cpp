@@ -164,7 +164,8 @@ bool Window::Open( const wxString& path )
         Refresh();
 
         AdjustScrollBar();
-        config_->Write( "RecentlyOpened", path );
+        if ( file_handler_ )
+            config_->Write( "RecentlyOpened", file_handler_->GetName() );
         config_->Flush();
         is_opened_ = true;
         return true;
