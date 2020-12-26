@@ -40,6 +40,7 @@ class Panel :
         Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ); 
 
         bool LoadFile( wxString path );
+        bool OpenExplorer();
         bool Destroy();
     private:
         void OnKeyDown( wxKeyEvent &event );

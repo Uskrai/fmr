@@ -71,44 +71,56 @@ bool Panel::LoadFile( wxString path )
     return ret;
 }
 
-void Panel::OnCharHook( wxKeyEvent &event )
+bool Panel::OpenExplorer()
 {
-    if ( event.GetKeyCode() == WXK_BACK )
+    wxString path, select_path;
+
+    if ( reader_ )
     {
-        wxString path, select_path;
+        auto handler = reader_->GetHandler();
+        if ( handler )
+        {
+            select_path = handler->GetName();
+
+            if ( handler->GetParent() )
+                path = handler->GetParent()->GetName();
+            else
+                path = select_path;
+        }
+    }
+
+    if ( path == "" )
+    {
+        select_path = Config::Get()->Read("RecentlyOpened", wxString() );
+        path = Path::GetParent( select_path );
+    }
+
+    if ( ! explorer_ )
+        return false;
+
+    if ( explorer_->Open( path ) )
+    {
+        explorer_->Show();
+        explorer_->Select( select_path );
+
         if ( reader_ )
         {
-            std::shared_ptr<AbstractHandler> handler = NULL;
-            handler = reader_->GetHandler();
-            if ( handler )
-                path = handler->GetName();
-
-            select_path = path;
-
-            if ( handler && handler->GetParent() )
-                path = handler->GetParent()->GetName();
+            reader_->Clear();
             reader_->Hide();
         }
 
-        if ( path == "" )
-        {
-            path = Config::Get()->Read("RecentlyOpened", wxString() );
-
-            if ( select_path == "" )
-                select_path = path;
-
-            path = Path::GetParent(path);
-        }
-
-        if ( reader_ )
-            reader_->Clear();
-
-        explorer_->Show();
-        explorer_->Open( path );
-        explorer_->Select( select_path );
         sizer_->Layout();
-        return;
+
+        return true;
     }
+
+    return false;
+}
+
+void Panel::OnCharHook( wxKeyEvent &event )
+{
+    if ( event.GetKeyCode() == WXK_BACK )
+        return void( OpenExplorer() );
     event.DoAllowNextEvent();
     event.Skip();
 }
