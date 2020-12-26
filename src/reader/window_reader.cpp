@@ -76,6 +76,9 @@ bool Window::Destroy()
 
 void Window::Clear()
 {
+    bitmap_.reset();
+    file_handler_.reset();
+    controller_.Clear();
 }
 
 void Window::OnDraw( wxDC &dc )

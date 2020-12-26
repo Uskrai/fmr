@@ -131,6 +131,8 @@ void Controller::Clear()
 {
     Delete( kLoadThreadID, g_sLock );
     Delete( kZoomThreadID, g_sLock );
+    bitmap_.reset();
+    handler_.reset();
 }
 
 } // namespace reader

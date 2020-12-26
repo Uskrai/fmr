@@ -153,6 +153,8 @@ void Window::Clear()
     list_cell_pos_.clear();
     list_item_.clear();
     list_renderer_.clear();
+    controller_.Clear();
+    handler_.reset();
     if ( grid_table_->GetRowsCount() > 0 )
         grid_table_->DeleteRows( 0, grid_table_->GetRowsCount() );
     if ( grid_table_->GetColsCount() > 0 )

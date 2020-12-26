@@ -100,6 +100,9 @@ void Panel::OnCharHook( wxKeyEvent &event )
             path = Path::GetParent(path);
         }
 
+        if ( m_reader )
+            m_reader->Clear();
+
         explorer_->Show();
         explorer_->Open( path );
         explorer_->Select( select_path );
