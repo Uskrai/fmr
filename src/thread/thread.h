@@ -61,6 +61,8 @@ class BaseThread :
 
         void SetId( int id );
         ThreadController *GetParent(){ return parent_; }
+        void QueueEventParent( wxEvent *event );
+
     protected:
         void Update();
         void Completed();

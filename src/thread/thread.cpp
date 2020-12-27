@@ -124,14 +124,35 @@ void BaseThread::SetId( int id )
     m_id = id;
 }
 
+void BaseThread::QueueEventParent( wxEvent *event )
+{
+    if ( event )
+        event->SetEventObject( this );
+
+    wxQueueEvent(
+        GetParent(),
+        event
+    );
+}
+
 void BaseThread::Update()
 {
-    ThreadUpdate( GetParent(), m_id );
+    wxThreadEvent *event = new wxThreadEvent(
+        EVT_COMMAND_THREAD_UPDATE,
+        m_id
+    );
+
+    QueueEventParent( event );
 }
 
 void BaseThread::Completed()
 {
-    ThreadCompleted( GetParent(), m_id );
+    wxThreadEvent *event = new wxThreadEvent(
+        EVT_COMMAND_THREAD_COMPLETED,
+        m_id
+    );
+
+    QueueEventParent( event );
 }
 
 
