@@ -43,9 +43,13 @@ class LoadThread
         void SetImageQuality( wxImageResizeQuality quality );
         void Clear();
 
+        void DeleteOnEmptyQueue( bool condition = true );
+
         void Push( StreamBitmap &stream_bitmap );
     private:
         std::queue<StreamBitmap> load_queue_;
+
+        bool is_delete_on_empty_;
 
         wxSize image_size_;
         wxImageResizeQuality image_quality_ = wxIMAGE_QUALITY_NORMAL;

@@ -45,6 +45,9 @@ void LoadThread::Clear()
     load_queue_ = std::queue<StreamBitmap>();
 }
 
+void LoadThread::DeleteOnEmptyQueue( bool condition )
+    { is_delete_on_empty_ = condition; }
+
 void LoadThread::Load( StreamBitmap &stream )
 {
     wxImage image;
@@ -64,7 +67,7 @@ void LoadThread::Load( StreamBitmap &stream )
 
 wxThread::ExitCode LoadThread::Entry()
 {
-    while ( !TestDestroy() )
+    while ( !TestDestroy() &&  !( is_delete_on_empty_ && load_queue_.empty() ) )
     {
         if ( load_queue_.size() > 0 && !TestDestroy() )
         {
