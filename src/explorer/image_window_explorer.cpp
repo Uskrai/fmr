@@ -82,11 +82,15 @@ std::vector<StringDraw> SplitString( std::wstring string, const wxSize &size, wx
     for ( const auto &it : string )
     {
         per_char_string += it;
+
+        if ( it != ' ' )
+            continue;
+
         wxSize text_extent = dc.GetTextExtent( per_space_string + per_char_string );
 
         if ( text_extent.GetWidth() > size.GetWidth() )
         {
-            string_draw.filename = std::move( per_space_string );
+            string_draw.filename = per_space_string;
 
             list_string.push_back( string_draw );
 
@@ -94,16 +98,12 @@ std::vector<StringDraw> SplitString( std::wstring string, const wxSize &size, wx
         }
 
 
-        if ( it == ' ' )
-        {
-            per_space_string += std::move(per_char_string);
-            per_char_string = "";
-
-        }
+        per_space_string += per_char_string;
+        per_char_string = "";
     }
 
-    per_space_string +=  std::move( per_char_string );
-    string_draw.filename = std::move( per_space_string );
+    per_space_string +=  per_char_string;
+    string_draw.filename = per_space_string;
 
     list_string.push_back( string_draw );
 
