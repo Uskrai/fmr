@@ -90,10 +90,7 @@ bool FindThread::Find( StreamBitmap &item )
         event->SetIndex( idx );
         event->SetStream( std::shared_ptr<SStream>(item.stream) );
 
-        wxQueueEvent(
-            GetParent(),
-            event.release()
-        );
+        QueueEventParent( event.release() );
 
         TEST_RETURN();
 
