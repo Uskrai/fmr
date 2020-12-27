@@ -29,6 +29,13 @@ namespace fmr
 
 char DUMMY_BUFFER;
 
+void SStream::Open( void *data, size_t length )
+{
+    m_stream = std::shared_ptr<wxMemoryOutputStream>(
+        new wxMemoryOutputStream(data,length)
+    );
+}
+
 SStream::SStream( void *data, size_t length )
 {
     Open(data,length);
@@ -37,11 +44,7 @@ SStream::SStream( void *data, size_t length )
 SStream::SStream( const wxString &name )
     : SStream()
 {
-    if ( wxFileName::Exists(name) )
-    {
-        wxFileInputStream stream(name);
-    }
-    m_name = name;
+    Open( name );
 }
 
 SStream::SStream( wxInputStream *stream )
@@ -51,6 +54,7 @@ SStream::SStream( wxInputStream *stream )
 }
 
 SStream::SStream( const SStream &copy )
+    : SStream()
 {
     Open( copy.m_stream );
     SetName( copy.m_name );
@@ -71,13 +75,6 @@ SStream &SStream::operator = ( const SStream &copy )
     return *this;
 }
 
-void SStream::Open( void *data, size_t length )
-{
-    m_stream = std::shared_ptr<wxMemoryOutputStream>(
-        new wxMemoryOutputStream(data,length)
-    );
-}
-
 void SStream::Open( const wxString &name )
 {
     if ( wxFileName::FileExists(name) )
@@ -91,25 +88,12 @@ void SStream::Open( const wxString &name )
 void SStream::Open( wxInputStream *stream )
 {
     if ( stream )
-    {
         m_stream->Write( *stream );
-    }
 }
 
 void SStream::Open( const wxMemoryOutputStream &stream )
 {
-
-    void *data = NULL;
-    size_t length = 0;
-    auto buffer = stream.GetOutputStreamBuffer();
-
-    if ( buffer )
-    {
-        data = buffer->GetBufferStart();
-        length = buffer->GetBufferSize();
-    }
-
-    Open( data, length );
+    Open( stream.GetOutputStreamBuffer()->GetBufferStart(), stream.GetSize() );
 }
 
 void SStream::Open( std::shared_ptr<wxMemoryOutputStream> stream )
@@ -145,11 +129,11 @@ void SStream::SetHandlerPath( const wxString &path )
 
 bool SStream::IsOk() const
 {
-    return m_stream->IsOk() && 
+    return m_stream->IsOk() &&
         m_stream->GetSize() != 0;
 }
 
-std::shared_ptr<AbstractHandler> SStream::GetHandler() 
+std::shared_ptr<AbstractHandler> SStream::GetHandler()
 {
     return m_handler;
 }
@@ -160,11 +144,11 @@ std::shared_ptr<wxMemoryInputStream> SStream::GetStream() const
     if ( m_stream )
     {
         if ( m_stream->IsOk() && m_stream->GetSize() != 0 )
-        stream = std::shared_ptr<wxMemoryInputStream>( 
-            new wxMemoryInputStream(*m_stream) 
+        stream = std::shared_ptr<wxMemoryInputStream>(
+            new wxMemoryInputStream(*m_stream)
         );
         else
-            stream = std::shared_ptr<wxMemoryInputStream>( 
+            stream = std::shared_ptr<wxMemoryInputStream>(
                 new wxMemoryInputStream( &DUMMY_BUFFER, sizeof(DUMMY_BUFFER))
             );
     }
