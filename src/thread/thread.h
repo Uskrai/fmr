@@ -52,7 +52,8 @@ class ThreadController
         wxDECLARE_EVENT_TABLE();
 }; 
 
-class BaseThread : public wxThread
+class BaseThread :
+    public wxThread, public wxObject
 {
     public:
         BaseThread( ThreadController *parent, const wxThreadKind type = wxTHREAD_DETACHED, int id = -1 );
