@@ -63,10 +63,20 @@ class BaseThread :
         ThreadController *GetParent(){ return parent_; }
         void QueueEventParent( wxEvent *event );
 
+        /**
+         * @brief disable send event when TestDestroy() return true
+         * this method will disable any called by QueueEventParent from thread
+         * managed by this object ( so if QueueEventParent called by different thread, it still
+         * will be send )
+         * @param disable whether to disable the event or not
+         */
+        void DisableEventOnDestroy( bool disable = true );
+
     protected:
         void Update();
         void Completed();
         ThreadController *parent_ = NULL;
+        bool disable_event_on_destroy_ = false;
         int m_id;
 };
 

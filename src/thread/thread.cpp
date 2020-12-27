@@ -126,6 +126,18 @@ void BaseThread::SetId( int id )
 
 void BaseThread::QueueEventParent( wxEvent *event )
 {
+    if ( disable_event_on_destroy_ )
+    {
+        if ( wxThread::This() && GetId() == wxThread::This()->GetId() )
+        {
+            if ( TestDestroy() )
+            {
+                delete event;
+                return;
+            }
+        }
+    }
+
     if ( event )
         event->SetEventObject( this );
 
@@ -154,6 +166,9 @@ void BaseThread::Completed()
 
     QueueEventParent( event );
 }
+
+void BaseThread::DisableEventOnDestroy( bool disable )
+    { disable_event_on_destroy_ = disable;}
 
 
 BaseThread::~BaseThread()
