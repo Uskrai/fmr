@@ -101,6 +101,7 @@ bool Panel::OpenExplorer()
     if ( explorer_->Open( path ) )
     {
         explorer_->Show();
+        explorer_->SetFocus();
         explorer_->Select( select_path );
 
         if ( reader_ )
