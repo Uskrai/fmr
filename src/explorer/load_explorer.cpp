@@ -100,6 +100,8 @@ wxThread::ExitCode LoadThread::Entry()
         }
     }
 
+    Completed();
+
     return (wxThread::ExitCode)0;
 }
 
