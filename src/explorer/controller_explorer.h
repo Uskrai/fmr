@@ -65,6 +65,8 @@ class Controller
 
         void OnFound( StreamEvent &event );
         void OnUpdate( wxCommandEvent &event );
+        void OnFindCompleted( wxCommandEvent &event );
+        void OnLoadCompleted( wxCommandEvent &event );
         wxDECLARE_EVENT_TABLE();
 };
 
