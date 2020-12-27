@@ -99,7 +99,6 @@ bool Window::Open( std::shared_ptr<AbstractHandler> handler )
         idx++;
     }
 
-    SetGridCursor(0,0);
     handler->Clear();
 
     int cur_row = 0;
@@ -127,6 +126,7 @@ bool Window::Open( std::shared_ptr<AbstractHandler> handler )
     controller_.SetParameter( list_item );
     controller_.Load();
     Refresh();
+    GoToCell(0,0);
     return true;
 }
 
