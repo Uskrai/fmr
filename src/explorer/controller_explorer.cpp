@@ -84,7 +84,6 @@ void Controller::OnFound( StreamEvent &event )
 {
     if ( Vector::IsExist(  list_stream_, event.GetIndex() ))
     {
-
         StreamBitmap stream = list_stream_[ event.GetIndex() ];
         stream.stream = event.GetStream();
 
@@ -116,6 +115,7 @@ void Controller::Load()
 
 
     find_thread_ = new FindThread( this, wxTHREAD_DETACHED, kFindThreadID );
+    find_thread_->DisableEventOnDestroy();
     find_thread_->SetParameter( list_stream_ );
 
     load_thread_ = new LoadThread( this, wxTHREAD_DETACHED, kLoadThreadID );
