@@ -67,6 +67,10 @@ void LoadThread::Load( StreamBitmap &stream )
 
 wxThread::ExitCode LoadThread::Entry()
 {
+    #define TEST_BREAK()       \
+        if ( TestDestroy() )    \
+            break
+
     while ( !TestDestroy() &&  !( is_delete_on_empty_ && load_queue_.empty() ) )
     {
         if ( load_queue_.size() > 0 && !TestDestroy() )
@@ -74,18 +78,22 @@ wxThread::ExitCode LoadThread::Entry()
             StreamBitmap &stream = load_queue_.front();
             std::shared_ptr<wxInputStream> input_stream = stream.stream->GetStream();
 
+            TEST_BREAK();
+
             if ( !TestDestroy() && wxImage::CanRead( *input_stream ) )
             {
                 Load( stream );
             }
             else
             {
+                TEST_BREAK();
                 std::shared_ptr<AbstractHandler> handler(
                     HandlerFactory::NewHandler( stream.stream->GetHandlerPath() )
                 );
 
-                if ( !TestDestroy() )
                 handler->Traverse( true );
+
+                TEST_BREAK();
 
                 size_t index = handler->Index( stream.stream->GetName() );
 
@@ -94,13 +102,18 @@ wxThread::ExitCode LoadThread::Entry()
                         new SStream( handler->Item( index ) )
                     );
 
-                if ( !TestDestroy() )
-                    Load( stream );
+                TEST_BREAK();
+
+                Load( stream );
             }
+
+            TEST_BREAK();
 
             Update();
             load_queue_.pop();
         }
+
+        TEST_BREAK();
     }
 
     Completed();
