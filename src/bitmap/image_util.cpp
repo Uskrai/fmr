@@ -25,6 +25,9 @@ namespace image_util
 {
     bool Load( wxImage &image, wxInputStream &stream )
     {
+        if ( ! stream.IsOk() && stream.GetSize() == 0 )
+            return false;
+
         if ( ! wxImage::CanRead( stream ) )
             return false;
 
