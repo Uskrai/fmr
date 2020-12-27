@@ -40,6 +40,36 @@ struct StringDraw
     wxRect rect;
 };
 
+class StreamBitmapEvent
+    : public wxCommandEvent
+{
+    public:
+        StreamBitmapEvent( wxEventType type = wxEVT_NULL, int id = -1 )
+            : wxCommandEvent( type, id ) {}
+
+        StreamBitmapEvent( const StreamBitmapEvent &other )
+            : wxCommandEvent( other.GetEventType(), other.GetId() )
+        {
+            stream_bitmap_ = other.stream_bitmap_;
+        }
+
+        StreamBitmapEvent Clone() { return StreamBitmapEvent( *this ); }
+
+        StreamBitmap &GetStreamBitmap() { return stream_bitmap_; }
+
+        void SetStreamBitmap( const StreamBitmap &item )
+            { stream_bitmap_ = item;}
+    protected:
+        StreamBitmap stream_bitmap_;
+};
+
+typedef void (wxEvtHandler::*StreamBitmapEventFunction)(StreamBitmapEvent&);
+
+#define StreamBitmapEventHandler( func ) wxEVENT_HANDLER_CAST( StreamBitmapEventFunction, func )
+
+#define EVT_STREAM_BITMAP( id, type, func )    \
+    wx__DECLARE_EVT1( type, id, StreamBitmapEventHandler( func ) )
+
 }; // namespace explorer
 
 }; // namespace fmr
