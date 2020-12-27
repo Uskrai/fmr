@@ -55,7 +55,7 @@ class Controller
         void DoSetNull( int id );
 
         void Clear();
-    
+
     private:
         wxWindow *parent_;
         std::vector<StreamBitmap> list_stream_;
@@ -63,7 +63,7 @@ class Controller
         LoadThread *load_thread_ = NULL;
         wxSize thumb_size_;
 
-        void OnFound( StreamEvent &event );
+        void OnFound( StreamBitmapEvent &event );
         void OnUpdate( wxCommandEvent &event );
         void OnFindCompleted( wxCommandEvent &event );
         void OnLoadCompleted( wxCommandEvent &event );

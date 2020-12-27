@@ -30,7 +30,7 @@ namespace fmr
 namespace explorer
 {
 
-wxDECLARE_EVENT( EVT_STREAM_FOUND, StreamEvent );
+wxDECLARE_EVENT( EVT_STREAM_FOUND, StreamBitmapEvent );
 
 class FindThread
     : public BaseThread

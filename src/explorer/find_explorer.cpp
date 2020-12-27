@@ -29,7 +29,7 @@ namespace fmr
 namespace explorer
 {
 
-wxDEFINE_EVENT( EVT_STREAM_FOUND, StreamEvent );
+wxDEFINE_EVENT( EVT_STREAM_FOUND, StreamBitmapEvent );
 
 void FindThread::SetParameter( std::vector<StreamBitmap> &list_stream )
 {
@@ -68,27 +68,13 @@ bool FindThread::Find( StreamBitmap &item )
 
     if ( wxImage::CanRead( *item.stream->GetStream() ) )
     {
-        std::unique_ptr<StreamEvent> event = std::make_unique<StreamEvent>(
-            StreamEvent( EVT_STREAM_FOUND, m_id )
+        std::unique_ptr<StreamBitmapEvent> event = std::make_unique<StreamBitmapEvent>(
+            StreamBitmapEvent( EVT_STREAM_FOUND, m_id )
         );
-        size_t idx = 0, index = 0;
 
         TEST_RETURN();
 
-        for ( const auto &it : list_stream_ )
-        {
-            if ( it.bitmap == item.bitmap )
-            {
-                idx = index;
-                break;
-            }
-            index++;
-        }
-
-        TEST_RETURN();
-
-        event->SetIndex( idx );
-        event->SetStream( std::shared_ptr<SStream>(item.stream) );
+        event->SetStreamBitmap( item );
 
         QueueEventParent( event.release() );
 

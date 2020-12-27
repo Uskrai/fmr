@@ -27,7 +27,7 @@ namespace explorer
 {
 
 wxBEGIN_EVENT_TABLE( Controller, ThreadController )
-    EVT_STREAM( kFindThreadID, EVT_STREAM_FOUND, Controller::OnFound )
+    EVT_STREAM_BITMAP( kFindThreadID, EVT_STREAM_FOUND, Controller::OnFound )
     EVT_COMMAND( kLoadThreadID, EVT_COMMAND_THREAD_UPDATE, Controller::OnUpdate )
     EVT_COMMAND( kFindThreadID, EVT_COMMAND_THREAD_COMPLETED, Controller::OnFindCompleted )
 wxEND_EVENT_TABLE()
@@ -80,16 +80,10 @@ void Controller::SetParameter( std::vector<StreamBitmap> &list_stream )
     list_stream_ = list_stream;
 }
 
-void Controller::OnFound( StreamEvent &event )
+void Controller::OnFound( StreamBitmapEvent &event )
 {
-    if ( Vector::IsExist(  list_stream_, event.GetIndex() ))
-    {
-        StreamBitmap stream = list_stream_[ event.GetIndex() ];
-        stream.stream = event.GetStream();
-
-        if ( load_thread_ )
-            load_thread_->Push( stream );
-    }
+    if ( load_thread_ )
+        load_thread_->Push( event.GetStreamBitmap() );
 }
 
 void Controller::OnUpdate( wxCommandEvent &event )
