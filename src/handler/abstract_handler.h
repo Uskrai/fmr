@@ -69,6 +69,9 @@ class AbstractHandler
         virtual wxString GetPrev() const = 0;
 
         virtual void Open( const wxString& path) = 0;
+
+        virtual bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false ) = 0;
+        virtual bool GetNextStream( SStream &stream, bool is_get_stream = false ) = 0;
         // enumerate current opened file or dir
         virtual void Traverse( bool GetStream = false, DirGetFlags flags = kDirDefault ) = 0 ;
 
