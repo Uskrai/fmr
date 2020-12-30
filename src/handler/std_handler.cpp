@@ -183,7 +183,9 @@ void STDHandler::Clear()
 
 void STDHandler::Close()
 {
-    Clear();
+    iterator_item_.~directory_iterator();
+    iterator_flags_ = kDirNone;
+    iterator_.~directory_iterator();
 }
 
 } // namespace fmr
