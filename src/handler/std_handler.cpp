@@ -175,6 +175,16 @@ bool STDHandler::MakeDir( std::wstring directory_name, bool overwrite )
 bool STDHandler::IsExist( size_t idx ) const
     { return Vector::IsExist( list_stream_ ,idx); }
 
+void STDHandler::Reset()
+{
+    Close();
+    Clear();
+    is_opened_ = false;
+    name_ = L"";
+    filename_ = L"";
+    parent_ = NULL;
+}
+
 void STDHandler::Clear()
 {
     list_stream_.clear();

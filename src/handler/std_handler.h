@@ -67,6 +67,7 @@ class STDHandler
 
         size_t Size() const;
         void Clear();
+        void Reset();
         void Close();
 
         static bool CanHandle( wxString path );
