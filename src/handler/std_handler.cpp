@@ -37,6 +37,7 @@ void STDHandler::Open( const wxString &path )
 {
     filename_ = path;
     name_ = Path::GetDirName(path);
+    is_opened_ = name_ != L"";
 
     wxString parent = Path::GetParent( name_ );
     if ( parent != name_ )
@@ -76,6 +77,9 @@ SStream &STDHandler::Item( size_t index )
 
 const SStream &STDHandler::Item( size_t index ) const
     { return list_stream_.at( index ); }
+
+bool STDHandler::IsOpened() const
+    { return is_opened_; }
 
 bool STDHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_stream )
 {

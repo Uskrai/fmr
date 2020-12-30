@@ -55,6 +55,7 @@ class STDHandler
         wxString GetPrev() const;
 
         void Open( const wxString &path );
+        bool IsOpened() const;
 
         void Traverse( bool GetStream = false, DirGetFlags flags = kDirDefault );
 
@@ -80,6 +81,7 @@ class STDHandler
         std::filesystem::directory_iterator iterator_;
 
         wxString name_, filename_;
+        bool is_opened_;
 
         std::vector<struct SStream> list_stream_;
         std::shared_ptr<AbstractHandler> parent_ = NULL;
