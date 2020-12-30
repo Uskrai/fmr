@@ -18,6 +18,7 @@
 #define FMR_HANDLER_ABSTRACT_HANDLER
 
 #include "handler/struct_stream.h"
+#include "base/bitmask.h"
 
 #include <memory>
 #include <vector>
@@ -68,7 +69,7 @@ class AbstractHandler
 
         virtual void Open( const wxString& path) = 0;
         // enumerate current opened file or dir
-        virtual void Traverse( bool GetStream = false ) = 0 ;
+        virtual void Traverse( bool GetStream = false, DirGetFlags flags = kDirDefault ) = 0 ;
 
         virtual bool IsExist( size_t index ) const = 0;
 
@@ -80,6 +81,8 @@ class AbstractHandler
 
         virtual size_t Size() const = 0;
         virtual void Clear() = 0;
+
+        // virtual bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false ) = 0;
 };
 
 }; // namespace fmr

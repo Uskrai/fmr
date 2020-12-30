@@ -51,7 +51,7 @@ class WxArchiveHandler
 
         bool IsExist( size_t index ) const;
         
-        void Traverse( bool GetStream = false );
+        void Traverse( bool GetStream = false, DirGetFlags flags = kDirDefault );
         void TraverseStream();
         size_t Index( const wxString& name ) const;
         size_t Size() const;

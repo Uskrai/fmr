@@ -43,7 +43,7 @@ class DefaultHandler
         DefaultHandler( const wxString& path );
         ~DefaultHandler();
         void Open( const wxString& path );
-        void Traverse( bool GetStream = false );
+        void Traverse( bool GetStream = false, DirGetFlags flags = kDirDefault );
         void TraverseStream();
 
         const std::shared_ptr<AbstractHandler> GetParent() const;

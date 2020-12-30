@@ -107,7 +107,7 @@ size_t DefaultHandler::Index( const wxString& path ) const
     return -1;
 }
 
-void DefaultHandler::Traverse( bool GetStream )
+void DefaultHandler::Traverse( bool GetStream, DirGetFlags flags )
 {
     dir.Open( wxPathOnly( m_name ) );
     

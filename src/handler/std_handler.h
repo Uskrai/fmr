@@ -34,15 +34,6 @@
 namespace fmr
 {
 
-enum DirFlags
-{
-    DIR_FOLLOWSYMLINK   = 0x1,
-    DIR_SKIPDENIED      = 0x2,
-    DIR_DIRS            = 0x4,
-    DIR_FILES           = 0x8,
-    DIR_DEFAULT         = DIR_FILES | DIR_DIRS | DIR_FOLLOWSYMLINK | DIR_SKIPDENIED
-};
-
 class STDHandler
     : public AbstractHandler
 {
@@ -65,7 +56,7 @@ class STDHandler
 
         void Open( const wxString &path );
 
-        void Traverse( bool GetStream = false );
+        void Traverse( bool GetStream = false, DirGetFlags flags = kDirDefault );
 
         bool IsExist( size_t idx ) const;
 
@@ -79,13 +70,13 @@ class STDHandler
 
         static bool CanHandle( wxString path );
 
-        bool GetFirst( SStream &stream, int flags = DIR_DEFAULT, bool is_get_stream = false );
+        bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false );
         bool GetNextFile( SStream &stream, bool is_get_stream = false );
     private:
         void TraverseStream();
 
         std::filesystem::directory_iterator iterator_item_;
-        int iterator_flags_;
+        DirGetFlags iterator_flags_;
         std::filesystem::directory_iterator iterator_;
 
         wxString name_, filename_;

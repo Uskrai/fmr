@@ -104,7 +104,7 @@ wxString WxArchiveHandler::GetFromCurrent( int i ) const
     return wxEmptyString;
 }
 
-void WxArchiveHandler::Traverse( bool GetStream)
+void WxArchiveHandler::Traverse( bool GetStream, DirGetFlags flags )
 {
     wxString path = m_name;
 

@@ -77,14 +77,14 @@ SStream &STDHandler::Item( size_t index )
 const SStream &STDHandler::Item( size_t index ) const
     { return list_stream_.at( index ); }
 
-bool STDHandler::GetFirst( SStream &stream, int flags, bool is_get_stream )
+bool STDHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_stream )
 {
     fs::directory_options options;
 
-    if ( flags & DIR_FOLLOWSYMLINK )
+    if ( flags & kDirFollowSymLink )
         options |= fs::directory_options::follow_directory_symlink;
 
-    if ( flags & DIR_SKIPDENIED )
+    if ( flags & kDirSkipDenied )
         options |= fs::directory_options::skip_permission_denied;
 
     iterator_flags_ = flags;
@@ -136,10 +136,10 @@ size_t STDHandler::Index( const wxString &name ) const
     return -1;
 }
 
-void STDHandler::Traverse( bool is_get_stream )
+void STDHandler::Traverse( bool is_get_stream, DirGetFlags flags )
 {
     SStream stream;
-    bool cont = GetFirst( stream, DIR_DEFAULT, is_get_stream );
+    bool cont = GetFirst( stream, flags , is_get_stream );
 
     while ( cont )
     {
