@@ -36,6 +36,7 @@ enum HandlerSortFirst
 
 enum DirGetFlags
 {
+    kDirNone            = 0x0,
     kDirFile            = 0x1,
     kDirDirectory       = 0x2,
     kDirSkipDenied      = 0x4,
