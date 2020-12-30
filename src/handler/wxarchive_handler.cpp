@@ -139,7 +139,9 @@ bool WxArchiveHandler::GetNextStream( SStream &stream, bool is_get_stream )
     else if ( !( iterator_flags_ & kDirFile ) )
         return GetNextStream( stream, is_get_stream );
 
+
     stream.SetName( entry->GetName() );
+    stream.SetDir( entry->IsDir() );
     stream.SetHandlerPath( GetName() );
 
     if ( is_get_stream )

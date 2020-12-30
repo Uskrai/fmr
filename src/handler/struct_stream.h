@@ -58,8 +58,10 @@ struct SStream
     void SetName( const std::string &name );
 
     void SetHandlerPath( const wxString &path );
+    void SetDir( bool is_dir = true );
 
     bool IsOk() const;
+    bool IsDir() const;
 
     std::wstring GetString() const { return m_name.ToStdWstring(); }
     const wxString &GetName() const { return m_name; };
@@ -71,6 +73,8 @@ struct SStream
     std::shared_ptr<wxMemoryOutputStream> m_stream;
     std::shared_ptr<AbstractHandler> m_handler;
     wxString m_name, handler_path_;
+
+    bool is_dir_ = false;
 };
 
 class StreamEvent

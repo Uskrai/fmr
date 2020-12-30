@@ -126,12 +126,17 @@ void SStream::SetName( const std::string &name )
 void SStream::SetHandlerPath( const wxString &path )
     { handler_path_ = path; }
 
+void SStream::SetDir( bool is_dir )
+    { is_dir_ = is_dir; }
 
 bool SStream::IsOk() const
 {
     return m_stream->IsOk() &&
         m_stream->GetSize() != 0;
 }
+
+bool SStream::IsDir() const
+    { return is_dir_; }
 
 std::shared_ptr<AbstractHandler> SStream::GetHandler()
 {

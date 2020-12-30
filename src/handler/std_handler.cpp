@@ -102,6 +102,7 @@ bool STDHandler::GetNextStream( SStream &stream, bool is_get_stream )
     iterator_++;
 
     stream.SetName( path.wstring() );
+    stream.SetDir( fs::is_directory( path ) );
 
     if ( is_get_stream )
         stream.Open( path.wstring() );

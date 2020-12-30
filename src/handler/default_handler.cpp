@@ -125,6 +125,8 @@ void DefaultHandler::OpenStream( const wxString &filename, SStream &stream, bool
 {
     stream.SetName( GetName() + filename );
     stream.SetHandlerPath( GetName() );
+    stream.SetDir( wxFileName::DirExists( stream.GetName() ) );
+
     if ( is_get_stream )
         stream.Open( GetName() +  filename );
 }
