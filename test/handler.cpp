@@ -20,7 +20,7 @@ TEST(STDHandlerTest, Size)
 	while ( cont )
 	{
 		i++;
-		cont = handler->GetNextFile( stream, true );
+		cont = handler->GetNextStream( stream, true );
 	}
 
 	handler->Traverse();

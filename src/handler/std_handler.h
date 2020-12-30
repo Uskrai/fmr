@@ -71,7 +71,7 @@ class STDHandler
         static bool CanHandle( wxString path );
 
         bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false );
-        bool GetNextFile( SStream &stream, bool is_get_stream = false );
+        bool GetNextStream( SStream &stream, bool is_get_stream = false );
     private:
         void TraverseStream();
 

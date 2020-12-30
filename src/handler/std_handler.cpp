@@ -90,10 +90,10 @@ bool STDHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_strea
     iterator_flags_ = flags;
     iterator_item_ = fs::directory_iterator( GetName().ToStdWstring(), options );
     iterator_ = fs::begin( iterator_item_ );
-    return GetNextFile( stream );
+    return GetNextStream( stream );
 }
 
-bool STDHandler::GetNextFile( SStream &stream, bool is_get_stream )
+bool STDHandler::GetNextStream( SStream &stream, bool is_get_stream )
 {
     if ( iterator_ == fs::end( iterator_item_ ) )
         return false;
@@ -144,7 +144,7 @@ void STDHandler::Traverse( bool is_get_stream, DirGetFlags flags )
     while ( cont )
     {
         list_stream_.push_back( stream );
-        cont = GetNextFile( stream, is_get_stream );
+        cont = GetNextStream( stream, is_get_stream );
     }
 }
 
