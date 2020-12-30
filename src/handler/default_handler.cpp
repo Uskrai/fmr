@@ -107,70 +107,63 @@ size_t DefaultHandler::Index( const wxString& path ) const
     return -1;
 }
 
-void DefaultHandler::Traverse( bool GetStream, DirGetFlags flags )
+void DefaultHandler::Traverse( bool is_get_stream, DirGetFlags flags )
 {
-    dir.Open( wxPathOnly( m_name ) );
-    
-    if ( ! dir.IsOpened() ) return;
+    SStream stream;
+    bool cont = GetFirst( stream, flags, is_get_stream );
 
-    wxString filename;
-    
-    std::vector<struct SStream> directory, files;
-    GetAllFiles( directory, wxDIR_DIRS | wxDIR_HIDDEN );
-    GetAllFiles( files, wxDIR_FILES | wxDIR_HIDDEN );
-    
-    auto copy = [this]( std::vector<struct SStream> &target1, std::vector<struct SStream> &target2 ) -> void
+    while ( cont )
     {
-        for ( auto &it : target1 )
-            m_all.push_back( it );
-        for ( auto &it : target2 )
-            m_all.push_back( it );
-    };
-
-    auto sort = [this]( std::vector<struct SStream> &target ) -> void
-    {
-        std::sort( target.begin(), target.end(), Compare::NaturalSortable );
-    };
-
-
-    if ( sort_flag_ == kSortAll )
-    {
-        copy( directory, files );
-        sort( m_all );
+        m_all.push_back( stream );
+        cont = GetNextStream( stream, is_get_stream );
     }
-    else
-    {
-        sort( directory );
-        sort( files );
-
-        if ( sort_flag_ == kSortDirFirst )
-        {
-            copy( directory, files );
-        }
-        else if ( sort_flag_ == kSortFileFirst )
-        {
-            copy( files, directory );
-        }
-    }
-
 
     std::sort( m_all.begin(), m_all.end(), Compare::NaturalSortable );
-
-    dir.Close();
-    if ( GetStream ) TraverseStream();
 }
 
-void DefaultHandler::TraverseStream()
+void DefaultHandler::OpenStream( const wxString &filename, SStream &stream, bool is_get_stream )
 {
-    for ( auto &it : m_all )
-    {
-        HandlerType type;
-        HandlerFactory::Find( it.GetName(), type );
-        if ( type != kHandlerDefault )
-            continue;
+    stream.SetName( GetName() + filename );
+    stream.SetHandlerPath( GetName() );
+    if ( is_get_stream )
+        stream.Open( GetName() +  filename );
+}
 
-        it.Open( it.GetName() );
-    }
+bool DefaultHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_stream )
+{
+    opened_directory_.Open( GetName() );
+
+    if ( ! opened_directory_.IsOpened() )
+        return false;
+
+    int flag_dir = wxDIR_HIDDEN;
+    if ( flags & kDirFile )
+        flag_dir += wxDIR_FILES;
+
+    if ( flags & kDirDirectory )
+        flag_dir += wxDIR_DIRS;
+
+    if ( !( flags & kDirFollowSymLink) )
+        flag_dir += wxDIR_NO_FOLLOW;
+
+    wxString filename;
+    if ( ! opened_directory_.GetFirst( &filename, wxEmptyString, flag_dir ) )
+        return false;
+
+
+    OpenStream( filename, stream, is_get_stream );
+    return true;
+}
+
+bool DefaultHandler::GetNextStream( SStream &stream, bool is_get_stream )
+{
+    wxString filename;
+
+    if ( ! opened_directory_.GetNext( &filename ) )
+        return false;
+
+    OpenStream( filename, stream, is_get_stream );
+    return true;
 }
 
 void DefaultHandler::GetAllFiles( std::vector<struct SStream> &vec_stream, int dir_flags )

@@ -43,6 +43,10 @@ class DefaultHandler
         DefaultHandler( const wxString& path );
         ~DefaultHandler();
         void Open( const wxString& path );
+
+        bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_steam = false );
+        bool GetNextStream( SStream &stream, bool is_get_stream = false );
+
         void Traverse( bool GetStream = false, DirGetFlags flags = kDirDefault );
         void TraverseStream();
 
@@ -76,6 +80,8 @@ class DefaultHandler
         wxString m_name;
         wxString m_filename;
         wxString m_parentName;
+
+        wxDir opened_directory_;
         
         std::shared_ptr<AbstractHandler> m_parent;
 
@@ -85,6 +91,7 @@ class DefaultHandler
         wxArrayString m_directory;
         wxDir dir;
         
+        void OpenStream( const wxString &filename, SStream &stream, bool is_get_stream );
         void GetAllFiles( std::vector<struct SStream> &vec_stream, int dir_get_flag );
 
 };
