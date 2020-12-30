@@ -76,6 +76,7 @@ class STDHandler
         bool GetNextStream( SStream &stream, bool is_get_stream = false );
 
         bool MakeDir( const std::wstring directory_name, bool overwrite = false );
+        bool MakeFile( const std::wstring &file_name, SStream stream, bool overwrite = false );
     private:
         void TraverseStream();
 

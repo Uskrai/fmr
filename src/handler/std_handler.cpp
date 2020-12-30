@@ -178,6 +178,21 @@ bool STDHandler::MakeDir( std::wstring directory_name, bool overwrite )
     return true;
 }
 
+bool STDHandler::MakeFile( const std::wstring &file_name, SStream stream, bool overwrite )
+{
+    if ( !IsOpened() )
+        return false;
+
+    std::wstring path = GetName().ToStdWstring() + file_name;
+    if ( fs::exists( path ) && !overwrite )
+        return false;
+
+    stream.SetName( path );
+    list_write_stream_.push_back( std::move( stream ) );
+
+    return true;
+}
+
 void STDHandler::Reset()
 {
     Close();
