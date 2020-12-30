@@ -115,7 +115,7 @@ void SStream::SetName( const wxString &name )
 
 void SStream::SetName( const std::wstring &name )
 {
-    SetName( name );
+    SetName( wxString(name) );
 }
 
 void SStream::SetName( const std::string &name )
