@@ -33,6 +33,17 @@ enum HandlerSortFirst
     kSortAll
 };
 
+enum DirGetFlags
+{
+    kDirFile            = 0x1,
+    KDirDirectory       = 0x2,
+    kDirSkipDenied      = 0x4,
+    kDirFollowSymLink   = 0x8,
+    kDirDefault         = kDirFile | KDirDirectory | kDirSkipDenied | kDirFollowSymLink
+};
+
+DEFINE_BITMASK_TYPE( DirGetFlags )
+
 class AbstractHandler 
 {
     public:     
