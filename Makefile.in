@@ -1814,9 +1814,6 @@ uninstall-am: uninstall-baseLTLIBRARIES uninstall-binPROGRAMS \
     # make source and link for frame
     # make source and link for panel
 
-# test_handler_SOURCES = test/src/handler.cpp
-# test_handler_LDADD = lib_std_handler.la lib_struct_stream.la -lgtest
-
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
