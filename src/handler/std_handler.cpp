@@ -24,6 +24,7 @@ namespace fs = std::filesystem;
 
 #include "base/path.h"
 #include "base/compare.h"
+#include <algorithm>
 
 namespace fmr
 {
@@ -80,6 +81,9 @@ const SStream &STDHandler::Item( size_t index ) const
 
 bool STDHandler::IsOpened() const
     { return is_opened_; }
+
+bool STDHandler::IsExist( size_t idx ) const
+    { return Vector::IsExist( list_stream_ ,idx); }
 
 bool STDHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_stream )
 {
@@ -173,9 +177,6 @@ bool STDHandler::MakeDir( std::wstring directory_name, bool overwrite )
 
     return true;
 }
-
-bool STDHandler::IsExist( size_t idx ) const
-    { return Vector::IsExist( list_stream_ ,idx); }
 
 void STDHandler::Reset()
 {
