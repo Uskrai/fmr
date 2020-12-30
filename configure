@@ -3667,7 +3667,7 @@ else
     HOST_SUFFIX=
 fi
 
-ac_config_files="$ac_config_files Makefile"
+ac_config_files="$ac_config_files Makefile test/Makefile"
 
 
 am__api_version='1.16'
@@ -18390,6 +18390,7 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
 

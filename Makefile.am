@@ -1,6 +1,8 @@
 
 AM_CPPFLAGS = -I@srcdir@/src
 
+SUBDIRS = . test
+
 base = src/base
 basedir = @abs_builddir@/base
 base_LTLIBRARIES = libcompare.la libpath.la

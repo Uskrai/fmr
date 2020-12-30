@@ -32,7 +32,7 @@ else
     HOST_SUFFIX=
 fi
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile test/Makefile])
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 
