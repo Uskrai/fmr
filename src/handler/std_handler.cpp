@@ -151,6 +151,8 @@ void STDHandler::Traverse( bool is_get_stream, DirGetFlags flags )
         list_stream_.push_back( stream );
         cont = GetNextStream( stream, is_get_stream );
     }
+
+    std::sort( list_stream_.begin(), list_stream_.end(), Compare::NaturalSortable );
 }
 
 bool STDHandler::MakeDir( std::wstring directory_name, bool overwrite )
