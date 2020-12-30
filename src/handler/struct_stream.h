@@ -70,6 +70,9 @@ struct SStream
     std::shared_ptr<AbstractHandler> GetHandler();
     std::shared_ptr<wxMemoryInputStream> GetStream() const ;
     std::shared_ptr<wxMemoryOutputStream> GetOutputStream();
+    const std::shared_ptr<wxMemoryOutputStream> GetOutputStream() const;
+
+    size_t CopyTo( void *buffer, size_t length ) const;
 
     std::shared_ptr<wxMemoryOutputStream> m_stream;
     std::shared_ptr<AbstractHandler> m_handler;

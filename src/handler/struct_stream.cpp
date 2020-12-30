@@ -169,9 +169,13 @@ std::shared_ptr<wxMemoryInputStream> SStream::GetStream() const
 }
 
 std::shared_ptr<wxMemoryOutputStream> SStream::GetOutputStream()
-{
-    return m_stream;
-}
+    { return m_stream; }
+
+const std::shared_ptr<wxMemoryOutputStream> SStream::GetOutputStream() const
+    { return m_stream; }
+
+size_t SStream::CopyTo( void *buffer, size_t length ) const
+    { return GetOutputStream()->CopyTo( buffer, length ); }
 
 StreamEvent::StreamEvent( const StreamEvent &other )
     : wxCommandEvent( other.GetEventType(), other.GetId() )
