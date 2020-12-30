@@ -50,7 +50,10 @@ class WxArchiveHandler
         wxString GetPrev() const;
 
         bool IsExist( size_t index ) const;
-        
+
+        bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false );
+        bool GetNextStream( SStream &stream, bool is_get_stream = false );
+
         void Traverse( bool GetStream = false, DirGetFlags flags = kDirDefault );
         void TraverseStream();
         size_t Index( const wxString& name ) const;
@@ -59,6 +62,7 @@ class WxArchiveHandler
         const SStream &Item( size_t index ) const;
         SStream &Item( size_t index );
         void Clear();
+        void Close();
 
         ~WxArchiveHandler();
 
@@ -70,6 +74,10 @@ class WxArchiveHandler
 
         wxString m_name;
         wxString m_parentName;
+
+
+        DirGetFlags iterator_flags_ = kDirNone;
+        wxArchiveInputStream *iterator_item_ = NULL;
 
         std::vector<SStream> m_all;
 };
