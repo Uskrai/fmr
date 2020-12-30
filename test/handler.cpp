@@ -15,7 +15,7 @@ TEST(STDHandlerTest, Size)
 	STDHandler *handler = new STDHandler();
 	handler->Open( test_path );
 	SStream stream;
-	bool cont = handler->GetFirst( stream, DIR_DEFAULT, true );
+	bool cont = handler->GetFirst( stream, kDirDefault, true );
 	size_t i = 0;
 	while ( cont )
 	{
