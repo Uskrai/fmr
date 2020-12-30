@@ -138,6 +138,9 @@ bool SStream::IsOk() const
 bool SStream::IsDir() const
     { return is_dir_; }
 
+size_t SStream::GetSize() const
+    { return m_stream->GetSize(); }
+
 std::shared_ptr<AbstractHandler> SStream::GetHandler()
 {
     return m_handler;

@@ -66,6 +66,7 @@ struct SStream
     std::wstring GetString() const { return m_name.ToStdWstring(); }
     const wxString &GetName() const { return m_name; };
     const wxString &GetHandlerPath() const { return handler_path_; }
+    size_t GetSize() const;
     std::shared_ptr<AbstractHandler> GetHandler();
     std::shared_ptr<wxMemoryInputStream> GetStream() const ;
     std::shared_ptr<wxMemoryOutputStream> GetOutputStream();
