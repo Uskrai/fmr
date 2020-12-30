@@ -73,6 +73,8 @@ class STDHandler
 
         bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false );
         bool GetNextStream( SStream &stream, bool is_get_stream = false );
+
+        bool MakeDir( const std::wstring directory_name, bool overwrite = false );
     private:
         void TraverseStream();
 
@@ -83,7 +85,7 @@ class STDHandler
         wxString name_, filename_;
         bool is_opened_;
 
-        std::vector<struct SStream> list_stream_;
+        std::vector<struct SStream> list_stream_, list_write_stream_;
         std::shared_ptr<AbstractHandler> parent_ = NULL;
 };
 

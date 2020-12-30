@@ -153,11 +153,33 @@ void STDHandler::Traverse( bool is_get_stream, DirGetFlags flags )
     }
 }
 
+bool STDHandler::MakeDir( std::wstring directory_name, bool overwrite )
+{
+    if ( ! IsOpened() )
+        return false;
+
+    std::wstring path = GetName().ToStdWstring() + directory_name;
+    if ( fs::exists( path ) && !overwrite )
+        return false;
+
+    SStream stream;
+
+    stream.SetName( path );
+    stream.SetDir();
+
+    list_write_stream_.push_back( stream );
+
+    return true;
+}
+
 bool STDHandler::IsExist( size_t idx ) const
     { return Vector::IsExist( list_stream_ ,idx); }
 
 void STDHandler::Clear()
-    { list_stream_.clear(); }
+{
+    list_stream_.clear();
+    list_write_stream_.clear();
+}
 
 void STDHandler::Close()
 {
