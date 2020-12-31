@@ -78,6 +78,8 @@ class STDHandler
         bool MakeDir( const std::wstring directory_name, bool overwrite = false );
         bool MakeFile( const std::wstring &file_name, SStream stream, bool overwrite = false );
         bool MakeDirectories();
+        bool RemoveAll();
+        bool Remove( const std::wstring &name, bool recursive );
     private:
         void TraverseStream();
 

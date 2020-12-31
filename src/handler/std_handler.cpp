@@ -193,9 +193,46 @@ bool STDHandler::MakeFile( const std::wstring &file_name, SStream stream, bool o
     if ( fs::exists( path ) && !overwrite )
         return false;
 
+    StreamActionType flags = kStreamWrite;
+
+    if ( overwrite )
+        flags |= kStreamOverwrite;
+
     stream.SetName( path );
+    stream.SetType( flags );
     list_write_stream_.push_back( std::move( stream ) );
 
+    return true;
+}
+
+bool STDHandler::Remove( const std::wstring &filename, bool recursive )
+{
+    const std::wstring path = GetName().ToStdWstring() + filename;
+
+    size_t index = Index( GetName() + filename );
+    if ( IsExist( index ) )
+    {
+        SStream stream;
+        StreamActionType flags = kStreamRemove;
+        if ( recursive )
+            flags |= kStreamRecursive;
+
+        stream.SetName( path );
+        stream.SetHandlerPath( GetName() );
+        stream.SetType( flags );
+
+        list_write_stream_.push_back( std::move( stream ) );
+        return true;
+    }
+    return false;
+}
+
+bool STDHandler::RemoveAll()
+{
+    SStream stream;
+    stream.SetName( GetName() );
+    stream.SetType( kStreamRemove | kStreamRecursive );
+    list_write_stream_.push_back( stream );
     return true;
 }
 
