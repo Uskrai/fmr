@@ -95,6 +95,9 @@ namespace Path
         return name;
     }
 
+    std::wstring MakeString( const fs::path  &path )
+        { return path.wstring(); }
+
     std::wstring GetParent( const std::wstring &path )
         { return fs::path( path ).parent_path().wstring(); }
 
