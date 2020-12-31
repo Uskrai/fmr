@@ -40,6 +40,18 @@ inline namespace Path
     // return name with separator if directory
     wxString GetNameWithSep( wxString path );
 
+    std::wstring GetParent( const std::wstring &path );
+
+    std::wstring GetRootPath( const std::wstring &path );
+
+    bool HasRootPath( const std::wstring &path );
+
+    std::wstring GetDirName( const std::wstring &path );
+
+    bool IsChild( const std::wstring &parent, std::wstring target );
+
+    std::wstring Append( const std::wstring &parent, const std::wstring &target );
+
 } // namespace Path
 
 } // namespace fmr

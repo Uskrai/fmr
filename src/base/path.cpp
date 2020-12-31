@@ -16,6 +16,9 @@
  */
 
 #include "base/path.h"
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace fmr
 {
@@ -64,6 +67,12 @@ namespace Path
             path.RemoveLast();
     }
 
+    void RemoveDirSep( std::wstring &string )
+    {
+        if ( string.back() == Separator )
+            string.pop_back();
+    }
+
     // return Name without Separatorarator
     wxString GetName( wxString path )
     {
@@ -86,6 +95,51 @@ namespace Path
         return name;
     }
 
+    std::wstring GetParent( const std::wstring &path )
+        { return fs::path( path ).parent_path().wstring(); }
+
+    std::wstring GetRootPath( const std::wstring &path )
+        { return fs::path(path).root_path().wstring(); }
+
+    std::wstring GetDirName( const std::wstring &path )
+    {
+        fs::path temp(path);
+
+        return temp.remove_filename().wstring();
+    }
+
+    bool HasRootPath( const std::wstring &path )
+        { return fs::path(path).has_root_path(); }
+
+    bool IsChild( const std::wstring &parent, std::wstring target )
+    {
+        std::wstring parent_root = GetRootPath( parent );
+        std::wstring target_root = GetRootPath( target );
+
+        if ( !HasRootPath( target ) )
+            return true;
+
+        if ( target_root != parent_root )
+            return false;
+
+        if ( parent_root == parent && parent_root == target_root )
+            return true;
+
+        while( target != target_root )
+        {
+            target = GetParent( target );
+            if ( target == parent )
+                return true;
+        }
+
+        return false;
+    }
+
+    std::wstring Append( const std::wstring &parent, const std::wstring &target )
+    {
+        fs::path path( parent );
+        return (path / target).wstring();
+    }
 }
 
 };
