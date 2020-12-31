@@ -98,7 +98,18 @@ bool STDHandler::OpenStream( SStream &stream )
     if ( stream.GetHandlerPath() != GetName() )
         return false;
 
-    stream.Open( Path::Append( GetName().ToStdWstring(), stream.GetString() ) );
+    stream.Open( GetName().ToStdWstring() + stream.GetString() );
+    return true;
+}
+
+bool STDHandler::OpenStream( const std::wstring &path, SStream &stream, bool is_get_stream )
+{
+    stream.SetName( Path::MakeRelative( GetName().ToStdWstring(), path ) );
+    stream.SetHandlerPath( GetName() );
+
+    if ( is_get_stream )
+        OpenStream( stream );
+
     return true;
 }
 
@@ -129,12 +140,8 @@ bool STDHandler::GetNextStream( SStream &stream, bool is_get_stream )
     fs::path path = iterator_->path();
     iterator_++;
 
-    stream.SetName( path.wstring() );
-    stream.SetHandlerPath( GetName() );
+    OpenStream( path.wstring(), stream, is_get_stream );
     stream.SetDir( fs::is_directory( path ) );
-
-    if ( is_get_stream && !stream.IsDir() )
-        OpenStream( stream );
 
     return true;
 }
@@ -225,7 +232,7 @@ bool STDHandler::MakeFile( const std::wstring &file_name, SStream stream, bool o
     if ( overwrite )
         flags |= kStreamOverwrite;
 
-    stream.SetName( path );
+    OpenStream( path, stream );
     stream.SetType( flags );
     list_write_stream_.push_back( std::move( stream ) );
 
@@ -269,7 +276,7 @@ bool STDHandler::CommitWrite()
 
     for ( auto &it : list_write_stream_ )
     {
-        std::wstring path = it.GetName().ToStdWstring();
+        std::wstring path = it.GetHandlerPath().ToStdWstring() + it.GetName().ToStdWstring();
         if ( it.GetType() & kStreamRemove )
         {
             if ( it.GetType() & kStreamRecursive )
