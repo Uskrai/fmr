@@ -143,6 +143,11 @@ namespace Path
         fs::path path( parent );
         return (path / target).wstring();
     }
+
+    std::wstring MakeRelative( const std::wstring &parent, const std::wstring &target )
+    {
+        return MakeString( fs::relative( target, parent ) );
+    }
 }
 
 };

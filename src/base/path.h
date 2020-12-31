@@ -52,6 +52,8 @@ inline namespace Path
 
     std::wstring Append( const std::wstring &parent, const std::wstring &target );
 
+    std::wstring MakeRelative( const std::wstring &parent, const std::wstring &target );
+
 } // namespace Path
 
 } // namespace fmr
