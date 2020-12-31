@@ -90,7 +90,6 @@ void SStream::Open( const wxString &name )
         wxFileInputStream stream(name);
         m_stream->Write( stream );
     }
-    SetName( name );
 }
 
 void SStream::Open( wxInputStream *stream )
