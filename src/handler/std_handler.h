@@ -80,6 +80,7 @@ class STDHandler
         bool MakeDirectories();
         bool RemoveAll();
         bool Remove( const std::wstring &name, bool recursive );
+        bool CommitWrite();
     private:
         void TraverseStream();
 

@@ -25,6 +25,8 @@ namespace fs = std::filesystem;
 #include "base/path.h"
 #include "base/compare.h"
 #include <algorithm>
+#include <fstream>
+#include <iostream>
 
 namespace fmr
 {
@@ -37,8 +39,8 @@ STDHandler::STDHandler( const wxString &path )
 void STDHandler::Open( const wxString &path )
 {
     filename_ = path;
-    name_ = Path::GetDirName(path);
-    is_opened_ = name_ != L"";
+    name_ = Path::GetDirName( path.ToStdWstring() );
+    is_opened_ = true;
 
     wxString parent = Path::GetParent( name_ );
     if ( parent != name_ )
@@ -89,6 +91,9 @@ bool STDHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_strea
 {
     fs::directory_options options;
 
+    if ( ! IsOpened() )
+        return false;
+
     if ( flags & kDirFollowSymLink )
         options |= fs::directory_options::follow_directory_symlink;
 
@@ -110,10 +115,11 @@ bool STDHandler::GetNextStream( SStream &stream, bool is_get_stream )
     iterator_++;
 
     stream.SetName( path.wstring() );
+    stream.SetHandlerPath( GetName() );
     stream.SetDir( fs::is_directory( path ) );
 
     if ( is_get_stream )
-        stream.Open( path.wstring() );
+        stream.Open( stream.GetName() );
 
     return true;
 }
@@ -175,11 +181,16 @@ bool STDHandler::MakeDir( std::wstring directory_name, bool overwrite )
         return false;
 
     SStream stream;
+    StreamActionType flags = kStreamWrite;
+
+    if ( overwrite )
+        flags |= kStreamOverwrite;
 
     stream.SetName( path );
+    stream.SetType( flags );
     stream.SetDir();
 
-    list_write_stream_.push_back( stream );
+    list_write_stream_.push_back( std::move( stream ) );
 
     return true;
 }
@@ -234,6 +245,50 @@ bool STDHandler::RemoveAll()
     stream.SetType( kStreamRemove | kStreamRecursive );
     list_write_stream_.push_back( stream );
     return true;
+}
+
+bool STDHandler::CommitWrite()
+{
+    MakeDirectories();
+
+    for ( auto &it : list_write_stream_ )
+    {
+        std::wstring path = it.GetName().ToStdWstring();
+        if ( it.GetType() & kStreamRemove )
+        {
+            if ( it.GetType() & kStreamRecursive )
+                fs::remove_all( path );
+            else
+                fs::remove( path );
+
+            continue;
+        }
+        else if ( it.GetType() & kStreamWrite )
+        {
+            if ( it.IsDir() )
+            {
+                fs::create_directories( path );
+            }
+            else
+            {
+                fs::path temp( path );
+                std::ofstream out_stream;
+                out_stream.open( temp );
+
+                size_t length = it.GetSize();
+                char *buffer = new char[ length ];
+                it.CopyTo( buffer, length );
+
+                out_stream.write( buffer, length );
+                out_stream.close();
+                delete[] buffer;
+            }
+        }
+    }
+
+    list_write_stream_.clear();
+
+    return false;
 }
 
 void STDHandler::Reset()
