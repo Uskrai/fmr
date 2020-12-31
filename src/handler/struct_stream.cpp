@@ -58,20 +58,28 @@ SStream::SStream( const SStream &copy )
 {
     Open( copy.m_stream );
     SetName( copy.m_name );
+    SetType( copy.stream_flags_ );
     SetHandlerPath( copy.handler_path_ );
+    SetDir( copy.is_dir_ );
+
 }
 
 SStream::SStream( SStream &&move )
 {
     m_stream = std::move( move.m_stream );
     m_name = std::move( move.m_name );
+    stream_flags_ = std::move( move.stream_flags_ );
     handler_path_ = std::move( move.handler_path_ );
+    is_dir_ = std::move( move.is_dir_ );
 }
 
 SStream &SStream::operator = ( const SStream &copy )
 {
     Open( copy.m_stream );
     SetName( copy.m_name );
+    SetType( copy.stream_flags_ );
+    SetHandlerPath( copy.handler_path_ );
+    SetDir( copy.is_dir_ );
     return *this;
 }
 
@@ -129,6 +137,9 @@ void SStream::SetHandlerPath( const wxString &path )
 void SStream::SetDir( bool is_dir )
     { is_dir_ = is_dir; }
 
+void SStream::SetType( StreamActionType flags )
+    { stream_flags_ = flags; }
+
 bool SStream::IsOk() const
 {
     return m_stream->IsOk() &&
@@ -140,6 +151,9 @@ bool SStream::IsDir() const
 
 size_t SStream::GetSize() const
     { return m_stream->GetSize(); }
+
+const StreamActionType &SStream::GetType() const
+    { return stream_flags_; }
 
 std::shared_ptr<AbstractHandler> SStream::GetHandler()
 {
