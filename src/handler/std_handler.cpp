@@ -159,6 +159,12 @@ void STDHandler::Traverse( bool is_get_stream, DirGetFlags flags )
     std::sort( list_stream_.begin(), list_stream_.end(), Compare::NaturalSortable );
 }
 
+bool STDHandler::MakeDirectories()
+{
+    if ( ! fs::exists( GetName().ToStdWstring() ) )
+        fs::create_directories( GetName().ToStdWstring() );
+}
+
 bool STDHandler::MakeDir( std::wstring directory_name, bool overwrite )
 {
     if ( ! IsOpened() )
