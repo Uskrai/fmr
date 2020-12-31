@@ -65,7 +65,7 @@ TEST( STDHandlerTest, Sort )
 {
 	STDHandler *handler = new STDHandler( test_path );
 	handler->Traverse();
-	EXPECT_EQ( handler->Item(0).GetString(), test_path + "test1" );
+	EXPECT_EQ( handler->Item(0).GetString(), L"test1" );
 
 	std::filesystem::remove_all( test_path );
 }
@@ -74,7 +74,9 @@ template<typename T>
 void TEST_WRITE( T *handler, const std::wstring path )
 {
 	SStream stream("Makefile");
+	handler->RemoveAll();
 	handler->CommitWrite();
+	handler->MakeDirectories();
 	handler->MakeDir(L"test1");
 	handler->MakeFile( L"owo", stream );
 	handler->CommitWrite();
@@ -85,20 +87,18 @@ void TEST_WRITE( T *handler, const std::wstring path )
 
 	EXPECT_EQ( handler->Size(), 2 );
 
-	size_t index = handler->Index( handler->GetName() + L"owo" );
+	size_t index = handler->Index( L"owo" );
 
 	EXPECT_EQ( handler->Item( index ).GetSize(), stream.GetSize() );
-	EXPECT_EQ( handler->Item( index ).GetString(), std::wstring( path + L"owo" ) );
+	EXPECT_EQ( handler->Item( index ).GetString(), L"owo" );
 
 	handler->RemoveAll();
 	handler->CommitWrite();
-	handler->CommitWrite();
 	handler->Clear();
-	handler->Traverse();
 
 	EXPECT_EQ( handler->Size(), 0 );
 
-	handler->CommitWrite();
+	EXPECT_FALSE( std::filesystem::exists( test_path ) );
 }
 
 TEST( STDHandlerTest, Write )
