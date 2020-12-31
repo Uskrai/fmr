@@ -71,6 +71,8 @@ class STDHandler
         void Close();
 
         static bool CanHandle( wxString path );
+        static bool StreamOpenable();
+        bool IsStreamOpenable() const;
 
         bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false );
         bool GetNextStream( SStream &stream, bool is_get_stream = false );

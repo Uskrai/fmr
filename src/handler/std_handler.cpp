@@ -84,6 +84,12 @@ const SStream &STDHandler::Item( size_t index ) const
 bool STDHandler::IsOpened() const
     { return is_opened_; }
 
+bool STDHandler::StreamOpenable()
+    { return true; }
+
+bool STDHandler::IsStreamOpenable() const
+    { return StreamOpenable(); }
+
 bool STDHandler::IsExist( size_t idx ) const
     { return Vector::IsExist( list_stream_ ,idx); }
 
