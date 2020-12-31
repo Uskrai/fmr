@@ -93,6 +93,15 @@ bool STDHandler::IsStreamOpenable() const
 bool STDHandler::IsExist( size_t idx ) const
     { return Vector::IsExist( list_stream_ ,idx); }
 
+bool STDHandler::OpenStream( SStream &stream )
+{
+    if ( stream.GetHandlerPath() != GetName() )
+        return false;
+
+    stream.Open( Path::Append( GetName().ToStdWstring(), stream.GetString() ) );
+    return true;
+}
+
 bool STDHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_stream )
 {
     fs::directory_options options;
@@ -124,8 +133,8 @@ bool STDHandler::GetNextStream( SStream &stream, bool is_get_stream )
     stream.SetHandlerPath( GetName() );
     stream.SetDir( fs::is_directory( path ) );
 
-    if ( is_get_stream )
-        stream.Open( stream.GetName() );
+    if ( is_get_stream && !stream.IsDir() )
+        OpenStream( stream );
 
     return true;
 }
@@ -174,7 +183,8 @@ void STDHandler::Traverse( bool is_get_stream, DirGetFlags flags )
 bool STDHandler::MakeDirectories()
 {
     if ( ! fs::exists( GetName().ToStdWstring() ) )
-        fs::create_directories( GetName().ToStdWstring() );
+        return fs::create_directories( GetName().ToStdWstring() );
+    return true;
 }
 
 bool STDHandler::MakeDir( std::wstring directory_name, bool overwrite )

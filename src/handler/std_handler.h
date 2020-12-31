@@ -74,6 +74,7 @@ class STDHandler
         static bool StreamOpenable();
         bool IsStreamOpenable() const;
 
+        bool OpenStream( SStream &stream );
         bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false );
         bool GetNextStream( SStream &stream, bool is_get_stream = false );
 
