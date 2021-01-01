@@ -124,8 +124,7 @@ TEST( STDHandler, Stream )
 
 }
 
-template<typename T>
-void TEST_WRITE( T *handler, const std::wstring path )
+void TEST_WRITE( STDHandler *handler, const std::wstring path )
 {
 	size_t length = 1000;
 	char *buffer = new char[length];
@@ -134,14 +133,14 @@ void TEST_WRITE( T *handler, const std::wstring path )
 
 	handler->RemoveAll();
 	handler->CommitWrite();
-	handler->MakeDirectories();
-	handler->MakeDir(L"test1");
-	handler->MakeFile( L"owo", stream_buffer );
-	handler->MakeFile( L"wew", stream_file );
-	handler->CommitWrite();
+	EXPECT_TRUE( handler->CreateDirectories() );
+	handler->CreateDirectory(L"test1");
+	handler->CreateFiles( L"owo", stream_buffer );
+	handler->CreateFiles( L"wew", stream_file );
+	EXPECT_TRUE( handler->CommitWrite() );
 	handler->Reset();
 
-	handler->Open( test_path );
+	handler->Open( path );
 	handler->Traverse( true );
 
 	EXPECT_EQ( handler->Size(), 3 );
@@ -157,6 +156,7 @@ void TEST_WRITE( T *handler, const std::wstring path )
 	EXPECT_EQ( handler->Size(), 0 );
 
 	EXPECT_FALSE( std::filesystem::exists( test_path ) );
+	EXPECT_FALSE( handler->CommitWrite() );
 	delete[] buffer;
 }
 

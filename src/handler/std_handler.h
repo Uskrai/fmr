@@ -79,9 +79,9 @@ class STDHandler
         bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false );
         bool GetNextStream( SStream &stream, bool is_get_stream = false );
 
-        bool MakeDir( const std::wstring directory_name, bool overwrite = false );
-        bool MakeFile( const std::wstring &file_name, SStream stream, bool overwrite = false );
-        bool MakeDirectories();
+        bool CreateDirectory( const std::wstring directory_name, bool overwrite = false );
+        bool CreateFiles( const std::wstring &file_name, SStream stream, bool overwrite = false );
+        bool CreateDirectories();
         bool RemoveAll();
         bool Remove( const std::wstring &name, bool recursive );
         bool CommitWrite();

@@ -187,14 +187,14 @@ void STDHandler::Traverse( bool is_get_stream, DirGetFlags flags )
     std::sort( list_stream_.begin(), list_stream_.end(), Compare::NaturalSortable );
 }
 
-bool STDHandler::MakeDirectories()
+bool STDHandler::CreateDirectories()
 {
     if ( ! fs::exists( GetName().ToStdWstring() ) )
         return fs::create_directories( GetName().ToStdWstring() );
     return true;
 }
 
-bool STDHandler::MakeDir( std::wstring directory_name, bool overwrite )
+bool STDHandler::CreateDirectory( std::wstring directory_name, bool overwrite )
 {
     if ( ! IsOpened() )
         return false;
@@ -218,7 +218,7 @@ bool STDHandler::MakeDir( std::wstring directory_name, bool overwrite )
     return true;
 }
 
-bool STDHandler::MakeFile( const std::wstring &file_name, SStream stream, bool overwrite )
+bool STDHandler::CreateFiles( const std::wstring &file_name, SStream stream, bool overwrite )
 {
     if ( !IsOpened() )
         return false;
