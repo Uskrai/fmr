@@ -35,7 +35,7 @@ DefaultHandler::DefaultHandler( const wxString& path )
 }
 void DefaultHandler::Open( const wxString& path )
 {
-    m_name = Path::GetDirName(path);
+    m_name = Path::GetDirName(path.ToStdWstring());
 
     wxString parent = Path::GetParent(m_name);
     if ( ! Path::IsRoot( m_name.ToStdWstring() ))
