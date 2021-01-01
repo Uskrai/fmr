@@ -71,6 +71,62 @@ TEST( STDHandlerTest, Sort )
 }
 
 template<typename T>
+void TEST_STREAM( T *handler )
+{
+	SStream stream;
+	bool cont = handler->GetFirst( stream, kDirDefault, true );
+
+	SStream temp_stream( stream );
+	temp_stream.GetStream();
+
+	std::vector<SStream> vec_stream;
+	size_t file = -1;
+
+	while ( cont )
+	{
+		vec_stream.push_back( stream );
+
+		// for checking copy stream
+		if ( file != size_t(-1) )
+		{
+			vec_stream.at(file).GetStream();
+			file++;
+		}
+		else file = 0;
+
+		cont = handler->GetNextStream( stream, true );
+	}
+	vec_stream.at(file).GetStream();
+
+	handler->Traverse( true );
+
+	EXPECT_EQ( vec_stream.size(), handler->Size() );
+
+	// checking size
+	for ( const auto &handler_it : handler->GetChild() )
+		for ( const auto &vec_it : vec_stream )
+			if ( handler_it.GetName() == vec_it.GetName() )
+			{
+				EXPECT_EQ( handler_it.GetSize(), vec_it.GetSize() );
+			}
+}
+
+TEST( DefaultHandler, Stream )
+{
+	auto handler = new DefaultHandler("test/");
+	TEST_STREAM( handler );
+	delete handler;
+}
+
+TEST( STDHandler, Stream )
+{
+	auto handler = new STDHandler("test");
+	TEST_STREAM( handler );
+	delete handler;
+
+}
+
+template<typename T>
 void TEST_WRITE( T *handler, const std::wstring path )
 {
 	SStream stream("Makefile");
