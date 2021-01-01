@@ -54,7 +54,6 @@ SStream::SStream( wxInputStream *stream )
 }
 
 SStream::SStream( const SStream &copy )
-    : SStream()
 {
     Open( copy.m_stream );
     SetName( copy.m_name );
@@ -85,6 +84,8 @@ SStream &SStream::operator = ( const SStream &copy )
 
 void SStream::Open( const wxString &name )
 {
+    Open();
+
     if ( wxFileName::FileExists(name) )
     {
         wxFileInputStream stream(name);
@@ -94,13 +95,22 @@ void SStream::Open( const wxString &name )
 
 void SStream::Open( wxInputStream *stream )
 {
+    Open();
+
     if ( stream )
         m_stream->Write( *stream );
 }
 
 void SStream::Open( const wxMemoryOutputStream &stream )
 {
-    Open( stream.GetOutputStreamBuffer()->GetBufferStart(), stream.GetSize() );
+    auto buffer = std::shared_ptr<char[]>(
+        new char[stream.GetSize()]
+    );
+    size_t length;
+    length = stream.CopyTo( buffer.get(), stream.GetSize() );
+
+    Open();
+    m_stream->Write( buffer.get(), length );
 }
 
 void SStream::Open( std::shared_ptr<wxMemoryOutputStream> stream )
@@ -141,7 +151,7 @@ void SStream::SetType( StreamActionType flags )
 
 bool SStream::IsOk() const
 {
-    return m_stream->IsOk() &&
+    return m_stream && m_stream->IsOk() &&
         m_stream->GetSize() != 0;
 }
 
@@ -161,23 +171,21 @@ std::shared_ptr<AbstractHandler> SStream::GetHandler()
 
 std::shared_ptr<wxMemoryInputStream> SStream::GetStream() const
 {
-    std::shared_ptr<wxMemoryInputStream> stream = NULL;
-    if ( m_stream )
-    {
-        if ( m_stream->IsOk() && m_stream->GetSize() != 0 )
-        stream = std::shared_ptr<wxMemoryInputStream>(
-            new wxMemoryInputStream(*m_stream)
-        );
-        else
-            stream = std::shared_ptr<wxMemoryInputStream>(
-                new wxMemoryInputStream( &DUMMY_BUFFER, sizeof(DUMMY_BUFFER))
-            );
-    }
-    else
-        stream = std::shared_ptr<wxMemoryInputStream>(
-            new wxMemoryInputStream( &DUMMY_BUFFER, sizeof( DUMMY_BUFFER ) )
-        );
 
+    char *buffer = NULL;
+    size_t length = 0;
+
+    if ( IsOk() )
+    {
+        buffer = new char[m_stream->GetSize()];
+        length = m_stream->CopyTo( buffer, m_stream->GetSize() );
+    }
+
+    auto stream = std::shared_ptr<wxMemoryInputStream>(
+        new wxMemoryInputStream( buffer, length )
+    );
+
+    delete[] buffer;
     return stream;
 }
 

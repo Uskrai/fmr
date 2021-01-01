@@ -89,7 +89,7 @@ struct SStream
 
     size_t CopyTo( void *buffer, size_t length ) const;
 
-    std::shared_ptr<wxMemoryOutputStream> m_stream;
+    std::shared_ptr<wxMemoryOutputStream> m_stream = NULL;
     std::shared_ptr<AbstractHandler> m_handler;
     wxString m_name, handler_path_;
     StreamActionType stream_flags_ = kStreamNone;
