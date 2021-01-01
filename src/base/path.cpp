@@ -108,7 +108,15 @@ namespace Path
     {
         fs::path temp(path);
 
-        return temp.remove_filename().wstring();
+        if ( fs::is_directory( temp ) )
+            return MakeString( temp );
+
+        temp.remove_filename();
+
+        if ( temp.empty() )
+            return L".";
+
+        return MakeString( temp );
     }
 
     bool HasRootPath( const std::wstring &path )
