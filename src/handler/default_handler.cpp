@@ -38,7 +38,7 @@ void DefaultHandler::Open( const wxString& path )
     m_name = Path::GetDirName(path);
 
     wxString parent = Path::GetParent(m_name);
-    if ( parent != m_name )
+    if ( ! Path::IsRoot( m_name.ToStdWstring() ))
     {
         m_parent = std::shared_ptr<AbstractHandler>( 
             new DefaultHandler( parent )

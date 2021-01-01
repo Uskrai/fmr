@@ -43,7 +43,7 @@ void STDHandler::Open( const wxString &path )
     is_opened_ = true;
 
     wxString parent = Path::GetParent( name_ );
-    if ( parent != name_ )
+    if ( !Path::IsRoot( name_.ToStdWstring() ) )
     {
         parent_ = std::make_shared<STDHandler>(
             STDHandler(parent)
