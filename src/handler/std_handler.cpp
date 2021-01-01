@@ -218,7 +218,7 @@ bool STDHandler::CreateDirectory( std::wstring directory_name, bool overwrite )
     return true;
 }
 
-bool STDHandler::CreateFiles( const std::wstring &file_name, SStream stream, bool overwrite )
+bool STDHandler::CreateFiles( SStream stream, const std::wstring &file_name, bool overwrite )
 {
     if ( !IsOpened() )
         return false;

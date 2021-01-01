@@ -135,8 +135,8 @@ void TEST_WRITE( STDHandler *handler, const std::wstring path )
 	handler->CommitWrite();
 	EXPECT_TRUE( handler->CreateDirectories() );
 	handler->CreateDirectory(L"test1");
-	handler->CreateFiles( L"owo", stream_buffer );
-	handler->CreateFiles( L"wew", stream_file );
+	handler->CreateFiles( stream_buffer, L"owo" );
+	handler->CreateFiles( stream_file, L"wew" );
 	EXPECT_TRUE( handler->CommitWrite() );
 	handler->Reset();
 
