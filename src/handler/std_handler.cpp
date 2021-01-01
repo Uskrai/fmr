@@ -272,7 +272,8 @@ bool STDHandler::RemoveAll()
 
 bool STDHandler::CommitWrite()
 {
-    MakeDirectories();
+    if ( ! fs::exists( GetName().ToStdWstring() ) )
+        return false;
 
     for ( auto &it : list_write_stream_ )
     {
@@ -311,7 +312,7 @@ bool STDHandler::CommitWrite()
 
     list_write_stream_.clear();
 
-    return false;
+    return true;
 }
 
 void STDHandler::Reset()
