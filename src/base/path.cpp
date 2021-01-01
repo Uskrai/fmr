@@ -114,6 +114,9 @@ namespace Path
     bool HasRootPath( const std::wstring &path )
         { return fs::path(path).has_root_path(); }
 
+    bool IsRoot( const std::wstring &path )
+        { return GetRootPath( path ) == path; }
+
     bool IsChild( const std::wstring &parent, std::wstring target )
     {
         std::wstring parent_root = GetRootPath( parent );
