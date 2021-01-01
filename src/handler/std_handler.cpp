@@ -263,11 +263,7 @@ bool STDHandler::Remove( const std::wstring &filename, bool recursive )
 
 bool STDHandler::RemoveAll()
 {
-    SStream stream;
-    stream.SetName( GetName() );
-    stream.SetType( kStreamRemove | kStreamRecursive );
-    list_write_stream_.push_back( stream );
-    return true;
+    return fs::remove_all( GetName().ToStdWstring() );
 }
 
 bool STDHandler::CommitWrite()
