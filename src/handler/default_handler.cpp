@@ -35,27 +35,26 @@ DefaultHandler::DefaultHandler( const wxString& path )
 }
 void DefaultHandler::Open( const wxString& path )
 {
-    m_name = Path::GetDirName(path.ToStdWstring());
+    opened_name_ = Path::GetDirName(path.ToStdWstring());
     is_opened_ = true;
 
-    wxString parent = Path::GetParent(m_name);
-    if ( ! Path::IsRoot( m_name.ToStdWstring() ))
+    std::wstring parent = Path::GetParent( GetName().ToStdWstring() );
+    if ( ! Path::IsRoot( GetName().ToStdWstring() ))
     {
-        m_parent = std::shared_ptr<AbstractHandler>( 
+        parent_handler_ = std::shared_ptr<AbstractHandler>( 
             new DefaultHandler( parent )
         );
-        m_parentName = parent;
     }
 }
 
 const wxString &DefaultHandler::GetName() const
-    { return m_name; }
+    { return opened_name_; }
 
 const std::shared_ptr<AbstractHandler> DefaultHandler::GetParent() const
-    { return m_parent; }
+    { return parent_handler_; }
 
 std::shared_ptr<AbstractHandler> DefaultHandler::GetParent()
-    { return m_parent; }
+    { return parent_handler_; }
 
 const std::vector<SStream> &DefaultHandler::GetChild() const
     { return m_all; }
@@ -170,23 +169,6 @@ bool DefaultHandler::GetNextStream( SStream &stream, bool is_get_stream )
 
     OpenStream( filename.ToStdWstring(), stream, is_get_stream );
     return true;
-}
-
-void DefaultHandler::GetAllFiles( std::vector<struct SStream> &vec_stream, int dir_flags )
-{
-    wxString filename;
-    bool cont = dir.GetFirst( &filename, wxEmptyString, dir_flags );
-    while ( cont )
-    {
-        filename =  Path::GetFullPath( dir.GetNameWithSep() + filename );
-        SStream stream;
-        stream.SetName( filename );
-        stream.SetHandlerPath( GetName() );
-        vec_stream.push_back( stream );
-
-
-        cont = dir.GetNext( &filename );
-    }
 }
 
 bool DefaultHandler::CreateDirectories()
@@ -331,9 +313,9 @@ void DefaultHandler::Reset()
     Close();
 
     list_write_stream_.clear();
-    m_name = wxEmptyString;
+    opened_name_ = wxEmptyString;
     is_opened_ = false;
-    m_parent = NULL;
+    parent_handler_ = NULL;
 }
 
 void DefaultHandler::Clear()

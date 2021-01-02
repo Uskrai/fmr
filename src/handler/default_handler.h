@@ -86,23 +86,17 @@ class DefaultHandler
     private:
 
         int type;
-        wxString m_name;
+        wxString opened_name_;
         wxString m_filename;
-        wxString m_parentName;
         bool is_opened_ = false;
-
         wxDir opened_directory_;
         
-        std::shared_ptr<AbstractHandler> m_parent = NULL;
+        std::shared_ptr<AbstractHandler> parent_handler_ = NULL;
 
         std::vector<struct SStream> m_all, list_write_stream_;
         HandlerSortFirst sort_flag_ = kSortFileFirst;
-        wxArrayString m_files;
-        wxArrayString m_directory;
-        wxDir dir;
 
         void OpenStream( const std::wstring &filename, SStream &stream, bool is_get_stream );
-        void GetAllFiles( std::vector<struct SStream> &vec_stream, int dir_get_flag );
 
         void DoRemove( const SStream &stream );
         void DoCreateDirectory( const SStream &stream );
