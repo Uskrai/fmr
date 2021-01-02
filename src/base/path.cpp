@@ -57,6 +57,9 @@ namespace Path
 
         RemoveDirSep(name);
 
+        if ( name.empty() )
+            return wxFileName::GetCwd();
+
         return name.SubString(0,name.rfind(Separator));
     }
 
@@ -114,7 +117,7 @@ namespace Path
         temp.remove_filename();
 
         if ( temp.empty() )
-            return L".";
+            return MakeString( fs::current_path() );
 
         return MakeString( temp );
     }
