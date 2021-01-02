@@ -33,37 +33,35 @@ void TestSizeHandler( AbstractHandler *handler, const std::wstring &path )
 	EXPECT_EQ( i, handler->Size() );
 }
 
-void TestSortHandler( DefaultHandler *handler, const std::wstring &path )
+void TestSortHandler( AbstractHandler *handler, const std::wstring &path )
 {
+	std::filesystem::create_directories( path + L"test1" );
+	std::filesystem::create_directories( path + L"test2" );
+
 	handler->Open( path );
 	handler->Traverse();
-	EXPECT_EQ( handler->Item(0).GetString(), path + L"test1" );
+	EXPECT_EQ( handler->Item(0).GetString(), L"test1" );
 
 	std::filesystem::remove_all( path );
 }
 
 TEST(STDHandlerTest, Size)
 {
-	std::filesystem::create_directories( test_path + L"test1");
-	std::filesystem::create_directories( test_path + L"test2");
-	STDHandler *handler = new STDHandler();
-	TestSizeHandler( handler, test_path );
-	delete handler;
+	STDHandler handler = STDHandler();
+	TestSizeHandler( &handler, test_path );
 }
 
 TEST( STDHandlerTest, Sort )
 {
-	STDHandler *handler = new STDHandler( test_path );
-	handler->Traverse();
-	EXPECT_EQ( handler->Item(0).GetString(), L"test1" );
-
-	std::filesystem::remove_all( test_path );
-	delete handler;
+	STDHandler handler = STDHandler( test_path );
+	TestSortHandler( &handler, test_path );
 }
 
 template<typename T>
-void TEST_STREAM( T *handler )
+void TEST_STREAM( T *handler, const std::wstring &path )
 {
+	handler->Clear();
+
 	SStream stream;
 	bool cont = handler->GetFirst( stream, kDirDefault, true );
 
@@ -71,24 +69,17 @@ void TEST_STREAM( T *handler )
 	temp_stream.GetStream();
 
 	std::vector<SStream> vec_stream;
-	size_t file = -1;
+	size_t file = 0;
 
 	while ( cont )
 	{
 		vec_stream.push_back( stream );
-
-		// for checking copy stream
-		if ( file != size_t(-1) )
-		{
-			vec_stream.at(file).GetStream();
-			file++;
-		}
-		else file = 0;
-
 		cont = handler->GetNextStream( stream, true );
-	}
-	if ( file != size_t(-1) )
+
+		// checking GetStream and copy ctor
 		vec_stream.at(file).GetStream();
+		file++;
+	}
 
 	handler->Traverse( true );
 
@@ -105,26 +96,21 @@ void TEST_STREAM( T *handler )
 
 TEST( DefaultHandler, Stream )
 {
-	auto handler = new DefaultHandler("test");
-	TEST_STREAM( handler );
-	handler->Open("../test");
-	handler->Clear();
-	TEST_STREAM( handler );
-	delete handler;
+	auto handler = DefaultHandler("test");
+	TEST_STREAM( &handler, L"test" );
+	TEST_STREAM( &handler, L"../test" );
 }
 
 TEST( STDHandler, Stream )
 {
-	auto handler = new STDHandler("test");
-	TEST_STREAM( handler );
-	handler->Open("../test");
-	handler->Clear();
-	TEST_STREAM( handler );
-	delete handler;
+	auto handler = STDHandler("test");
+	TEST_STREAM( &handler, L"test" );
+	TEST_STREAM( &handler, L"../test" );
 
 }
 
-void TEST_WRITE( STDHandler *handler, const std::wstring path )
+template<typename T>
+void TEST_WRITE( T *handler, const std::wstring path )
 {
 	size_t length = 1000;
 	char *buffer = new char[length];
@@ -134,6 +120,7 @@ void TEST_WRITE( STDHandler *handler, const std::wstring path )
 	handler->RemoveAll();
 	handler->CommitWrite();
 	EXPECT_TRUE( handler->CreateDirectories() );
+	EXPECT_TRUE( std::filesystem::exists( handler->GetName().ToStdWstring() ) );
 	handler->CreateDirectory(L"test1");
 	handler->CreateFiles( stream_buffer, L"owo" );
 	handler->CreateFiles( stream_file, L"wew" );
@@ -150,14 +137,19 @@ void TEST_WRITE( STDHandler *handler, const std::wstring path )
 	EXPECT_EQ( handler->Item( index ).GetSize(), length );
 
 	handler->RemoveAll();
-	handler->CommitWrite();
+	EXPECT_FALSE( handler->CommitWrite() );
 	handler->Clear();
 
 	EXPECT_EQ( handler->Size(), 0 );
 
 	EXPECT_FALSE( std::filesystem::exists( test_path ) );
-	EXPECT_FALSE( handler->CommitWrite() );
 	delete[] buffer;
+}
+
+TEST( DefaultHandler, Write )
+{
+	DefaultHandler handler = DefaultHandler( test_path );
+	TEST_WRITE( &handler, test_path );
 }
 
 TEST( STDHandlerTest, Write )
@@ -194,16 +186,14 @@ TEST( STDHandlerTest, Write )
 
 TEST( DefaultHandlerTest, Size )
 {
-	DefaultHandler *handler = new DefaultHandler();
-	TestSizeHandler( handler, test_path );
-	delete handler;
+	DefaultHandler handler = DefaultHandler();
+	TestSizeHandler( &handler, test_path );
 }
 
 TEST( DefaultHandlerTest, Sort )
 {
-	DefaultHandler *handler = new DefaultHandler();
-	TestSortHandler( handler, test_path );
-	delete handler;
+	DefaultHandler handler = DefaultHandler();
+	TestSortHandler( &handler, test_path );
 }
 
 } // namespace fmr
@@ -212,5 +202,4 @@ int main( int argc, char **argv )
 {
 	testing::InitGoogleTest( &argc, argv );
 	return RUN_ALL_TESTS();
-	//arcHandler();
 }
