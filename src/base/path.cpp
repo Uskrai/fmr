@@ -101,8 +101,16 @@ namespace Path
     std::wstring MakeString( const fs::path  &path )
         { return path.wstring(); }
 
-    std::wstring GetParent( const std::wstring &path )
-        { return fs::path( path ).parent_path().wstring(); }
+    std::wstring GetParent( std::wstring path )
+    {
+        if ( !IsRoot( path ) )
+            RemoveDirSep( path );
+
+        fs::path temp( path );
+        fs::path temp_parent = temp.parent_path();
+
+        return GetDirName( MakeString( temp_parent ) );
+    }
 
     std::wstring GetRootPath( const std::wstring &path )
         { return fs::path(path).root_path().wstring(); }
