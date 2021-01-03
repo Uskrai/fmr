@@ -50,6 +50,7 @@ class WxArchiveHandler
         wxString GetPrev() const;
 
         bool IsExist( size_t index ) const;
+        bool IsOpened() const;
 
         bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false );
         bool GetNextStream( SStream &stream, bool is_get_stream = false );
@@ -61,25 +62,39 @@ class WxArchiveHandler
 
         const SStream &Item( size_t index ) const;
         SStream &Item( size_t index );
+
+        void Reset();
         void Clear();
         void Close();
 
         ~WxArchiveHandler();
 
+
+        bool CreateDirectories();
+        bool CreateDirectory( const std::wstring &dirname, bool overwrite = false );
+        bool CreateFiles( SStream stream, const std::wstring &name, bool overwrite = false );
+        bool Remove( const std::wstring &name, bool recursive = false );
+        bool RemoveAll();
+        bool CommitWrite();
+
         static bool CanHandle( wxString path );
     private:
-        static bool Find( wxString& path, const wxArchiveClassFactory*& factory, wxInputStream*& in );
+        static bool Find( wxString path, const wxArchiveClassFactory*& factory );
 
         std::shared_ptr<AbstractHandler> m_parent;
 
         wxString m_name;
         wxString m_parentName;
 
+        bool is_opened_ = false;
+
 
         DirGetFlags iterator_flags_ = kDirNone;
         wxArchiveInputStream *iterator_item_ = NULL;
 
-        std::vector<SStream> m_all;
+        std::vector<SStream> &GetWriteList();
+
+        std::vector<SStream> m_all, list_write_stream_;
 };
 
 }; // namespace fmr

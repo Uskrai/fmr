@@ -32,6 +32,7 @@ WxArchiveHandler::WxArchiveHandler( const wxString& path )
 void WxArchiveHandler::Open( const wxString& path )
 {
     m_name = path;
+    is_opened_ = true;
 
     wxString parent = Path::GetParent(path);
     if ( parent != m_name )
@@ -85,11 +86,17 @@ size_t WxArchiveHandler::Size() const
 bool WxArchiveHandler::IsExist( size_t index ) const
     { return Vector::IsExist( GetChild(), index  ); }
 
+bool WxArchiveHandler::IsOpened() const
+    { return is_opened_; }
+
 wxString WxArchiveHandler::GetNext() const
     { return GetFromCurrent(1); }
 
 wxString WxArchiveHandler::GetPrev() const
     { return GetFromCurrent(-1); }
+
+std::vector<SStream> &WxArchiveHandler::GetWriteList()
+    { return list_write_stream_; }
 
 wxString WxArchiveHandler::GetFromCurrent( int i ) const
 {
@@ -107,14 +114,17 @@ wxString WxArchiveHandler::GetFromCurrent( int i ) const
 bool WxArchiveHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_stream )
 {
     wxString path = GetName();
-    wxInputStream *instream;
     const wxArchiveClassFactory *factory;
 
-    if ( ! Find( path, factory, instream ) )
+    if ( ! Find( path, factory ) )
         return false;
 
+    auto instream = std::unique_ptr<wxFileInputStream>(
+        new wxFileInputStream( path )
+    );
+
     iterator_flags_ = flags;
-    iterator_item_ = factory->NewStream( *instream );
+    iterator_item_ = factory->NewStream( instream.release() );
     return GetNextStream( stream, is_get_stream );
 }
 
@@ -165,34 +175,22 @@ void WxArchiveHandler::Traverse( bool GetStream, DirGetFlags flags )
     std::sort( m_all.begin(), m_all.end(), Compare::NaturalSortable );
 }
 
-bool WxArchiveHandler::Find( wxString& path, const wxArchiveClassFactory*& factory, wxInputStream*& in )
+bool WxArchiveHandler::Find( wxString path, const wxArchiveClassFactory*& factory )
 {
 
     factory = wxArchiveClassFactory::Find( path, wxSTREAM_FILEEXT );
     if ( factory ) 
-    {
-        if ( !in ) delete in;
-        in = new wxFileInputStream(path);
         return true;
-    }
-
-    wxString filename = path;
 
     const wxFilterClassFactory* fcf;
     fcf = wxFilterClassFactory::Find( path, wxSTREAM_FILEEXT );
 
     if ( fcf )
     {
-        if ( !in ) delete in;
-        in = fcf->NewStream( new wxFileInputStream(filename));
         path = fcf->PopExtension(path);
-
         factory = wxArchiveClassFactory::Find( path, wxSTREAM_FILEEXT );
-
         if ( factory )
-        {
             return true;
-        }
     }
 
     return false;
@@ -200,17 +198,204 @@ bool WxArchiveHandler::Find( wxString& path, const wxArchiveClassFactory*& facto
 
 bool WxArchiveHandler::CanHandle( wxString path )
 {
-    wxInputStream* in;
     const wxArchiveClassFactory* factory;
-    bool result = WxArchiveHandler::Find( path, factory, in );
-    if ( result ) delete in;
+    bool result = WxArchiveHandler::Find( path, factory );
     return result;
+}
+
+bool WxArchiveHandler::CreateDirectories()
+{
+    if ( !IsOpened() )
+        return false;
+
+    wxFileOutputStream file_output( GetName() );
+    const wxArchiveClassFactory *factory;
+    wxString path = GetName();
+    if ( ! WxArchiveHandler::Find( path, factory ) )
+        return false;
+
+    auto archive_output = std::unique_ptr<wxArchiveOutputStream>(
+         factory->NewStream( file_output )
+    );
+
+    bool ret = archive_output.get();
+    return ret;
+}
+
+bool WxArchiveHandler::CreateDirectory( const std::wstring &dirname, bool overwrite )
+{
+    if ( !IsOpened() )
+        return false;
+
+    if ( Path::HasRootPath( dirname ) )
+        return false;
+
+    StreamActionType flags = kStreamWrite;
+
+    if ( overwrite )
+        flags |= kStreamOverwrite;
+
+    SStream stream;
+    stream.SetName( dirname );
+    stream.SetDir();
+    stream.SetType( flags );
+
+    GetWriteList().push_back( std::move( stream ) );
+    return true;
+}
+
+bool WxArchiveHandler::CreateFiles( SStream stream, const std::wstring &filename, bool overwrite )
+{
+    if ( !IsOpened() )
+        return false;
+
+    if ( Path::HasRootPath( filename ) )
+        return false;
+
+    StreamActionType flags = kStreamWrite;
+
+    if ( overwrite )
+        flags |= kStreamOverwrite;
+
+    stream.SetName( filename );
+    stream.SetType( flags );
+
+    GetWriteList().push_back( std::move( stream ) );
+    return true;
+}
+
+bool WxArchiveHandler::Remove( const std::wstring &name, bool recursive )
+{
+    if ( !IsOpened() )
+        return false;
+
+    if ( Path::HasRootPath( name )  )
+        return false;
+
+    StreamActionType flags = kStreamRemove;
+
+    if ( recursive )
+        flags |= kStreamRecursive;
+
+    SStream stream;
+    stream.SetName( name );
+    stream.SetType( flags );
+
+    GetWriteList().push_back( std::move( stream ) );
+    return true;
+}
+
+bool WxArchiveHandler::RemoveAll()
+{
+    const wxArchiveClassFactory *factory;
+    bool ret = false;
+
+    if ( wxFileName::FileExists( GetName() ) && Find( GetName(), factory ) )
+        ret = wxRemoveFile( GetName() );
+
+    return ret;
+}
+
+bool WxArchiveHandler::CommitWrite()
+{
+    if ( ! IsOpened() )
+        return false;
+
+    const wxArchiveClassFactory *factory;
+    if ( !( wxFileName::FileExists( GetName() ) && Find( GetName(), factory ) ) )
+        return false;
+
+    wxInputStream *in_stream = new wxFileInputStream( GetName() );
+    auto archive_input = std::unique_ptr<wxArchiveInputStream>(
+        factory->NewStream( in_stream )
+    );
+
+    wxTempFileOutputStream temp_output( GetName() );
+
+    auto archive_output = std::unique_ptr<wxArchiveOutputStream>(
+        factory->NewStream( temp_output )
+    );
+
+    archive_output->CopyArchiveMetaData( *archive_input );
+
+    SStream temp_stream;
+    bool cont = GetFirst( temp_stream, kDirDefault, true );
+
+    while( cont )
+    {
+        GetWriteList().push_back( std::move( temp_stream ) );
+        cont = GetNextStream( temp_stream, true );
+    }
+
+    {
+        auto it = GetWriteList().begin();
+        while( it != GetWriteList().end() )
+        {
+            bool is_increment_it = true;
+            auto next = it;
+            while ( next != GetWriteList().end() )
+            {
+                bool is_increment_next = true;
+                if ( it != next && it->GetName() == next->GetName() )
+                {
+                    if ( next->GetType() & kStreamOverwrite )
+                    {
+                        GetWriteList().erase( it );
+                        is_increment_it = false;
+                        break;
+                    }
+                    else
+                    {
+                        GetWriteList().erase( next );
+                        is_increment_next = false;
+                    }
+                }
+                if ( is_increment_next )
+                    ++next;
+            }
+
+            if ( is_increment_it )
+                ++it;
+        }
+    }
+
+    std::sort( GetWriteList().begin(), GetWriteList().end(), Compare::NaturalSortable );
+
+    for ( auto it = GetWriteList().begin(); it != GetWriteList().end(); ++it )
+    {
+        if ( it->IsDir() )
+            archive_output->PutNextDirEntry( it->GetName() );
+
+        else
+        {
+            std::shared_ptr<char[]> buffer = std::shared_ptr<char[]>(
+                new char[it->GetSize()]
+            );
+
+            size_t length = it->CopyTo( buffer.get(), it->GetSize() );
+            archive_output->PutNextEntry( it->GetName() );
+            archive_output->Write( buffer.get(), length );
+        }
+    }
+
+    archive_input.reset();
+    archive_output->Close();
+    temp_output.Commit();
+    return true;
+}
+
+void WxArchiveHandler::Reset()
+{
+    Clear();
+    Close();
+    m_name = L"";
+    m_parent = NULL;
 }
 
 void WxArchiveHandler::Clear()
 {
-    m_name = wxEmptyString;
     GetChild().clear();
+    GetWriteList().clear();
 }
 
 void WxArchiveHandler::Close()
