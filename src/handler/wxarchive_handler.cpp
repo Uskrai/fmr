@@ -208,18 +208,24 @@ bool WxArchiveHandler::CreateDirectories()
     if ( !IsOpened() )
         return false;
 
-    wxFileOutputStream file_output( GetName() );
     const wxArchiveClassFactory *factory;
     wxString path = GetName();
     if ( ! WxArchiveHandler::Find( path, factory ) )
         return false;
 
-    auto archive_output = std::unique_ptr<wxArchiveOutputStream>(
-         factory->NewStream( file_output )
+    auto file_output = std::shared_ptr<wxTempFileOutputStream>(
+        new wxTempFileOutputStream( GetName() )
     );
 
-    bool ret = archive_output.get();
-    return ret;
+    auto archive_output = std::unique_ptr<wxArchiveOutputStream>(
+         factory->NewStream( *file_output.get() )
+    );
+
+    wxArchiveEntry *entry = factory->NewEntry();
+    archive_output->PutNextEntry( entry );
+    if ( archive_output->Close() )
+        return file_output->Commit();
+    return false;
 }
 
 bool WxArchiveHandler::CreateDirectory( const std::wstring &dirname, bool overwrite )
@@ -316,7 +322,8 @@ bool WxArchiveHandler::CommitWrite()
         factory->NewStream( temp_output )
     );
 
-    archive_output->CopyArchiveMetaData( *archive_input );
+    if ( archive_input->IsOk() &&  archive_input->GetSize() != 0 )
+        archive_output->CopyArchiveMetaData( *archive_input );
 
     SStream temp_stream;
     bool cont = GetFirst( temp_stream, kDirDefault, true );
@@ -380,8 +387,11 @@ bool WxArchiveHandler::CommitWrite()
 
     archive_input.reset();
     archive_output->Close();
-    temp_output.Commit();
-    return true;
+
+    if ( GetWriteList().empty() )
+        return CreateDirectories();
+
+    return temp_output.Commit();
 }
 
 void WxArchiveHandler::Reset()
