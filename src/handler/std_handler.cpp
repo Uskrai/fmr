@@ -129,7 +129,7 @@ bool STDHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_strea
     iterator_flags_ = flags;
     iterator_item_ = fs::directory_iterator( GetName().ToStdWstring(), options );
     iterator_ = fs::begin( iterator_item_ );
-    return GetNextStream( stream );
+    return GetNextStream( stream, is_get_stream );
 }
 
 bool STDHandler::GetNextStream( SStream &stream, bool is_get_stream )
