@@ -295,9 +295,8 @@ bool STDHandler::CommitWrite()
                 std::ofstream out_stream;
                 out_stream.open( temp );
 
-                size_t length = it.GetSize();
-                char *buffer = new char[ length ];
-                it.CopyTo( buffer, length );
+                char *buffer = new char[ it.GetSize() ];
+                size_t length = it.CopyTo( buffer, it.GetSize() );
 
                 out_stream.write( buffer, length );
                 out_stream.close();
