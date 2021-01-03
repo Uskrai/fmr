@@ -159,6 +159,13 @@ TEST( STDHandlerTest, Write )
 	delete handler;
 }
 
+TEST( WxArchiveHandler, Write )
+{
+	std::wstring path = L"test_dir.zip";
+	auto handler = WxArchiveHandler( path );
+	TEST_WRITE( &handler, path );
+}
+
 // TEST( wxArchiveTest, Size )
 // {
 // 	WxArchiveHandler *handler = new WxArchiveHandler( "test_zip.zip" );
