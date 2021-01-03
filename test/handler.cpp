@@ -166,6 +166,17 @@ TEST( WxArchiveHandler, Write )
 	TEST_WRITE( &handler, path );
 }
 
+TEST( WxArchiveHandler, Stream )
+{
+	WxArchiveHandler handler = WxArchiveHandler();
+	char buffer[1000];
+	handler.CreateDirectories();
+	handler.CreateDirectory(L"owo");
+	handler.CreateFiles( SStream( &buffer, 1000 ), L"wewew" );
+	TEST_STREAM( &handler, L"test_dir.zip" );
+	handler.RemoveAll();
+}
+
 // TEST( wxArchiveTest, Size )
 // {
 // 	WxArchiveHandler *handler = new WxArchiveHandler( "test_zip.zip" );
