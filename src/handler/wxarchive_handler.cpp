@@ -133,7 +133,9 @@ bool WxArchiveHandler::GetNextStream( SStream &stream, bool is_get_stream )
     if ( !iterator_item_ )
         return false;
 
-    wxArchiveEntry *entry = iterator_item_->GetNextEntry();
+    auto entry = std::unique_ptr<wxArchiveEntry>(
+        iterator_item_->GetNextEntry()
+    );
 
     if ( !entry )
     {
