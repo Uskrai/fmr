@@ -146,17 +146,56 @@ void TEST_WRITE( T *handler, const std::wstring path )
 	delete[] buffer;
 }
 
+TEST( DefaultHandlerTest, Sort )
+{
+	DefaultHandler handler = DefaultHandler();
+	TestSortHandler( &handler, test_path );
+}
+
+TEST( DefaultHandlerTest, Size )
+{
+	DefaultHandler handler = DefaultHandler();
+	TestSizeHandler( &handler, test_path );
+}
+
 TEST( DefaultHandler, Write )
 {
 	DefaultHandler handler = DefaultHandler( test_path );
 	TEST_WRITE( &handler, test_path );
 }
 
+TEST( DefaultHandler, Stream )
+{
+	auto handler = DefaultHandler("test");
+	TEST_STREAM( &handler, L"test" );
+	TEST_STREAM( &handler, L"../test" );
+}
+
+TEST( STDHandlerTest, Sort )
+{
+	STDHandler handler = STDHandler( test_path );
+	TestSortHandler( &handler, test_path );
+}
+
+TEST(STDHandlerTest, Size)
+{
+	STDHandler handler = STDHandler();
+	TestSizeHandler( &handler, test_path );
+}
+
+
 TEST( STDHandlerTest, Write )
 {
 	STDHandler *handler = new STDHandler( test_path );
 	TEST_WRITE( handler, test_path );
 	delete handler;
+}
+
+TEST( STDHandler, Stream )
+{
+	auto handler = STDHandler("test");
+	TEST_STREAM( &handler, L"test" );
+	TEST_STREAM( &handler, L"../test" );
 }
 
 TEST( WxArchiveHandler, Write )
