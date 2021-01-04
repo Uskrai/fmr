@@ -99,11 +99,15 @@ size_t DefaultHandler::Index( const wxString& path ) const
 {
     if ( path == GetName() )
         return 0;
-    
+
+    std::wstring temp = path.ToStdWstring();
+    if ( Path::IsAbsolute( temp ) )
+        temp = MakeRelative( GetName().ToStdWstring(), path.ToStdWstring() );
+
     size_t idx = 0;
     while( Vector::IsExist( m_all, idx) )
     {
-        if ( m_all.at(idx).GetName() == path )
+        if ( m_all.at(idx).GetName() == temp )
             return idx;
         idx++;
     }
