@@ -171,22 +171,18 @@ std::shared_ptr<AbstractHandler> SStream::GetHandler()
 
 std::shared_ptr<wxMemoryInputStream> SStream::GetStream() const
 {
-
-    char *buffer = NULL;
-    size_t length = 0;
-
     if ( IsOk() )
     {
-        buffer = new char[m_stream->GetSize()];
-        length = m_stream->CopyTo( buffer, m_stream->GetSize() );
+        return std::shared_ptr<wxMemoryInputStream>(
+            new wxMemoryInputStream( *m_stream )
+        );
     }
-
-    auto stream = std::shared_ptr<wxMemoryInputStream>(
-        new wxMemoryInputStream( buffer, length )
-    );
-
-    delete[] buffer;
-    return stream;
+    else
+    {
+        return std::shared_ptr<wxMemoryInputStream>(
+            new wxMemoryInputStream( NULL, 0 )
+        );
+    }
 }
 
 std::shared_ptr<wxMemoryOutputStream> SStream::GetOutputStream()
