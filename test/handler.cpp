@@ -45,18 +45,6 @@ void TestSortHandler( AbstractHandler *handler, const std::wstring &path )
 	std::filesystem::remove_all( path );
 }
 
-TEST(STDHandlerTest, Size)
-{
-	STDHandler handler = STDHandler();
-	TestSizeHandler( &handler, test_path );
-}
-
-TEST( STDHandlerTest, Sort )
-{
-	STDHandler handler = STDHandler( test_path );
-	TestSortHandler( &handler, test_path );
-}
-
 template<typename T>
 void TEST_STREAM( T *handler, const std::wstring &path )
 {
@@ -83,7 +71,7 @@ void TEST_STREAM( T *handler, const std::wstring &path )
 
 	handler->Traverse( true );
 
-	EXPECT_EQ( vec_stream.size(), handler->Size() );
+	ASSERT_EQ( vec_stream.size(), handler->Size() );
 
 	// checking size
 	for ( const auto &handler_it : handler->GetChild() )
@@ -92,21 +80,6 @@ void TEST_STREAM( T *handler, const std::wstring &path )
 			{
 				EXPECT_EQ( handler_it.GetSize(), vec_it.GetSize() );
 			}
-}
-
-TEST( DefaultHandler, Stream )
-{
-	auto handler = DefaultHandler("test");
-	TEST_STREAM( &handler, L"test" );
-	TEST_STREAM( &handler, L"../test" );
-}
-
-TEST( STDHandler, Stream )
-{
-	auto handler = STDHandler("test");
-	TEST_STREAM( &handler, L"test" );
-	TEST_STREAM( &handler, L"../test" );
-
 }
 
 template<typename T>
@@ -118,31 +91,32 @@ void TEST_WRITE( T *handler, const std::wstring path )
 	SStream stream_file("Makefile");
 
 	handler->RemoveAll();
-	handler->CommitWrite();
-	EXPECT_TRUE( handler->CreateDirectories() );
-	EXPECT_TRUE( std::filesystem::exists( handler->GetName().ToStdWstring() ) );
+	ASSERT_TRUE( handler->CreateDirectories() );
+	ASSERT_TRUE( std::filesystem::exists( handler->GetName().ToStdWstring() ) );
+	ASSERT_TRUE( handler->CommitWrite() );
 	handler->CreateDirectory(L"test1");
 	handler->CreateFiles( stream_buffer, L"owo" );
 	handler->CreateFiles( stream_file, L"wew" );
-	EXPECT_TRUE( handler->CommitWrite() );
+	ASSERT_TRUE( handler->CommitWrite() );
+
 	handler->Reset();
 
 	handler->Open( path );
 	handler->Traverse( true );
 
-	EXPECT_EQ( handler->Size(), 3 );
+	ASSERT_EQ( handler->Size(), 3 );
 
 	size_t index = handler->Index( L"owo" );
 
-	EXPECT_EQ( handler->Item( index ).GetSize(), length );
+	ASSERT_EQ( handler->Item( index ).GetSize(), length );
 
 	handler->RemoveAll();
 	EXPECT_FALSE( handler->CommitWrite() );
 	handler->Clear();
 
-	EXPECT_EQ( handler->Size(), 0 );
+	ASSERT_EQ( handler->Size(), 0 );
 
-	EXPECT_FALSE( std::filesystem::exists( test_path ) );
+	ASSERT_FALSE( std::filesystem::exists( test_path ) );
 	delete[] buffer;
 }
 
@@ -240,18 +214,6 @@ TEST( WxArchiveHandler, Stream )
 
 // 	EXPECT_EQ( handler->Item(0).GetString(), L"test_zip/" );
 // }
-
-TEST( DefaultHandlerTest, Size )
-{
-	DefaultHandler handler = DefaultHandler();
-	TestSizeHandler( &handler, test_path );
-}
-
-TEST( DefaultHandlerTest, Sort )
-{
-	DefaultHandler handler = DefaultHandler();
-	TestSortHandler( &handler, test_path );
-}
 
 } // namespace fmr
 
