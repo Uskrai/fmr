@@ -4,6 +4,7 @@
 #include "handler/std_handler.h"
 #include "handler/default_handler.h"
 #include "handler/wxarchive_handler.h"
+#include <wx/stopwatch.h>
 
 namespace fmr
 {
@@ -59,6 +60,7 @@ void TEST_STREAM( T *handler, const std::wstring &path )
 	std::vector<SStream> vec_stream;
 	size_t file = 0;
 
+	ASSERT_TRUE( cont ) << path << " should have some file or folder";
 	while ( cont )
 	{
 		vec_stream.push_back( stream );
@@ -74,8 +76,8 @@ void TEST_STREAM( T *handler, const std::wstring &path )
 	ASSERT_EQ( vec_stream.size(), handler->Size() );
 
 	// checking size
-	for ( const auto &handler_it : handler->GetChild() )
-		for ( const auto &vec_it : vec_stream )
+	for ( const SStream &handler_it : handler->GetChild() )
+		for ( const SStream &vec_it : vec_stream )
 			if ( handler_it.GetName() == vec_it.GetName() )
 			{
 				EXPECT_EQ( handler_it.GetSize(), vec_it.GetSize() );
@@ -142,7 +144,6 @@ TEST( DefaultHandler, Stream )
 {
 	auto handler = DefaultHandler("test");
 	TEST_STREAM( &handler, L"test" );
-	TEST_STREAM( &handler, L"../test" );
 }
 
 TEST( STDHandlerTest, Sort )
@@ -169,7 +170,6 @@ TEST( STDHandler, Stream )
 {
 	auto handler = STDHandler("test");
 	TEST_STREAM( &handler, L"test" );
-	TEST_STREAM( &handler, L"../test" );
 }
 
 TEST( WxArchiveHandler, Write )

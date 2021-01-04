@@ -2,7 +2,7 @@
 AM_CPPFLAGS = -I@top_srcdir@/src
 AM_LDFLAGS = -lgtest
 
-LIB_DIR = ..
+LIB_DIR = @abs_top_builddir@
 bin_PROGRAMS = handler
 handler_SOURCES = handler.cpp
 handler_LDADD = $(LIB_DIR)/libpath.la \
