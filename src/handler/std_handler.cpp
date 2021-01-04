@@ -98,7 +98,8 @@ bool STDHandler::OpenStream( SStream &stream )
     if ( stream.GetHandlerPath() != GetName() )
         return false;
 
-    stream.Open( GetName().ToStdWstring() + stream.GetString() );
+    std::wstring path = Path::Append( GetName().ToStdWstring(), stream.GetString() );
+    stream.Open( path );
     return true;
 }
 
