@@ -52,6 +52,10 @@ inline namespace Path
 
     bool IsChild( const std::wstring &parent, std::wstring target );
 
+    bool IsAbsolute( const std::wstring &path );
+
+    bool IsRelative( const std::wstring &path );
+
     std::wstring Append( const std::wstring &parent, const std::wstring &target );
 
     std::wstring MakeRelative( const std::wstring &parent, const std::wstring &target );

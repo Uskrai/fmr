@@ -160,6 +160,12 @@ namespace Path
         return false;
     }
 
+    bool IsAbsolute( const std::wstring &path )
+        { return fs::path(path).is_absolute(); }
+
+    bool IsRelative( const std::wstring &path )
+        { return fs::path(path).is_relative(); }
+
     std::wstring Append( const std::wstring &parent, const std::wstring &target )
     {
         fs::path path( parent );
