@@ -181,11 +181,12 @@ TEST( WxArchiveHandler, Write )
 
 TEST( WxArchiveHandler, Stream )
 {
-	WxArchiveHandler handler = WxArchiveHandler();
+	WxArchiveHandler handler = WxArchiveHandler( L"test_dir.zip" );
 	char buffer[1000];
 	handler.CreateDirectories();
 	handler.CreateDirectory(L"owo");
 	handler.CreateFiles( SStream( &buffer, 1000 ), L"wewew" );
+	handler.CommitWrite();
 	TEST_STREAM( &handler, L"test_dir.zip" );
 	handler.RemoveAll();
 }
