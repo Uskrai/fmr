@@ -71,6 +71,7 @@ class WxArchiveHandler
 
 
         bool CreateDirectories();
+        bool CreateDirectories( const std::wstring &path );
         bool CreateDirectory( const std::wstring &dirname, bool overwrite = false );
         bool CreateFiles( SStream stream, const std::wstring &name, bool overwrite = false );
         bool Remove( const std::wstring &name, bool recursive = false );

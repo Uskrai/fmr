@@ -207,16 +207,21 @@ bool WxArchiveHandler::CanHandle( wxString path )
 
 bool WxArchiveHandler::CreateDirectories()
 {
-    if ( !IsOpened() )
+    return  IsOpened()
+            && CreateDirectories( GetName().ToStdWstring() );
+}
+
+bool WxArchiveHandler::CreateDirectories( const std::wstring &path )
+{
+    if (path == "")
         return false;
 
     const wxArchiveClassFactory *factory;
-    wxString path = GetName();
     if ( ! WxArchiveHandler::Find( path, factory ) )
         return false;
 
     auto file_output = std::shared_ptr<wxTempFileOutputStream>(
-        new wxTempFileOutputStream( GetName() )
+        new wxTempFileOutputStream( path )
     );
 
     auto archive_output = std::unique_ptr<wxArchiveOutputStream>(

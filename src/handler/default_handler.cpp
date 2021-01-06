@@ -178,7 +178,17 @@ bool DefaultHandler::GetNextStream( SStream &stream, bool is_get_stream )
 
 bool DefaultHandler::CreateDirectories()
 {
-    return wxDir::Make( GetName(), wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL );
+    return  IsOpened()
+            && CreateDirectories( GetName().ToStdWstring() );
+}
+
+bool DefaultHandler::CreateDirectories( const std::wstring &path )
+{
+    return  path != ""
+            && (
+                wxDir::Exists( path )
+                || wxDir::Make( path, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL )
+            );
 }
 
 bool DefaultHandler::CreateDirectory( const std::wstring &directory_name, bool overwrite )

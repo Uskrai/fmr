@@ -76,6 +76,7 @@ class DefaultHandler
         void Close();
 
         bool CreateDirectories();
+        bool CreateDirectories( const std::wstring &path );
         bool CreateDirectory( const std::wstring &directory_name, bool overwrite = false );
         bool CreateFiles( SStream stream, const std::wstring &filename, bool overwite = false );
         bool Remove( const std::wstring &filename, bool recursive = false );

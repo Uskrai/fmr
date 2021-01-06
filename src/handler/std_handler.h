@@ -82,6 +82,7 @@ class STDHandler
         bool CreateDirectory( const std::wstring directory_name, bool overwrite = false );
         bool CreateFiles( SStream stream, const std::wstring &filename, bool overwrite = false );
         bool CreateDirectories();
+        bool CreateDirectories( const std::wstring &path );
         bool RemoveAll();
         bool RemoveAll( const std::wstring &path );
         bool Remove( const std::wstring &name, bool recursive );
