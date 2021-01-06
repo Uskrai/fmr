@@ -279,8 +279,10 @@ bool STDHandler::RemoveAll()
 bool STDHandler::RemoveAll( const std::wstring &path )
 {
     return  !path.empty()
-            && fs::exists( path )
-            && fs::remove_all( path );
+            && (
+                !fs::exists( path )
+                || fs::remove_all( path )
+            );
 }
 
 bool STDHandler::CommitWrite()

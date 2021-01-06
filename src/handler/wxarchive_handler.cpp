@@ -307,9 +307,13 @@ bool WxArchiveHandler::RemoveAll()
 bool WxArchiveHandler::RemoveAll( const std::wstring &path )
 {
     const wxArchiveClassFactory *factory;
-    return  wxFileName::FileExists( path )
-            && Find( path, factory )
-            && wxRemoveFile( path );
+    return  !path.empty() &&
+            (
+                !wxFileName::FileExists( path )
+                || ( Find( path, factory )
+                    && wxRemoveFile( path )
+                )
+            );
 }
 
 bool WxArchiveHandler::CommitWrite()

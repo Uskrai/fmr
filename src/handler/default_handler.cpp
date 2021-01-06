@@ -265,8 +265,11 @@ bool DefaultHandler::RemoveAll()
 
 bool DefaultHandler::RemoveAll( const std::wstring &path )
 {
-    return  wxFileName::Exists( path )
-            && wxDir::Remove( path, wxPATH_RMDIR_RECURSIVE );
+    return  !path.empty()
+            &&  (
+                !wxFileName::Exists( path )
+                || wxDir::Remove( path, wxPATH_RMDIR_RECURSIVE )
+            );
 }
 
 void DefaultHandler::DoCreateFile( const SStream &stream )
