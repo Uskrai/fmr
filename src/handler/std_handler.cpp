@@ -190,7 +190,7 @@ void STDHandler::Traverse( bool is_get_stream, DirGetFlags flags )
 
 bool STDHandler::CreateDirectories()
 {
-    if ( ! fs::exists( GetName().ToStdWstring() ) )
+    if ( IsOpened() && ! fs::exists( GetName().ToStdWstring() ) )
         return fs::create_directories( GetName().ToStdWstring() );
     return true;
 }

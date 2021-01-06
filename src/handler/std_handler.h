@@ -93,7 +93,7 @@ class STDHandler
         std::filesystem::directory_iterator iterator_;
 
         wxString name_, filename_;
-        bool is_opened_;
+        bool is_opened_ = false;
 
         std::vector<struct SStream> list_stream_, list_write_stream_;
         std::shared_ptr<AbstractHandler> parent_ = NULL;
