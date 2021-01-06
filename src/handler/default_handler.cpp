@@ -274,14 +274,14 @@ bool DefaultHandler::RemoveAll( const std::wstring &path )
 
 void DefaultHandler::DoCreateFile( const SStream &stream )
 {
-    wxFileOutputStream out_stream( stream.GetHandlerPath() + stream.GetName() );
-    auto buffer = std::shared_ptr<char[]>(
-        new char[stream.GetSize()]
-    );
+    wxTempFileOutputStream out_stream( stream.GetHandlerPath() + stream.GetName() );
+    char *buffer = new char[stream.GetSize()];
 
-    size_t length = stream.CopyTo( buffer.get(), stream.GetSize() );
+    size_t length = stream.CopyTo( buffer, stream.GetSize() );
 
-    out_stream.Write( buffer.get(), length );
+    out_stream.Write( buffer, length );
+    out_stream.Commit();
+    delete[] buffer;
 }
 
 void DefaultHandler::DoRemove( const SStream &stream )
