@@ -329,6 +329,8 @@ bool DefaultHandler::CommitWrite()
 
     }
 
+    list_write_stream_.clear();
+
     return true;
 }
 
@@ -346,6 +348,7 @@ void DefaultHandler::Reset()
 void DefaultHandler::Clear()
 {
     m_all.clear();
+    list_write_stream_.clear();
 }
 
 void DefaultHandler::Close()
