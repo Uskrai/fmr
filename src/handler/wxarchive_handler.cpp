@@ -295,13 +295,16 @@ bool WxArchiveHandler::Remove( const std::wstring &name, bool recursive )
 
 bool WxArchiveHandler::RemoveAll()
 {
+    return  IsOpened()
+            && RemoveAll( GetName().ToStdWstring() );
+}
+
+bool WxArchiveHandler::RemoveAll( const std::wstring &path )
+{
     const wxArchiveClassFactory *factory;
-    bool ret = false;
-
-    if ( wxFileName::FileExists( GetName() ) && Find( GetName(), factory ) )
-        ret = wxRemoveFile( GetName() );
-
-    return ret;
+    return  wxFileName::FileExists( path )
+            && Find( path, factory )
+            && wxRemoveFile( path );
 }
 
 bool WxArchiveHandler::CommitWrite()

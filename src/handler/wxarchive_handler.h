@@ -75,6 +75,7 @@ class WxArchiveHandler
         bool CreateFiles( SStream stream, const std::wstring &name, bool overwrite = false );
         bool Remove( const std::wstring &name, bool recursive = false );
         bool RemoveAll();
+        bool RemoveAll( const std::wstring &path );
         bool CommitWrite();
 
         static bool CanHandle( wxString path );

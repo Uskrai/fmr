@@ -264,7 +264,15 @@ bool STDHandler::Remove( const std::wstring &filename, bool recursive )
 
 bool STDHandler::RemoveAll()
 {
-    return fs::remove_all( GetName().ToStdWstring() );
+    return  IsOpened()
+            && RemoveAll( GetName().ToStdWstring() );
+}
+
+bool STDHandler::RemoveAll( const std::wstring &path )
+{
+    return  !path.empty()
+            && fs::exists( path )
+            && fs::remove_all( path );
 }
 
 bool STDHandler::CommitWrite()

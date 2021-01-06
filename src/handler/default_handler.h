@@ -80,6 +80,7 @@ class DefaultHandler
         bool CreateFiles( SStream stream, const std::wstring &filename, bool overwite = false );
         bool Remove( const std::wstring &filename, bool recursive = false );
         bool RemoveAll();
+        bool RemoveAll( const std::wstring &path );
         bool CommitWrite();
 
         static bool CanHandle( wxString path ) { return true; }
