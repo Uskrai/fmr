@@ -13,6 +13,7 @@
 #define FILE_SIZE_INTERVAL 5
 #define FILE_COUNT 100
 #define FOLDER_COUNT 100
+#define FILENAME_LENGTH 10
 
 namespace fmr
 {
@@ -43,14 +44,39 @@ std::wstring MakeName( size_t size )
 	return string;
 }
 
+std::shared_ptr<char[]> MakeBuffer( size_t size )
+{
+	char *buffer = new char[size];
+	return std::shared_ptr<char[]>( buffer );
+}
+
+time_t GetMicroSecond()
+{
+	using namespace std::literals;
+
+	auto now = std::chrono::system_clock::now();
+
+	return std::chrono::system_clock::to_time_t( now );
+}
+
+SStream MakeStream( size_t size )
+{
+	auto buffer_ = MakeBuffer( size );
+	return SStream( buffer_.get(), size );
+}
+
 template<class T>
 class HandlerTest : public ::testing::Test
 {
 	public:
 		void SetUp() override
 		{
-			handler_ = new T();
-			test_dir_ = L"test_dir" + GetExtension( handler_ );
+
+		}
+
+		static void PrepareHandler()
+		{
+			handler_->Reset();
 			ASSERT_FALSE( handler_->CreateDirectories() );
 			ASSERT_FALSE( handler_->RemoveAll() );
 
@@ -62,32 +88,6 @@ class HandlerTest : public ::testing::Test
 			ASSERT_TRUE( handler_->CreateDirectories( test_dir_ ) );
 			ASSERT_TRUE( handler_->RemoveAll( test_dir_ ) );
 
-			PrepareHandler();
-		}
-
-		std::shared_ptr<char[]> MakeBuffer( size_t size )
-		{
-			char *buffer = new char[size];
-			return std::shared_ptr<char[]>( buffer );
-		}
-
-		time_t GetMicroSecond()
-		{
-			using namespace std::literals;
-
-			auto now = std::chrono::system_clock::now();
-
-			return std::chrono::system_clock::to_time_t( now );
-		}
-
-		SStream MakeStream( size_t size )
-		{
-			auto buffer_ = MakeBuffer( size );
-			return SStream( buffer_.get(), size );
-		}
-
-		void PrepareHandler()
-		{
 			handler_->Open( test_dir_ );
 			handler_->CreateDirectories();
 			size_t stream_total_size = 0;
@@ -97,7 +97,7 @@ class HandlerTest : public ::testing::Test
 			while ( length < FILE_COUNT * FILE_SIZE_INTERVAL )
 			{
 				SStream item = MakeStream( length );
-				std::wstring name = MakeName( 10 );
+				std::wstring name = MakeName( FILENAME_LENGTH );
 				stream_total_size += item.GetSize();
 
 				ASSERT_TRUE( handler_->CreateFiles( item, name ) );
@@ -127,21 +127,34 @@ class HandlerTest : public ::testing::Test
 			handler_->Clear();
 		}
 
-		void TearDown() override
+		static void SetUpTestSuite()
 		{
-			ASSERT_TRUE( handler_->RemoveAll( test_dir_ ) );
-			ASSERT_TRUE( !std::filesystem::exists( test_dir_ ) );
+			TearDownTestSuite();
+			handler_ = new T();
+			test_dir_ = L"test_dir" + GetExtension( handler_ );
+			PrepareHandler();
 		}
 
-		~HandlerTest( )
+		static void TearDownTestSuite()
 		{
-			delete handler_;
+			if ( handler_ )
+			{
+				ASSERT_TRUE( handler_->RemoveAll( test_dir_ ) );
+				ASSERT_TRUE( !std::filesystem::exists( test_dir_ ) );
+
+				delete handler_;
+				handler_ = NULL;
+			}
+		}
+
+		void TearDown() override
+		{
 		}
 
 	protected:
 		std::shared_ptr<char[]> buffer_ = NULL;
-		T *handler_ = NULL;
-		std::wstring test_dir_;
+		inline static T *handler_ = NULL;
+		inline static std::wstring test_dir_;
 };
 
 
@@ -256,6 +269,7 @@ TYPED_TEST( HandlerTest, SizeTest )
 TYPED_TEST( HandlerTest, WriteTest )
 {
 	TEST_WRITE( this->handler_, this->test_dir_ );
+	this->PrepareHandler();
 }
 
 TYPED_TEST( HandlerTest, StreamTest )
