@@ -88,7 +88,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = handler$(EXEEXT)
+bin_PROGRAMS = sort$(EXEEXT) handler$(EXEEXT)
 subdir = test
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/aux-build/wxwin.m4 \
@@ -113,6 +113,10 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+am_sort_OBJECTS = sort.$(OBJEXT)
+sort_OBJECTS = $(am_sort_OBJECTS)
+sort_DEPENDENCIES = $(LIB_DIR)/libcompare.la \
+	$(LIB_DIR)/lib_struct_stream.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -128,7 +132,7 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/aux-build/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/handler.Po
+am__depfiles_remade = ./$(DEPDIR)/handler.Po ./$(DEPDIR)/sort.Po
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -148,8 +152,8 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(handler_SOURCES)
-DIST_SOURCES = $(handler_SOURCES)
+SOURCES = $(handler_SOURCES) $(sort_SOURCES)
+DIST_SOURCES = $(handler_SOURCES) $(sort_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -527,6 +531,10 @@ handler_LDADD = $(LIB_DIR)/libpath.la \
                 $(LIB_DIR)/lib_wxarchive_handler.la \
                 $(LIB_DIR)/libcompare.la
 
+sort_SOURCES = sort.cpp
+sort_LDADD = $(LIB_DIR)/libcompare.la \
+                $(LIB_DIR)/lib_struct_stream.la
+
 TESTS = $(bin_PROGRAMS)
 all: all-am
 
@@ -615,6 +623,10 @@ handler$(EXEEXT): $(handler_OBJECTS) $(handler_DEPENDENCIES) $(EXTRA_handler_DEP
 	@rm -f handler$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(handler_OBJECTS) $(handler_LDADD) $(LIBS)
 
+sort$(EXEEXT): $(sort_OBJECTS) $(sort_DEPENDENCIES) $(EXTRA_sort_DEPENDENCIES) 
+	@rm -f sort$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(sort_OBJECTS) $(sort_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -622,6 +634,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handler.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sort.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -852,6 +865,13 @@ recheck: all
 	        am__force_recheck=am--force-recheck \
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
+sort.log: sort$(EXEEXT)
+	@p='sort$(EXEEXT)'; \
+	b='sort'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 handler.log: handler$(EXEEXT)
 	@p='handler$(EXEEXT)'; \
 	b='handler'; \
@@ -954,6 +974,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/handler.Po
+	-rm -f ./$(DEPDIR)/sort.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -1000,6 +1021,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/handler.Po
+	-rm -f ./$(DEPDIR)/sort.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

@@ -92,15 +92,19 @@ class HandlerTest : public ::testing::Test
 			handler_->CreateDirectories();
 			size_t stream_total_size = 0;
 
+
 			size_t length = FILE_SIZE_START;
 			while ( length < FILE_COUNT * FILE_SIZE_INTERVAL )
 			{
-				auto stream = MakeStream( length );
-				stream_total_size += stream.GetSize();
-				ASSERT_TRUE( handler_->CreateFiles( stream, MakeName( 10 ) ) );
+				SStream item = MakeStream( length );
+				std::wstring name = MakeName( 10 );
+				stream_total_size += item.GetSize();
+
+				ASSERT_TRUE( handler_->CreateFiles( item, name ) );
 
 				length += FILE_SIZE_INTERVAL;
 			}
+
 
 			length = 0;
 			while ( length < FOLDER_COUNT )
@@ -110,8 +114,6 @@ class HandlerTest : public ::testing::Test
 			}
 
 			handler_->CommitWrite();
-
-			SStream stream;
 
 			handler_->Clear();
 			handler_->Traverse( true );
@@ -128,6 +130,7 @@ class HandlerTest : public ::testing::Test
 		void TearDown() override
 		{
 			ASSERT_TRUE( handler_->RemoveAll( test_dir_ ) );
+			ASSERT_TRUE( !std::filesystem::exists( test_dir_ ) );
 		}
 
 		~HandlerTest( )
@@ -142,7 +145,7 @@ class HandlerTest : public ::testing::Test
 };
 
 
-typedef testing::Types<STDHandler,DefaultHandler,WxArchiveHandler> handler_type;
+typedef testing::Types<STDHandler,WxArchiveHandler,DefaultHandler> handler_type;
 
 TYPED_TEST_SUITE( HandlerTest, handler_type );
 
@@ -170,6 +173,7 @@ template<typename T>
 void TEST_STREAM( T *handler, const std::wstring &path )
 {
 	handler->Clear();
+	handler->Open( path );
 
 	SStream stream;
 	bool cont = handler->GetFirst( stream, kDirDefault, true );
@@ -244,20 +248,31 @@ void TEST_WRITE( T *handler, const std::wstring path )
 	delete[] buffer;
 }
 
-TYPED_TEST( HandlerTest, Size )
+TYPED_TEST( HandlerTest, SizeTest )
 {
 	TestSizeHandler( this->handler_, this->test_dir_ );
 }
 
-TYPED_TEST( HandlerTest, Write )
+TYPED_TEST( HandlerTest, WriteTest )
 {
 	TEST_WRITE( this->handler_, this->test_dir_ );
 }
 
-TYPED_TEST( HandlerTest, Stream )
+TYPED_TEST( HandlerTest, StreamTest )
 {
-	printf("%p\n", this->handler_ );
 	TEST_STREAM( this->handler_, this->test_dir_ );
+}
+
+TYPED_TEST( HandlerTest, OpenTest )
+{
+	this->handler_->Reset();
+	SStream stream;
+	ASSERT_FALSE( this->handler_->GetFirst( stream ) );
+	ASSERT_FALSE( this->handler_->GetNextStream( stream ) );
+
+	this->handler_->Reset();
+	ASSERT_FALSE( this->handler_->GetNextStream( stream ) );
+	ASSERT_FALSE( this->handler_->GetFirst( stream ) );
 }
 
 // TEST( STDHandlerTest, Sort )
