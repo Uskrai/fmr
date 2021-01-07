@@ -347,7 +347,7 @@ bool STDHandler::CommitWrite()
             {
                 fs::path temp( path );
                 std::ofstream out_stream;
-                out_stream.open( temp );
+                out_stream.open( temp, std::ios_base::binary );
 
                 char *buffer = new char[ it.GetSize() ];
                 size_t length = it.CopyTo( buffer, it.GetSize() );
