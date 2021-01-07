@@ -14,6 +14,7 @@
 #define FILE_COUNT 100
 #define FOLDER_COUNT 100
 #define FILENAME_LENGTH 10
+#define TEST_DIRECTORY L"test_dir"
 
 namespace fmr
 {
@@ -125,6 +126,12 @@ class HandlerTest : public ::testing::Test
 			ASSERT_EQ( stream_total_size, traverse_total_size );
 
 			handler_->Clear();
+		}
+
+		T *CreateHandler()
+		{
+			T *handler = new T();
+			return handler;
 		}
 
 		static void SetUpTestSuite()
@@ -287,8 +294,29 @@ TYPED_TEST( HandlerTest, OpenTest )
 	this->handler_->Reset();
 	ASSERT_FALSE( this->handler_->GetNextStream( stream ) );
 	ASSERT_FALSE( this->handler_->GetFirst( stream ) );
+
+	this->handler_->Open( this->test_dir_ );
 }
 
+TYPED_TEST( HandlerTest, TraverseTest )
+{
+	this->handler_->Clear();
+
+	this->handler_->Traverse( );
+	size_t size = this->handler_->Size();
+	this->handler_->Traverse( );
+	ASSERT_EQ( size, this->handler_->Size() ) << "handler should be cleared before traversing";
+}
+
+TYPED_TEST( HandlerTest, ChangeFolderTest )
+{
+	ASSERT_TRUE( this->handler_->GetParent() );
+	this->handler_->GetParent()->Traverse();
+	std::wstring parent_path = this->handler_->GetFromCurrent( 1 ).ToStdWstring();
+	bool is_absolute( Path::IsAbsolute( parent_path ) );
+
+	ASSERT_TRUE( is_absolute ) << parent_path << " should be absolute";
+}
 
 } // namespace fmr
 
