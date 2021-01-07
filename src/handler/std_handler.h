@@ -39,6 +39,7 @@ class STDHandler
 {
     public:
         STDHandler(){};
+        STDHandler( STDHandler &&move );
         STDHandler( const wxString &path );
         ~STDHandler() {}
 
@@ -90,7 +91,7 @@ class STDHandler
     private:
         void TraverseStream();
 
-        std::filesystem::directory_iterator iterator_item_;
+        std::unique_ptr<std::filesystem::directory_iterator> iterator_item_;
         DirGetFlags iterator_flags_;
         std::filesystem::directory_iterator iterator_;
 

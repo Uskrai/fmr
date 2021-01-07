@@ -51,6 +51,19 @@ void STDHandler::Open( const wxString &path )
     }
 }
 
+STDHandler::STDHandler( STDHandler &&move )
+{
+    name_ = std::move( move.name_ );
+    filename_ = std::move( move.filename_ );
+    is_opened_ = std::move( move.is_opened_ );
+    parent_ = std::move( move.parent_ );
+    iterator_item_ = std::move( move.iterator_item_ );
+    iterator_flags_ = std::move( move.iterator_flags_ );
+    iterator_ = std::move ( move.iterator_ );
+    list_stream_ = std::move( move.list_stream_ );
+    list_write_stream_ = std::move( move.list_write_stream_ );
+}
+
 const wxString &STDHandler::GetName() const
     { return name_; }
 
@@ -128,22 +141,24 @@ bool STDHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_strea
         options |= fs::directory_options::skip_permission_denied;
 
     iterator_flags_ = flags;
-    iterator_item_ = fs::directory_iterator( GetName().ToStdWstring(), options );
-    iterator_ = fs::begin( iterator_item_ );
+    iterator_item_ = std::unique_ptr<fs::directory_iterator>(
+        new fs::directory_iterator( GetName().ToStdWstring(), options )
+    );
+    iterator_ = fs::begin( *iterator_item_ );
     return GetNextStream( stream, is_get_stream );
 }
 
 bool STDHandler::GetNextStream( SStream &stream, bool is_get_stream )
 {
-    if ( iterator_ == fs::end( iterator_item_ ) )
+    if ( !iterator_item_ || iterator_ == fs::end( *iterator_item_ ) )
         return false;
 
     fs::path path = iterator_->path();
-    iterator_++;
 
     OpenStream( path.wstring(), stream, is_get_stream );
     stream.SetDir( fs::is_directory( path ) );
 
+    iterator_++;
     return true;
 }
 
@@ -347,9 +362,8 @@ void STDHandler::Clear()
 
 void STDHandler::Close()
 {
-    iterator_item_.~directory_iterator();
+    iterator_item_ = NULL;
     iterator_flags_ = kDirNone;
-    iterator_.~directory_iterator();
 }
 
 } // namespace fmr
