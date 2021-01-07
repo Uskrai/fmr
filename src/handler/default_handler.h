@@ -62,7 +62,8 @@ class DefaultHandler
         wxString GetNext() const;
         wxString GetPrev() const;
 
-        wxString ItemName( size_t idx );
+        std::wstring GetStreamPath( const SStream &stream ) const;
+        std::wstring GetItemPath( size_t index ) const;
         const struct SStream &Item( size_t index ) const;
         struct SStream &Item( size_t index );
 
