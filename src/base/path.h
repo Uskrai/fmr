@@ -65,7 +65,10 @@ inline namespace Path
 
     std::wstring MakeRelative( const std::wstring &parent, const std::wstring &target );
 
+    std::wstring MakeAbsolute( const std::wstring &path );
+
     std::wstring MakeDirectory( const std::wstring &path );
+
 
 } // namespace Path
 

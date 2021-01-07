@@ -180,6 +180,9 @@ namespace Path
         return MakeString( fs::relative( target, parent ) );
     }
 
+    std::wstring MakeAbsolute( const std::wstring &path )
+    { return MakeString( fs::absolute( path ) ); }
+
     std::wstring MakeDirectory( const std::wstring &path )
     {
         if ( fs::is_directory( path ) )
