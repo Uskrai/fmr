@@ -37,8 +37,8 @@ void WxArchiveHandler::Open( const wxString& path )
     wxString parent = Path::GetParent(path);
     if ( parent != m_name )
     {
-        m_parent = std::shared_ptr<AbstractHandler>(
-            new DefaultHandler(parent)
+        m_parent = std::make_shared<DefaultHandler>(
+            DefaultHandler(parent)
         );
         m_parentName = parent;
     }

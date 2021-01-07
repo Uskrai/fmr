@@ -93,7 +93,7 @@ class DefaultHandler
         bool is_opened_ = false;
         wxDir opened_directory_;
         
-        std::shared_ptr<AbstractHandler> parent_handler_ = NULL;
+        std::shared_ptr<DefaultHandler> parent_handler_ = NULL;
 
         std::vector<struct SStream> m_all, list_write_stream_;
         HandlerSortFirst sort_flag_ = kSortFileFirst;

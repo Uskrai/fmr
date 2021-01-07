@@ -41,7 +41,7 @@ void DefaultHandler::Open( const wxString& path )
     std::wstring parent = Path::GetParent( GetName().ToStdWstring() );
     if ( ! Path::IsRoot( GetName().ToStdWstring() ))
     {
-        parent_handler_ = std::shared_ptr<AbstractHandler>( 
+        parent_handler_ = std::shared_ptr<DefaultHandler>( 
             new DefaultHandler( parent )
         );
     }

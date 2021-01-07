@@ -18,6 +18,7 @@
 #define FMR_HANDLER_WX_ARCHIVE_HANDLER
 
 #include "handler/abstract_handler.h"
+#include "handler/default_handler.h"
 #include "handler/struct_stream.h"
 #include "base/vector.h"
 #include "base/path.h"
@@ -83,7 +84,7 @@ class WxArchiveHandler
     private:
         static bool Find( wxString path, const wxArchiveClassFactory*& factory );
 
-        std::shared_ptr<AbstractHandler> m_parent;
+        std::shared_ptr<DefaultHandler> m_parent;
 
         wxString m_name;
         wxString m_parentName;
