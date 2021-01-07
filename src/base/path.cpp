@@ -101,6 +101,9 @@ namespace Path
     std::wstring MakeString( const fs::path  &path )
         { return path.wstring(); }
 
+    std::wstring GetSeparator()
+        { return std::wstring( 1, Separator ); }
+
     std::wstring GetParent( std::wstring path )
     {
         if ( !IsRoot( path ) )
@@ -175,6 +178,14 @@ namespace Path
     std::wstring MakeRelative( const std::wstring &parent, const std::wstring &target )
     {
         return MakeString( fs::relative( target, parent ) );
+    }
+
+    std::wstring MakeDirectory( const std::wstring &path )
+    {
+        if ( fs::is_directory( path ) )
+            return path;
+
+        return Append( path, GetSeparator() );
     }
 }
 

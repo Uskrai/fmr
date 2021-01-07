@@ -33,6 +33,16 @@ DefaultHandler::DefaultHandler( const wxString& path )
 {
     this->Open(path);
 }
+
+DefaultHandler::DefaultHandler( DefaultHandler &&handler )
+{
+    using std::move;
+    opened_name_ = move( handler.opened_name_ );
+    parent_handler_ = move( handler.parent_handler_ );
+    m_all = move( handler.m_all );
+    list_write_stream_ = move( handler.list_write_stream_ );
+}
+
 void DefaultHandler::Open( const wxString& path )
 {
     opened_name_ = Path::GetDirName(path.ToStdWstring());

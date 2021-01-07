@@ -40,6 +40,7 @@ class DefaultHandler
 {
     public:
         DefaultHandler(){}
+        DefaultHandler( DefaultHandler &&handler );
         DefaultHandler( const wxString& path );
         ~DefaultHandler();
         void Open( const wxString& path );

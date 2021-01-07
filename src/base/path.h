@@ -19,13 +19,14 @@
 #define FMR_BASE_PATH
 
 #include <wx/filename.h>
+#include <filesystem>
 
 namespace fmr
 {
 
 inline namespace Path
 {
-    const wxUniChar Separator = wxFileName::GetPathSeparator(); 
+    const wchar_t Separator = std::filesystem::path::preferred_separator;
     
     // return long path
     wxString GetFullPath( wxString path );
@@ -39,6 +40,8 @@ inline namespace Path
     wxString GetName( wxString path );
     // return name with separator if directory
     wxString GetNameWithSep( wxString path );
+
+    std::wstring GetSeparator();
 
     std::wstring GetParent( std::wstring path );
 
@@ -59,6 +62,8 @@ inline namespace Path
     std::wstring Append( const std::wstring &parent, const std::wstring &target );
 
     std::wstring MakeRelative( const std::wstring &parent, const std::wstring &target );
+
+    std::wstring MakeDirectory( const std::wstring &path );
 
 } // namespace Path
 
