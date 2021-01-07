@@ -194,9 +194,12 @@ size_t STDHandler::Index( const wxString &name ) const
     size_t i = 0;
     if ( name == GetName() ) return 0;
 
+    std::wstring temp = name.ToStdWstring();
+    Path::RemoveDirSep( temp );
+
     for ( const auto &it : list_stream_ )
     {
-        if ( name == it.GetName() ) return i;
+        if ( temp == it.GetName() ) return i;
         i++;
     }
     return -1;

@@ -46,7 +46,7 @@ class WxArchiveHandler
         const std::vector<SStream> &GetChild() const;
         std::vector<SStream> &GetChild();
 
-        wxString GetFromCurrent( int i ) const;
+        wxString GetFromCurrent( int step ) const;
         wxString GetNext() const;
         wxString GetPrev() const;
 

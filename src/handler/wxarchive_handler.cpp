@@ -98,14 +98,14 @@ wxString WxArchiveHandler::GetPrev() const
 std::vector<SStream> &WxArchiveHandler::GetWriteList()
     { return list_write_stream_; }
 
-wxString WxArchiveHandler::GetFromCurrent( int i ) const
+wxString WxArchiveHandler::GetFromCurrent( int step ) const
 {
     if ( ! GetParent() )
         return L"";
 
     size_t idx = GetParent()->Index( GetName() );
-    if ( GetParent()->IsExist( idx ) )
-        return m_parent->GetItemPath( idx + i );
+    if ( GetParent()->IsExist( idx + step ) )
+        return m_parent->GetItemPath( idx + step );
 
     return L"";
 }

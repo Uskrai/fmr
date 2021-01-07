@@ -129,6 +129,8 @@ size_t DefaultHandler::Index( const wxString& path ) const
     if ( Path::IsAbsolute( temp ) )
         temp = MakeRelative( GetName().ToStdWstring(), path.ToStdWstring() );
 
+    Path::RemoveDirSep( temp );
+
     size_t idx = 0;
     while( Vector::IsExist( m_all, idx) )
     {
