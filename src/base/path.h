@@ -51,6 +51,8 @@ inline namespace Path
 
     std::wstring GetDirName( const std::wstring &path );
 
+    void RemoveDirSep( std::wstring &path );
+
     bool IsRoot( const std::wstring &path );
 
     bool IsChild( const std::wstring &parent, std::wstring target );
