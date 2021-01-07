@@ -58,7 +58,7 @@ class DefaultHandler
         std::vector<struct SStream> &GetChild();
         const wxString &GetName() const;
 
-        wxString GetFromCurrent( int i ) const;
+        wxString GetFromCurrent( int step ) const;
         wxString GetNext() const;
         wxString GetPrev() const;
 

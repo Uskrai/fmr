@@ -100,15 +100,14 @@ std::vector<SStream> &WxArchiveHandler::GetWriteList()
 
 wxString WxArchiveHandler::GetFromCurrent( int i ) const
 {
-    if ( GetParent() )
-    {
-        auto &list_stream = GetParent()->GetChild();
-        size_t idx = GetParent()->Index( GetName() );
-        if ( idx != size_t(-1) && Vector::IsExist( list_stream, idx + i ) )
-            return list_stream.at( idx + i ).GetName();
-    }
+    if ( ! GetParent() )
+        return L"";
 
-    return wxEmptyString;
+    size_t idx = GetParent()->Index( GetName() );
+    if ( GetParent()->IsExist( idx ) )
+        return m_parent->GetItemPath( idx + i );
+
+    return L"";
 }
 
 bool WxArchiveHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_stream )

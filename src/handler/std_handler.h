@@ -62,6 +62,8 @@ class STDHandler
 
         bool IsExist( size_t idx ) const;
 
+        std::wstring GetStreamPath( const SStream &stream ) const;
+        std::wstring GetItemPath( size_t idx ) const;
         size_t Index( const wxString &name ) const;
         const struct SStream &Item( size_t idx ) const;
         struct SStream &Item( size_t idx );
@@ -99,7 +101,7 @@ class STDHandler
         bool is_opened_ = false;
 
         std::vector<struct SStream> list_stream_, list_write_stream_;
-        std::shared_ptr<AbstractHandler> parent_ = NULL;
+        std::shared_ptr<STDHandler> parent_ = NULL;
 };
 
 };

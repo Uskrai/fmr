@@ -164,16 +164,29 @@ bool STDHandler::GetNextStream( SStream &stream, bool is_get_stream )
 
 wxString STDHandler::GetFromCurrent( int step ) const
 {
-    if ( GetParent() )
-    {
-        wxString parent = GetParent()->GetName();
-        const auto &arr = GetParent()->GetChild();
-        size_t idx = Index( GetName() );
+    if ( !GetParent() )
+        return L"";
 
-        if ( Vector::IsExist(arr, idx + step) )
-            return arr.at(idx + step).GetName();
-    }
-    return "";
+
+    size_t idx = GetParent()->Index( GetName() );
+    if ( GetParent()->IsExist( idx + step) )
+        return parent_->GetItemPath( idx + step );
+
+    return L"";
+}
+
+std::wstring STDHandler::GetStreamPath( const SStream &stream ) const
+{
+    return Path::Append(
+        GetName().ToStdWstring(),
+        stream.GetName().ToStdWstring()
+    );
+}
+
+std::wstring STDHandler::GetItemPath( size_t idx ) const
+{
+    auto &stream = Item( idx );
+    return GetStreamPath( stream );
 }
 
 size_t STDHandler::Index( const wxString &name ) const

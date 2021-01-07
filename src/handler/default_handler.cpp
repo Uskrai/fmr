@@ -107,16 +107,17 @@ std::wstring DefaultHandler::GetItemPath( size_t index ) const
     return GetStreamPath( stream );
 }
 
-wxString DefaultHandler::GetFromCurrent( int i ) const
+wxString DefaultHandler::GetFromCurrent( int step ) const
 {
-    if ( GetParent() )
-    {
-        const std::vector<SStream> &list_stream = GetParent()->GetChild();
-        size_t idx = GetParent()->Index( GetName() );
-        if ( idx != size_t(-1) && Vector::IsExist(list_stream, idx + i ) )
-            return list_stream.at( idx + i ).GetName();
-    }
-    return wxEmptyString;
+    if ( !GetParent() )
+        return wxEmptyString;
+
+    size_t idx = GetParent()->Index( GetName() );
+
+    if ( GetParent()->IsExist( idx + step ) )
+        return parent_handler_->GetItemPath( idx + step );
+
+    return L"";
 }
 
 size_t DefaultHandler::Index( const wxString& path ) const
