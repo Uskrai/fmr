@@ -14,7 +14,7 @@
 #define FILE_COUNT 100
 #define FOLDER_COUNT 100
 #define FILENAME_LENGTH 10
-#define TEST_DIRECTORY L"test_dir"
+#define TEST_DIRECTORY L"handler_test_dir"
 
 namespace fmr
 {
@@ -138,7 +138,7 @@ class HandlerTest : public ::testing::Test
 		{
 			TearDownTestSuite();
 			handler_ = new T();
-			test_dir_ = L"test_dir" + GetExtension( handler_ );
+			test_dir_ = TEST_DIRECTORY + GetExtension( handler_ );
 			PrepareHandler();
 		}
 
@@ -168,6 +168,26 @@ class HandlerTest : public ::testing::Test
 typedef testing::Types<STDHandler,WxArchiveHandler,DefaultHandler> handler_type;
 
 TYPED_TEST_SUITE( HandlerTest, handler_type );
+
+#define HANDLER_TEST_FUNC( TestName ) \
+	template<typename T> \
+	void TestName ## Function( T *handler, std::wstring path, HandlerTest<T> *test_obj )
+
+#define HANDLER_TEST_CALL_FUNC( TestName, Postfix, Func ) \
+	TYPED_TEST( HandlerTest, TestName ## Postfix ) \
+	{ \
+		return TestName ## Function ( \
+			this->handler_, \
+			Func( this->test_dir_ ), \
+			this \
+		); \
+	}
+
+#define HANDLER_TEST( TestName )	\
+	HANDLER_TEST_FUNC( TestName ); \
+	HANDLER_TEST_CALL_FUNC( TestName, Absolute, Path::MakeAbsolute ); \
+	HANDLER_TEST_CALL_FUNC( TestName, Relative, std::wstring ); \
+	HANDLER_TEST_FUNC( TestName )
 
 void TestSizeHandler( AbstractHandler *handler, const std::wstring &path )
 {
@@ -268,54 +288,52 @@ void TEST_WRITE( T *handler, const std::wstring path )
 	delete[] buffer;
 }
 
-TYPED_TEST( HandlerTest, SizeTest )
+HANDLER_TEST( SizeTest )
 {
-	TestSizeHandler( this->handler_, this->test_dir_ );
+	TestSizeHandler( handler, path );
 }
 
-TYPED_TEST( HandlerTest, WriteTest )
+HANDLER_TEST( WriteTest )
 {
-	TEST_WRITE( this->handler_, this->test_dir_ );
-	this->PrepareHandler();
+	TEST_WRITE( handler, path );
+	test_obj->PrepareHandler();
 }
 
-TYPED_TEST( HandlerTest, StreamTest )
+HANDLER_TEST( StreamTest )
 {
-	TEST_STREAM( this->handler_, this->test_dir_ );
+	TEST_STREAM( handler, path );
 }
 
-TYPED_TEST( HandlerTest, OpenTest )
+HANDLER_TEST( OpenTest )
 {
-	this->handler_->Reset();
+	handler->Reset();
 	SStream stream;
-	ASSERT_FALSE( this->handler_->GetFirst( stream ) );
-	ASSERT_FALSE( this->handler_->GetNextStream( stream ) );
+	ASSERT_FALSE( handler->GetFirst( stream ) );
+	ASSERT_FALSE( handler->GetNextStream( stream ) );
 
-	this->handler_->Reset();
-	ASSERT_FALSE( this->handler_->GetNextStream( stream ) );
-	ASSERT_FALSE( this->handler_->GetFirst( stream ) );
+	handler->Reset();
+	ASSERT_FALSE( handler->GetNextStream( stream ) );
+	ASSERT_FALSE( handler->GetFirst( stream ) );
 
-	this->handler_->Open( this->test_dir_ );
+	handler->Open( path );
 }
 
-TYPED_TEST( HandlerTest, TraverseTest )
+HANDLER_TEST( TraverseTest )
 {
-	this->handler_->Clear();
+	handler->Clear();
 
-	this->handler_->Traverse( );
-	size_t size = this->handler_->Size();
-	this->handler_->Traverse( );
-	ASSERT_EQ( size, this->handler_->Size() ) << "handler should be cleared before traversing";
+	handler->Traverse( );
+	size_t size = handler->Size();
+	handler->Traverse( );
+	ASSERT_EQ( size, handler->Size() ) << "handler should be cleared before traversing";
 }
 
-TYPED_TEST( HandlerTest, ChangeFolderTest )
+HANDLER_TEST( ChangeFolderTest )
 {
-	ASSERT_TRUE( this->handler_->GetParent() );
-	this->handler_->GetParent()->Traverse();
-	std::wstring parent_path = this->handler_->GetFromCurrent( 1 ).ToStdWstring();
-	bool is_absolute( Path::IsAbsolute( parent_path ) );
-
-	ASSERT_TRUE( is_absolute ) << parent_path << " should be absolute";
+	ASSERT_TRUE( handler->GetParent() );
+	handler->GetParent()->Traverse();
+	std::wstring next_folder_path = handler->GetFromCurrent( 1 ).ToStdWstring();
+	ASSERT_NE( next_folder_path, L"" );
 }
 
 } // namespace fmr
