@@ -141,15 +141,20 @@ size_t DefaultHandler::Index( const wxString& path ) const
 void DefaultHandler::Traverse( bool is_get_stream, DirGetFlags flags )
 {
     SStream stream;
+    std::vector<SStream> vec_stream;
+
     bool cont = GetFirst( stream, flags, is_get_stream );
 
+    vec_stream.reserve( Size() );
     while ( cont )
     {
-        m_all.push_back( stream );
+        vec_stream.push_back( stream );
         cont = GetNextStream( stream, is_get_stream );
     }
 
-    std::sort( m_all.begin(), m_all.end(), Compare::NaturalSortable );
+    vec_stream.shrink_to_fit();
+    std::sort( vec_stream.begin(), vec_stream.end(), Compare::NaturalSortable );
+    m_all = std::move( vec_stream );
 }
 
 void DefaultHandler::OpenStream( const std::wstring &filename, SStream &stream, bool is_get_stream )

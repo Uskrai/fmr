@@ -165,16 +165,21 @@ bool WxArchiveHandler::GetNextStream( SStream &stream, bool is_get_stream )
 void WxArchiveHandler::Traverse( bool GetStream, DirGetFlags flags )
 {
     SStream stream;
+    std::vector<SStream> vec_stream;
 
     bool cont = GetFirst( stream, flags, GetStream );
 
+    vec_stream.reserve( Size() );
     while ( cont )
     {
-        m_all.push_back( stream );
+        vec_stream.push_back( stream );
         cont = GetNextStream( stream, GetStream );
     }
 
-    std::sort( m_all.begin(), m_all.end(), Compare::NaturalSortable );
+    vec_stream.shrink_to_fit();
+    std::sort( vec_stream.begin(), vec_stream.end(), Compare::NaturalSortable );
+
+    m_all = std::move( vec_stream );
 }
 
 bool WxArchiveHandler::Find( wxString path, const wxArchiveClassFactory*& factory )

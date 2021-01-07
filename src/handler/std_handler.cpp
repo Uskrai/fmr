@@ -192,15 +192,19 @@ size_t STDHandler::Index( const wxString &name ) const
 void STDHandler::Traverse( bool is_get_stream, DirGetFlags flags )
 {
     SStream stream;
+    std::vector<SStream> vec_stream;
     bool cont = GetFirst( stream, flags , is_get_stream );
 
+    vec_stream.reserve( Size() );
     while ( cont )
     {
-        list_stream_.push_back( stream );
+        vec_stream.push_back( stream );
         cont = GetNextStream( stream, is_get_stream );
     }
 
-    std::sort( list_stream_.begin(), list_stream_.end(), Compare::NaturalSortable );
+    vec_stream.shrink_to_fit();
+    std::sort( vec_stream.begin(), vec_stream.end(), Compare::NaturalSortable );
+    list_stream_ = std::move( vec_stream );
 }
 
 bool STDHandler::CreateDirectories()
