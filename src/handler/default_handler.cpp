@@ -43,6 +43,18 @@ DefaultHandler::DefaultHandler( DefaultHandler &&handler )
     list_write_stream_ = move( handler.list_write_stream_ );
 }
 
+DefaultHandler::DefaultHandler( const DefaultHandler &handler )
+{
+    if ( handler.is_opened_ )
+        Open( MakeDirectory(
+            handler.GetName().ToStdWstring()
+        ));
+
+    m_filename = handler.m_filename;
+    m_all = handler.m_all;
+    list_write_stream_ = handler.list_write_stream_;
+}
+
 void DefaultHandler::Open( const wxString& path )
 {
     opened_name_ = Path::GetDirName(path.ToStdWstring());
