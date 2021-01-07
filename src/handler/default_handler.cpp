@@ -141,6 +141,9 @@ void DefaultHandler::OpenStream( const std::wstring &filename, SStream &stream, 
 
 bool DefaultHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_stream )
 {
+    if ( GetName() == L"" )
+        return false;
+
     opened_directory_.Open( GetName() );
 
     if ( ! opened_directory_.IsOpened() )
@@ -168,6 +171,9 @@ bool DefaultHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_s
 bool DefaultHandler::GetNextStream( SStream &stream, bool is_get_stream )
 {
     wxString filename;
+
+    if ( !opened_directory_.IsOpened() )
+        return false;
 
     if ( ! opened_directory_.GetNext( &filename ) )
         return false;
