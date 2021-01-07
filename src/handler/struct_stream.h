@@ -22,6 +22,7 @@
 #include <string>
 
 #include "base/compare.h"
+#include "base/bitmask.h"
 #include "handler/abstract_handler.h"
 #include <wx/mstream.h>
 #include <wx/event.h>
@@ -32,6 +33,18 @@ class AbstractHandler;
 
 namespace fmr
 {
+
+enum StreamActionType
+{
+    kStreamNone = 0x00,
+    kStreamRead = 0x01,
+    kStreamWrite = 0x02,
+    kStreamOverwrite = 0x04,
+    kStreamRemove = 0x08,
+    kStreamRecursive = 0x10,
+};
+
+DEFINE_BITMASK_TYPE( StreamActionType )
 
 struct SStream
     : public Compare::Sortable
@@ -58,19 +71,30 @@ struct SStream
     void SetName( const std::string &name );
 
     void SetHandlerPath( const wxString &path );
+    void SetDir( bool is_dir = true );
+    void SetType( StreamActionType flags );
 
     bool IsOk() const;
+    bool IsDir() const;
 
     std::wstring GetString() const { return m_name.ToStdWstring(); }
     const wxString &GetName() const { return m_name; };
     const wxString &GetHandlerPath() const { return handler_path_; }
+    const StreamActionType &GetType() const;
+    size_t GetSize() const;
     std::shared_ptr<AbstractHandler> GetHandler();
     std::shared_ptr<wxMemoryInputStream> GetStream() const ;
     std::shared_ptr<wxMemoryOutputStream> GetOutputStream();
+    const std::shared_ptr<wxMemoryOutputStream> GetOutputStream() const;
 
-    std::shared_ptr<wxMemoryOutputStream> m_stream;
+    size_t CopyTo( void *buffer, size_t length ) const;
+
+    std::shared_ptr<wxMemoryOutputStream> m_stream = NULL;
     std::shared_ptr<AbstractHandler> m_handler;
     wxString m_name, handler_path_;
+    StreamActionType stream_flags_ = kStreamNone;
+
+    bool is_dir_ = false;
 };
 
 class StreamEvent

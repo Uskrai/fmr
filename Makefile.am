@@ -1,6 +1,8 @@
 
 AM_CPPFLAGS = -I@srcdir@/src
 
+SUBDIRS = . test
+
 base = src/base
 basedir = @abs_builddir@/base
 base_LTLIBRARIES = libcompare.la libpath.la
@@ -12,7 +14,7 @@ base_LTLIBRARIES = libcompare.la libpath.la
 
 handler = src/handler
 handlerdir = @abs_builddir@/handler
-handler_LTLIBRARIES = lib_default_handler.la lib_wxarchive_handler.la lib_handler_factory.la lib_struct_stream.la
+handler_LTLIBRARIES = lib_default_handler.la lib_wxarchive_handler.la lib_handler_factory.la lib_struct_stream.la lib_std_handler.la
 
     lib_default_handler_la_SOURCES = $(handler)/default_handler.cpp
     lib_default_handler_la_LIBADD = lib_struct_stream.la
@@ -25,6 +27,8 @@ handler_LTLIBRARIES = lib_default_handler.la lib_wxarchive_handler.la lib_handle
 
     lib_struct_stream_la_SOURCES = $(handler)/struct_stream.cpp
 
+    lib_std_handler_la_SOURCES = $(handler)/std_handler.cpp
+    lib_std_handler_la_LIBADD = lib_struct_stream.la libpath.la
 
 
 # make libraries for bitmap

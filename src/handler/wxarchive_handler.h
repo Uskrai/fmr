@@ -18,6 +18,7 @@
 #define FMR_HANDLER_WX_ARCHIVE_HANDLER
 
 #include "handler/abstract_handler.h"
+#include "handler/default_handler.h"
 #include "handler/struct_stream.h"
 #include "base/vector.h"
 #include "base/path.h"
@@ -45,33 +46,58 @@ class WxArchiveHandler
         const std::vector<SStream> &GetChild() const;
         std::vector<SStream> &GetChild();
 
-        wxString GetFromCurrent( int i ) const;
+        wxString GetFromCurrent( int step ) const;
         wxString GetNext() const;
         wxString GetPrev() const;
 
         bool IsExist( size_t index ) const;
-        
-        void Traverse( bool GetStream = false );
+        bool IsOpened() const;
+
+        bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false );
+        bool GetNextStream( SStream &stream, bool is_get_stream = false );
+
+        void Traverse( bool GetStream = false, DirGetFlags flags = kDirDefault );
         void TraverseStream();
         size_t Index( const wxString& name ) const;
         size_t Size() const;
 
         const SStream &Item( size_t index ) const;
         SStream &Item( size_t index );
+
+        void Reset();
         void Clear();
+        void Close();
 
         ~WxArchiveHandler();
 
+
+        bool CreateDirectories();
+        bool CreateDirectories( const std::wstring &path );
+        bool CreateDirectory( const std::wstring &dirname, bool overwrite = false );
+        bool CreateFiles( SStream stream, const std::wstring &name, bool overwrite = false );
+        bool Remove( const std::wstring &name, bool recursive = false );
+        bool RemoveAll();
+        bool RemoveAll( const std::wstring &path );
+        bool CommitWrite();
+
         static bool CanHandle( wxString path );
     private:
-        static bool Find( wxString& path, const wxArchiveClassFactory*& factory, wxInputStream*& in );
+        static bool Find( wxString path, const wxArchiveClassFactory*& factory );
 
-        std::shared_ptr<AbstractHandler> m_parent;
+        std::shared_ptr<DefaultHandler> m_parent;
 
         wxString m_name;
         wxString m_parentName;
 
-        std::vector<SStream> m_all;
+        bool is_opened_ = false;
+
+
+        DirGetFlags iterator_flags_ = kDirNone;
+        wxArchiveInputStream *iterator_item_ = NULL;
+
+        std::vector<SStream> &GetWriteList();
+
+        std::vector<SStream> m_all, list_write_stream_;
 };
 
 }; // namespace fmr

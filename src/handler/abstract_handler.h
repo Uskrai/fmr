@@ -18,6 +18,7 @@
 #define FMR_HANDLER_ABSTRACT_HANDLER
 
 #include "handler/struct_stream.h"
+#include "base/bitmask.h"
 
 #include <memory>
 #include <vector>
@@ -32,6 +33,18 @@ enum HandlerSortFirst
     kSortDirFirst,
     kSortAll
 };
+
+enum DirGetFlags
+{
+    kDirNone            = 0x0,
+    kDirFile            = 0x1,
+    kDirDirectory       = 0x2,
+    kDirSkipDenied      = 0x4,
+    kDirFollowSymLink   = 0x8,
+    kDirDefault         = kDirFile | kDirDirectory | kDirSkipDenied | kDirFollowSymLink
+};
+
+DEFINE_BITMASK_TYPE( DirGetFlags )
 
 class AbstractHandler 
 {
@@ -56,8 +69,11 @@ class AbstractHandler
         virtual wxString GetPrev() const = 0;
 
         virtual void Open( const wxString& path) = 0;
+
+        virtual bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false ) = 0;
+        virtual bool GetNextStream( SStream &stream, bool is_get_stream = false ) = 0;
         // enumerate current opened file or dir
-        virtual void Traverse( bool GetStream = false ) = 0 ;
+        virtual void Traverse( bool GetStream = false, DirGetFlags flags = kDirDefault ) = 0 ;
 
         virtual bool IsExist( size_t index ) const = 0;
 
@@ -69,6 +85,8 @@ class AbstractHandler
 
         virtual size_t Size() const = 0;
         virtual void Clear() = 0;
+
+        // virtual bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false ) = 0;
 };
 
 }; // namespace fmr

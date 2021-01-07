@@ -182,6 +182,9 @@ lib_load_explorer_la_OBJECTS = $(am_lib_load_explorer_la_OBJECTS)
 lib_load_reader_la_DEPENDENCIES = libthread.la lib_image_util.la
 am_lib_load_reader_la_OBJECTS = $(reader)/load_reader.lo
 lib_load_reader_la_OBJECTS = $(am_lib_load_reader_la_OBJECTS)
+lib_std_handler_la_DEPENDENCIES = lib_struct_stream.la libpath.la
+am_lib_std_handler_la_OBJECTS = $(handler)/std_handler.lo
+lib_std_handler_la_OBJECTS = $(am_lib_std_handler_la_OBJECTS)
 lib_struct_stream_la_LIBADD =
 am_lib_struct_stream_la_OBJECTS = $(handler)/struct_stream.lo
 lib_struct_stream_la_OBJECTS = $(am_lib_struct_stream_la_OBJECTS)
@@ -264,6 +267,7 @@ am__depfiles_remade = $(base)/$(DEPDIR)/compare.Plo \
 	$(gui)/$(DEPDIR)/frame.Plo $(gui)/$(DEPDIR)/panel.Plo \
 	$(handler)/$(DEPDIR)/default_handler.Plo \
 	$(handler)/$(DEPDIR)/handler_factory.Plo \
+	$(handler)/$(DEPDIR)/std_handler.Plo \
 	$(handler)/$(DEPDIR)/struct_stream.Plo \
 	$(handler)/$(DEPDIR)/wxarchive_handler.Plo \
 	$(reader)/$(DEPDIR)/controller_reader.Plo \
@@ -299,7 +303,7 @@ SOURCES = $(lib_controller_explorer_la_SOURCES) \
 	$(lib_handler_factory_la_SOURCES) $(lib_image_util_la_SOURCES) \
 	$(lib_image_window_explorer_la_SOURCES) \
 	$(lib_load_explorer_la_SOURCES) $(lib_load_reader_la_SOURCES) \
-	$(lib_struct_stream_la_SOURCES) \
+	$(lib_std_handler_la_SOURCES) $(lib_struct_stream_la_SOURCES) \
 	$(lib_window_explorer_la_SOURCES) \
 	$(lib_window_reader_la_SOURCES) \
 	$(lib_wxarchive_handler_la_SOURCES) \
@@ -316,7 +320,7 @@ DIST_SOURCES = $(lib_controller_explorer_la_SOURCES) \
 	$(lib_handler_factory_la_SOURCES) $(lib_image_util_la_SOURCES) \
 	$(lib_image_window_explorer_la_SOURCES) \
 	$(lib_load_explorer_la_SOURCES) $(lib_load_reader_la_SOURCES) \
-	$(lib_struct_stream_la_SOURCES) \
+	$(lib_std_handler_la_SOURCES) $(lib_struct_stream_la_SOURCES) \
 	$(lib_window_explorer_la_SOURCES) \
 	$(lib_window_reader_la_SOURCES) \
 	$(lib_wxarchive_handler_la_SOURCES) \
@@ -326,11 +330,27 @@ DIST_SOURCES = $(lib_controller_explorer_la_SOURCES) \
 	$(libpath_la_SOURCES) $(libposition_la_SOURCES) \
 	$(libscrolledwindow_la_SOURCES) $(libsize_la_SOURCES) \
 	$(libthread_la_SOURCES) $(fmr_SOURCES)
+RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
+	ctags-recursive dvi-recursive html-recursive info-recursive \
+	install-data-recursive install-dvi-recursive \
+	install-exec-recursive install-html-recursive \
+	install-info-recursive install-pdf-recursive \
+	install-ps-recursive install-recursive installcheck-recursive \
+	installdirs-recursive pdf-recursive ps-recursive \
+	tags-recursive uninstall-recursive
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
+  distclean-recursive maintainer-clean-recursive
+am__recursive_targets = \
+  $(RECURSIVE_TARGETS) \
+  $(RECURSIVE_CLEAN_TARGETS) \
+  $(am__extra_recursive_targets)
+AM_RECURSIVE_TARGETS = $(am__recursive_targets:-recursive=) TAGS CTAGS \
+	cscope distdir distdir-am dist dist-all distcheck
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -351,7 +371,7 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
-AM_RECURSIVE_TARGETS = cscope
+DIST_SUBDIRS = $(SUBDIRS)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/aux-build/ar-lib \
 	$(top_srcdir)/aux-build/compile \
 	$(top_srcdir)/aux-build/config.guess \
@@ -373,6 +393,31 @@ am__remove_distdir = \
       || { sleep 5 && rm -rf "$(distdir)"; }; \
   else :; fi
 am__post_remove_distdir = $(am__remove_distdir)
+am__relativize = \
+  dir0=`pwd`; \
+  sed_first='s,^\([^/]*\)/.*$$,\1,'; \
+  sed_rest='s,^[^/]*/*,,'; \
+  sed_last='s,^.*/\([^/]*\)$$,\1,'; \
+  sed_butlast='s,/*[^/]*$$,,'; \
+  while test -n "$$dir1"; do \
+    first=`echo "$$dir1" | sed -e "$$sed_first"`; \
+    if test "$$first" != "."; then \
+      if test "$$first" = ".."; then \
+        dir2=`echo "$$dir0" | sed -e "$$sed_last"`/"$$dir2"; \
+        dir0=`echo "$$dir0" | sed -e "$$sed_butlast"`; \
+      else \
+        first2=`echo "$$dir2" | sed -e "$$sed_first"`; \
+        if test "$$first2" = "$$first"; then \
+          dir2=`echo "$$dir2" | sed -e "$$sed_rest"`; \
+        else \
+          dir2="../$$dir2"; \
+        fi; \
+        dir0="$$dir0"/"$$first"; \
+      fi; \
+    fi; \
+    dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
+  done; \
+  reldir="$$dir2"
 DIST_ARCHIVES = $(distdir).tar.gz
 GZIP_ENV = --best
 DIST_TARGETS = dist-gzip
@@ -515,6 +560,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -I@srcdir@/src
+SUBDIRS = . test
 base = src/base
 basedir = @abs_builddir@/base
 base_LTLIBRARIES = libcompare.la libpath.la
@@ -522,7 +568,7 @@ libcompare_la_SOURCES = $(base)/compare.cpp
 libpath_la_SOURCES = $(base)/path.cpp
 handler = src/handler
 handlerdir = @abs_builddir@/handler
-handler_LTLIBRARIES = lib_default_handler.la lib_wxarchive_handler.la lib_handler_factory.la lib_struct_stream.la
+handler_LTLIBRARIES = lib_default_handler.la lib_wxarchive_handler.la lib_handler_factory.la lib_struct_stream.la lib_std_handler.la
 lib_default_handler_la_SOURCES = $(handler)/default_handler.cpp
 lib_default_handler_la_LIBADD = lib_struct_stream.la
 lib_wxarchive_handler_la_SOURCES = $(handler)/wxarchive_handler.cpp
@@ -530,6 +576,8 @@ lib_wxarchive_handler_la_LIBADD = lib_default_handler.la libcompare.la libpath.l
 lib_handler_factory_la_SOURCES = $(handler)/handler_factory.cpp
 lib_handler_factory_la_LIBADD = lib_default_handler.la lib_wxarchive_handler.la libcompare.la libpath.la
 lib_struct_stream_la_SOURCES = $(handler)/struct_stream.cpp
+lib_std_handler_la_SOURCES = $(handler)/std_handler.cpp
+lib_std_handler_la_LIBADD = lib_struct_stream.la libpath.la
 
 # make libraries for bitmap
 bitmap = src/bitmap
@@ -585,7 +633,7 @@ thread_LTLIBRARIES = libthread.la
 libthread_la_SOURCES = $(thread)/thread.cpp
 fmr_SOURCES = src/main/app.cpp
 fmr_LDADD = libframe.la
-all: all-am
+all: all-recursive
 
 .SUFFIXES:
 .SUFFIXES: .cpp .lo .o .obj
@@ -1020,6 +1068,11 @@ $(reader)/load_reader.lo: $(reader)/$(am__dirstamp) \
 
 lib_load_reader.la: $(lib_load_reader_la_OBJECTS) $(lib_load_reader_la_DEPENDENCIES) $(EXTRA_lib_load_reader_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(readerdir) $(lib_load_reader_la_OBJECTS) $(lib_load_reader_la_LIBADD) $(LIBS)
+$(handler)/std_handler.lo: $(handler)/$(am__dirstamp) \
+	$(handler)/$(DEPDIR)/$(am__dirstamp)
+
+lib_std_handler.la: $(lib_std_handler_la_OBJECTS) $(lib_std_handler_la_DEPENDENCIES) $(EXTRA_lib_std_handler_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(handlerdir) $(lib_std_handler_la_OBJECTS) $(lib_std_handler_la_LIBADD) $(LIBS)
 $(handler)/struct_stream.lo: $(handler)/$(am__dirstamp) \
 	$(handler)/$(DEPDIR)/$(am__dirstamp)
 
@@ -1171,6 +1224,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(gui)/$(DEPDIR)/panel.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/default_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/handler_factory.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/std_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/struct_stream.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/wxarchive_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/controller_reader.Plo@am__quote@ # am--include-marker
@@ -1228,14 +1282,61 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool config.lt
 
+# This directory's subdirectories are mostly independent; you can cd
+# into them and run 'make' without going through this Makefile.
+# To change the values of 'make' variables: instead of editing Makefiles,
+# (1) if the variable is set in 'config.status', edit 'config.status'
+#     (which will cause the Makefiles to be regenerated when you run 'make');
+# (2) otherwise, pass the desired values on the 'make' command line.
+$(am__recursive_targets):
+	@fail=; \
+	if $(am__make_keepgoing); then \
+	  failcom='fail=yes'; \
+	else \
+	  failcom='exit 1'; \
+	fi; \
+	dot_seen=no; \
+	target=`echo $@ | sed s/-recursive//`; \
+	case "$@" in \
+	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
+	  *) list='$(SUBDIRS)' ;; \
+	esac; \
+	for subdir in $$list; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    dot_seen=yes; \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	  || eval $$failcom; \
+	done; \
+	if test "$$dot_seen" = "no"; then \
+	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
+	fi; test -z "$$fail"
+
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
-tags: tags-am
+tags: tags-recursive
 TAGS: tags
 
 tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	set x; \
 	here=`pwd`; \
+	if ($(ETAGS) --etags-include --version) >/dev/null 2>&1; then \
+	  include_option=--etags-include; \
+	  empty_fix=.; \
+	else \
+	  include_option=--include; \
+	  empty_fix=; \
+	fi; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    test ! -f $$subdir/TAGS || \
+	      set "$$@" "$$include_option=$$here/$$subdir/TAGS"; \
+	  fi; \
+	done; \
 	$(am__define_uniq_tagged_files); \
 	shift; \
 	if test -z "$(ETAGS_ARGS)$$*$$unique"; then :; else \
@@ -1248,7 +1349,7 @@ tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	      $$unique; \
 	  fi; \
 	fi
-ctags: ctags-am
+ctags: ctags-recursive
 
 CTAGS: ctags
 ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
@@ -1267,7 +1368,7 @@ cscope: cscope.files
 clean-cscope:
 	-rm -f cscope.files
 cscope.files: clean-cscope cscopelist
-cscopelist: cscopelist-am
+cscopelist: cscopelist-recursive
 
 cscopelist-am: $(am__tagged_files)
 	list='$(am__tagged_files)'; \
@@ -1320,6 +1421,31 @@ distdir-am: $(DISTFILES)
 	    test -f "$(distdir)/$$file" \
 	    || cp -p $$d/$$file "$(distdir)/$$file" \
 	    || exit 1; \
+	  fi; \
+	done
+	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    $(am__make_dryrun) \
+	      || test -d "$(distdir)/$$subdir" \
+	      || $(MKDIR_P) "$(distdir)/$$subdir" \
+	      || exit 1; \
+	    dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
+	    $(am__relativize); \
+	    new_distdir=$$reldir; \
+	    dir1=$$subdir; dir2="$(top_distdir)"; \
+	    $(am__relativize); \
+	    new_top_distdir=$$reldir; \
+	    echo " (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir="$$new_top_distdir" distdir="$$new_distdir" \\"; \
+	    echo "     am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)"; \
+	    ($(am__cd) $$subdir && \
+	      $(MAKE) $(AM_MAKEFLAGS) \
+	        top_distdir="$$new_top_distdir" \
+	        distdir="$$new_distdir" \
+		am__remove_distdir=: \
+		am__skip_length_check=: \
+		am__skip_mode_fix=: \
+	        distdir) \
+	      || exit 1; \
 	  fi; \
 	done
 	-test -n "$(am__skip_mode_fix)" \
@@ -1460,21 +1586,22 @@ distcleancheck: distclean
 	       $(distcleancheck_listfiles) ; \
 	       exit 1; } >&2
 check-am: all-am
-check: check-am
+check: check-recursive
 all-am: Makefile $(PROGRAMS) $(LTLIBRARIES)
-installdirs:
+installdirs: installdirs-recursive
+installdirs-am:
 	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(basedir)" "$(DESTDIR)$(bitmapdir)" "$(DESTDIR)$(explorerdir)" "$(DESTDIR)$(guidir)" "$(DESTDIR)$(handlerdir)" "$(DESTDIR)$(readerdir)" "$(DESTDIR)$(threaddir)" "$(DESTDIR)$(windowdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
-install-exec: install-exec-am
-install-data: install-data-am
-uninstall: uninstall-am
+install: install-recursive
+install-exec: install-exec-recursive
+install-data: install-data-recursive
+uninstall: uninstall-recursive
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 
-installcheck: installcheck-am
+installcheck: installcheck-recursive
 install-strip:
 	if test -z '$(STRIP)'; then \
 	  $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
@@ -1514,7 +1641,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean: clean-am
+clean: clean-recursive
 
 clean-am: clean-baseLTLIBRARIES clean-binPROGRAMS \
 	clean-bitmapLTLIBRARIES clean-explorerLTLIBRARIES \
@@ -1522,7 +1649,7 @@ clean-am: clean-baseLTLIBRARIES clean-binPROGRAMS \
 	clean-libtool clean-readerLTLIBRARIES clean-threadLTLIBRARIES \
 	clean-windowLTLIBRARIES mostlyclean-am
 
-distclean: distclean-am
+distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 		-rm -f $(base)/$(DEPDIR)/compare.Plo
 	-rm -f $(base)/$(DEPDIR)/path.Plo
@@ -1540,6 +1667,7 @@ distclean: distclean-am
 	-rm -f $(gui)/$(DEPDIR)/panel.Plo
 	-rm -f $(handler)/$(DEPDIR)/default_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/handler_factory.Plo
+	-rm -f $(handler)/$(DEPDIR)/std_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
 	-rm -f $(reader)/$(DEPDIR)/controller_reader.Plo
@@ -1553,15 +1681,15 @@ distclean: distclean-am
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-tags
 
-dvi: dvi-am
+dvi: dvi-recursive
 
 dvi-am:
 
-html: html-am
+html: html-recursive
 
 html-am:
 
-info: info-am
+info: info-recursive
 
 info-am:
 
@@ -1570,33 +1698,33 @@ install-data-am: install-baseLTLIBRARIES install-bitmapLTLIBRARIES \
 	install-handlerLTLIBRARIES install-readerLTLIBRARIES \
 	install-threadLTLIBRARIES install-windowLTLIBRARIES
 
-install-dvi: install-dvi-am
+install-dvi: install-dvi-recursive
 
 install-dvi-am:
 
 install-exec-am: install-binPROGRAMS
 
-install-html: install-html-am
+install-html: install-html-recursive
 
 install-html-am:
 
-install-info: install-info-am
+install-info: install-info-recursive
 
 install-info-am:
 
 install-man:
 
-install-pdf: install-pdf-am
+install-pdf: install-pdf-recursive
 
 install-pdf-am:
 
-install-ps: install-ps-am
+install-ps: install-ps-recursive
 
 install-ps-am:
 
 installcheck-am:
 
-maintainer-clean: maintainer-clean-am
+maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
 		-rm -f $(base)/$(DEPDIR)/compare.Plo
@@ -1615,6 +1743,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f $(gui)/$(DEPDIR)/panel.Plo
 	-rm -f $(handler)/$(DEPDIR)/default_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/handler_factory.Plo
+	-rm -f $(handler)/$(DEPDIR)/std_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
 	-rm -f $(reader)/$(DEPDIR)/controller_reader.Plo
@@ -1627,16 +1756,16 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
-mostlyclean: mostlyclean-am
+mostlyclean: mostlyclean-recursive
 
 mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool
 
-pdf: pdf-am
+pdf: pdf-recursive
 
 pdf-am:
 
-ps: ps-am
+ps: ps-recursive
 
 ps-am:
 
@@ -1646,10 +1775,11 @@ uninstall-am: uninstall-baseLTLIBRARIES uninstall-binPROGRAMS \
 	uninstall-readerLTLIBRARIES uninstall-threadLTLIBRARIES \
 	uninstall-windowLTLIBRARIES
 
-.MAKE: install-am install-strip
+.MAKE: $(am__recursive_targets) install-am install-strip
 
-.PHONY: CTAGS GTAGS TAGS all all-am am--depfiles am--refresh check \
-	check-am clean clean-baseLTLIBRARIES clean-binPROGRAMS \
+.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am \
+	am--depfiles am--refresh check check-am clean \
+	clean-baseLTLIBRARIES clean-binPROGRAMS \
 	clean-bitmapLTLIBRARIES clean-cscope clean-explorerLTLIBRARIES \
 	clean-generic clean-guiLTLIBRARIES clean-handlerLTLIBRARIES \
 	clean-libtool clean-readerLTLIBRARIES clean-threadLTLIBRARIES \
@@ -1668,14 +1798,15 @@ uninstall-am: uninstall-baseLTLIBRARIES uninstall-binPROGRAMS \
 	install-pdf-am install-ps install-ps-am \
 	install-readerLTLIBRARIES install-strip \
 	install-threadLTLIBRARIES install-windowLTLIBRARIES \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-baseLTLIBRARIES \
-	uninstall-binPROGRAMS uninstall-bitmapLTLIBRARIES \
-	uninstall-explorerLTLIBRARIES uninstall-guiLTLIBRARIES \
-	uninstall-handlerLTLIBRARIES uninstall-readerLTLIBRARIES \
-	uninstall-threadLTLIBRARIES uninstall-windowLTLIBRARIES
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-baseLTLIBRARIES uninstall-binPROGRAMS \
+	uninstall-bitmapLTLIBRARIES uninstall-explorerLTLIBRARIES \
+	uninstall-guiLTLIBRARIES uninstall-handlerLTLIBRARIES \
+	uninstall-readerLTLIBRARIES uninstall-threadLTLIBRARIES \
+	uninstall-windowLTLIBRARIES
 
 .PRECIOUS: Makefile
 

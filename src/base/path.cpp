@@ -16,6 +16,9 @@
  */
 
 #include "base/path.h"
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace fmr
 {
@@ -54,6 +57,9 @@ namespace Path
 
         RemoveDirSep(name);
 
+        if ( name.empty() )
+            return wxFileName::GetCwd();
+
         return name.SubString(0,name.rfind(Separator));
     }
 
@@ -62,6 +68,12 @@ namespace Path
     {
         if ( path.EndsWith(Separator) )
             path.RemoveLast();
+    }
+
+    void RemoveDirSep( std::wstring &string )
+    {
+        if ( string.back() == Separator )
+            string.pop_back();
     }
 
     // return Name without Separatorarator
@@ -86,6 +98,98 @@ namespace Path
         return name;
     }
 
+    std::wstring MakeString( const fs::path  &path )
+        { return path.wstring(); }
+
+    std::wstring GetSeparator()
+        { return std::wstring( 1, Separator ); }
+
+    std::wstring GetParent( std::wstring path )
+    {
+        if ( !IsRoot( path ) )
+            RemoveDirSep( path );
+
+        fs::path temp( path );
+        fs::path temp_parent = temp.parent_path();
+
+        return GetDirName( MakeString( temp_parent ) );
+    }
+
+    std::wstring GetRootPath( const std::wstring &path )
+        { return fs::path(path).root_path().wstring(); }
+
+    std::wstring GetDirName( const std::wstring &path )
+    {
+        fs::path temp(path);
+
+        if ( fs::is_directory( temp ) )
+            return MakeString( temp );
+
+        temp.remove_filename();
+
+        if ( temp.empty() )
+            return MakeString( fs::current_path() );
+
+        return MakeString( temp );
+    }
+
+    bool HasRootPath( const std::wstring &path )
+        { return fs::path(path).has_root_path(); }
+
+    bool IsRoot( const std::wstring &path )
+        { return GetRootPath( path ) == path; }
+
+    bool IsChild( const std::wstring &parent, std::wstring target )
+    {
+        std::wstring parent_root = GetRootPath( parent );
+        std::wstring target_root = GetRootPath( target );
+
+        if ( !HasRootPath( target ) )
+            return true;
+
+        if ( target_root != parent_root )
+            return false;
+
+        if ( parent_root == parent && parent_root == target_root )
+            return true;
+
+        while( target != target_root )
+        {
+            target = GetParent( target );
+            if ( target == parent )
+                return true;
+        }
+
+        return false;
+    }
+
+    bool IsAbsolute( const std::wstring &path )
+        { return fs::path(path).is_absolute(); }
+
+    bool IsRelative( const std::wstring &path )
+        { return fs::path(path).is_relative(); }
+
+    std::wstring Append( const std::wstring &parent, const std::wstring &target )
+    {
+        fs::path path( parent );
+        return (path / target).wstring();
+    }
+
+    std::wstring MakeRelative( const std::wstring &parent, const std::wstring &target )
+    {
+        return MakeString( fs::relative( target, parent ) );
+    }
+
+    std::wstring MakeAbsolute( const std::wstring &path )
+    { return MakeString( fs::absolute( path ) ); }
+
+    std::wstring MakeDirectory( const std::wstring &path )
+    {
+        if ( fs::is_directory( path ) )
+            return path;
+
+        return Append( path, GetSeparator() );
+    }
 }
 
 };

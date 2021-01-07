@@ -40,10 +40,16 @@ class DefaultHandler
 {
     public:
         DefaultHandler(){}
+        DefaultHandler( DefaultHandler &&handler );
+        DefaultHandler( const DefaultHandler &handler );
         DefaultHandler( const wxString& path );
         ~DefaultHandler();
         void Open( const wxString& path );
-        void Traverse( bool GetStream = false );
+
+        bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_steam = false );
+        bool GetNextStream( SStream &stream, bool is_get_stream = false );
+
+        void Traverse( bool GetStream = false, DirGetFlags flags = kDirDefault );
         void TraverseStream();
 
         const std::shared_ptr<AbstractHandler> GetParent() const;
@@ -53,11 +59,12 @@ class DefaultHandler
         std::vector<struct SStream> &GetChild();
         const wxString &GetName() const;
 
-        wxString GetFromCurrent( int i ) const;
+        wxString GetFromCurrent( int step ) const;
         wxString GetNext() const;
         wxString GetPrev() const;
 
-        wxString ItemName( size_t idx );
+        std::wstring GetStreamPath( const SStream &stream ) const;
+        std::wstring GetItemPath( size_t index ) const;
         const struct SStream &Item( size_t index ) const;
         struct SStream &Item( size_t index );
 
@@ -65,28 +72,40 @@ class DefaultHandler
         size_t Size() const;
 
         bool IsExist( size_t index ) const;
+        bool IsOpened() const;
 
+        void Reset();
         void Clear();
         void Close();
+
+        bool CreateDirectories();
+        bool CreateDirectories( const std::wstring &path );
+        bool CreateDirectory( const std::wstring &directory_name, bool overwrite = false );
+        bool CreateFiles( SStream stream, const std::wstring &filename, bool overwite = false );
+        bool Remove( const std::wstring &filename, bool recursive = false );
+        bool RemoveAll();
+        bool RemoveAll( const std::wstring &path );
+        bool CommitWrite();
 
         static bool CanHandle( wxString path ) { return true; }
     private:
 
         int type;
-        wxString m_name;
+        wxString opened_name_;
         wxString m_filename;
-        wxString m_parentName;
+        bool is_opened_ = false;
+        wxDir opened_directory_;
         
-        std::shared_ptr<AbstractHandler> m_parent;
+        std::shared_ptr<DefaultHandler> parent_handler_ = NULL;
 
-        std::vector<struct SStream> m_all;
+        std::vector<struct SStream> m_all, list_write_stream_;
         HandlerSortFirst sort_flag_ = kSortFileFirst;
-        wxArrayString m_files;
-        wxArrayString m_directory;
-        wxDir dir;
-        
-        void GetAllFiles( std::vector<struct SStream> &vec_stream, int dir_get_flag );
 
+        void OpenStream( const std::wstring &filename, SStream &stream, bool is_get_stream );
+
+        void DoRemove( const SStream &stream );
+        void DoCreateDirectory( const SStream &stream );
+        void DoCreateFile( const SStream &stream );
 };
 
 };

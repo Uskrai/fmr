@@ -33,28 +33,50 @@ DefaultHandler::DefaultHandler( const wxString& path )
 {
     this->Open(path);
 }
+
+DefaultHandler::DefaultHandler( DefaultHandler &&handler )
+{
+    using std::move;
+    opened_name_ = move( handler.opened_name_ );
+    parent_handler_ = move( handler.parent_handler_ );
+    m_all = move( handler.m_all );
+    list_write_stream_ = move( handler.list_write_stream_ );
+}
+
+DefaultHandler::DefaultHandler( const DefaultHandler &handler )
+{
+    if ( handler.is_opened_ )
+        Open( MakeDirectory(
+            handler.GetName().ToStdWstring()
+        ));
+
+    m_filename = handler.m_filename;
+    m_all = handler.m_all;
+    list_write_stream_ = handler.list_write_stream_;
+}
+
 void DefaultHandler::Open( const wxString& path )
 {
-    m_name = Path::GetDirName(path);
+    opened_name_ = Path::GetDirName(path.ToStdWstring());
+    is_opened_ = true;
 
-    wxString parent = Path::GetParent(m_name);
-    if ( parent != m_name )
+    std::wstring parent = Path::GetParent( GetName().ToStdWstring() );
+    if ( ! Path::IsRoot( GetName().ToStdWstring() ))
     {
-        m_parent = std::shared_ptr<AbstractHandler>( 
+        parent_handler_ = std::shared_ptr<DefaultHandler>( 
             new DefaultHandler( parent )
         );
-        m_parentName = parent;
     }
 }
 
 const wxString &DefaultHandler::GetName() const
-    { return m_name; }
+    { return opened_name_; }
 
 const std::shared_ptr<AbstractHandler> DefaultHandler::GetParent() const
-    { return m_parent; }
+    { return parent_handler_; }
 
 std::shared_ptr<AbstractHandler> DefaultHandler::GetParent()
-    { return m_parent; }
+    { return parent_handler_; }
 
 const std::vector<SStream> &DefaultHandler::GetChild() const
     { return m_all; }
@@ -74,131 +96,315 @@ size_t DefaultHandler::Size() const
 bool DefaultHandler::IsExist( size_t idx ) const
     { return Vector::IsExist( GetChild(), idx ); }
 
+bool DefaultHandler::IsOpened() const
+    { return is_opened_; }
+
 wxString DefaultHandler::GetNext() const
     { return GetFromCurrent(1); }
 
 wxString DefaultHandler::GetPrev() const
     { return GetFromCurrent(-1); }
 
-wxString DefaultHandler::GetFromCurrent( int i ) const
+std::wstring DefaultHandler::GetStreamPath( const SStream &stream ) const
 {
-    if ( GetParent() )
-    {
-        const std::vector<SStream> &list_stream = GetParent()->GetChild();
-        size_t idx = GetParent()->Index( GetName() );
-        if ( idx != size_t(-1) && Vector::IsExist(list_stream, idx + i ) )
-            return list_stream.at( idx + i ).GetName();
-    }
-    return wxEmptyString;
+    return Path::Append(
+        stream.GetHandlerPath().ToStdWstring(),
+        stream.GetName().ToStdWstring()
+    );
+}
+
+std::wstring DefaultHandler::GetItemPath( size_t index ) const
+{
+    const SStream &stream = GetChild().at( index );
+    return GetStreamPath( stream );
+}
+
+wxString DefaultHandler::GetFromCurrent( int step ) const
+{
+    if ( !GetParent() )
+        return wxEmptyString;
+
+    size_t idx = GetParent()->Index( GetName() );
+
+    if ( GetParent()->IsExist( idx + step ) )
+        return parent_handler_->GetItemPath( idx + step );
+
+    return L"";
 }
 
 size_t DefaultHandler::Index( const wxString& path ) const
 {
     if ( path == GetName() )
         return 0;
-    
+
+    std::wstring temp = path.ToStdWstring();
+    if ( Path::IsAbsolute( temp ) )
+        temp = MakeRelative( GetName().ToStdWstring(), path.ToStdWstring() );
+
+    Path::RemoveDirSep( temp );
+
     size_t idx = 0;
     while( Vector::IsExist( m_all, idx) )
     {
-        if ( m_all.at(idx).GetName() == path )
+        if ( m_all.at(idx).GetName() == temp )
             return idx;
         idx++;
     }
     return -1;
 }
 
-void DefaultHandler::Traverse( bool GetStream )
+void DefaultHandler::Traverse( bool is_get_stream, DirGetFlags flags )
 {
-    dir.Open( wxPathOnly( m_name ) );
-    
-    if ( ! dir.IsOpened() ) return;
+    SStream stream;
+    std::vector<SStream> vec_stream;
 
-    wxString filename;
-    
-    std::vector<struct SStream> directory, files;
-    GetAllFiles( directory, wxDIR_DIRS | wxDIR_HIDDEN );
-    GetAllFiles( files, wxDIR_FILES | wxDIR_HIDDEN );
-    
-    auto copy = [this]( std::vector<struct SStream> &target1, std::vector<struct SStream> &target2 ) -> void
-    {
-        for ( auto &it : target1 )
-            m_all.push_back( it );
-        for ( auto &it : target2 )
-            m_all.push_back( it );
-    };
+    bool cont = GetFirst( stream, flags, is_get_stream );
 
-    auto sort = [this]( std::vector<struct SStream> &target ) -> void
-    {
-        std::sort( target.begin(), target.end(), Compare::NaturalSortable );
-    };
-
-
-    if ( sort_flag_ == kSortAll )
-    {
-        copy( directory, files );
-        sort( m_all );
-    }
-    else
-    {
-        sort( directory );
-        sort( files );
-
-        if ( sort_flag_ == kSortDirFirst )
-        {
-            copy( directory, files );
-        }
-        else if ( sort_flag_ == kSortFileFirst )
-        {
-            copy( files, directory );
-        }
-    }
-
-
-    std::sort( m_all.begin(), m_all.end(), Compare::NaturalSortable );
-
-    dir.Close();
-    if ( GetStream ) TraverseStream();
-}
-
-void DefaultHandler::TraverseStream()
-{
-    for ( auto &it : m_all )
-    {
-        HandlerType type;
-        HandlerFactory::Find( it.GetName(), type );
-        if ( type != kHandlerDefault )
-            continue;
-
-        it.Open( it.GetName() );
-    }
-}
-
-void DefaultHandler::GetAllFiles( std::vector<struct SStream> &vec_stream, int dir_flags )
-{
-    wxString filename;
-    bool cont = dir.GetFirst( &filename, wxEmptyString, dir_flags );
+    vec_stream.reserve( Size() );
     while ( cont )
     {
-        filename =  Path::GetFullPath( dir.GetNameWithSep() + filename );
-        SStream stream;
-        stream.SetName( filename );
-        stream.SetHandlerPath( GetName() );
         vec_stream.push_back( stream );
-
-
-        cont = dir.GetNext( &filename );
+        cont = GetNextStream( stream, is_get_stream );
     }
+
+    vec_stream.shrink_to_fit();
+    std::sort( vec_stream.begin(), vec_stream.end(), Compare::NaturalSortable );
+    m_all = std::move( vec_stream );
+}
+
+void DefaultHandler::OpenStream( const std::wstring &filename, SStream &stream, bool is_get_stream )
+{
+    std::wstring appended_path = Path::Append( GetName().ToStdWstring(), filename );
+    stream.SetName( Path::MakeRelative( GetName().ToStdWstring(), appended_path) );
+    stream.SetHandlerPath( GetName() );
+    stream.SetDir( wxFileName::DirExists( stream.GetName() ) );
+
+    if ( is_get_stream )
+        stream.Open( appended_path );
+}
+
+bool DefaultHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_stream )
+{
+    if ( GetName() == L"" )
+        return false;
+
+    opened_directory_.Open( GetName() );
+
+    if ( ! opened_directory_.IsOpened() )
+        return false;
+
+    int flag_dir = wxDIR_HIDDEN;
+    if ( flags & kDirFile )
+        flag_dir += wxDIR_FILES;
+
+    if ( flags & kDirDirectory )
+        flag_dir += wxDIR_DIRS;
+
+    if ( !( flags & kDirFollowSymLink) )
+        flag_dir += wxDIR_NO_FOLLOW;
+
+    wxString filename;
+    if ( ! opened_directory_.GetFirst( &filename, wxEmptyString, flag_dir ) )
+        return false;
+
+
+    OpenStream( filename.ToStdWstring(), stream, is_get_stream );
+    return true;
+}
+
+bool DefaultHandler::GetNextStream( SStream &stream, bool is_get_stream )
+{
+    wxString filename;
+
+    if ( !opened_directory_.IsOpened() )
+        return false;
+
+    if ( ! opened_directory_.GetNext( &filename ) )
+        return false;
+
+    OpenStream( filename.ToStdWstring(), stream, is_get_stream );
+    return true;
+}
+
+bool DefaultHandler::CreateDirectories()
+{
+    return  IsOpened()
+            && CreateDirectories( GetName().ToStdWstring() );
+}
+
+bool DefaultHandler::CreateDirectories( const std::wstring &path )
+{
+    return  path != ""
+            && (
+                wxDir::Exists( path )
+                || wxDir::Make( path, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL )
+            );
+}
+
+bool DefaultHandler::CreateDirectory( const std::wstring &directory_name, bool overwrite )
+{
+    if ( ! IsOpened() )
+        return false;
+
+    if ( !IsChild( GetName().ToStdWstring(), directory_name ) )
+        return false;
+
+    SStream stream;
+    StreamActionType flags = kStreamWrite;
+
+    if ( overwrite )
+        flags |= kStreamOverwrite;
+
+    stream.SetName( directory_name );
+    stream.SetHandlerPath( GetName() );
+    stream.SetDir();
+    stream.SetType( flags );
+
+    list_write_stream_.push_back( std::move( stream ) );
+    return true;
+}
+
+bool DefaultHandler::CreateFiles( SStream stream, const std::wstring &filename, bool overwrite )
+{
+    if ( !IsOpened() )
+        return false;
+
+    if ( !IsChild( GetName().ToStdWstring(), filename ) )
+        return false;
+
+    StreamActionType flags = kStreamWrite;
+
+    if ( overwrite )
+        flags |= kStreamOverwrite;
+
+    stream.SetName( filename );
+    stream.SetHandlerPath( GetName() );
+    stream.SetType( flags );
+
+    list_write_stream_.push_back( std::move( stream ) );
+    return true;
+}
+
+bool DefaultHandler::Remove( const std::wstring &name, bool recursive )
+{
+    if ( !IsOpened() )
+        return false;
+
+    if ( !IsChild( GetName().ToStdWstring(), name ) )
+        return false;
+
+    SStream stream;
+    StreamActionType flags = kStreamRemove;
+
+    if ( recursive )
+        flags |= kStreamRecursive;
+
+    stream.SetName( name );
+    stream.SetHandlerPath( GetName() );
+    stream.SetType( flags );
+
+    list_write_stream_.push_back( std::move( stream ) );
+    return true;
+}
+
+bool DefaultHandler::RemoveAll()
+{
+    return  IsOpened()
+            && RemoveAll( GetName().ToStdWstring() );
+}
+
+bool DefaultHandler::RemoveAll( const std::wstring &path )
+{
+    return  !path.empty()
+            &&  (
+                !wxFileName::Exists( path )
+                || wxDir::Remove( path, wxPATH_RMDIR_RECURSIVE )
+            );
+}
+
+void DefaultHandler::DoCreateFile( const SStream &stream )
+{
+    wxTempFileOutputStream out_stream( stream.GetHandlerPath() + stream.GetName() );
+    char *buffer = new char[stream.GetSize()];
+
+    size_t length = stream.CopyTo( buffer, stream.GetSize() );
+
+    out_stream.Write( buffer, length );
+    out_stream.Commit();
+    delete[] buffer;
+}
+
+void DefaultHandler::DoRemove( const SStream &stream )
+{
+    int flags = ( stream.GetType() & kStreamRecursive )
+                ? wxPATH_RMDIR_RECURSIVE
+                : 0;
+
+    wxDir::Remove( stream.GetHandlerPath() + stream.GetName(), flags );
+}
+
+void DefaultHandler::DoCreateDirectory( const SStream &stream )
+{
+    int flags = ( stream.GetType() & kStreamRecursive )
+                ? wxPATH_MKDIR_FULL
+                : 0;
+
+    wxDir::Make( stream.GetHandlerPath() + stream.GetName(), wxS_DIR_DEFAULT, flags );
+}
+
+bool DefaultHandler::CommitWrite()
+{
+    if ( ! wxDir::Exists( GetName() ) )
+        return false;
+
+    for ( const auto &it : list_write_stream_ )
+    {
+        if ( it.GetType() & kStreamRead )
+            continue;
+
+        if ( wxFileName::Exists( it.GetHandlerPath() + it.GetName() ) )
+        {
+            if ( it.GetType() & kStreamOverwrite )
+                DoRemove( it );
+            else
+                continue;
+        }
+
+        if ( it.IsDir() )
+            DoCreateDirectory( it );
+        else if ( it.GetType() & kStreamWrite )
+            DoCreateFile( it );
+        else if ( it.GetType() & kStreamRemove )
+            DoRemove( it );
+
+    }
+
+    list_write_stream_.clear();
+
+    return true;
+}
+
+void DefaultHandler::Reset()
+{
+    Clear();
+    Close();
+
+    list_write_stream_.clear();
+    opened_name_ = wxEmptyString;
+    is_opened_ = false;
+    parent_handler_ = NULL;
 }
 
 void DefaultHandler::Clear()
 {
     m_all.clear();
+    list_write_stream_.clear();
 }
 
 void DefaultHandler::Close()
 {
     Clear();
-    m_name = wxEmptyString;
+    opened_directory_.Close();
 }
 
 DefaultHandler::~DefaultHandler()

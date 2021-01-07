@@ -54,46 +54,63 @@ SStream::SStream( wxInputStream *stream )
 }
 
 SStream::SStream( const SStream &copy )
-    : SStream()
 {
     Open( copy.m_stream );
     SetName( copy.m_name );
+    SetType( copy.stream_flags_ );
     SetHandlerPath( copy.handler_path_ );
+    SetDir( copy.is_dir_ );
+
 }
 
 SStream::SStream( SStream &&move )
 {
     m_stream = std::move( move.m_stream );
     m_name = std::move( move.m_name );
+    stream_flags_ = std::move( move.stream_flags_ );
     handler_path_ = std::move( move.handler_path_ );
+    is_dir_ = std::move( move.is_dir_ );
 }
 
 SStream &SStream::operator = ( const SStream &copy )
 {
     Open( copy.m_stream );
     SetName( copy.m_name );
+    SetType( copy.stream_flags_ );
+    SetHandlerPath( copy.handler_path_ );
+    SetDir( copy.is_dir_ );
     return *this;
 }
 
 void SStream::Open( const wxString &name )
 {
+    Open();
+
     if ( wxFileName::FileExists(name) )
     {
         wxFileInputStream stream(name);
         m_stream->Write( stream );
     }
-    SetName( name );
 }
 
 void SStream::Open( wxInputStream *stream )
 {
+    Open();
+
     if ( stream )
         m_stream->Write( *stream );
 }
 
 void SStream::Open( const wxMemoryOutputStream &stream )
 {
-    Open( stream.GetOutputStreamBuffer()->GetBufferStart(), stream.GetSize() );
+    auto buffer = std::shared_ptr<char[]>(
+        new char[stream.GetSize()]
+    );
+    size_t length;
+    length = stream.CopyTo( buffer.get(), stream.GetSize() );
+
+    Open();
+    m_stream->Write( buffer.get(), length );
 }
 
 void SStream::Open( std::shared_ptr<wxMemoryOutputStream> stream )
@@ -115,7 +132,7 @@ void SStream::SetName( const wxString &name )
 
 void SStream::SetName( const std::wstring &name )
 {
-    SetName( name );
+    SetName( wxString(name) );
 }
 
 void SStream::SetName( const std::string &name )
@@ -126,12 +143,26 @@ void SStream::SetName( const std::string &name )
 void SStream::SetHandlerPath( const wxString &path )
     { handler_path_ = path; }
 
+void SStream::SetDir( bool is_dir )
+    { is_dir_ = is_dir; }
+
+void SStream::SetType( StreamActionType flags )
+    { stream_flags_ = flags; }
 
 bool SStream::IsOk() const
 {
-    return m_stream->IsOk() &&
+    return m_stream && m_stream->IsOk() &&
         m_stream->GetSize() != 0;
 }
+
+bool SStream::IsDir() const
+    { return is_dir_; }
+
+size_t SStream::GetSize() const
+    { return m_stream->GetSize(); }
+
+const StreamActionType &SStream::GetType() const
+    { return stream_flags_; }
 
 std::shared_ptr<AbstractHandler> SStream::GetHandler()
 {
@@ -140,30 +171,28 @@ std::shared_ptr<AbstractHandler> SStream::GetHandler()
 
 std::shared_ptr<wxMemoryInputStream> SStream::GetStream() const
 {
-    std::shared_ptr<wxMemoryInputStream> stream = NULL;
-    if ( m_stream )
+    if ( IsOk() )
     {
-        if ( m_stream->IsOk() && m_stream->GetSize() != 0 )
-        stream = std::shared_ptr<wxMemoryInputStream>(
-            new wxMemoryInputStream(*m_stream)
+        return std::shared_ptr<wxMemoryInputStream>(
+            new wxMemoryInputStream( *m_stream )
         );
-        else
-            stream = std::shared_ptr<wxMemoryInputStream>(
-                new wxMemoryInputStream( &DUMMY_BUFFER, sizeof(DUMMY_BUFFER))
-            );
     }
     else
-        stream = std::shared_ptr<wxMemoryInputStream>(
-            new wxMemoryInputStream( &DUMMY_BUFFER, sizeof( DUMMY_BUFFER ) )
+    {
+        return std::shared_ptr<wxMemoryInputStream>(
+            new wxMemoryInputStream( NULL, 0 )
         );
-
-    return stream;
+    }
 }
 
 std::shared_ptr<wxMemoryOutputStream> SStream::GetOutputStream()
-{
-    return m_stream;
-}
+    { return m_stream; }
+
+const std::shared_ptr<wxMemoryOutputStream> SStream::GetOutputStream() const
+    { return m_stream; }
+
+size_t SStream::CopyTo( void *buffer, size_t length ) const
+    { return GetOutputStream()->CopyTo( buffer, length ); }
 
 StreamEvent::StreamEvent( const StreamEvent &other )
     : wxCommandEvent( other.GetEventType(), other.GetId() )
