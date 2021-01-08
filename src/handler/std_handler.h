@@ -77,8 +77,7 @@ class STDHandler
         static bool StreamOpenable();
         bool IsStreamOpenable() const;
 
-        bool OpenStream( SStream &stream );
-        bool OpenStream( const std::string &name, SStream &stream, bool is_get_stream = false );
+        bool GetStream( SStream &stream );
         bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false );
         bool GetNextStream( SStream &stream, bool is_get_stream = false );
 
@@ -102,6 +101,8 @@ class STDHandler
 
         std::vector<struct SStream> list_stream_, list_write_stream_;
         std::shared_ptr<STDHandler> parent_ = NULL;
+
+        bool OpenStream( const std::string &name, SStream &stream, bool is_get_stream = false );
 };
 
 };

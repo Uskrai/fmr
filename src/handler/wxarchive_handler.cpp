@@ -161,6 +161,27 @@ bool WxArchiveHandler::GetNextStream( SStream &stream, bool is_get_stream )
     return true;
 }
 
+bool WxArchiveHandler::GetStream( SStream &stream )
+{
+    if ( stream.GetHandlerPath() != GetName() )
+        return false;
+
+    SStream temp_stream;
+    bool cont = GetFirst( temp_stream );
+
+    while( cont )
+    {
+        if ( temp_stream.GetName() == stream.GetName() )
+        {
+            stream.Open( iterator_item_ );
+            Close();
+            return true;
+        }
+
+        cont = GetNextStream( temp_stream );
+    }
+}
+
 void WxArchiveHandler::Traverse( bool GetStream, DirGetFlags flags )
 {
     SStream stream;

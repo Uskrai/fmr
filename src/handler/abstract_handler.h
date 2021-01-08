@@ -72,6 +72,17 @@ class AbstractHandler
 
         virtual bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false ) = 0;
         virtual bool GetNextStream( SStream &stream, bool is_get_stream = false ) = 0;
+
+        /**
+         * @brief this method will try to get stream that is created by this object
+         * this method might reset the state of the object
+         * @param stream stream that have been initialized
+         * by instance of this object
+         * @return true if the stream exist
+         * @return false if the stream doesn't exist in handler's current path
+         */
+        virtual bool GetStream( SStream &stream ) = 0;
+
         // enumerate current opened file or dir
         virtual void Traverse( bool GetStream = false, DirGetFlags flags = kDirDefault ) = 0 ;
 
