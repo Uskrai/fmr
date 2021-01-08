@@ -39,16 +39,20 @@ ImageWindow::ImageWindow( const ImageWindow &other )
 
     bitmap_ = std::make_shared<SBitmap>
         ( SBitmap( *other.bitmap_ ) );
+
+    refresh_scheduled_ = true;
 }
 
 void ImageWindow::SetBitmap( std::shared_ptr<SBitmap> bmp )
 {
     bitmap_ = bmp;
+    refresh_scheduled_ = true;
 }
 
 void ImageWindow::SetStream( std::shared_ptr<SStream> stream )
 {
     stream_ = stream;
+    refresh_scheduled_ = true;
 }
 
 const std::shared_ptr<SStream> ImageWindow::GetStream() const
@@ -111,51 +115,84 @@ std::vector<StringDraw> SplitString( std::string string, const wxSize &size, wxD
     return list_string;
 }
 
+void ImageWindow::PrepareRect( const wxRect &rect )
+{
+    bitmap_rect_ = rect;
+    text_rect_ = rect;
+
+    bitmap_rect_.SetSize( GetBestBitmapSize( rect.GetSize() ) );
+
+    wxSize txt_size = text_rect_.GetSize();
+    txt_size.Scale( 1, 0.2 );
+    text_rect_.SetSize( txt_size );
+    text_rect_.SetTop( bitmap_rect_.GetBottom() + 5 );
+
+    if ( bitmap_ && bitmap_->IsOk() )
+    {
+        wxRect bmp_rect = wxRect( bitmap_->GetPosition(), bitmap_->GetSize() );
+        bmp_rect = bmp_rect.CenterIn( bitmap_rect_ );
+        bitmap_position_ = bmp_rect.GetPosition();
+
+        bitmap_size_ = bitmap_->GetSize();
+    }
+
+    this_rect_ = rect;
+}
+
+void ImageWindow::PrepareStringPos( wxDC &dc, const wxRect &rect )
+{
+    if ( !stream_ )
+        return;
+
+    vec_string_draw_ = SplitString(
+        Path::GetName( stream_->GetName() ),
+        text_rect_.GetSize(),
+        dc
+    );
+
+    wxPoint text_pos = text_rect_.GetTopLeft();
+    wxRect string_rect;
+
+    for ( auto &it : vec_string_draw_ )
+    {
+        wxString string;
+        String::FromUTF8( it.filename, string );
+
+        it.rect.SetSize( dc.GetTextExtent( string ) );
+        it.rect = it.rect.CenterIn( text_rect_ );
+        it.rect.SetTop( text_pos.y );
+
+        text_pos = it.rect.GetBottomLeft();
+    }
+
+    string_name_ = stream_->GetName();
+}
+
 void ImageWindow::Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col, bool isSelected )
 {
-    wxRect bmp_rect( rect );
-    wxRect txt_rect( rect );
+    if ( stream_ && string_name_ != stream_->GetName() )
+        refresh_scheduled_ = true;
 
-    bmp_rect.SetSize( GetBestBitmapSize( rect.GetSize() ) );
+    if ( bitmap_ && bitmap_size_ != bitmap_->GetSize() )
+        refresh_scheduled_ = true;
 
-    wxSize txt_size = txt_rect.GetSize();
-    txt_size.Scale( 1, 0.2 );
-    txt_rect.SetSize( txt_size );
-    txt_rect.SetTop( bmp_rect.GetBottom() + 5 );
+    if ( this_rect_ != rect || refresh_scheduled_ )
+    {
+        PrepareRect( rect );
+        PrepareStringPos( dc, text_rect_ );
+        refresh_scheduled_ = false;
+    }
 
     if ( bitmap_->IsOk() )
+        dc.DrawBitmap( bitmap_->GetBitmap(), bitmap_position_ );
+
+
+    for ( const auto & it : vec_string_draw_ )
     {
-        wxRect bitmap_rect = wxRect( bitmap_->GetPosition(), bitmap_->GetSize() );
-        bitmap_rect = bitmap_rect.CenterIn( bmp_rect );
-        dc.DrawBitmap( bitmap_->GetBitmap(), bitmap_rect.GetPosition() );
-
+        wxString string;
+        String::FromUTF8( it.filename, string );
+        dc.DrawText( string , it.rect.GetPosition() );
     }
-
-    if ( stream_ )
-    {
-        std::vector<StringDraw> filename;
-
-        filename = SplitString( Path::GetName( stream_->GetName() ) , txt_size, dc );
-
-        wxPoint text_pos = txt_rect.GetTopLeft();
-
-        wxRect string_rect;
-
-        for ( const auto & it : filename )
-        {
-            wxString string;
-            String::FromUTF8( it.filename, string );
-
-            string_rect.SetSize( dc.GetTextExtent( string ) );
-            string_rect = string_rect.CenterIn( txt_rect );
-            string_rect.SetTop( text_pos.y );
-
-            dc.DrawText( string , string_rect.GetPosition() );
-
-            text_pos = string_rect.GetBottomLeft();
-        }
-    }
-
 }
 
 wxSize ImageWindow::GetBestSize( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, int row, int col )
