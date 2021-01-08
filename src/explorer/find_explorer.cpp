@@ -36,12 +36,21 @@ void FindThread::SetParameter( std::vector<StreamBitmap> &list_stream )
     list_stream_ = list_stream;
 }
 
+#define TEST_RETURN()   \
+    if ( TestDestroy() ) return false
+
 wxThread::ExitCode FindThread::Entry()
 {
     for ( auto &it : list_stream_  )
     {
         if (!TestDestroy() )
-            Find( it );
+        {
+            std::unique_ptr<AbstractOpenableHandler> handler(
+                HandlerFactory::NewOpenableHandler( it.stream->GetHandlerPath() )
+            );
+
+            Find( handler.get(), it );
+        }
 
         Update();
         if ( TestDestroy() )
@@ -51,82 +60,88 @@ wxThread::ExitCode FindThread::Entry()
     return (wxThread::ExitCode)0;
 }
 
+void FindThread::StreamFound( StreamBitmap &item )
+{
+
+    std::unique_ptr<StreamBitmapEvent> event(
+        new StreamBitmapEvent( EVT_STREAM_FOUND, m_id )
+    );
+
+    event->SetStreamBitmap( item );
+
+    QueueEventParent( event.release() );
+}
+
+template<typename T>
+bool FindThread::TraverseHandler( T *handler, StreamBitmap &item )
+{
+    handler->Traverse( false );
+
+    for ( const auto &it : handler->GetChild() )
+    {
+        item.stream = std::shared_ptr<SStream>(
+            new SStream( it )
+        );
+
+        if ( Find( handler, item ) )
+            return true;
+    }
+    return false;
+}
+
 bool FindThread::Find( StreamBitmap &item )
 {
-    wxImage img;
-
-    #define TEST_RETURN()   \
-        if ( TestDestroy() ) return false
+    if ( ! wxImage::CanRead( *item.stream->GetStream() ) )
+        return false;
 
     TEST_RETURN();
+    StreamFound( item );
+    return true;
+}
 
+bool FindThread::Find( AbstractOpenableHandler *handler, StreamBitmap &item )
+{
+    std::string path = handler->GetItemPath( *item.stream );
 
-    if ( ! item.stream->IsOk() )
-        item.stream->Open( item.stream->GetName() );
-
-    TEST_RETURN();
-
-    if ( wxImage::CanRead( *item.stream->GetStream() ) )
+    if ( HandlerFactory::IsOpenable( path ) )
     {
-        std::unique_ptr<StreamBitmapEvent> event = std::make_unique<StreamBitmapEvent>(
-            StreamBitmapEvent( EVT_STREAM_FOUND, m_id )
+        std::unique_ptr<AbstractOpenableHandler> stream_handler(
+            HandlerFactory::NewOpenableHandler( path )
         );
 
-        TEST_RETURN();
-
-        event->SetStreamBitmap( item );
-
-        QueueEventParent( event.release() );
+        handler->GetStream( *item.stream );
 
         TEST_RETURN();
 
-        return true;
-    }
-    else
-    {
-        TEST_RETURN();
-        HandlerType type;
-        HandlerFactory::Find( item.stream->GetName(), type );
+        if ( Find( item ) )
+            return true;
 
-        std::shared_ptr<AbstractHandler> handler(
-            HandlerFactory::NewHandler( type )
-        );
-
-        if ( !handler )
+        if ( path != stream_handler->GetName() )
             return false;
 
         TEST_RETURN();
 
-        handler->Open( item.stream->GetName() );
+        return TraverseHandler( stream_handler.get(), item );
+    }
+    else
+    {
+        std::unique_ptr<AbstractHandler> stream_handler(
+            HandlerFactory::NewHandler( path )
+        );
 
-        if ( item.stream->GetName() == handler->GetName() )
-        {
-            TEST_RETURN();
+        TEST_RETURN();
 
-            bool isGetStream = type != kHandlerDefault;
-            handler->Traverse( isGetStream );
-
-            TEST_RETURN();
-
-            for ( auto &it : handler->GetChild() )
-            {
-                TEST_RETURN();
-
-                StreamBitmap temp;
-                temp.stream = std::shared_ptr<SStream>(
-                    new SStream( it )
-                );
-
-                TEST_RETURN();
-
-                temp.bitmap = item.bitmap;
-                if ( !TestDestroy() && Find( temp ) )
-                    return true;
-            }
-        }
+        return TraverseHandler( stream_handler.get(), item );
     }
     return false;
 }
+
+bool FindThread::Find( AbstractHandler *handler, StreamBitmap &item )
+{
+    handler->GetStream( *item.stream );
+
+    return Find( item );
+};
 
 }; // namespace explorer
 
