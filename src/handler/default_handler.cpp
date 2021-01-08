@@ -105,7 +105,7 @@ wxString DefaultHandler::GetNext() const
 wxString DefaultHandler::GetPrev() const
     { return GetFromCurrent(-1); }
 
-std::wstring DefaultHandler::GetStreamPath( const SStream &stream ) const
+std::wstring DefaultHandler::GetItemPath( const SStream &stream ) const
 {
     return Path::Append(
         stream.GetHandlerPath().ToStdWstring(),
@@ -115,8 +115,7 @@ std::wstring DefaultHandler::GetStreamPath( const SStream &stream ) const
 
 std::wstring DefaultHandler::GetItemPath( size_t index ) const
 {
-    const SStream &stream = GetChild().at( index );
-    return GetStreamPath( stream );
+    return GetItemPath( Item( index ) );
 }
 
 wxString DefaultHandler::GetFromCurrent( int step ) const

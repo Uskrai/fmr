@@ -19,7 +19,7 @@
 #define FMR_HANDLER_STD_HANDLER
 
 
-#include "handler/abstract_handler.h"
+#include "handler/abstract_openable_handler.h"
 #include "handler/struct_stream.h"
 #include "base/vector.h"
 
@@ -35,7 +35,7 @@ namespace fmr
 {
 
 class STDHandler
-    : public AbstractHandler
+    : public AbstractOpenableHandler
 {
     public:
         STDHandler(){};
@@ -62,7 +62,7 @@ class STDHandler
 
         bool IsExist( size_t idx ) const;
 
-        std::wstring GetStreamPath( const SStream &stream ) const;
+        std::wstring GetItemPath( const SStream &stream ) const;
         std::wstring GetItemPath( size_t idx ) const;
         size_t Index( const wxString &name ) const;
         const struct SStream &Item( size_t idx ) const;

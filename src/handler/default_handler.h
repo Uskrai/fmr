@@ -21,7 +21,7 @@
 
 // #include <wx/wfstream.h>
 
-#include "handler/abstract_handler.h"
+#include "handler/abstract_openable_handler.h"
 #include "base/vector.h"
 
 #include <wx/dir.h>
@@ -36,7 +36,7 @@ namespace fmr
 {
 
 class DefaultHandler
-    : public AbstractHandler
+    : public AbstractOpenableHandler
 {
     public:
         DefaultHandler(){}
@@ -63,7 +63,7 @@ class DefaultHandler
         wxString GetNext() const;
         wxString GetPrev() const;
 
-        std::wstring GetStreamPath( const SStream &stream ) const;
+        std::wstring GetItemPath( const SStream &stream ) const;
         std::wstring GetItemPath( size_t index ) const;
         const struct SStream &Item( size_t index ) const;
         struct SStream &Item( size_t index );

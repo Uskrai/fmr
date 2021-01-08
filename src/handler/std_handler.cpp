@@ -175,7 +175,7 @@ wxString STDHandler::GetFromCurrent( int step ) const
     return L"";
 }
 
-std::wstring STDHandler::GetStreamPath( const SStream &stream ) const
+std::wstring STDHandler::GetItemPath( const SStream &stream ) const
 {
     return Path::Append(
         GetName().ToStdWstring(),
@@ -185,8 +185,7 @@ std::wstring STDHandler::GetStreamPath( const SStream &stream ) const
 
 std::wstring STDHandler::GetItemPath( size_t idx ) const
 {
-    auto &stream = Item( idx );
-    return GetStreamPath( stream );
+    return GetItemPath( Item( idx ) );
 }
 
 size_t STDHandler::Index( const wxString &name ) const
