@@ -25,6 +25,8 @@ namespace fmr
 namespace explorer
 {
 
+wxDEFINE_EVENT( EVT_BITMAP_LOADED, StreamBitmapEvent );
+
 void LoadThread::SetSize( const wxSize &size )
 {
     image_size_ = size;
@@ -69,9 +71,24 @@ void LoadThread::Load( StreamBitmap &item )
 
     TEST_RETURN();
 
+
     if ( image.IsOk() )
         item.bitmap->SetBitmap( image );
 
+}
+
+void LoadThread::Update( StreamBitmap &item )
+{
+    std::unique_ptr<StreamBitmapEvent> event(
+        new StreamBitmapEvent( EVT_BITMAP_LOADED, m_id )
+    );
+
+    TEST_RETURN();
+    event->SetStreamBitmap( item );
+
+    TEST_RETURN();
+    QueueEventParent( event.release() );
+    BaseThread::Update();
 }
 
 wxThread::ExitCode LoadThread::Entry()
@@ -102,7 +119,7 @@ wxThread::ExitCode LoadThread::Entry()
 
             Load( item );
 
-            Update();
+            Update( item );
             load_queue_.pop();
         }
 

@@ -29,6 +29,7 @@ namespace fmr
 namespace explorer
 {
 
+wxDECLARE_EVENT( EVT_BITMAP_LOADED, StreamBitmapEvent );
 class LoadThread
     : public BaseThread
 {
@@ -46,7 +47,9 @@ class LoadThread
         void DeleteOnEmptyQueue( bool condition = true );
 
         void Push( StreamBitmap &stream_bitmap );
-    private:
+
+    protected:
+        void Update( StreamBitmap &stream_bitmap );
         std::queue<StreamBitmap> load_queue_;
 
         bool is_delete_on_empty_;
