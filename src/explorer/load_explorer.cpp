@@ -25,6 +25,8 @@ namespace fmr
 namespace explorer
 {
 
+wxDEFINE_EVENT( EVT_BITMAP_LOADED, StreamBitmapEvent );
+
 void LoadThread::SetSize( const wxSize &size )
 {
     image_size_ = size;
@@ -48,21 +50,45 @@ void LoadThread::Clear()
 void LoadThread::DeleteOnEmptyQueue( bool condition )
     { is_delete_on_empty_ = condition; }
 
-void LoadThread::Load( StreamBitmap &stream )
+void LoadThread::Load( StreamBitmap &item )
 {
+    #define TEST_RETURN() \
+        if ( TestDestroy() ) return;
+
     wxImage image;
-    if ( ! wxImage::CanRead( *stream.stream->GetStream() ) )
+    auto stream = item.stream->GetStream();
+    if ( ! wxImage::CanRead( *stream ) )
         return;
 
-    if ( !TestDestroy() )
-        image_util::Load( image, *stream.stream->GetStream() );
+    TEST_RETURN();
 
-    if ( image.IsOk() && !TestDestroy() )
+    image_util::Load( image, *stream );
+
+    TEST_RETURN();
+
+    if ( image.IsOk() )
         image_util::Rescale( image, image_size_, image_quality_ );
 
-    if ( image.IsOk() && !TestDestroy() )
-        stream.bitmap->SetBitmap( image );
+    TEST_RETURN();
 
+    if ( image.IsOk() )
+        item.bitmap->SetBitmap( image );
+
+}
+
+void LoadThread::Update( StreamBitmap &item )
+{
+    TEST_RETURN();
+    std::unique_ptr<StreamBitmapEvent> event(
+        new StreamBitmapEvent( EVT_BITMAP_LOADED, m_id )
+    );
+
+    TEST_RETURN();
+    event->SetStreamBitmap( item );
+
+    TEST_RETURN();
+    QueueEventParent( event.release() );
+    BaseThread::Update();
 }
 
 wxThread::ExitCode LoadThread::Entry()
@@ -75,41 +101,27 @@ wxThread::ExitCode LoadThread::Entry()
     {
         if ( load_queue_.size() > 0 && !TestDestroy() )
         {
-            StreamBitmap &stream = load_queue_.front();
-            std::shared_ptr<wxInputStream> input_stream = stream.stream->GetStream();
+            TEST_BREAK();
+            StreamBitmap &item = load_queue_.front();
+            std::shared_ptr<wxInputStream> input_stream = item.stream->GetStream();
 
             TEST_BREAK();
 
-            if ( !TestDestroy() && wxImage::CanRead( *input_stream ) )
-            {
-                Load( stream );
-            }
-            else
+            if ( ! item.stream->IsOk() || !wxImage::CanRead( *input_stream ) )
             {
                 TEST_BREAK();
-                std::shared_ptr<AbstractHandler> handler(
-                    HandlerFactory::NewHandler( stream.stream->GetHandlerPath() )
+                std::unique_ptr<AbstractHandler> handler(
+                    HandlerFactory::NewHandler( item.stream->GetHandlerPath() )
                 );
-
-                handler->Traverse( true );
-
                 TEST_BREAK();
-
-                size_t index = handler->Index( stream.stream->GetName() );
-
-                if ( handler->IsExist( index ) && !TestDestroy() )
-                    stream.stream = std::shared_ptr<SStream>(
-                        new SStream( handler->Item( index ) )
-                    );
-
-                TEST_BREAK();
-
-                Load( stream );
+                handler->GetStream( *item.stream );
             }
 
             TEST_BREAK();
 
-            Update();
+            Load( item );
+
+            Update( item );
             load_queue_.pop();
         }
 

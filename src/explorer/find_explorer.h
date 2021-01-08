@@ -41,7 +41,13 @@ class FindThread
         void SetParameter( std::vector<StreamBitmap> &list_stream );
 
         bool Find( StreamBitmap &item );
+        bool Find( AbstractOpenableHandler *handler, StreamBitmap &item );
+        bool Find( AbstractHandler *handler, StreamBitmap &item );
     private:
+        void StreamFound( StreamBitmap &item );
+        template<typename T>
+        bool TraverseHandler( T *handler, StreamBitmap &item );
+
         std::vector<StreamBitmap> list_stream_;
 
         ExitCode Entry();

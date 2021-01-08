@@ -34,6 +34,18 @@ namespace explorer
 class ImageWindow
     : public wxGridCellRenderer
 {
+    protected:
+        wxRect bitmap_rect_, text_rect_, this_rect_;
+        wxPoint bitmap_position_;
+        wxSize bitmap_size_;
+        std::vector<StringDraw> vec_string_draw_;
+        std::string string_name_;
+        std::shared_ptr<SStream> stream_ = NULL;
+        std::shared_ptr<SBitmap> bitmap_ = NULL;
+        wxGridCellAutoWrapStringRenderer string_wrapper_;
+
+        bool refresh_scheduled_ = false;
+
     public:
         ImageWindow(){};
         ImageWindow( const StreamBitmap &stream_bitmap );
@@ -53,10 +65,9 @@ class ImageWindow
 
         void Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col, bool isSelected );
         wxSize GetBestSize( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, int row, int col );
-    protected:
-        std::shared_ptr<SStream> stream_ = NULL;
-        std::shared_ptr<SBitmap> bitmap_ = NULL;
-        wxGridCellAutoWrapStringRenderer string_wrapper_;
+
+        void PrepareRect( const wxRect &rect );
+        void PrepareStringPos( wxDC &dc, const wxRect &rect );
 };
 
 }; // namespace fmr
