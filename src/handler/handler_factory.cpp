@@ -52,11 +52,23 @@ bool HandlerFactory::Find( const std::string& path, HandlerType& type )
         return true;
     }
 
-    if ( DefaultHandler::CanHandle(path) )
+    return FindOpenable( path, type );
+}
+
+bool HandlerFactory::FindOpenable( const std::string &path )
+{
+    HandlerType type;
+    return FindOpenable( path, type );
+}
+
+bool HandlerFactory::FindOpenable(  const std::string &path, HandlerType &type )
+{
+    if ( DefaultHandler::CanHandle( path ) )
     {
         type = kHandlerDefault;
         return true;
     }
+
     return false;
 }
 
@@ -115,6 +127,14 @@ AbstractOpenableHandler *HandlerFactory::NewOpenableHandler( const HandlerType &
 AbstractHandler* HandlerFactory::NewHandler()
 {
     return NewHandler( m_type );
+}
+
+bool HandlerFactory::IsOpenable( const std::string &path )
+{
+    HandlerType type;
+    Find( path, type );
+
+    return type != kHandlerNotFound;
 }
 
 }; // namespace fmr
