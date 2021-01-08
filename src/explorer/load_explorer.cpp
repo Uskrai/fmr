@@ -48,20 +48,29 @@ void LoadThread::Clear()
 void LoadThread::DeleteOnEmptyQueue( bool condition )
     { is_delete_on_empty_ = condition; }
 
-void LoadThread::Load( StreamBitmap &stream )
+void LoadThread::Load( StreamBitmap &item )
 {
+    #define TEST_RETURN() \
+        if ( TestDestroy() ) return;
+
     wxImage image;
-    if ( ! wxImage::CanRead( *stream.stream->GetStream() ) )
+    auto stream = item.stream->GetStream();
+    if ( ! wxImage::CanRead( *stream ) )
         return;
 
-    if ( !TestDestroy() )
-        image_util::Load( image, *stream.stream->GetStream() );
+    TEST_RETURN();
 
-    if ( image.IsOk() && !TestDestroy() )
+    image_util::Load( image, *stream );
+
+    TEST_RETURN();
+
+    if ( image.IsOk() )
         image_util::Rescale( image, image_size_, image_quality_ );
 
-    if ( image.IsOk() && !TestDestroy() )
-        stream.bitmap->SetBitmap( image );
+    TEST_RETURN();
+
+    if ( image.IsOk() )
+        item.bitmap->SetBitmap( image );
 
 }
 
@@ -75,39 +84,23 @@ wxThread::ExitCode LoadThread::Entry()
     {
         if ( load_queue_.size() > 0 && !TestDestroy() )
         {
-            StreamBitmap &stream = load_queue_.front();
-            std::shared_ptr<wxInputStream> input_stream = stream.stream->GetStream();
+            StreamBitmap &item = load_queue_.front();
+            std::shared_ptr<wxInputStream> input_stream = item.stream->GetStream();
 
             TEST_BREAK();
 
-            if ( !TestDestroy() && wxImage::CanRead( *input_stream ) )
+            if ( ! item.stream->IsOk() || !wxImage::CanRead( *input_stream ) )
             {
-                Load( stream );
-            }
-            else
-            {
-                TEST_BREAK();
-                std::shared_ptr<AbstractHandler> handler(
-                    HandlerFactory::NewHandler( stream.stream->GetHandlerPath() )
+                std::unique_ptr<AbstractHandler> handler(
+                    HandlerFactory::NewHandler( item.stream->GetHandlerPath() )
                 );
-
-                handler->Traverse( true );
-
                 TEST_BREAK();
-
-                size_t index = handler->Index( stream.stream->GetName() );
-
-                if ( handler->IsExist( index ) && !TestDestroy() )
-                    stream.stream = std::shared_ptr<SStream>(
-                        new SStream( handler->Item( index ) )
-                    );
-
-                TEST_BREAK();
-
-                Load( stream );
+                handler->GetStream( *item.stream );
             }
 
             TEST_BREAK();
+
+            Load( item );
 
             Update();
             load_queue_.pop();
