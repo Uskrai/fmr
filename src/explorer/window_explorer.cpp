@@ -93,13 +93,11 @@ bool Window::Open( std::shared_ptr<AbstractOpenableHandler> handler )
     for ( auto &it : handler->GetChild() )
     {
         list_item.at(idx).stream =
-            std::shared_ptr<SStream>( new SStream( std::move(it) ) );
+            std::shared_ptr<SStream>( new SStream( it ) );
         list_item.at(idx).bitmap =
             std::shared_ptr<SBitmap>( new SBitmap() );
         idx++;
     }
-
-    handler->Clear();
 
     int cur_row = 0;
     int cur_col = 0;
@@ -215,16 +213,25 @@ void Window::OnGridEnter( wxKeyEvent &event )
         {
             std::string curr_name = handler_->GetName();
             std::string name = handler_->GetParent()->GetName();
-            Open( name );
-            Select( curr_name );
+            std::shared_ptr<AbstractOpenableHandler> handler(
+                HandlerFactory::NewOpenableHandler( name )
+            );
+
+            Open( handler );
+
+            size_t idx = handler->Index( curr_name );
+            if ( handler->IsExist( idx ) )
+                Select( handler->Item( idx ).GetName() );
         }
         return;
     }
     event.Skip();
 }
 
-void Window::Select( const std::string &name )
+void Window::Select( std::string name )
 {
+    name = Path::GetName( name );
+
     size_t idx = 0;
     for ( const auto &it : list_cell_pos_ )
     {

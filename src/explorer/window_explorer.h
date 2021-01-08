@@ -54,7 +54,7 @@ class Window
         bool Open( std::shared_ptr<AbstractOpenableHandler> handler );
         bool Open( const std::string &name );
 
-        void Select( const std::string &name );
+        void Select( std::string name );
 
         void Clear();
         bool Destroy();
