@@ -64,6 +64,7 @@ class Controller
         wxSize thumb_size_;
 
         void OnFound( StreamBitmapEvent &event );
+        void OnLoaded( StreamBitmapEvent &event );
         void OnUpdate( wxCommandEvent &event );
         void OnFindCompleted( wxCommandEvent &event );
         void OnLoadCompleted( wxCommandEvent &event );

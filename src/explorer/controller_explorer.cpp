@@ -28,6 +28,7 @@ namespace explorer
 
 wxBEGIN_EVENT_TABLE( Controller, ThreadController )
     EVT_STREAM_BITMAP( kFindThreadID, EVT_STREAM_FOUND, Controller::OnFound )
+    EVT_STREAM_BITMAP( kLoadThreadID, EVT_BITMAP_LOADED, Controller::OnLoaded )
     EVT_COMMAND( kLoadThreadID, EVT_COMMAND_THREAD_UPDATE, Controller::OnUpdate )
     EVT_COMMAND( kFindThreadID, EVT_COMMAND_THREAD_COMPLETED, Controller::OnFindCompleted )
 wxEND_EVENT_TABLE()
@@ -84,6 +85,10 @@ void Controller::OnFound( StreamBitmapEvent &event )
 {
     if ( load_thread_ )
         load_thread_->Push( event.GetStreamBitmap() );
+}
+
+void Controller::OnLoaded( StreamBitmapEvent &event )
+{
 }
 
 void Controller::OnUpdate( wxCommandEvent &event )
