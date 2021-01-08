@@ -18,6 +18,7 @@
 #define HANDLER_HANDLER_FACTORY
 
 #include "handler/abstract_handler.h"
+#include "handler/abstract_openable_handler.h"
 
 namespace fmr
 {
@@ -32,11 +33,13 @@ enum HandlerType
 class HandlerFactory
 {
     public:
-        static bool Is( const wxString& path1, const wxString& path2);
-        static bool Find( const wxString& path );
-        static bool Find( const wxString& path, HandlerType& type );
-        static AbstractHandler* NewHandler( const wxString& path );
+        static bool Is( const std::string& path1, const std::string& path2);
+        static bool Find( const std::string& path );
+        static bool Find( const std::string& path, HandlerType& type );
+        static AbstractHandler* NewHandler( const std::string& path );
         static AbstractHandler* NewHandler( const HandlerType& type );
+        static AbstractOpenableHandler *NewOpenableHandler( const std::string &path );
+        static AbstractOpenableHandler *NewOpenableHander( const HandlerType &type );
         AbstractHandler* NewHandler();
         HandlerType GetType();
     private:

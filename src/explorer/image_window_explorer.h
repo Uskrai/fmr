@@ -19,6 +19,8 @@
 #define FMR_EXPLORER_IMAGE_WINDOW
 
 #include "explorer/common.h"
+#include "base/string.h"
+
 #include "explorer/load_explorer.h"
 #include <wx/grid.h>
 #include <memory>

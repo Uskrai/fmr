@@ -25,86 +25,93 @@ namespace fmr
 
 namespace Path
 {
-    wxString GetFullPath( wxString path )
-    {
-        wxFileName name(path);
-        if ( path.StartsWith('.') )
-            path = wxFileName::GetCwd() + Separator + path.AfterFirst( Separator );
+    // wxString GetFullPath( wxString path )
+    // {
+    //     wxFileName name(path);
+    //     if ( path.StartsWith('.') )
+    //         path = wxFileName::GetCwd() + Separator + path.AfterFirst( Separator );
     
-        RemoveDirSep(path);
-        if ( name.DirExists(path) )
-            name.AssignDir(path);
-        else if ( name.FileExists(path) )
-            name.Assign(path);
+    //     RemoveDirSep(path);
+    //     if ( name.DirExists(path) )
+    //         name.AssignDir(path);
+    //     else if ( name.FileExists(path) )
+    //         name.Assign(path);
 
-        return name.GetFullPath();
-    }
+    //     return name.GetFullPath();
+    // }
 
-    wxString GetDirName( wxString path )
-    {
-        path = GetFullPath(path);
-        if ( path.EndsWith(Separator) )
-            return path;
+    // wxString GetDirName( wxString path )
+    // {
+    //     path = GetFullPath(path);
+    //     if ( path.EndsWith(Separator) )
+    //         return path;
 
-        size_t idx = path.rfind( Separator );
-        return path.SubString( 0, idx );
-    }
+    //     size_t idx = path.rfind( Separator );
+    //     return path.SubString( 0, idx );
+    // }
 
-    // return parent's path
-    wxString GetParent( const wxString& path )
-    {
-        wxString name(GetFullPath(path));
+    // // return parent's path
+    // wxString GetParent( const wxString& path )
+    // {
+    //     wxString name(GetFullPath(path));
 
-        RemoveDirSep(name);
+    //     RemoveDirSep(name);
 
-        if ( name.empty() )
-            return wxFileName::GetCwd();
+    //     if ( name.empty() )
+    //         return wxFileName::GetCwd();
 
-        return name.SubString(0,name.rfind(Separator));
-    }
+    //     return name.SubString(0,name.rfind(Separator));
+    // }
 
-    // strip last Separatorarator
-    void RemoveDirSep( wxString& path )
-    {
-        if ( path.EndsWith(Separator) )
-            path.RemoveLast();
-    }
+    // // strip last Separatorarator
+    // void RemoveDirSep( wxString& path )
+    // {
+    //     if ( path.EndsWith(Separator) )
+    //         path.RemoveLast();
+    // }
 
-    void RemoveDirSep( std::wstring &string )
-    {
-        if ( string.back() == Separator )
-            string.pop_back();
-    }
+    // void RemoveDirSep( String &string )
+    // {
+    //     if ( string.back() == Separator )
+    //         string.pop_back();
+    // }
 
-    // return Name without Separatorarator
-    wxString GetName( wxString path )
-    {
-        RemoveDirSep(path);
+    // // return Name without Separatorarator
+    // wxString GetName( wxString path )
+    // {
+    //     RemoveDirSep(path);
         
-        wxString name = path.SubString( path.rfind(Separator) + 1, -1 );
+    //     wxString name = path.SubString( path.rfind(Separator) + 1, -1 );
 
-        return name;
-    }
+    //     return name;
+    // }
 
-    // return name with Separatorarator if directory
-    wxString GetNameWithSep( wxString path )
-    {
-        bool isDir = path.EndsWith(Separator);
-        if( isDir )
-            path.RemoveLast();
+    // // return name with Separatorarator if directory
+    // wxString GetNameWithSep( wxString path )
+    // {
+    //     bool isDir = path.EndsWith(Separator);
+    //     if( isDir )
+    //         path.RemoveLast();
         
-        wxString name = GetName(path);
-        name = isDir ? name + Separator : name;
-        return name;
+    //     wxString name = GetName(path);
+    //     name = isDir ? name + Separator : name;
+    //     return name;
+    // }
+
+    String MakeString( const fs::path  &path )
+        { return path.u8string(); }
+
+    String MakeString( const wxString &path )
+    {
+        // printf("%S\t", path.wc_str() );
+        // printf("%s\n", path.fn_str() );
+        return String( path.ToUTF8() );
     }
 
-    std::wstring MakeString( const fs::path  &path )
-        { return path.wstring(); }
+    String GetSeparator()
+        { return String( 1, Separator ); }
 
-    std::wstring GetSeparator()
-        { return std::wstring( 1, Separator ); }
-
-    std::wstring GetParent( std::wstring path )
+    String GetParent( String path )
     {
         if ( !IsRoot( path ) )
             RemoveDirSep( path );
@@ -115,10 +122,21 @@ namespace Path
         return GetDirName( MakeString( temp_parent ) );
     }
 
-    std::wstring GetRootPath( const std::wstring &path )
-        { return fs::path(path).root_path().wstring(); }
+    String GetName( String path )
+    {
+        RemoveDirSep( path );
 
-    std::wstring GetDirName( const std::wstring &path )
+
+        size_t idx = path.rfind( Separator );
+        if ( idx != String::npos )
+            path = path.substr( idx );
+        return path;
+    }
+
+    String GetRootPath( const String &path )
+        { return MakeString( fs::path(path).root_path() ); }
+
+    String GetDirName( const String &path )
     {
         fs::path temp(path);
 
@@ -133,16 +151,22 @@ namespace Path
         return MakeString( temp );
     }
 
-    bool HasRootPath( const std::wstring &path )
+    void RemoveDirSep( String &path )
+    {
+        if ( !path.empty() && path.back() == Separator )
+            path.pop_back();
+    }
+
+    bool HasRootPath( const String &path )
         { return fs::path(path).has_root_path(); }
 
-    bool IsRoot( const std::wstring &path )
+    bool IsRoot( const String &path )
         { return GetRootPath( path ) == path; }
 
-    bool IsChild( const std::wstring &parent, std::wstring target )
+    bool IsChild( const String &parent, String target )
     {
-        std::wstring parent_root = GetRootPath( parent );
-        std::wstring target_root = GetRootPath( target );
+        String parent_root = GetRootPath( parent );
+        String target_root = GetRootPath( target );
 
         if ( !HasRootPath( target ) )
             return true;
@@ -163,27 +187,27 @@ namespace Path
         return false;
     }
 
-    bool IsAbsolute( const std::wstring &path )
+    bool IsAbsolute( const String &path )
         { return fs::path(path).is_absolute(); }
 
-    bool IsRelative( const std::wstring &path )
+    bool IsRelative( const String &path )
         { return fs::path(path).is_relative(); }
 
-    std::wstring Append( const std::wstring &parent, const std::wstring &target )
+    String Append( const String &parent, const String &target )
     {
         fs::path path( parent );
-        return (path / target).wstring();
+        return MakeString( path / target );
     }
 
-    std::wstring MakeRelative( const std::wstring &parent, const std::wstring &target )
+    String MakeRelative( const String &parent, const String &target )
     {
         return MakeString( fs::relative( target, parent ) );
     }
 
-    std::wstring MakeAbsolute( const std::wstring &path )
+    String MakeAbsolute( const String &path )
     { return MakeString( fs::absolute( path ) ); }
 
-    std::wstring MakeDirectory( const std::wstring &path )
+    String MakeDirectory( const String &path )
     {
         if ( fs::is_directory( path ) )
             return path;

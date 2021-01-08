@@ -59,7 +59,7 @@ bool Window::Destroy()
     return wxWindow::Destroy();
 }
 
-bool Window::Open( std::shared_ptr<AbstractHandler> handler )
+bool Window::Open( std::shared_ptr<AbstractOpenableHandler> handler )
 {
     if ( !handler )
         return false;
@@ -127,25 +127,20 @@ bool Window::Open( std::shared_ptr<AbstractHandler> handler )
     controller_.Load();
     Refresh();
     GoToCell(0,0);
+    handler_ = handler;
     return true;
 }
 
-bool Window::Open( const wxString &name )
+bool Window::Open( const std::string &name )
 {
-    if ( name.IsEmpty() )
+    if ( name.empty() )
         return false;
 
-    auto handler = std::shared_ptr<AbstractHandler>(
-        HandlerFactory::NewHandler( name )
+    auto handler = std::shared_ptr<AbstractOpenableHandler>(
+        HandlerFactory::NewOpenableHandler( name )
     );
 
-    if ( Open( handler ) )
-    {
-        handler_ = handler;
-        return true;
-    }
-
-    return false;
+    return Open( handler );
 }
 
 void Window::Clear()
@@ -176,10 +171,19 @@ void Window::OnGridEnter( wxKeyEvent &event )
         {
             if ( it == selected_cell_ )
             {
-                wxString path = list_item_.at(idx).stream->GetName();
+                auto &stream = list_item_.at(idx).stream;
+
+                if ( !stream )
+                    return;
+
+                std::string path = handler_->GetItemPath( *stream );
+
                 auto handler = std::shared_ptr<AbstractHandler>(
                     HandlerFactory::NewHandler( path )
                 );
+
+                if ( !handler )
+                    return;
 
                 handler->Traverse( true );
 
@@ -209,8 +213,8 @@ void Window::OnGridEnter( wxKeyEvent &event )
     {
         if ( handler_->GetParent() )
         {
-            wxString curr_name = handler_->GetName();
-            wxString name = handler_->GetParent()->GetName();
+            std::string curr_name = handler_->GetName();
+            std::string name = handler_->GetParent()->GetName();
             Open( name );
             Select( curr_name );
         }
@@ -219,7 +223,7 @@ void Window::OnGridEnter( wxKeyEvent &event )
     event.Skip();
 }
 
-void Window::Select( const wxString &name )
+void Window::Select( const std::string &name )
 {
     size_t idx = 0;
     for ( const auto &it : list_cell_pos_ )

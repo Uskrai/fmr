@@ -35,9 +35,9 @@ Controller::~Controller()
     DeleteThread( kZoomThreadID, g_sLock );
 }
 
-ControllerExit Controller::Open( const wxString &path )
+ControllerExit Controller::Open( const std::string &path )
 {
-    if ( path.IsEmpty() )
+    if ( path.empty() )
         return kControllerPathEmpty;
     
     if ( ! bitmap_ )

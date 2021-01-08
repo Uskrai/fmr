@@ -137,7 +137,7 @@ void SStream::SetName( const std::wstring &name )
 
 void SStream::SetName( const std::string &name )
 {
-    SetName( wxString(name) );
+    m_name = name;
 }
 
 void SStream::SetHandlerPath( const wxString &path )

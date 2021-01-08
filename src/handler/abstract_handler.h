@@ -50,7 +50,7 @@ class AbstractHandler
 {
     public:     
         AbstractHandler() {};
-        AbstractHandler( const wxString& path ) {};
+        AbstractHandler( const std::string& path ) {};
         virtual ~AbstractHandler() {};
 
         // return handler of Parent's Directory
@@ -62,13 +62,13 @@ class AbstractHandler
         virtual std::vector<struct SStream> &GetChild() = 0;
 
         // return opened path
-        virtual const wxString &GetName() const = 0;
-        virtual wxString GetFromCurrent( int step ) const = 0;
+        virtual const std::string &GetName() const = 0;
+        virtual std::string GetFromCurrent( int step ) const = 0;
         // return next or prev folder / file
-        virtual wxString GetNext() const = 0;
-        virtual wxString GetPrev() const = 0;
+        virtual std::string GetNext() const = 0;
+        virtual std::string GetPrev() const = 0;
 
-        virtual void Open( const wxString& path) = 0;
+        virtual void Open( const std::string& path) = 0;
 
         virtual bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false ) = 0;
         virtual bool GetNextStream( SStream &stream, bool is_get_stream = false ) = 0;
@@ -78,7 +78,7 @@ class AbstractHandler
         virtual bool IsExist( size_t index ) const = 0;
 
         // search from filename
-        virtual size_t Index( const wxString& name ) const = 0;
+        virtual size_t Index( const std::string& name ) const = 0;
         // return files stream;
         virtual const struct SStream &Item( size_t index ) const = 0;
         virtual struct SStream &Item( size_t index ) = 0;

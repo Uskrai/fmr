@@ -108,7 +108,7 @@ void Frame::OpenFile(wxCommandEvent& event)
 
     if(openDialog->ShowModal() == wxID_OK)
     {
-        m_panel->LoadFile( openDialog->GetPath() );
+        m_panel->LoadFile( String::ToString( openDialog->GetPath() ) );
     }
     event.Skip();
     openDialog->Destroy();

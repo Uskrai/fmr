@@ -38,7 +38,7 @@ class AbstractOpenableHandler
          * @param stream stream object
          * @return std::wstring the path of the stream's
          */
-        virtual std::wstring GetItemPath( const SStream &stream ) const = 0;
+        virtual std::string GetItemPath( const SStream &stream ) const = 0;
 
         /**
          * @brief Get the Item Path object
@@ -46,7 +46,7 @@ class AbstractOpenableHandler
          * @param index the index from Index() method
          * @return std::wstring the path of the stream pointed by index
          */
-        virtual std::wstring GetItemPath( size_t index ) const = 0;
+        virtual std::string GetItemPath( size_t index ) const = 0;
 };
 
 } // namespace fmr

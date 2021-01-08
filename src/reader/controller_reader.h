@@ -59,7 +59,7 @@ class Controller
         Controller( wxWindow *parent );
         ~Controller();
 
-        ControllerExit Open( const wxString &path );
+        ControllerExit Open( const std::string &path );
 
         void Zoom( const wxPoint &area, const wxPoint &pos, const ControllerZoom &flags );
 

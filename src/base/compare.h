@@ -26,18 +26,18 @@ namespace fmr
 
 #define DeclareStringCompareFunction( name ) \
     bool name ## Sortable ( const Sortable &s1, const Sortable &s2 );    \
-    bool name ## String ( const std::wstring &s1, const std::wstring &s2 )
+    bool name ## String ( const Compare::String &s1, const Compare::String &s2 )
 
 #define DefineStringCompareFunction( name ) \
     bool name ## Sortable ( const Sortable &s1, const Sortable &s2 ) \
         { return name ## String ( s1.GetString(), s2.GetString() ); }; \
-    bool name ## String ( const std::wstring &s1, const std::wstring &s2 )
+    bool name ## String ( const String &s1, const String &s2 )
 
     
 namespace Compare
 {
-    typedef wchar_t Char;
-    typedef std::wstring String;
+    typedef char Char;
+    typedef std::string String;
 
     class Sortable 
     {

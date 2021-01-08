@@ -25,6 +25,7 @@
 #include "handler/abstract_handler.h"
 #include <wx/grid.h>
 #include <memory>
+#include "base/path.h"
 
 class wxPanel;
 
@@ -50,16 +51,16 @@ class Window
             const wxString &name = wxPanelNameStr
         );
 
-        bool Open( std::shared_ptr<AbstractHandler> handler );
-        bool Open( const wxString &name );
+        bool Open( std::shared_ptr<AbstractOpenableHandler> handler );
+        bool Open( const std::string &name );
 
-        void Select( const wxString &name );
+        void Select( const std::string &name );
 
         void Clear();
         bool Destroy();
     protected:
         Controller controller_ = Controller( this );
-        std::shared_ptr<AbstractHandler> handler_;
+        std::shared_ptr<AbstractOpenableHandler> handler_;
         std::vector<SBitmap> list_bitmap_;
         std::vector<StreamBitmap> list_item_;
         std::vector<ImageWindow*> list_renderer_;

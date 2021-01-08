@@ -28,7 +28,7 @@ HandlerType HandlerFactory::GetType()
     return m_type;
 }
 
-bool HandlerFactory::Is( const wxString& path1, const wxString& path2)
+bool HandlerFactory::Is( const std::string& path1, const std::string& path2)
 {
     HandlerType type1, type2;
     Find( path1, type1 );
@@ -37,13 +37,13 @@ bool HandlerFactory::Is( const wxString& path1, const wxString& path2)
 }
 
 
-bool HandlerFactory::Find( const wxString& path )
+bool HandlerFactory::Find( const std::string& path )
 {
     HandlerType type;
     return Find( path, type );
 }
 
-bool HandlerFactory::Find( const wxString& path, HandlerType& type )
+bool HandlerFactory::Find( const std::string& path, HandlerType& type )
 {
     type = kHandlerNotFound;
     if ( WxArchiveHandler::CanHandle(path) )
@@ -60,7 +60,7 @@ bool HandlerFactory::Find( const wxString& path, HandlerType& type )
     return false;
 }
 
-AbstractHandler* HandlerFactory::NewHandler( const wxString& path )
+AbstractHandler* HandlerFactory::NewHandler( const std::string& path )
 {
     AbstractHandler *handler = NULL;
     HandlerType type;
@@ -79,11 +79,37 @@ AbstractHandler* HandlerFactory::NewHandler( const HandlerType& type )
     {
         case kHandlerWxArchive:
             return new WxArchiveHandler();
+    }
+
+    auto handler =  NewOpenableHander( type );
+
+    if ( handler )
+        return handler;
+
+    return nullptr;
+}
+
+AbstractOpenableHandler *HandlerFactory::NewOpenableHandler( const std::string &path )
+{
+    HandlerType type;
+    AbstractOpenableHandler *handler;
+    if ( Find( path, type ))
+    {
+        handler = NewOpenableHander( type );
+        handler->Open( path );
+    }
+
+    return handler;
+}
+
+AbstractOpenableHandler *HandlerFactory::NewOpenableHander( const HandlerType &type )
+{
+    switch ( type )
+    {
         case kHandlerDefault:
             return new DefaultHandler();
-        default:
-            return NULL;
     }
+    return nullptr;
 }
 
 AbstractHandler* HandlerFactory::NewHandler()
