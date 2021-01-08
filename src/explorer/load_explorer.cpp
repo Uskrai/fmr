@@ -71,7 +71,6 @@ void LoadThread::Load( StreamBitmap &item )
 
     TEST_RETURN();
 
-
     if ( image.IsOk() )
         item.bitmap->SetBitmap( image );
 
@@ -79,6 +78,7 @@ void LoadThread::Load( StreamBitmap &item )
 
 void LoadThread::Update( StreamBitmap &item )
 {
+    TEST_RETURN();
     std::unique_ptr<StreamBitmapEvent> event(
         new StreamBitmapEvent( EVT_BITMAP_LOADED, m_id )
     );
@@ -101,6 +101,7 @@ wxThread::ExitCode LoadThread::Entry()
     {
         if ( load_queue_.size() > 0 && !TestDestroy() )
         {
+            TEST_BREAK();
             StreamBitmap &item = load_queue_.front();
             std::shared_ptr<wxInputStream> input_stream = item.stream->GetStream();
 
@@ -108,6 +109,7 @@ wxThread::ExitCode LoadThread::Entry()
 
             if ( ! item.stream->IsOk() || !wxImage::CanRead( *input_stream ) )
             {
+                TEST_BREAK();
                 std::unique_ptr<AbstractHandler> handler(
                     HandlerFactory::NewHandler( item.stream->GetHandlerPath() )
                 );

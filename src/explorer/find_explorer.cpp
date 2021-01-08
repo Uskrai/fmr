@@ -62,10 +62,15 @@ wxThread::ExitCode FindThread::Entry()
 
 void FindThread::StreamFound( StreamBitmap &item )
 {
+    if ( TestDestroy() )
+        return;
 
     std::unique_ptr<StreamBitmapEvent> event(
         new StreamBitmapEvent( EVT_STREAM_FOUND, m_id )
     );
+
+    if ( TestDestroy() )
+        return;
 
     event->SetStreamBitmap( item );
 
@@ -79,10 +84,11 @@ bool FindThread::TraverseHandler( T *handler, StreamBitmap &item )
 
     for ( const auto &it : handler->GetChild() )
     {
+        TEST_RETURN();
         item.stream = std::shared_ptr<SStream>(
             new SStream( it )
         );
-
+        TEST_RETURN();
         if ( Find( handler, item ) )
             return true;
     }
@@ -91,6 +97,7 @@ bool FindThread::TraverseHandler( T *handler, StreamBitmap &item )
 
 bool FindThread::Find( StreamBitmap &item )
 {
+    TEST_RETURN();
     if ( ! wxImage::CanRead( *item.stream->GetStream() ) )
         return false;
 
@@ -108,6 +115,8 @@ bool FindThread::Find( AbstractOpenableHandler *handler, StreamBitmap &item )
         std::unique_ptr<AbstractOpenableHandler> stream_handler(
             HandlerFactory::NewOpenableHandler( path )
         );
+
+        TEST_RETURN();
 
         handler->GetStream( *item.stream );
 
