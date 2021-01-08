@@ -131,10 +131,11 @@ AbstractHandler* HandlerFactory::NewHandler()
 
 bool HandlerFactory::IsOpenable( const std::string &path )
 {
-    HandlerType type;
+    HandlerType type, openable_type;
     Find( path, type );
+    FindOpenable( path, openable_type );
 
-    return type != kHandlerNotFound;
+    return type == openable_type;
 }
 
 }; // namespace fmr
