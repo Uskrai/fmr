@@ -146,7 +146,7 @@ void Window::OnThreadUpdate( wxCommandEvent &event )
     Refresh();
 }
 
-bool Window::Open( const wxString& path )
+bool Window::Open( const std::string& path )
 {
     is_opened_ = false;
     auto open_bitmap = NewBitmap();
@@ -165,7 +165,7 @@ bool Window::Open( const wxString& path )
 
         AdjustScrollBar();
         if ( file_handler_ )
-            config_->Write( "RecentlyOpened", file_handler_->GetName() );
+            config_->Write( "RecentlyOpened", wxString( file_handler_->GetName() ) );
         config_->Flush();
         is_opened_ = true;
         return true;
@@ -186,7 +186,7 @@ bool Window::Open( const wxString& path )
     return false;
 }
 
-std::shared_ptr<AbstractHandler> Window::NewHandler( const wxString &path )
+std::shared_ptr<AbstractHandler> Window::NewHandler( const std::string &path )
 {
     auto handler = std::shared_ptr<AbstractHandler>(
             HandlerFactory::NewHandler(path)
@@ -225,7 +225,7 @@ void Window::ReloadConfig()
 
 bool Window::ChangeFolder( int step )
 {
-    wxString path = file_handler_->GetFromCurrent( step );
+    std::string path = file_handler_->GetFromCurrent( step );
 
     if ( path == wxEmptyString ) return false;
 

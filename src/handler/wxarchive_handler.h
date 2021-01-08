@@ -35,10 +35,10 @@ class WxArchiveHandler
 {
     public:
         WxArchiveHandler() {}
-        WxArchiveHandler( const wxString& path );
-        void Open( const wxString& path );
+        WxArchiveHandler( const std::string& path );
+        void Open( const std::string& path );
 
-        const wxString &GetName() const;
+        const std::string &GetName() const;
 
         const std::shared_ptr<AbstractHandler> GetParent() const;
         std::shared_ptr<AbstractHandler> GetParent();
@@ -46,9 +46,9 @@ class WxArchiveHandler
         const std::vector<SStream> &GetChild() const;
         std::vector<SStream> &GetChild();
 
-        wxString GetFromCurrent( int step ) const;
-        wxString GetNext() const;
-        wxString GetPrev() const;
+        std::string GetFromCurrent( int step ) const;
+        std::string GetNext() const;
+        std::string GetPrev() const;
 
         bool IsExist( size_t index ) const;
         bool IsOpened() const;
@@ -58,7 +58,7 @@ class WxArchiveHandler
 
         void Traverse( bool GetStream = false, DirGetFlags flags = kDirDefault );
         void TraverseStream();
-        size_t Index( const wxString& name ) const;
+        size_t Index( const std::string& name ) const;
         size_t Size() const;
 
         const SStream &Item( size_t index ) const;
@@ -72,22 +72,22 @@ class WxArchiveHandler
 
 
         bool CreateDirectories();
-        bool CreateDirectories( const std::wstring &path );
-        bool CreateDirectory( const std::wstring &dirname, bool overwrite = false );
-        bool CreateFiles( SStream stream, const std::wstring &name, bool overwrite = false );
-        bool Remove( const std::wstring &name, bool recursive = false );
+        bool CreateDirectories( const std::string &path );
+        bool CreateDirectory( const std::string &dirname, bool overwrite = false );
+        bool CreateFiles( SStream stream, const std::string &name, bool overwrite = false );
+        bool Remove( const std::string &name, bool recursive = false );
         bool RemoveAll();
-        bool RemoveAll( const std::wstring &path );
+        bool RemoveAll( const std::string &path );
         bool CommitWrite();
 
-        static bool CanHandle( wxString path );
+        static bool CanHandle( std::string path );
     private:
-        static bool Find( wxString path, const wxArchiveClassFactory*& factory );
+        static bool Find( std::string path, const wxArchiveClassFactory*& factory );
 
         std::shared_ptr<DefaultHandler> m_parent;
 
-        wxString m_name;
-        wxString m_parentName;
+        std::string m_name;
+        std::string m_parentName;
 
         bool is_opened_ = false;
 

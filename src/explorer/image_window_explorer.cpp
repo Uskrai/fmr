@@ -70,23 +70,22 @@ wxSize ImageWindow::GetBestBitmapSize( const wxSize &size )
     return best_size;
 }
 
-std::vector<StringDraw> SplitString( std::wstring string, const wxSize &size, wxDC &dc )
+std::vector<StringDraw> SplitString( std::string string, const wxSize &size, wxDC &dc )
 {
     std::vector<StringDraw> list_string;
 
-
     StringDraw string_draw;
 
-    wxString per_space_string, per_char_string;
+    std::string per_space_string, per_char_string;
 
     for ( const auto &it : string )
     {
         per_char_string += it;
 
-        if ( it != ' ' )
-            continue;
+        wxString string_to_check;
+        String::FromUTF8( per_space_string + per_char_string, string_to_check );
 
-        wxSize text_extent = dc.GetTextExtent( per_space_string + per_char_string );
+        wxSize text_extent = dc.GetTextExtent( string_to_check );
 
         if ( text_extent.GetWidth() > size.GetWidth() )
         {
@@ -97,6 +96,8 @@ std::vector<StringDraw> SplitString( std::wstring string, const wxSize &size, wx
             per_space_string = "";
         }
 
+        if ( it != ' ' )
+            continue;
 
         per_space_string += per_char_string;
         per_char_string = "";
@@ -134,7 +135,7 @@ void ImageWindow::Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRe
     {
         std::vector<StringDraw> filename;
 
-        filename = SplitString( Path::GetName( stream_->GetName() ).ToStdWstring(), txt_size, dc );
+        filename = SplitString( Path::GetName( stream_->GetName() ) , txt_size, dc );
 
         wxPoint text_pos = txt_rect.GetTopLeft();
 
@@ -142,11 +143,14 @@ void ImageWindow::Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRe
 
         for ( const auto & it : filename )
         {
-            string_rect.SetSize( dc.GetTextExtent( it.filename ) );
+            wxString string;
+            String::FromUTF8( it.filename, string );
+
+            string_rect.SetSize( dc.GetTextExtent( string ) );
             string_rect = string_rect.CenterIn( txt_rect );
             string_rect.SetTop( text_pos.y );
 
-            dc.DrawText( it.filename, string_rect.GetPosition() );
+            dc.DrawText( string , string_rect.GetPosition() );
 
             text_pos = string_rect.GetBottomLeft();
         }

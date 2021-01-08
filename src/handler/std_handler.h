@@ -19,7 +19,7 @@
 #define FMR_HANDLER_STD_HANDLER
 
 
-#include "handler/abstract_handler.h"
+#include "handler/abstract_openable_handler.h"
 #include "handler/struct_stream.h"
 #include "base/vector.h"
 
@@ -35,12 +35,12 @@ namespace fmr
 {
 
 class STDHandler
-    : public AbstractHandler
+    : public AbstractOpenableHandler
 {
     public:
         STDHandler(){};
         STDHandler( STDHandler &&move );
-        STDHandler( const wxString &path );
+        STDHandler( const std::string &path );
         ~STDHandler() {}
 
         const std::shared_ptr<AbstractHandler> GetParent() const;
@@ -49,22 +49,22 @@ class STDHandler
         const std::vector<struct SStream> &GetChild() const;
         std::vector<struct SStream> &GetChild();
 
-        const wxString &GetName() const;
+        const std::string &GetName() const;
 
-        wxString GetFromCurrent( int step ) const;
-        wxString GetNext() const;
-        wxString GetPrev() const;
+        std::string GetFromCurrent( int step ) const;
+        std::string GetNext() const;
+        std::string GetPrev() const;
 
-        void Open( const wxString &path );
+        void Open( const std::string &path );
         bool IsOpened() const;
 
         void Traverse( bool GetStream = false, DirGetFlags flags = kDirDefault );
 
         bool IsExist( size_t idx ) const;
 
-        std::wstring GetStreamPath( const SStream &stream ) const;
-        std::wstring GetItemPath( size_t idx ) const;
-        size_t Index( const wxString &name ) const;
+        std::string GetItemPath( const SStream &stream ) const;
+        std::string GetItemPath( size_t idx ) const;
+        size_t Index( const std::string &name ) const;
         const struct SStream &Item( size_t idx ) const;
         struct SStream &Item( size_t idx );
 
@@ -73,22 +73,22 @@ class STDHandler
         void Reset();
         void Close();
 
-        static bool CanHandle( wxString path );
+        static bool CanHandle( std::string path );
         static bool StreamOpenable();
         bool IsStreamOpenable() const;
 
         bool OpenStream( SStream &stream );
-        bool OpenStream( const std::wstring &name, SStream &stream, bool is_get_stream = false );
+        bool OpenStream( const std::string &name, SStream &stream, bool is_get_stream = false );
         bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_stream = false );
         bool GetNextStream( SStream &stream, bool is_get_stream = false );
 
-        bool CreateDirectory( const std::wstring directory_name, bool overwrite = false );
-        bool CreateFiles( SStream stream, const std::wstring &filename, bool overwrite = false );
+        bool CreateDirectory( const std::string directory_name, bool overwrite = false );
+        bool CreateFiles( SStream stream, const std::string &filename, bool overwrite = false );
         bool CreateDirectories();
-        bool CreateDirectories( const std::wstring &path );
+        bool CreateDirectories( const std::string &path );
         bool RemoveAll();
-        bool RemoveAll( const std::wstring &path );
-        bool Remove( const std::wstring &name, bool recursive );
+        bool RemoveAll( const std::string &path );
+        bool Remove( const std::string &name, bool recursive );
         bool CommitWrite();
     private:
         void TraverseStream();
@@ -97,7 +97,7 @@ class STDHandler
         DirGetFlags iterator_flags_;
         std::filesystem::directory_iterator iterator_;
 
-        wxString name_, filename_;
+        std::string name_, filename_;
         bool is_opened_ = false;
 
         std::vector<struct SStream> list_stream_, list_write_stream_;

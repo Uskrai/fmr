@@ -36,7 +36,7 @@ struct StreamBitmap
 
 struct StringDraw
 {
-    wxString filename;
+    std::string filename;
     wxRect rect;
 };
 

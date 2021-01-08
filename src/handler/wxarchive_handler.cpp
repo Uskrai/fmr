@@ -24,17 +24,17 @@
 namespace fmr
 {
 
-WxArchiveHandler::WxArchiveHandler( const wxString& path )
+WxArchiveHandler::WxArchiveHandler( const std::string& path )
 {
     Open( path );
 }
 
-void WxArchiveHandler::Open( const wxString& path )
+void WxArchiveHandler::Open( const std::string& path )
 {
     m_name = path;
     is_opened_ = true;
 
-    wxString parent = Path::GetParent(path);
+    std::string parent = Path::GetParent(path);
     if ( parent != m_name )
     {
         m_parent = std::make_shared<DefaultHandler>(
@@ -44,7 +44,7 @@ void WxArchiveHandler::Open( const wxString& path )
     }
 }
 
-size_t WxArchiveHandler::Index( const wxString& name ) const
+size_t WxArchiveHandler::Index( const std::string& name ) const
 {
     if ( name == m_name ) return 0;
 
@@ -59,7 +59,7 @@ size_t WxArchiveHandler::Index( const wxString& name ) const
     return -1;
 }
 
-const wxString &WxArchiveHandler::GetName() const
+const std::string &WxArchiveHandler::GetName() const
     { return m_name; }
 
 const std::shared_ptr<AbstractHandler> WxArchiveHandler::GetParent() const
@@ -89,30 +89,30 @@ bool WxArchiveHandler::IsExist( size_t index ) const
 bool WxArchiveHandler::IsOpened() const
     { return is_opened_; }
 
-wxString WxArchiveHandler::GetNext() const
+std::string WxArchiveHandler::GetNext() const
     { return GetFromCurrent(1); }
 
-wxString WxArchiveHandler::GetPrev() const
+std::string WxArchiveHandler::GetPrev() const
     { return GetFromCurrent(-1); }
 
 std::vector<SStream> &WxArchiveHandler::GetWriteList()
     { return list_write_stream_; }
 
-wxString WxArchiveHandler::GetFromCurrent( int step ) const
+std::string WxArchiveHandler::GetFromCurrent( int step ) const
 {
     if ( ! GetParent() )
-        return L"";
+        return "";
 
     size_t idx = GetParent()->Index( GetName() );
     if ( GetParent()->IsExist( idx + step ) )
         return m_parent->GetItemPath( idx + step );
 
-    return L"";
+    return "";
 }
 
 bool WxArchiveHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_stream )
 {
-    wxString path = GetName();
+    std::string path = GetName();
     const wxArchiveClassFactory *factory;
 
     if ( ! Find( path, factory ) )
@@ -181,7 +181,7 @@ void WxArchiveHandler::Traverse( bool GetStream, DirGetFlags flags )
     m_all = std::move( vec_stream );
 }
 
-bool WxArchiveHandler::Find( wxString path, const wxArchiveClassFactory*& factory )
+bool WxArchiveHandler::Find( std::string path, const wxArchiveClassFactory*& factory )
 {
 
     factory = wxArchiveClassFactory::Find( path, wxSTREAM_FILEEXT );
@@ -202,7 +202,7 @@ bool WxArchiveHandler::Find( wxString path, const wxArchiveClassFactory*& factor
     return false;
 }
 
-bool WxArchiveHandler::CanHandle( wxString path )
+bool WxArchiveHandler::CanHandle( std::string path )
 {
     const wxArchiveClassFactory* factory;
     bool result = WxArchiveHandler::Find( path, factory );
@@ -212,10 +212,10 @@ bool WxArchiveHandler::CanHandle( wxString path )
 bool WxArchiveHandler::CreateDirectories()
 {
     return  IsOpened()
-            && CreateDirectories( GetName().ToStdWstring() );
+            && CreateDirectories( GetName() );
 }
 
-bool WxArchiveHandler::CreateDirectories( const std::wstring &path )
+bool WxArchiveHandler::CreateDirectories( const std::string &path )
 {
     if (path == "")
         return false;
@@ -239,7 +239,7 @@ bool WxArchiveHandler::CreateDirectories( const std::wstring &path )
     return false;
 }
 
-bool WxArchiveHandler::CreateDirectory( const std::wstring &dirname, bool overwrite )
+bool WxArchiveHandler::CreateDirectory( const std::string &dirname, bool overwrite )
 {
     if ( !IsOpened() )
         return false;
@@ -261,7 +261,7 @@ bool WxArchiveHandler::CreateDirectory( const std::wstring &dirname, bool overwr
     return true;
 }
 
-bool WxArchiveHandler::CreateFiles( SStream stream, const std::wstring &filename, bool overwrite )
+bool WxArchiveHandler::CreateFiles( SStream stream, const std::string &filename, bool overwrite )
 {
     if ( !IsOpened() )
         return false;
@@ -281,7 +281,7 @@ bool WxArchiveHandler::CreateFiles( SStream stream, const std::wstring &filename
     return true;
 }
 
-bool WxArchiveHandler::Remove( const std::wstring &name, bool recursive )
+bool WxArchiveHandler::Remove( const std::string &name, bool recursive )
 {
     if ( !IsOpened() )
         return false;
@@ -305,10 +305,10 @@ bool WxArchiveHandler::Remove( const std::wstring &name, bool recursive )
 bool WxArchiveHandler::RemoveAll()
 {
     return  IsOpened()
-            && RemoveAll( GetName().ToStdWstring() );
+            && RemoveAll( GetName() );
 }
 
-bool WxArchiveHandler::RemoveAll( const std::wstring &path )
+bool WxArchiveHandler::RemoveAll( const std::string &path )
 {
     const wxArchiveClassFactory *factory;
     return  !path.empty() &&
@@ -416,7 +416,7 @@ void WxArchiveHandler::Reset()
 {
     Clear();
     Close();
-    m_name = L"";
+    m_name = "";
     m_parent = NULL;
 }
 

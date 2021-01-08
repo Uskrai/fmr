@@ -22,6 +22,7 @@
 #include <string>
 
 #include "base/compare.h"
+#include "base/path.h"
 #include "base/bitmask.h"
 #include "handler/abstract_handler.h"
 #include <wx/mstream.h>
@@ -77,9 +78,9 @@ struct SStream
     bool IsOk() const;
     bool IsDir() const;
 
-    std::wstring GetString() const { return m_name.ToStdWstring(); }
-    const wxString &GetName() const { return m_name; };
-    const wxString &GetHandlerPath() const { return handler_path_; }
+    std::string GetString() const { return m_name; }
+    const std::string &GetName() const { return m_name; };
+    const std::string &GetHandlerPath() const { return handler_path_; }
     const StreamActionType &GetType() const;
     size_t GetSize() const;
     std::shared_ptr<AbstractHandler> GetHandler();
@@ -91,7 +92,7 @@ struct SStream
 
     std::shared_ptr<wxMemoryOutputStream> m_stream = NULL;
     std::shared_ptr<AbstractHandler> m_handler;
-    wxString m_name, handler_path_;
+    std::string m_name, handler_path_;
     StreamActionType stream_flags_ = kStreamNone;
 
     bool is_dir_ = false;

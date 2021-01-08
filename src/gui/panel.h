@@ -21,6 +21,7 @@
 #include <wx/panel.h>
 #include "reader/window_reader.h"
 #include "explorer/window_explorer.h"
+#include "base/string.h"
 
 class wxBoxSizer;
 
@@ -39,7 +40,7 @@ class Panel :
     public: 
         Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ); 
 
-        bool LoadFile( wxString path );
+        bool LoadFile( std::string path );
         bool OpenExplorer();
         bool Destroy();
     private:

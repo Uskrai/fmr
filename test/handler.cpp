@@ -14,26 +14,25 @@
 #define FILE_COUNT 100
 #define FOLDER_COUNT 100
 #define FILENAME_LENGTH 10
-#define TEST_DIRECTORY L"handler_test_dir"
+#define TEST_DIRECTORY "handler_test_dir"
 
 namespace fmr
 {
 
-std::wstring GetExtension( AbstractHandler * )
-	{ return L"/"; }
+std::string GetExtension( AbstractHandler * )
+	{ return "/"; }
 
-std::wstring GetExtension( WxArchiveHandler * )
-	{ return L".zip"; }
+std::string GetExtension( WxArchiveHandler * )
+	{ return ".zip"; }
 
-std::wstring MakeName( size_t size )
+std::string MakeName( size_t size )
 {
-	std::wstring path;
 	std::random_device dev;
 	std::mt19937 rng( dev() );
 	std::uniform_int_distribution<> lower_char(97,122), upper_char(65,90);
 
 	size_t i = 0;
-	std::wstring string;
+	std::string string;
 	while ( i < size )
 	{
 		if ( !(i & 2) )
@@ -83,8 +82,8 @@ class HandlerTest : public ::testing::Test
 
 			ASSERT_TRUE( handler_->RemoveAll( test_dir_ ) );
 
-			ASSERT_FALSE( handler_->CreateDirectories(L"") );
-			ASSERT_FALSE( handler_->RemoveAll(L"") );
+			ASSERT_FALSE( handler_->CreateDirectories("") );
+			ASSERT_FALSE( handler_->RemoveAll("") );
 
 			ASSERT_TRUE( handler_->CreateDirectories( test_dir_ ) );
 			ASSERT_TRUE( handler_->RemoveAll( test_dir_ ) );
@@ -98,7 +97,7 @@ class HandlerTest : public ::testing::Test
 			while ( length < FILE_COUNT * FILE_SIZE_INTERVAL )
 			{
 				SStream item = MakeStream( length );
-				std::wstring name = MakeName( FILENAME_LENGTH );
+				std::string name = MakeName( FILENAME_LENGTH );
 				stream_total_size += item.GetSize();
 
 				ASSERT_TRUE( handler_->CreateFiles( item, name ) );
@@ -161,7 +160,7 @@ class HandlerTest : public ::testing::Test
 	protected:
 		std::shared_ptr<char[]> buffer_ = NULL;
 		inline static T *handler_ = NULL;
-		inline static std::wstring test_dir_;
+		inline static std::string test_dir_;
 };
 
 
@@ -171,7 +170,7 @@ TYPED_TEST_SUITE( HandlerTest, handler_type );
 
 #define HANDLER_TEST_FUNC( TestName ) \
 	template<typename T> \
-	void TestName ## Function( T *handler, std::wstring path, HandlerTest<T> *test_obj )
+	void TestName ## Function( T *handler, std::string path, HandlerTest<T> *test_obj )
 
 #define HANDLER_TEST_CALL_FUNC( TestName, Postfix, Func ) \
 	TYPED_TEST( HandlerTest, TestName ## Postfix ) \
@@ -186,10 +185,10 @@ TYPED_TEST_SUITE( HandlerTest, handler_type );
 #define HANDLER_TEST( TestName )	\
 	HANDLER_TEST_FUNC( TestName ); \
 	HANDLER_TEST_CALL_FUNC( TestName, Absolute, Path::MakeAbsolute ); \
-	HANDLER_TEST_CALL_FUNC( TestName, Relative, std::wstring ); \
+	HANDLER_TEST_CALL_FUNC( TestName, Relative, std::string ); \
 	HANDLER_TEST_FUNC( TestName )
 
-void TestSizeHandler( AbstractHandler *handler, const std::wstring &path )
+void TestSizeHandler( AbstractHandler *handler, const std::string &path )
 {
 	handler->Open( path );
 
@@ -210,7 +209,7 @@ void TestSizeHandler( AbstractHandler *handler, const std::wstring &path )
 }
 
 template<typename T>
-void TEST_STREAM( T *handler, const std::wstring &path )
+void TEST_STREAM( T *handler, const std::string &path )
 {
 	handler->Clear();
 	handler->Open( path );
@@ -249,7 +248,7 @@ void TEST_STREAM( T *handler, const std::wstring &path )
 }
 
 template<typename T>
-void TEST_WRITE( T *handler, const std::wstring path )
+void TEST_WRITE( T *handler, const std::string path )
 {
 	size_t length = 1000;
 	char *buffer = new char[length];
@@ -257,14 +256,14 @@ void TEST_WRITE( T *handler, const std::wstring path )
 	SStream stream_file("Makefile");
 
 	ASSERT_TRUE( handler->RemoveAll() );
-	ASSERT_FALSE( std::filesystem::exists( handler->GetName().ToStdWstring() ) );
+	ASSERT_FALSE( std::filesystem::exists( handler->GetName() ) );
 	ASSERT_TRUE( handler->CreateDirectories() );
 
-	ASSERT_TRUE( std::filesystem::exists( handler->GetName().ToStdWstring() ) );
+	ASSERT_TRUE( std::filesystem::exists( handler->GetName() ) );
 	ASSERT_TRUE( handler->CommitWrite() );
-	handler->CreateDirectory(L"test1");
-	handler->CreateFiles( stream_buffer, L"owo" );
-	handler->CreateFiles( stream_file, L"wew" );
+	handler->CreateDirectory("test1");
+	handler->CreateFiles( stream_buffer, "owo" );
+	handler->CreateFiles( stream_file, "wew" );
 	ASSERT_TRUE( handler->CommitWrite() );
 
 	handler->Reset();
@@ -274,7 +273,7 @@ void TEST_WRITE( T *handler, const std::wstring path )
 
 	ASSERT_EQ( handler->Size(), 3 );
 
-	size_t index = handler->Index( L"owo" );
+	size_t index = handler->Index( "owo" );
 
 	ASSERT_EQ( handler->Item( index ).GetSize(), length );
 
@@ -332,8 +331,8 @@ HANDLER_TEST( ChangeFolderTest )
 {
 	ASSERT_TRUE( handler->GetParent() );
 	handler->GetParent()->Traverse();
-	std::wstring next_folder_path = handler->GetFromCurrent( 1 ).ToStdWstring();
-	ASSERT_NE( next_folder_path, L"" );
+	std::string next_folder_path = handler->GetFromCurrent( 1 );
+	ASSERT_NE( next_folder_path, "" );
 }
 
 } // namespace fmr

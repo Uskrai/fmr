@@ -26,48 +26,52 @@ namespace fmr
 
 inline namespace Path
 {
+    typedef std::string String;
+    const String EmptyString = "";
     const wchar_t Separator = std::filesystem::path::preferred_separator;
     
-    // return long path
-    wxString GetFullPath( wxString path );
-    // return directory name
-    wxString GetDirName( wxString path );
-    // return parent's path
-    wxString GetParent( const wxString& path );
-    // strip last separator
-    void RemoveDirSep( wxString& path );
-    // return Name without separator
-    wxString GetName( wxString path );
-    // return name with separator if directory
-    wxString GetNameWithSep( wxString path );
+    // // return long path
+    // wxString GetFullPath( wxString path );
+    // // return directory name
+    // wxString GetDirName( wxString path );
+    // // return parent's path
+    // wxString GetParent( const wxString& path );
+    // // strip last separator
+    // void RemoveDirSep( wxString& path );
+    // // return Name without separator
+    // wxString GetName( wxString path );
+    // // return name with separator if directory
+    // wxString GetNameWithSep( wxString path );
 
-    std::wstring GetSeparator();
+    String GetSeparator();
 
-    std::wstring GetParent( std::wstring path );
+    String GetName( String path );
 
-    std::wstring GetRootPath( const std::wstring &path );
+    String GetParent( String path );
 
-    bool HasRootPath( const std::wstring &path );
+    String GetRootPath( const String &path );
 
-    std::wstring GetDirName( const std::wstring &path );
+    bool HasRootPath( const String &path );
 
-    void RemoveDirSep( std::wstring &path );
+    String GetDirName( const String &path );
 
-    bool IsRoot( const std::wstring &path );
+    void RemoveDirSep( String &path );
 
-    bool IsChild( const std::wstring &parent, std::wstring target );
+    bool IsRoot( const String &path );
 
-    bool IsAbsolute( const std::wstring &path );
+    bool IsChild( const String &parent, String target );
 
-    bool IsRelative( const std::wstring &path );
+    bool IsAbsolute( const String &path );
 
-    std::wstring Append( const std::wstring &parent, const std::wstring &target );
+    bool IsRelative( const String &path );
 
-    std::wstring MakeRelative( const std::wstring &parent, const std::wstring &target );
+    String Append( const String &parent, const String &target );
 
-    std::wstring MakeAbsolute( const std::wstring &path );
+    String MakeRelative( const String &parent, const String &target );
 
-    std::wstring MakeDirectory( const std::wstring &path );
+    String MakeAbsolute( const String &path );
+
+    String MakeDirectory( const String &path );
 
 
 } // namespace Path

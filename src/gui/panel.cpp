@@ -54,7 +54,7 @@ Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
     SetSizer( sizer_ );
 };
 
-bool Panel::LoadFile( wxString path )
+bool Panel::LoadFile( std::string path )
 {
     bool ret = reader_->Open( path );
     reader_->Show();
@@ -73,7 +73,7 @@ bool Panel::LoadFile( wxString path )
 
 bool Panel::OpenExplorer()
 {
-    wxString path, select_path;
+    std::string path, select_path;
 
     if ( reader_ )
     {
@@ -129,7 +129,7 @@ void Panel::OnCharHook( wxKeyEvent &event )
 void Panel::OnExplorerOpenFile( wxCommandEvent &event )
 {
     explorer_->Hide();
-    if ( LoadFile(event.GetString() ) )
+    if ( LoadFile( String::ToString( event.GetString() ) ) )
     {
         explorer_->Clear();
     }

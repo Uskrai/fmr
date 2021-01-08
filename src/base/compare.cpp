@@ -25,6 +25,11 @@ namespace Compare
     bool NotEnd( const wxString& str, size_t idx ) 
         { return idx < str.size(); }
 
+    char ToLower( char ch )
+    {
+        return static_cast<char>( std::tolower( static_cast<unsigned char>( ch ) ) );
+    }
+
     String GetNonZero( const String &str, size_t &idx, Char & chr )
     {
         size_t sz = 0;
@@ -42,13 +47,13 @@ namespace Compare
         idx += sz;
         chr = str[idx];
 
-        return ( tmp == "" ) ? L"0" : tmp;
+        return ( tmp == "" ) ? "0" : tmp;
     }
 
     DefineStringCompareFunction ( Natural )
     {
-        const String &first = wxString(s1).Lower().wx_str();
-        const String &second = wxString(s2).Lower().wx_str();
+        const String &first = s1;
+        const String &second = s2;
 
         // const String& first = s1.Lower().wx_str();
 
@@ -57,8 +62,9 @@ namespace Compare
         size_t idx = 0, pos = 0;
         while ( NotEnd( first, idx ) && NotEnd( second, pos ) )
         {
-            Char fst = first[idx];
-            Char scnd = second[pos];
+            // this probably should be fixed
+            Char fst = ToLower( first[idx] );
+            Char scnd = ToLower( second[pos] );
             
             if ( isdigit(fst) && isdigit(scnd) )
             {

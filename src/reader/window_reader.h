@@ -23,6 +23,7 @@
 
 
 #include "base/range.h"
+#include "base/path.h"
 #include "bitmap/bitmap.h"
 #include "thread/thread.h"
 #include "reader/controller_reader.h"
@@ -65,7 +66,7 @@ class Window :
         ~Window();
         bool Destroy();
 
-        bool Open( const wxString& path );
+        bool Open( const std::string& path );
         
         void ReloadConfig();
 
@@ -95,7 +96,7 @@ class Window :
 
         void CalcScrollStep( ScrollingType type );
 
-        std::shared_ptr<AbstractHandler> NewHandler( const wxString &path );
+        std::shared_ptr<AbstractHandler> NewHandler( const std::string &path );
         std::shared_ptr<Bitmap> NewBitmap();
 
         void Error( wxSize size ); 
