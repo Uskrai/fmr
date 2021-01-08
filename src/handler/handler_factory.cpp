@@ -81,7 +81,7 @@ AbstractHandler* HandlerFactory::NewHandler( const HandlerType& type )
             return new WxArchiveHandler();
     }
 
-    auto handler =  NewOpenableHander( type );
+    auto handler =  NewOpenableHandler( type );
 
     if ( handler )
         return handler;
@@ -95,14 +95,14 @@ AbstractOpenableHandler *HandlerFactory::NewOpenableHandler( const std::string &
     AbstractOpenableHandler *handler;
     if ( Find( path, type ))
     {
-        handler = NewOpenableHander( type );
+        handler = NewOpenableHandler( type );
         handler->Open( path );
     }
 
     return handler;
 }
 
-AbstractOpenableHandler *HandlerFactory::NewOpenableHander( const HandlerType &type )
+AbstractOpenableHandler *HandlerFactory::NewOpenableHandler( const HandlerType &type )
 {
     switch ( type )
     {

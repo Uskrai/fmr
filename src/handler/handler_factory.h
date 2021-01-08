@@ -39,7 +39,7 @@ class HandlerFactory
         static AbstractHandler* NewHandler( const std::string& path );
         static AbstractHandler* NewHandler( const HandlerType& type );
         static AbstractOpenableHandler *NewOpenableHandler( const std::string &path );
-        static AbstractOpenableHandler *NewOpenableHander( const HandlerType &type );
+        static AbstractOpenableHandler *NewOpenableHandler( const HandlerType &type );
         AbstractHandler* NewHandler();
         HandlerType GetType();
     private:
