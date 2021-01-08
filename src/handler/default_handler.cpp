@@ -173,13 +173,12 @@ void DefaultHandler::Traverse( bool is_get_stream, DirGetFlags flags )
 
 void DefaultHandler::OpenStream( const std::string &filename, SStream &stream, bool is_get_stream )
 {
-    std::string appended_path = Path::Append( GetName(), filename );
-    stream.SetName( Path::MakeRelative( GetName(), appended_path) );
+    stream.SetName( filename );
     stream.SetHandlerPath( GetName() );
     stream.SetDir( wxFileName::DirExists( stream.GetName() ) );
 
     if ( is_get_stream )
-        stream.Open( appended_path );
+        GetStream( stream );
 }
 
 bool DefaultHandler::GetFirst( SStream &stream, DirGetFlags flags, bool is_get_stream )
@@ -222,6 +221,20 @@ bool DefaultHandler::GetNextStream( SStream &stream, bool is_get_stream )
         return false;
 
     OpenStream( String::ToString( filename ), stream, is_get_stream );
+    return true;
+}
+
+bool DefaultHandler::GetStream( SStream &stream )
+{
+    if ( stream.GetHandlerPath() != GetName() )
+        return false;
+
+    std::string path = Path::Append(
+        stream.GetHandlerPath(),
+        stream.GetName()
+    );
+
+    stream.Open( path );
     return true;
 }
 

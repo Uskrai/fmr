@@ -52,11 +52,23 @@ bool HandlerFactory::Find( const std::string& path, HandlerType& type )
         return true;
     }
 
-    if ( DefaultHandler::CanHandle(path) )
+    return FindOpenable( path, type );
+}
+
+bool HandlerFactory::FindOpenable( const std::string &path )
+{
+    HandlerType type;
+    return FindOpenable( path, type );
+}
+
+bool HandlerFactory::FindOpenable(  const std::string &path, HandlerType &type )
+{
+    if ( DefaultHandler::CanHandle( path ) )
     {
         type = kHandlerDefault;
         return true;
     }
+
     return false;
 }
 
@@ -81,7 +93,7 @@ AbstractHandler* HandlerFactory::NewHandler( const HandlerType& type )
             return new WxArchiveHandler();
     }
 
-    auto handler =  NewOpenableHander( type );
+    auto handler =  NewOpenableHandler( type );
 
     if ( handler )
         return handler;
@@ -95,14 +107,14 @@ AbstractOpenableHandler *HandlerFactory::NewOpenableHandler( const std::string &
     AbstractOpenableHandler *handler;
     if ( Find( path, type ))
     {
-        handler = NewOpenableHander( type );
+        handler = NewOpenableHandler( type );
         handler->Open( path );
     }
 
     return handler;
 }
 
-AbstractOpenableHandler *HandlerFactory::NewOpenableHander( const HandlerType &type )
+AbstractOpenableHandler *HandlerFactory::NewOpenableHandler( const HandlerType &type )
 {
     switch ( type )
     {
@@ -115,6 +127,15 @@ AbstractOpenableHandler *HandlerFactory::NewOpenableHander( const HandlerType &t
 AbstractHandler* HandlerFactory::NewHandler()
 {
     return NewHandler( m_type );
+}
+
+bool HandlerFactory::IsOpenable( const std::string &path )
+{
+    HandlerType type, openable_type;
+    Find( path, type );
+    FindOpenable( path, openable_type );
+
+    return type == openable_type;
 }
 
 }; // namespace fmr

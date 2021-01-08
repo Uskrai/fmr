@@ -50,6 +50,8 @@ class DefaultHandler
         bool GetFirst( SStream &stream, DirGetFlags flags = kDirDefault, bool is_get_steam = false );
         bool GetNextStream( SStream &stream, bool is_get_stream = false );
 
+        bool GetStream( SStream &stream );
+
         void Traverse( bool GetStream = false, DirGetFlags flags = kDirDefault );
         void TraverseStream();
 
