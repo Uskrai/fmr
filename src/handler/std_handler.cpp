@@ -120,6 +120,9 @@ bool STDHandler::OpenStream( const std::string &path, SStream &stream, bool is_g
 {
     stream.SetName( Path::MakeRelative( GetName(), path ) );
     stream.SetHandlerPath( GetName() );
+    stream.SetDir( fs::is_directory(
+        Path::Append( GetName(), stream.GetName() )
+    ));
 
     if ( is_get_stream )
         GetStream( stream );
