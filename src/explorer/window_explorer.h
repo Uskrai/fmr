@@ -23,7 +23,7 @@
 #include "explorer/controller_explorer.h"
 #include "explorer/image_window_explorer.h"
 #include "handler/abstract_handler.h"
-#include <wx/grid.h>
+#include "window/grid_window.h"
 #include <memory>
 #include "base/path.h"
 
@@ -38,12 +38,12 @@ namespace explorer
 {
 
 
-class Window 
-    : public wxGrid
+class Window
+    : public GridWindow
 {
     public:
-        Window( 
-            wxWindow *parent, 
+        Window(
+            wxWindow *parent,
             const wxWindowID &id = wxID_ANY,
             const wxPoint &pos = wxDefaultPosition,
             const wxSize &size = wxDefaultSize,
@@ -65,15 +65,15 @@ class Window
         std::vector<StreamBitmap> list_item_;
         std::vector<ImageWindow*> list_renderer_;
 
-        wxGridTableBase *grid_table_;
+        // wxGridTableBase *grid_table_;
 
-        std::vector<wxGridCellCoords> list_cell_pos_;
+        // std::vector<wxGridCellCoords> list_cell_pos_;
 
         void OnThreadUpdate( wxCommandEvent &event );
         void OnGridEnter( wxKeyEvent &event );
-        void OnGridSelect( wxGridEvent &event );
+        // void OnGridSelect( wxGridEvent &event );
 
-        wxGridCellCoords selected_cell_;
+        // wxGridCellCoords selected_cell_;
         wxDECLARE_EVENT_TABLE();
 };
 

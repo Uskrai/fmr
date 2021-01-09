@@ -69,7 +69,7 @@ explorerdir = @abs_builddir@/explorer
 explorer_LTLIBRARIES = lib_window_explorer.la lib_controller_explorer.la lib_image_window_explorer.la lib_find_explorer.la lib_load_explorer.la
 
     lib_window_explorer_la_SOURCES = $(explorer)/window_explorer.cpp
-    lib_window_explorer_la_LIBADD = lib_controller_explorer.la lib_image_window_explorer.la lib_find_explorer.la lib_load_explorer.la
+    lib_window_explorer_la_LIBADD = lib_controller_explorer.la lib_image_window_explorer.la lib_find_explorer.la lib_load_explorer.la lib_grid_window.la
 
     lib_controller_explorer_la_SOURCES = $(explorer)/controller_explorer.cpp
     lib_controller_explorer_la_LIBADD = lib_find_explorer.la
@@ -96,8 +96,10 @@ gui_LTLIBRARIES = libframe.la libpanel.la
 
 window = src/window
 windowdir = @abs_builddir@/window
-window_LTLIBRARIES = libscrolledwindow.la
+window_LTLIBRARIES = libscrolledwindow.la lib_grid_window.la
     libscrolledwindow_la_SOURCES = $(window)/scrolledwindow.cpp
+
+    lib_grid_window_la_SOURCES = $(window)/grid_window.cpp
 
 thread = src/thread
 threaddir = @abs_builddir@/thread

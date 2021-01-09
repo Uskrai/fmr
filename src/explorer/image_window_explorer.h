@@ -22,7 +22,7 @@
 #include "base/string.h"
 
 #include "explorer/load_explorer.h"
-#include <wx/grid.h>
+#include <wx/window.h>
 #include <memory>
 
 namespace fmr
@@ -32,7 +32,7 @@ namespace explorer
 {
 
 class ImageWindow
-    : public wxGridCellRenderer
+    : public wxWindow
 {
     protected:
         wxRect bitmap_rect_, text_rect_, this_rect_;
@@ -42,12 +42,20 @@ class ImageWindow
         std::string string_name_;
         std::shared_ptr<SStream> stream_ = NULL;
         std::shared_ptr<SBitmap> bitmap_ = NULL;
-        wxGridCellAutoWrapStringRenderer string_wrapper_;
 
         bool refresh_scheduled_ = false;
 
     public:
         ImageWindow(){};
+        ImageWindow(
+            wxWindow *parent,
+            wxWindowID id = wxID_ANY,
+            const wxPoint &pos = wxDefaultPosition,
+            const wxSize &size = wxDefaultSize,
+            long style = 0,
+            const wxString &name = wxPanelNameStr
+        );
+
         ImageWindow( const StreamBitmap &stream_bitmap );
         ImageWindow( const ImageWindow &other  );
 
@@ -59,15 +67,20 @@ class ImageWindow
         const std::shared_ptr<SBitmap> GetBitmap() const;
         std::shared_ptr<SBitmap> GetBitmap();
 
-        wxGridCellRenderer *Clone() const { return new ImageWindow( *this ); }
-
         static wxSize GetBestBitmapSize( const wxSize &size );
 
-        void Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col, bool isSelected );
-        wxSize GetBestSize( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, int row, int col );
+        void Draw( wxDC &dc );
 
         void PrepareRect( const wxRect &rect );
         void PrepareStringPos( wxDC &dc, const wxRect &rect );
+
+        // virtual void Move( int x, int y, int flags = wxSIZE_USE_EXISTING );
+
+    private:
+        wxDECLARE_EVENT_TABLE();
+
+        void OnPaint( wxPaintEvent &event );
+        void OnSize( wxSizeEvent &event );
 };
 
 }; // namespace fmr
