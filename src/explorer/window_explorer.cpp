@@ -239,7 +239,7 @@ void Window::Select( std::string name )
 {
     name = Path::GetName( name );
 
-    size_t idx = 0;
+    // size_t idx = 0;
     // for ( const auto &it : list_cell_pos_ )
     // {
     //     // auto renderer = list_renderer_[idx];

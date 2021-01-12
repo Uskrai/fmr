@@ -180,6 +180,7 @@ bool WxArchiveHandler::GetStream( SStream &stream )
 
         cont = GetNextStream( temp_stream );
     }
+    return false;
 }
 
 void WxArchiveHandler::Traverse( bool GetStream, DirGetFlags flags )

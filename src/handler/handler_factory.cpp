@@ -91,14 +91,9 @@ AbstractHandler* HandlerFactory::NewHandler( const HandlerType& type )
     {
         case kHandlerWxArchive:
             return new WxArchiveHandler();
+        default:
+            return NewOpenableHandler( type );
     }
-
-    auto handler =  NewOpenableHandler( type );
-
-    if ( handler )
-        return handler;
-
-    return nullptr;
 }
 
 AbstractOpenableHandler *HandlerFactory::NewOpenableHandler( const std::string &path )
@@ -120,6 +115,9 @@ AbstractOpenableHandler *HandlerFactory::NewOpenableHandler( const HandlerType &
     {
         case kHandlerDefault:
             return new DefaultHandler();
+
+        default:
+            return nullptr;
     }
     return nullptr;
 }
