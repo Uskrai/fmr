@@ -20,11 +20,30 @@
 #include <wx/dc.h>
 #include "base/path.h"
 
+#include <wx/dcclient.h>
+
 namespace fmr
 {
 
 namespace explorer
 {
+
+wxBEGIN_EVENT_TABLE( ImageWindow, wxWindow )
+    EVT_PAINT( ImageWindow::OnPaint )
+    EVT_SIZE( ImageWindow::OnSize )
+wxEND_EVENT_TABLE()
+
+ImageWindow::ImageWindow(
+    wxWindow *parent,
+    wxWindowID id,
+    const wxPoint &pos,
+    const wxSize &size,
+    long style,
+    const wxString &name
+)   : wxWindow( parent, id, pos, size, style, name )
+{
+
+}
 
 ImageWindow::ImageWindow( const StreamBitmap &stream_bitmap )
 {
@@ -168,8 +187,11 @@ void ImageWindow::PrepareStringPos( wxDC &dc, const wxRect &rect )
     string_name_ = stream_->GetName();
 }
 
-void ImageWindow::Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col, bool isSelected )
+void ImageWindow::OnPaint( wxPaintEvent &event )
 {
+    wxPaintDC dc( this );
+    wxRect rect( wxPoint(0,0), GetSize() );
+
     if ( stream_ && string_name_ != stream_->GetName() )
         refresh_scheduled_ = true;
 
@@ -195,10 +217,7 @@ void ImageWindow::Draw( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRe
     }
 }
 
-wxSize ImageWindow::GetBestSize( wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, int row, int col )
-{
-    return wxSize(300,300);
-}
+void ImageWindow::OnSize( wxSizeEvent &event ){ refresh_scheduled_ = true;}
 
 }; // namespace explorer
 

@@ -20,8 +20,9 @@
 #include <wx/dc.h>
 #include <wx/dcclient.h>
 #include <wx/event.h>
+#include "base/dimension.h"
 
-wxBEGIN_EVENT_TABLE( ScrolledWindow, wxWindow )
+wxBEGIN_EVENT_TABLE( ScrolledWindow, wxScrolledWindow )
     EVT_SIZE( ScrolledWindow::OnSize )
     EVT_PAINT( ScrolledWindow::OnPaint )
     EVT_KEY_DOWN( ScrolledWindow::OnKey )
@@ -29,43 +30,36 @@ wxBEGIN_EVENT_TABLE( ScrolledWindow, wxWindow )
     EVT_MOTION( ScrolledWindow::OnMouseMotion )
     EVT_SCROLLWIN_LINEUP( ScrolledWindow::OnScrollLine )
     EVT_SCROLLWIN_LINEDOWN ( ScrolledWindow::OnScrollLine )
+    EVT_SCROLLWIN_THUMBTRACK( ScrolledWindow::OnScrollThumbTrack )
     EVT_SCROLLWIN( ScrolledWindow::OnScroll )
-    EVT_COMMAND_SCROLL_THUMBTRACK( VerticalScrollBar, ScrolledWindow::OnScrollThumbTrack )
-    EVT_COMMAND_SCROLL_THUMBTRACK( HorizontalScrollBar, ScrolledWindow::OnScrollThumbTrack )
     EVT_TIMER( ScrolledTimerID, ScrolledWindow::OnSetVirtualSize)
 wxEND_EVENT_TABLE()
 
-ScrolledWindow::ScrolledWindow( wxWindow *parent, 
+ScrolledWindow::ScrolledWindow( wxWindow *parent,
                                 wxWindowID id,
                                 const wxPoint &pos,
                                 const wxSize &size,
                                 long style,
                                 const wxString &name
                             )
-    : wxWindow( parent, id, pos, size, style, name )
+    : wxScrolledWindow()
 {
-    m_timer.SetOwner( this, ScrolledTimerID );
-    CreateScrollBar( wxBOTH );
-    SetVirtualSize(0,0);
+    Create( parent, id, pos, size, style, name );
 }
 
 ScrolledWindow::~ScrolledWindow()
 {
-    if ( m_vScrollBar )
-        m_vScrollBar->Destroy();
-    if ( m_hScrollBar )
-        m_hScrollBar->Destroy();
 }
 
-bool ScrolledWindow::Create(    wxWindow *parent, 
-                                wxWindowID id, 
+bool ScrolledWindow::Create(    wxWindow *parent,
+                                wxWindowID id,
                                 const wxPoint &pos,
                                 const wxSize &size,
                                 long style,
                                 const wxString &name
-                            ) 
+                            )
 {
-    bool ret = wxWindow::Create( parent, id,  pos, size, style, name );
+    bool ret = wxScrolledWindow::Create( parent, id,  pos, size, style, name );
     m_timer.SetOwner( this, ScrolledTimerID );
     CreateScrollBar( wxBOTH );
     SetVirtualSize(0,0);
@@ -74,11 +68,19 @@ bool ScrolledWindow::Create(    wxWindow *parent,
 
 void ScrolledWindow::CreateScrollBar( wxOrientation orient )
 {
-    if ( ( orient & wxVERTICAL ) && ! m_vScrollBar )
-        m_vScrollBar = new wxScrollBar( this, VerticalScrollBar, wxDefaultPosition, wxDefaultSize, wxSB_VERTICAL );
-    
-    if ( ( orient & wxHORIZONTAL ) && ! m_hScrollBar )
-        m_hScrollBar = new wxScrollBar( this, HorizontalScrollBar, wxDefaultPosition, wxDefaultSize, wxSB_HORIZONTAL );
+    SetScrollbar(
+        wxVERTICAL,
+        GetViewStart().y,
+        GetSize().GetHeight(),
+        GetVirtualSize().GetHeight()
+    );
+
+    SetScrollbar(
+        wxVERTICAL,
+        GetViewStart().x,
+        GetSize().GetHeight(),
+        GetVirtualSize().GetHeight()
+    );
 }
 
 void ScrolledWindow::OnSize( wxSizeEvent &event )
@@ -89,7 +91,7 @@ void ScrolledWindow::OnSize( wxSizeEvent &event )
 
 void ScrolledWindow::DoPrepareDC( wxDC &dc )
 {
-    dc.SetDeviceOrigin( -m_viewStart.x, -m_viewStart.y );
+    dc.SetDeviceOrigin( -GetViewStart().x, -GetViewStart().y );
 }
 
 void ScrolledWindow::OnPaint( wxPaintEvent &event )
@@ -99,68 +101,79 @@ void ScrolledWindow::OnPaint( wxPaintEvent &event )
     OnDraw( dc );
 }
 
-void ScrolledWindow::Scroll( const wxPoint &pos )
+void ScrolledWindow::AdjustScrollBar()
 {
-    Scroll( pos.x, pos.y );
+    SetScrollbar(
+        wxVERTICAL,
+        GetViewStart().y,
+        GetClientSize().GetHeight(),
+        GetVirtualSize().GetHeight()
+    );
+
+    SetScrollbar(
+        wxHORIZONTAL,
+        GetViewStart().x,
+        GetClientSize().GetWidth(),
+        GetVirtualSize().GetWidth()
+    );
+
+    m_viewStart.y = GetScrollPos( wxVERTICAL );
+    m_viewStart.x = GetScrollPos( wxHORIZONTAL );
 }
+
+void ScrolledWindow::OnSetVirtualSize( wxTimerEvent &event )
+{
+    AdjustScrollBar();
+}
+
+void ScrolledWindow::DoSetVirtualSize( int width, int height )
+{
+    m_virtualSize = wxSize(width,height);
+    if ( ! m_timer.IsRunning() )
+        m_timer.StartOnce( 500 );
+}
+
+void ScrolledWindow::DoGetViewStart( int *x, int *y ) const
+{
+    *x = m_viewStart.x;
+    *y = m_viewStart.y;
+}
+
+void ScrolledWindow::Scroll( const wxPoint &pos )
+    { Scroll( pos.x, pos.y ); }
 
 void ScrolledWindow::Scroll( int x, int y )
 {
-    DoScroll( wxHORIZONTAL, x - GetViewStart().x );
-    DoScroll( wxVERTICAL, y - GetViewStart().y );
+    m_viewStart = wxPoint( x, y );
+    SetScrollPos( wxHORIZONTAL, x );
+    SetScrollPos( wxVERTICAL, y );
+    AdjustScrollBar();
     Refresh();
 }
 
 void ScrolledWindow::Scroll( wxOrientation orient, int step )
-{
-    DoScroll( orient, step );
-    Refresh();
-}
+    { DoScroll( orient, step ); }
 
 void ScrolledWindow::DoScroll( wxOrientation orient, int step )
 {
-    int pos;
+    int pos = GetScrollPos( orient ) + step;
+    SetScrollPos( orient, pos );
+    pos = GetScrollPos( orient );
 
-    wxQueueEvent(
-        this,
-        new wxScrollWinEvent(
-            wxEVT_SCROLLWIN_THUMBTRACK, 
-            GetScrollPos( orient ) + step,
-            orient
-        )
-    );
     if ( orient == wxVERTICAL )
-    {
-        m_vScrollBar->SetThumbPosition(
-            m_vScrollBar->GetThumbPosition() + step
-        );
-        pos = m_vScrollBar->GetThumbPosition();
-        m_viewStart.y = pos;
-    }
+        Scroll( GetScrollPos( wxHORIZONTAL ), pos );
 
     if ( orient == wxHORIZONTAL )
-    {
-        m_hScrollBar->SetThumbPosition(
-            m_hScrollBar->GetThumbPosition() + step
-        );
-        pos = m_hScrollBar->GetThumbPosition();
-        m_viewStart.x = pos;
-    }
+        Scroll( pos, GetScrollPos( wxVERTICAL ) );
 }
 
 void ScrolledWindow::DoScrollLine( wxEventType type, wxOrientation orient, int step )
-{    
-    int pos = GetScrollPos( orient );
-    Scroll( orient, step );
-
-    pos = ( pos == GetScrollPos( orient ) ) ?
-        pos + step : GetScrollPos( orient );
-
+{
     wxQueueEvent(
         this,
         new wxScrollWinEvent(
             type,
-            pos,
+            GetScrollPos( orient ) + step,
             orient
         )
     );
@@ -168,7 +181,7 @@ void ScrolledWindow::DoScrollLine( wxEventType type, wxOrientation orient, int s
 
 void ScrolledWindow::LineUp( wxOrientation orient, int step )
 {
-    DoScrollLine( 
+    DoScrollLine(
         wxEVT_SCROLLWIN_LINEUP,
         orient,
         -step
@@ -187,36 +200,43 @@ void ScrolledWindow::LineDown( wxOrientation orient, int step )
 void ScrolledWindow::OnScrollLine( wxScrollWinEvent &event )
 {
     wxDirection direction;
-    int orient = event.GetOrientation();
+    wxOrientation orient;
     int pos = event.GetPosition();
-    wxScrollBar *bar;
 
-    if ( orient == wxVERTICAL )
-        bar = m_vScrollBar;
-    else if ( orient == wxHORIZONTAL )
-        bar = m_hScrollBar;
-    
-    AdjustScrollBar();
-    if ( pos < 0 )
+    if ( event.GetOrientation() == wxVERTICAL )
+        orient = wxVERTICAL;
+    else if ( event.GetOrientation() == wxHORIZONTAL )
+        orient = wxHORIZONTAL;
+
+    int bottom_edge = GetScrollPos( orient );
+    int virtual_edge = dimension::Get( GetVirtualSize(), orient ) - GetScrollThumb( orient );
+
+    if ( pos < 0 && GetScrollPos( orient ) == 0 )
     {
         if ( orient == wxVERTICAL )
             direction = wxUP;
         if ( orient == wxHORIZONTAL )
             direction = wxLEFT;
     }
-    else if ( pos > bar->GetRange() - bar->GetThumbSize() )
+    else if
+        (
+            bottom_edge == virtual_edge
+            && pos > bottom_edge
+        )
     {
         if ( orient == wxVERTICAL )
             direction = wxDOWN;
         if( orient == wxHORIZONTAL )
             direction = wxRIGHT;
     }
-    else 
+    else
     {
+        int step = pos - GetScrollPos( orient );
+        Scroll( orient, step );
         event.Skip();
         return;
     }
-    
+
     // this will inverse the direction
     // if m_isFromRight is true
     // and direction is left or right
@@ -225,15 +245,6 @@ void ScrolledWindow::OnScrollLine( wxScrollWinEvent &event )
             wxRIGHT : wxLEFT;
 
     OnEdge( direction );
-}
-
-int ScrolledWindow::GetScrollPos( wxOrientation orient )
-{
-     if ( orient == wxVERTICAL )
-        return m_vScrollBar->GetThumbPosition();
-    else if ( orient == wxHORIZONTAL )
-        return m_hScrollBar->GetThumbPosition();
-    return 0;
 }
 
 void ScrolledWindow::OnKey( wxKeyEvent &event )
@@ -256,21 +267,23 @@ void ScrolledWindow::OnKey( wxKeyEvent &event )
             // if key is up or down
             if ( isUp || isDown )
                 orient = wxVERTICAL;
-            
+
             // set orientation to horizontal
             // if key is left or right
             if ( isLeft || isRight )
                 orient = wxHORIZONTAL;
-            
+
             // if key is up or left
             // then lineup
             if ( isUp || isLeft )
                 LineUp( orient, m_stepPerKey );
-            
-            // if key is down or right 
+
+            // if key is down or right
             // then linedown
             if ( isDown || isRight )
                 LineDown( orient, m_stepPerKey );
+
+            return;
         }
     }
 
@@ -279,44 +292,20 @@ void ScrolledWindow::OnKey( wxKeyEvent &event )
 
 void ScrolledWindow::OnMouseWheel( wxMouseEvent &event )
 {
-    
     wxOrientation orient = wxVERTICAL;
     // make horizontal if shift is down
-    orient = ( event.ShiftDown() ) 
+    orient = ( event.ShiftDown() )
         ? wxHORIZONTAL : orient;
 
     int step = ( event.GetWheelDelta() / event.GetWheelRotation() ) * -1;
     // multiply by negative if invert
     // to reverse it
-    int temp = GetScrollPos( orient );
     step *= ( m_isMouseWheelInvert ) ? -1 : 1;
-    
+
     if ( step < 0 )
         LineUp( orient, m_stepPerWheel );
     else if ( step > 0 )
         LineDown( orient, m_stepPerWheel );
-    
-    if ( temp == GetScrollPos( orient ) && step != 0 )
-    {
-        if ( orient == wxHORIZONTAL )
-        {
-            step *= ( m_isFromRight ) ?
-                -1 : 1;
-
-            if ( step > 0 )
-                OnEdge( wxRIGHT );
-            else if ( step < 0 )
-                OnEdge( wxLEFT );
-        }
-        if ( orient == wxVERTICAL )
-        {
-            if ( step > 0 )
-                OnEdge( wxDOWN );
-            else if ( step < 0 )
-                OnEdge( wxUP );
-        }
-    }
-
 
     event.Skip();
 }
@@ -332,8 +321,15 @@ void ScrolledWindow::OnMouseMotion( wxMouseEvent &event )
         if ( event.Dragging() && event.LeftIsDown() && ! event.RightIsDown() && ! event.MiddleIsDown() )
         {
             wxPoint view = GetViewStart();
-            view.x -= event.GetX() - lastPos.x;
-            view.y -= event.GetY() - lastPos.y;
+            int view_x = event.GetX() - lastPos.x;
+            int view_y = event.GetY() - lastPos.y;
+
+            wxSize virtual_size = GetVirtualSize();
+            if ( virtual_size.GetWidth() > GetClientSize().GetWidth() )
+                view.x -= view_x;
+            if  ( virtual_size.GetHeight() > GetClientSize().GetHeight() )
+                view.y -= view_y;
+
             Scroll( view );
         }
     }
@@ -344,81 +340,16 @@ void ScrolledWindow::OnMouseMotion( wxMouseEvent &event )
     event.Skip();
 }
 
-void ScrolledWindow::OnScrollThumbTrack( wxScrollEvent &event )
+void ScrolledWindow::OnScrollThumbTrack( wxScrollWinEvent &event )
 {
-    if ( event.GetOrientation() == wxHORIZONTAL )
-        m_viewStart.x = event.GetPosition();
-    else if ( event.GetOrientation() == wxVERTICAL )
-        m_viewStart.y = event.GetPosition();
-
+    dimension::Set( m_viewStart, event.GetOrientation(), event.GetPosition() );
     Refresh();
-    wxQueueEvent( this, 
-        new wxScrollWinEvent( 
-            wxEVT_SCROLLWIN_THUMBTRACK,
-            event.GetPosition(),
-            event.GetOrientation()
-        )
-    );
-}
-
-
-void ScrolledWindow::AdjustScrollBar()
-{
-    wxSize sz = GetClientSize();
-    m_vScrollBar->SetPosition( wxPoint(
-        sz.GetWidth() - m_vScrollBar->GetSize().GetWidth(), 
-        0
-    ));
-    m_hScrollBar->SetPosition( wxPoint(
-        0, 
-        sz.GetHeight() - m_hScrollBar->GetSize().GetHeight()
-    ));
-
-    m_vScrollBar->SetSize( 
-        -1,
-        sz.GetHeight()
-    );
-
-    m_hScrollBar->SetSize(
-        sz.GetWidth(),
-        -1
-    );
-
-    m_viewStart.y = m_vScrollBar->GetThumbPosition();
-    m_vScrollBar->SetScrollbar(
-        GetViewStart().y,
-        sz.GetHeight(), 
-        GetVirtualSize().GetHeight(), 
-        sz.GetHeight()
-    );
-
-    m_viewStart.x = m_hScrollBar->GetThumbPosition();
-    m_hScrollBar->SetScrollbar(
-        GetViewStart().x,
-        sz.GetWidth(), 
-        GetVirtualSize().GetWidth(), 
-        sz.GetWidth()
-    );
-
-    if ( m_hScrollBar->GetRange() <= GetClientSize().GetWidth() )
-        m_hScrollBar->HideWithEffect( wxSHOW_EFFECT_BLEND );
-    else 
-        m_hScrollBar->Show();
-    if ( m_vScrollBar->GetRange() <= GetClientSize().GetHeight() )
-        m_vScrollBar->HideWithEffect( wxSHOW_EFFECT_BLEND );
-    else
-        m_vScrollBar->Show();
-}
-
-void ScrolledWindow::OnSetVirtualSize( wxTimerEvent &event )
-{
-    AdjustScrollBar();
-}
-
-void ScrolledWindow::DoSetVirtualSize( int width, int height )
-{
-    m_virtualSize = wxSize(width,height);
-    if ( ! m_timer.IsRunning() )
-        m_timer.StartOnce( 500 );
+    // wxQueueEvent( this,
+        // new wxScrollWinEvent(
+            // wxEVT_SCROLLWIN_THUMBTRACK,
+            // event.GetPosition(),
+            // event.GetOrientation()
+        // )
+    // );
 }
 
