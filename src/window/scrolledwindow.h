@@ -18,7 +18,7 @@
 #ifndef FMR_WINDOW_WINDOW
 #define FMR_WINDOW_WINDOW
 
-#include <wx/window.h>
+#include <wx/scrolwin.h>
 #include <wx/timer.h>
 class wxScrollBar;
 
@@ -29,16 +29,16 @@ enum ScrollBarId
 };
 const int ScrolledTimerID = VerticalScrollBar + 1;
 
-class ScrolledWindow : public wxWindow
+class ScrolledWindow : public wxScrolledWindow
 {
     public:
-        ScrolledWindow() : wxWindow() {};
-        ScrolledWindow( wxWindow *parent, 
-                        wxWindowID id = wxID_ANY, 
+        ScrolledWindow() : wxScrolledWindow() {};
+        ScrolledWindow( wxWindow *parent,
+                        wxWindowID id = wxID_ANY,
                         const wxPoint &pos = wxDefaultPosition,
                         const wxSize &size = wxDefaultSize,
                         long style = 0,
-                        const wxString &name = wxPanelNameStr 
+                        const wxString &name = wxPanelNameStr
                     );
         ~ScrolledWindow();
         bool Create( wxWindow *parent,
@@ -49,33 +49,31 @@ class ScrolledWindow : public wxWindow
                 const wxString &name = wxPanelNameStr
             );
         void CreateScrollBar( wxOrientation orient );
-        
+
         // to scroll window
         void Scroll( const wxPoint &pos );
         void Scroll( int x, int y );
-        // step will be added by 
+        // step will be added by
         // ViewStart according to orientation.
         void Scroll( wxOrientation orient, int step );
         void LineUp( wxOrientation orient, int step );
         void LineDown ( wxOrientation orient, int step );
 
-        void OnScroll( wxScrollWinEvent &event ){ }
+        void OnScroll( wxScrollWinEvent &event ){ };
 
 
-        wxPoint GetViewStart() { return m_viewStart; }
-        int GetScrollPos( wxOrientation );
-    
+
         void AdjustScrollBar();
 
         virtual void DoSetNull( int id ) {};
     protected:
-        wxScrollBar *m_vScrollBar = NULL, *m_hScrollBar = NULL;
+        // wxScrollBar *m_vScrollBar = NULL, *m_hScrollBar = NULL;
         wxPoint m_viewStart;
         // this is how much window should scroll per event.
         int m_stepPerKey = 300, m_stepPerWheel = 300;
         bool m_isMouseWheelInvert = false, m_isFromRight = false;
         void DoSetVirtualSize( int width, int height );
-        
+        void DoGetViewStart( int *x, int *y ) const;
         void DoPrepareDC( wxDC &dc );
 
         virtual void OnEdge( wxDirection direction ) {};
@@ -87,7 +85,7 @@ class ScrolledWindow : public wxWindow
         void OnPaint( wxPaintEvent &event );
         void OnMouseWheel( wxMouseEvent &event );
         void OnMouseMotion( wxMouseEvent &event );
-        void OnScrollThumbTrack( wxScrollEvent &event );
+        void OnScrollThumbTrack( wxScrollWinEvent &event );
         void OnSetVirtualSize( wxTimerEvent &event );
 
         void OnScrollLine( wxScrollWinEvent &event );
@@ -96,7 +94,7 @@ class ScrolledWindow : public wxWindow
         virtual void OnDraw( wxDC &dc ) {};
 
         wxDECLARE_EVENT_TABLE();
-        
+
         void DoScroll( wxOrientation orient, int step );
         void DoScrollLine( wxEventType type, wxOrientation orient, int step );
 };
