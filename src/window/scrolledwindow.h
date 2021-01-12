@@ -51,8 +51,7 @@ class ScrolledWindow : public wxScrolledWindow
         void CreateScrollBar( wxOrientation orient );
 
         // to scroll window
-        void Scroll( const wxPoint &pos );
-        void Scroll( int x, int y );
+        using wxScrolledWindow::Scroll;
         // step will be added by
         // ViewStart according to orientation.
         void Scroll( wxOrientation orient, int step );
@@ -61,20 +60,17 @@ class ScrolledWindow : public wxScrolledWindow
 
         void OnScroll( wxScrollWinEvent &event ){ };
 
-
-
         void AdjustScrollBar();
 
         virtual void DoSetNull( int id ) {};
     protected:
         // wxScrollBar *m_vScrollBar = NULL, *m_hScrollBar = NULL;
-        wxPoint m_viewStart;
+        // wxPoint m_viewStart;
         // this is how much window should scroll per event.
         int m_stepPerKey = 300, m_stepPerWheel = 300;
         bool m_isMouseWheelInvert = false, m_isFromRight = false;
-        void DoSetVirtualSize( int width, int height );
-        void DoGetViewStart( int *x, int *y ) const;
-        void DoPrepareDC( wxDC &dc );
+        // void DoScroll( int x, int y );
+        // void DoGetViewStart( int *x, int *y ) const;
 
         virtual void OnEdge( wxDirection direction ) {};
 
@@ -95,7 +91,8 @@ class ScrolledWindow : public wxScrolledWindow
 
         wxDECLARE_EVENT_TABLE();
 
-        void DoScroll( wxOrientation orient, int step );
+        void DoSetVirtualSize( int width, int height );
+        virtual void DoPrepareDC( wxDC &dc );
         void DoScrollLine( wxEventType type, wxOrientation orient, int step );
 };
 

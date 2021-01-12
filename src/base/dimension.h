@@ -33,6 +33,9 @@ namespace dimension
 
     inline void Set( wxPoint &pt, int orientation, int pos )
     {
+        if ( pos == wxDefaultCoord )
+            return;
+
         if ( orientation == wxVERTICAL )
             pt.y = pos;
         if ( orientation == wxHORIZONTAL )
@@ -43,6 +46,22 @@ namespace dimension
     {
         wxPoint pos( size.GetWidth(), size.GetHeight() );
         return Get( pos, orient );
+    }
+
+    wxOrientation GetOrient( const int &orient )
+    {
+        if ( orient == wxVERTICAL )
+            return wxVERTICAL;
+        if ( orient == wxHORIZONTAL )
+            return wxHORIZONTAL;
+        return wxORIENTATION_MASK;
+    }
+
+    wxPoint Make( const wxPoint &pt, wxOrientation orient, int pos )
+    {
+        wxPoint temp( pt );
+        dimension::Set( temp, orient, pos );
+        return temp;
     }
 
     // wxDirection GetDirection( const wxPoint &pos, const wxOrientation &orient )
