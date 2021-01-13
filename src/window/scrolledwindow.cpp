@@ -22,7 +22,7 @@
 #include <wx/event.h>
 #include "base/dimension.h"
 
-wxBEGIN_EVENT_TABLE( ScrolledWindow, wxScrolledWindow )
+wxBEGIN_EVENT_TABLE( ScrolledWindow, wxScrolledCanvas )
     EVT_SIZE( ScrolledWindow::OnSize )
     EVT_PAINT( ScrolledWindow::OnPaint )
     EVT_KEY_DOWN( ScrolledWindow::OnKey )
@@ -42,7 +42,7 @@ ScrolledWindow::ScrolledWindow( wxWindow *parent,
                                 long style,
                                 const wxString &name
                             )
-    : wxScrolledWindow()
+    : wxScrolledCanvas()
 {
     Create( parent, id, pos, size, style, name );
 }
@@ -59,7 +59,7 @@ bool ScrolledWindow::Create(    wxWindow *parent,
                                 const wxString &name
                             )
 {
-    bool ret = wxScrolledWindow::Create( parent, id,  pos, size, style, name );
+    bool ret = wxScrolledCanvas::Create( parent, id,  pos, size, style, name );
     m_timer.SetOwner( this, ScrolledTimerID );
     CreateScrollBar( wxBOTH );
     SetVirtualSize(0,0);

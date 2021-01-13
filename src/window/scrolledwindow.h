@@ -29,10 +29,10 @@ enum ScrollBarId
 };
 const int ScrolledTimerID = VerticalScrollBar + 1;
 
-class ScrolledWindow : public wxScrolledWindow
+class ScrolledWindow : public wxScrolledCanvas
 {
     public:
-        ScrolledWindow() : wxScrolledWindow() {};
+        ScrolledWindow() : wxScrolledCanvas() {};
         ScrolledWindow( wxWindow *parent,
                         wxWindowID id = wxID_ANY,
                         const wxPoint &pos = wxDefaultPosition,
@@ -51,7 +51,7 @@ class ScrolledWindow : public wxScrolledWindow
         void CreateScrollBar( wxOrientation orient );
 
         // to scroll window
-        using wxScrolledWindow::Scroll;
+        using wxScrolledCanvas::Scroll;
         // step will be added by
         // ViewStart according to orientation.
         void Scroll( wxOrientation orient, int step );
