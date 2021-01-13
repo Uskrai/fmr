@@ -69,10 +69,10 @@ bool ScrolledWindow::Create(    wxWindow *parent,
 void ScrolledWindow::CreateScrollBar( wxOrientation orient )
 {
     SetScrollbars(
-        GetVirtualSize().GetWidth(),
-        GetVirtualSize().GetHeight(),
         1,
-        1
+        1,
+        GetVirtualSize().GetWidth(),
+        GetVirtualSize().GetHeight()
     );
 }
 
