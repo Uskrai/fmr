@@ -25,7 +25,7 @@ namespace fmr
 {
 
 class GridWindow
-    : public wxWindow
+    : public ScrolledWindow
 {
     protected:
         wxGridSizer *sizer_;
