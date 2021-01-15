@@ -28,11 +28,11 @@
     constexpr inline T operator^ (T a, T b) \
     { return static_cast<T>( static_cast<std::underlying_type<T>::type>(a) ^ static_cast<std::underlying_type<T>::type>(b) ); } \
                                             \
-    constexpr inline T& operator|= (T& a, T b)  \
+    inline T& operator|= (T& a, T b)  \
     { return reinterpret_cast<T&>( reinterpret_cast<std::underlying_type<T>::type&>(a) |= static_cast<std::underlying_type<T>::type>(b) ); } \
                                                 \
-    constexpr inline T& operator&= (T& a, T b)  \
+    inline T& operator&= (T& a, T b)  \
     { return reinterpret_cast<T&>( reinterpret_cast<std::underlying_type<T>::type&>(a) &= static_cast<std::underlying_type<T>::type>(b) ); } \
                                                 \
-    constexpr inline T& operator^= (T& a, T b)  \
+    inline T& operator^= (T& a, T b)  \
     { return reinterpret_cast<T&>( reinterpret_cast<std::underlying_type<T>::type&>(a) ^= static_cast<std::underlying_type<T>::type>(b) ); }
