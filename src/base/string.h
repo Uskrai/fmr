@@ -25,7 +25,8 @@ namespace fmr
 
 namespace String
 {
-    inline std::string ToString( const wxString &string )
+    template<typename T>
+    std::string ToString( const T &string )
         { return std::string(string.ToUTF8()); }
 
     template<typename T>
