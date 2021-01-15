@@ -48,7 +48,26 @@ namespace dimension
         return Get( pos, orient );
     }
 
-    wxOrientation GetOrient( const int &orient )
+    template<class T>
+    inline void print( const T &dimension, const char *text )
+    {
+        printf("%s %dx%d\n", text, dimension.x, dimension.y );
+    }
+
+    inline wxDirection GetDirection( const wxOrientation &orient, int pos )
+    {
+        if ( pos == 0 )
+            return wxALL;
+
+        if ( orient == wxVERTICAL )
+            return pos < 0 ? wxUP : wxDOWN;
+        else if ( orient == wxHORIZONTAL )
+            return pos < 0 ? wxLEFT : wxRIGHT;
+
+        return wxALL;
+    }
+
+    inline wxOrientation GetOrient( const int &orient )
     {
         if ( orient == wxVERTICAL )
             return wxVERTICAL;
@@ -57,7 +76,7 @@ namespace dimension
         return wxORIENTATION_MASK;
     }
 
-    wxPoint Make( const wxPoint &pt, wxOrientation orient, int pos )
+    inline wxPoint Make( const wxPoint &pt, wxOrientation orient, int pos )
     {
         wxPoint temp( pt );
         dimension::Set( temp, orient, pos );
