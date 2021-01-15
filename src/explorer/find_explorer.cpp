@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "explorer/find_explorer.h"
-#include "handler/abstract_handler.h"
-#include "handler/handler_factory.h"
+#include <fmr/explorer/find_explorer.h>
+#include <fmr/handler/abstract_handler.h>
+#include <fmr/handler/handler_factory.h>
+
 #include <wx/image.h>
 #include <wx/filename.h>
 

@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "bitmap/bitmap.h"
-#include "bitmap/position.h"
-#include "bitmap/size.h"
+#include <fmr/bitmap/bitmap.h>
+#include <fmr/bitmap/position.h>
+#include <fmr/bitmap/size.h>
 
 #include <wx/window.h>
 

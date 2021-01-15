@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <fmr/common/compare.h>
+#include <fmr/handler/struct_stream.h>
+
 #include <gtest/gtest.h>
-#include "base/compare.h"
-#include "handler/struct_stream.h"
 #include <algorithm>
 #include <random>
 

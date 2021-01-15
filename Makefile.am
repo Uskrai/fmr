@@ -1,15 +1,15 @@
 
-AM_CPPFLAGS = -I@srcdir@/src
+AM_CPPFLAGS = -I@srcdir@/include
 
 SUBDIRS = . test
 
-base = src/base
-basedir = @abs_builddir@/base
-base_LTLIBRARIES = libcompare.la libpath.la
+common = src/common
+commondir = @abs_builddir@/common
+common_LTLIBRARIES = lib_compare.la lib_path.la
 
-    libcompare_la_SOURCES = $(base)/compare.cpp
+    lib_compare_la_SOURCES = $(common)/compare.cpp
 
-    libpath_la_SOURCES = $(base)/path.cpp
+    lib_path_la_SOURCES = $(common)/path.cpp
 
 
 handler = src/handler
@@ -20,15 +20,15 @@ handler_LTLIBRARIES = lib_default_handler.la lib_wxarchive_handler.la lib_handle
     lib_default_handler_la_LIBADD = lib_struct_stream.la
 
     lib_wxarchive_handler_la_SOURCES = $(handler)/wxarchive_handler.cpp
-    lib_wxarchive_handler_la_LIBADD = lib_default_handler.la libcompare.la libpath.la
+    lib_wxarchive_handler_la_LIBADD = lib_default_handler.la lib_compare.la lib_path.la
 
     lib_handler_factory_la_SOURCES = $(handler)/handler_factory.cpp
-    lib_handler_factory_la_LIBADD =  lib_default_handler.la lib_wxarchive_handler.la libcompare.la libpath.la
+    lib_handler_factory_la_LIBADD =  lib_default_handler.la lib_wxarchive_handler.la lib_compare.la lib_path.la
 
     lib_struct_stream_la_SOURCES = $(handler)/struct_stream.cpp
 
     lib_std_handler_la_SOURCES = $(handler)/std_handler.cpp
-    lib_std_handler_la_LIBADD = lib_struct_stream.la libpath.la
+    lib_std_handler_la_LIBADD = lib_struct_stream.la lib_path.la
 
 
 # make libraries for bitmap
@@ -75,7 +75,7 @@ explorer_LTLIBRARIES = lib_window_explorer.la lib_controller_explorer.la lib_ima
     lib_controller_explorer_la_LIBADD = lib_find_explorer.la
 
     lib_image_window_explorer_la_SOURCES = $(explorer)/image_window_explorer.cpp
-    lib_image_window_explorer_la_LIBADD = libpath.la
+    lib_image_window_explorer_la_LIBADD = lib_path.la
 
     lib_find_explorer_la_SOURCES = $(explorer)/find_explorer.cpp
     lib_find_explorer_la_LIBADD = libthread.la

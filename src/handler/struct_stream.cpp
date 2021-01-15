@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "handler/struct_stream.h"
+#include <fmr/handler/struct_stream.h>
+#include <fmr/handler/abstract_handler.h>
 
 #include <wx/wfstream.h>
 #include <wx/mstream.h>
 #include <wx/filename.h>
-#include "handler/handler_factory.h"
-#include "handler/abstract_handler.h"
 #include <wx/wxcrtvararg.h>
 
 namespace fmr

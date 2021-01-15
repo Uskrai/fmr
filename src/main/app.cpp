@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "app.h"
-#include "gui/frame.h"
-#include "base/config.h"
+#include <fmr/main/app.h>
+#include <fmr/gui/frame.h>
+#include <fmr/common/config.h>
 
 #include <wx/display.h>
 #include <wx/image.h>
-
 #include <wx/stdpaths.h>
 #include <wx/intl.h>
 

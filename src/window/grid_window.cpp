@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "window/grid_window.h"
+#include <fmr/window/grid_window.h>
 #include <wx/dcclient.h>
 
 namespace fmr

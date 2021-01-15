@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "gui/frame.h"
-#include "gui/panel.h"
+#include <fmr/gui/frame.h>
+#include <fmr/gui/panel.h>
+#include <fmr/common/config.h>
+
 #include <wx/frame.h>
 #include <wx/menu.h>
 #include <wx/filedlg.h>
 #include <wx/sizer.h>
-
-#include "base/config.h"
 #include <wx/event.h>
 
 namespace fmr

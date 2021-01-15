@@ -105,17 +105,17 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_handler_OBJECTS = handler.$(OBJEXT)
 handler_OBJECTS = $(am_handler_OBJECTS)
-handler_DEPENDENCIES = $(LIB_DIR)/libpath.la \
+handler_DEPENDENCIES = $(LIB_DIR)/lib_path.la \
 	$(LIB_DIR)/lib_struct_stream.la $(LIB_DIR)/lib_std_handler.la \
 	$(LIB_DIR)/lib_default_handler.la \
-	$(LIB_DIR)/lib_wxarchive_handler.la $(LIB_DIR)/libcompare.la
+	$(LIB_DIR)/lib_wxarchive_handler.la $(LIB_DIR)/lib_compare.la
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
 am_sort_OBJECTS = sort.$(OBJEXT)
 sort_OBJECTS = $(am_sort_OBJECTS)
-sort_DEPENDENCIES = $(LIB_DIR)/libcompare.la \
+sort_DEPENDENCIES = $(LIB_DIR)/lib_compare.la \
 	$(LIB_DIR)/lib_struct_stream.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -520,19 +520,19 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -I@top_srcdir@/src
+AM_CPPFLAGS = -I@top_srcdir@/include
 AM_LDFLAGS = -lgtest
 LIB_DIR = @abs_top_builddir@
 handler_SOURCES = handler.cpp
-handler_LDADD = $(LIB_DIR)/libpath.la \
+handler_LDADD = $(LIB_DIR)/lib_path.la \
                 $(LIB_DIR)/lib_struct_stream.la \
                 $(LIB_DIR)/lib_std_handler.la \
                 $(LIB_DIR)/lib_default_handler.la \
                 $(LIB_DIR)/lib_wxarchive_handler.la \
-                $(LIB_DIR)/libcompare.la
+                $(LIB_DIR)/lib_compare.la
 
 sort_SOURCES = sort.cpp
-sort_LDADD = $(LIB_DIR)/libcompare.la \
+sort_LDADD = $(LIB_DIR)/lib_compare.la \
                 $(LIB_DIR)/lib_struct_stream.la
 
 TESTS = $(bin_PROGRAMS)

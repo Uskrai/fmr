@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "handler/wxarchive_handler.h"
-#include "handler/default_handler.h"
+#include <fmr/handler/wxarchive_handler.h>
+#include <fmr/handler/default_handler.h>
+#include <fmr/common/compare.h>
 
-#include "base/compare.h"
 #include <algorithm>
 
 namespace fmr

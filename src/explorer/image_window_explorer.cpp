@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "explorer/image_window_explorer.h"
-#include "bitmap/bmp.h"
-#include <wx/dc.h>
-#include "base/path.h"
+#include <fmr/explorer/image_window_explorer.h>
+#include <fmr/bitmap/bmp.h>
+#include <fmr/common/path.h>
 
+#include <wx/dc.h>
 #include <wx/dcclient.h>
 
 namespace fmr

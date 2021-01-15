@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "explorer/window_explorer.h"
+#include <fmr/explorer/window_explorer.h>
 #include <wx/filename.h>
 
 namespace fmr

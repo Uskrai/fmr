@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "explorer/load_explorer.h"
-#include "bitmap/image_util.h"
-#include "handler/handler_factory.h"
+#include <fmr/explorer/load_explorer.h>
+#include <fmr/bitmap/image_util.h>
+#include <fmr/handler/handler_factory.h>
 
 namespace fmr
 {

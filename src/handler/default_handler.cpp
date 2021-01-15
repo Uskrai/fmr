@@ -17,12 +17,12 @@
  * 
  */
 
-#include "handler/default_handler.h"
-#include "handler/handler_factory.h"
-#include <wx/wfstream.h>
+#include <fmr/handler/default_handler.h>
+#include <fmr/handler/handler_factory.h>
+#include <fmr/common/path.h>
+#include <fmr/common/compare.h>
 
-#include "base/path.h"
-#include "base/compare.h"
+#include <wx/wfstream.h>
 #include <algorithm>
 
 namespace fmr

@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "window/scrolledwindow.h"
+#include <fmr/window/scrolledwindow.h>
+#include <fmr/common/dimension.h>
 #include <wx/scrolbar.h>
 #include <wx/dc.h>
 #include <wx/dcclient.h>
 #include <wx/event.h>
-#include "base/dimension.h"
 
 wxBEGIN_EVENT_TABLE( ScrolledWindow, wxScrolledCanvas )
     EVT_SIZE( ScrolledWindow::OnSize )

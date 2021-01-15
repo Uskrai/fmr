@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "bitmap/image_util.h"
+#include <fmr/bitmap/image_util.h>
+
 #include <wx/log.h>
 
 namespace fmr

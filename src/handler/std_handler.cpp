@@ -17,13 +17,12 @@
  * 
  */
 
-#include "handler/std_handler.h"
-#include <wx/wfstream.h>
+#include <fmr/handler/std_handler.h>
+#include <fmr/common/path.h>
+#include <fmr/common/compare.h>
 
 namespace fs = std::filesystem;
 
-#include "base/path.h"
-#include "base/compare.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
