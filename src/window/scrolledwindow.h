@@ -53,15 +53,22 @@ class ScrolledWindow : public wxScrolledCanvas
 
         // to scroll window
         using wxScrolledCanvas::Scroll;
+        void Scroll( int x, int y );
+        void Scroll( const wxPoint &pos );
         // step will be added by
         // ViewStart according to orientation.
         void Scroll( wxOrientation orient, int step );
         void LineUp( wxOrientation orient, int step );
         void LineDown ( wxOrientation orient, int step );
 
-        void OnScroll( wxScrollWinEvent &event ){ };
+        void OnScroll( wxScrollWinEvent &event );
 
         void AdjustScrollBar();
+
+        int GetScrollRangeLimit( const wxOrientation &orient ) const;
+
+        using wxScrolledCanvas::GetScrollPos;
+        virtual int GetScrollPos( const wxOrientation &orient ) const;
 
         virtual void DoSetNull( int id ) {};
     protected:

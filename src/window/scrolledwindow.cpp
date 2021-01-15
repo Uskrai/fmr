@@ -69,10 +69,7 @@ bool ScrolledWindow::Create(    wxWindow *parent,
 void ScrolledWindow::CreateScrollBar( wxOrientation orient )
 {
     SetScrollbars(
-        1,
-        1,
-        GetVirtualSize().GetWidth(),
-        GetVirtualSize().GetHeight()
+        1,1,1,1
     );
 }
 
@@ -94,21 +91,34 @@ void ScrolledWindow::OnPaint( wxPaintEvent &event )
     OnDraw( dc );
 }
 
+void ScrolledWindow::OnScroll( wxScrollWinEvent &event )
+{
+}
+
 void ScrolledWindow::AdjustScrollBar()
 {
     SetScrollbar(
         wxVERTICAL,
-        GetViewStart().y,
+        GetScrollPos( wxVERTICAL ),
         GetClientSize().GetHeight(),
         GetVirtualSize().GetHeight()
     );
 
-    SetScrollbar(
-        wxHORIZONTAL,
-        GetViewStart().x,
-        GetClientSize().GetWidth(),
-        GetVirtualSize().GetWidth()
-    );
+}
+
+int ScrolledWindow::GetScrollPos( const wxOrientation &orient ) const
+{
+    int pos = dimension::Get( GetViewStart(), orient );
+    int pos_limit = GetScrollRangeLimit( orient );
+
+    int ret = pos < pos_limit ? pos : pos_limit;
+    ret = ret > 0 ? ret : 0;
+    return ret;
+}
+
+int ScrolledWindow::GetScrollRangeLimit( const wxOrientation &orient ) const
+{
+    return GetScrollRange( orient ) - GetScrollThumb( orient );
 }
 
 void ScrolledWindow::OnSetVirtualSize( wxTimerEvent &event )
@@ -123,14 +133,29 @@ void ScrolledWindow::DoSetVirtualSize( int width, int height )
         m_timer.StartOnce( 500 );
 }
 
+void ScrolledWindow::Scroll( const wxPoint &pos )
+{
+    DoScroll( pos.x, pos.y );
+}
+
+void ScrolledWindow::Scroll( int x, int y )
+{
+    Scroll( wxPoint( x, y ) );
+}
+
 void ScrolledWindow::Scroll( wxOrientation orient, int step )
 {
     int ver_pos = GetScrollPos( wxVERTICAL );
     int hor_pos = GetScrollPos( wxHORIZONTAL );
-
     wxPoint pos( hor_pos, ver_pos );
+
     int orient_pos = dimension::Get( pos, orient );
-    dimension::Set( pos, orient, orient_pos + step );
+    int dest_pos = orient_pos + step;
+    int limit_pos = GetScrollRangeLimit( orient );
+    dest_pos = dest_pos > limit_pos ? limit_pos : dest_pos;
+    dest_pos = dest_pos < 0 ? 0 : dest_pos;
+
+    dimension::Set( pos, orient, dest_pos );
     Scroll( pos );
 }
 
@@ -166,52 +191,33 @@ void ScrolledWindow::LineDown( wxOrientation orient, int step )
 
 void ScrolledWindow::OnScrollLine( wxScrollWinEvent &event )
 {
-    wxDirection direction;
-    wxOrientation orient;
+    wxOrientation orient = dimension::GetOrient( event.GetOrientation() );
+    int bottom_edge = GetScrollRangeLimit( orient );
+    int scroll_pos = GetScrollPos( orient );
     int pos = event.GetPosition();
+    int step = pos - scroll_pos;
+    wxDirection direction = dimension::GetDirection( orient, step );
+    bool is_top = scroll_pos == 0;
+    bool is_bottom = scroll_pos == bottom_edge;
+    bool is_below_bottom = is_bottom && pos >= bottom_edge;
+    bool is_over_top = is_top && pos <= 0;
+    bool is_edge = (is_top && is_over_top) || (is_bottom && is_below_bottom );
 
-    if ( event.GetOrientation() == wxVERTICAL )
-        orient = wxVERTICAL;
-    else if ( event.GetOrientation() == wxHORIZONTAL )
-        orient = wxHORIZONTAL;
-
-    int bottom_edge = GetScrollPos( orient );
-    int virtual_edge = dimension::Get( GetVirtualSize(), orient ) - GetScrollThumb( orient );
-
-    if ( pos < 0 && GetScrollPos( orient ) == 0 )
+    if ( !is_edge || direction == wxALL )
     {
-        if ( orient == wxVERTICAL )
-            direction = wxUP;
-        if ( orient == wxHORIZONTAL )
-            direction = wxLEFT;
-    }
-    else if
-        (
-            bottom_edge == virtual_edge
-            && pos > bottom_edge
-        )
-    {
-        if ( orient == wxVERTICAL )
-            direction = wxDOWN;
-        if( orient == wxHORIZONTAL )
-            direction = wxRIGHT;
+        Scroll( orient, step );
     }
     else
     {
-        int step = pos - GetScrollPos( orient );
-        Scroll( orient, step );
-        event.Skip();
-        return;
+        // this will inverse the direction
+        // if m_isFromRight is true
+        // and direction is left or right
+        if ( m_isFromRight && (direction == wxLEFT || direction == wxRIGHT) )
+            direction = ( direction == wxLEFT ) ?
+                wxRIGHT : wxLEFT;
+
+        return OnEdge( direction );
     }
-
-    // this will inverse the direction
-    // if m_isFromRight is true
-    // and direction is left or right
-    if ( m_isFromRight && (direction == wxLEFT || direction == wxRIGHT) )
-        direction = ( direction == wxLEFT ) ?
-            wxRIGHT : wxLEFT;
-
-    OnEdge( direction );
 }
 
 void ScrolledWindow::OnKey( wxKeyEvent &event )
@@ -273,8 +279,6 @@ void ScrolledWindow::OnMouseWheel( wxMouseEvent &event )
         LineUp( orient, m_stepPerWheel );
     else if ( step > 0 )
         LineDown( orient, m_stepPerWheel );
-
-    event.Skip();
 }
 
 void ScrolledWindow::OnMouseMotion( wxMouseEvent &event )
@@ -295,6 +299,7 @@ void ScrolledWindow::OnMouseMotion( wxMouseEvent &event )
             view.y -= view_y;
 
             Scroll( view );
+            return;
         }
     }
 
@@ -307,6 +312,9 @@ void ScrolledWindow::OnMouseMotion( wxMouseEvent &event )
 void ScrolledWindow::OnScrollThumbTrack( wxScrollWinEvent &event )
 {
     wxOrientation orient = dimension::GetOrient(  event.GetOrientation() );
-    Scroll( dimension::Make( GetViewStart(), orient, event.GetPosition() ) );
+    wxPoint pos = GetViewStart();
+    dimension::Set( pos, orient, event.GetPosition() );
+    Scroll( pos );
+    event.Skip();
 }
 
