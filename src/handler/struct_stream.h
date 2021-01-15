@@ -24,16 +24,16 @@
 #include "base/compare.h"
 #include "base/path.h"
 #include "base/bitmask.h"
-#include "handler/abstract_handler.h"
 #include <wx/mstream.h>
 #include <wx/event.h>
 
 class wxInputStream;
 class wxOutputStream;
-class AbstractHandler;
 
 namespace fmr
 {
+
+class AbstractHandler;
 
 enum StreamActionType
 {
@@ -45,7 +45,7 @@ enum StreamActionType
     kStreamRecursive = 0x10,
 };
 
-DEFINE_BITMASK_TYPE( StreamActionType )
+DEFINE_BITMASK_TYPE( StreamActionType  )
 
 struct SStream
     : public Compare::Sortable
@@ -106,7 +106,8 @@ class StreamEvent
             : wxCommandEvent( comand_type, id ) {};
         StreamEvent( const StreamEvent &other );
         StreamEvent( StreamEvent &&other );
-        wxEvent *Clone(){ return new StreamEvent( *this ); }
+        using wxEvent::Clone;
+        wxEvent *Clone() { return new StreamEvent( *this ); }
 
         void SetStream( std::shared_ptr<SStream> stream );
         void SetIndex( size_t index );

@@ -46,7 +46,7 @@ DefaultHandler::DefaultHandler( DefaultHandler &&handler )
 DefaultHandler::DefaultHandler( const DefaultHandler &handler )
 {
     if ( handler.is_opened_ )
-        Open( MakeDirectory(
+        Open( Path::MakeDirectory(
             handler.GetName()
         ));
 
@@ -138,7 +138,7 @@ size_t DefaultHandler::Index( const std::string& path ) const
 
     std::string temp = path;
     if ( Path::IsAbsolute( temp ) )
-        temp = MakeRelative( GetName(), path );
+        temp = Path::MakeRelative( GetName(), path );
 
     Path::RemoveDirSep( temp );
 
@@ -258,7 +258,7 @@ bool DefaultHandler::CreateDirectory( const std::string &directory_name, bool ov
     if ( ! IsOpened() )
         return false;
 
-    if ( !IsChild( GetName(), directory_name ) )
+    if ( !Path::IsChild( GetName(), directory_name ) )
         return false;
 
     SStream stream;
@@ -281,7 +281,7 @@ bool DefaultHandler::CreateFiles( SStream stream, const std::string &filename, b
     if ( !IsOpened() )
         return false;
 
-    if ( !IsChild( GetName(), filename ) )
+    if ( !Path::IsChild( GetName(), filename ) )
         return false;
 
     StreamActionType flags = kStreamWrite;
@@ -302,7 +302,7 @@ bool DefaultHandler::Remove( const std::string &name, bool recursive )
     if ( !IsOpened() )
         return false;
 
-    if ( !IsChild( GetName(), name ) )
+    if ( !Path::IsChild( GetName(), name ) )
         return false;
 
     SStream stream;
