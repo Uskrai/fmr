@@ -27,7 +27,8 @@ enum ScrollBarId
     HorizontalScrollBar = wxID_HIGHEST + 20,
     VerticalScrollBar
 };
-const int ScrolledTimerID = VerticalScrollBar + 1;
+
+inline const int ScrolledTimerID = VerticalScrollBar + 1;
 
 class ScrolledWindow : public wxScrolledCanvas
 {
