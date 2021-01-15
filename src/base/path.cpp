@@ -98,20 +98,16 @@ namespace Path
     //     return name;
     // }
 
-    String MakeString( const fs::path  &path )
+    std::string MakeString( const fs::path  &path )
         { return path.u8string(); }
 
-    String MakeString( const wxString &path )
-    {
-        // printf("%S\t", path.wc_str() );
-        // printf("%s\n", path.fn_str() );
-        return String( path.ToUTF8() );
-    }
+    std::string MakeString( const wxString &path )
+            { return std::string( path.ToUTF8() ); }
 
-    String GetSeparator()
-        { return String( 1, Separator ); }
+    std::string GetSeparator()
+        { return std::string( 1, Separator ); }
 
-    String GetParent( String path )
+    std::string GetParent( std::string path )
     {
         if ( !IsRoot( path ) )
             RemoveDirSep( path );
@@ -122,21 +118,21 @@ namespace Path
         return GetDirName( MakeString( temp_parent ) );
     }
 
-    String GetName( String path )
+    std::string GetName( std::string path )
     {
         RemoveDirSep( path );
 
 
         size_t idx = path.rfind( Separator );
-        if ( idx != String::npos )
+        if ( idx != std::string::npos )
             path = path.substr( idx );
         return path;
     }
 
-    String GetRootPath( const String &path )
+    std::string GetRootPath( const std::string &path )
         { return MakeString( fs::path(path).root_path() ); }
 
-    String GetDirName( const String &path )
+    std::string GetDirName( const std::string &path )
     {
         fs::path temp(path);
 
@@ -151,22 +147,22 @@ namespace Path
         return MakeString( temp );
     }
 
-    void RemoveDirSep( String &path )
+    void RemoveDirSep( std::string &path )
     {
         if ( !path.empty() && path.back() == Separator )
             path.pop_back();
     }
 
-    bool HasRootPath( const String &path )
+    bool HasRootPath( const std::string &path )
         { return fs::path(path).has_root_path(); }
 
-    bool IsRoot( const String &path )
+    bool IsRoot( const std::string &path )
         { return GetRootPath( path ) == path; }
 
-    bool IsChild( const String &parent, String target )
+    bool IsChild( const std::string &parent, std::string target )
     {
-        String parent_root = GetRootPath( parent );
-        String target_root = GetRootPath( target );
+        std::string parent_root = GetRootPath( parent );
+        std::string target_root = GetRootPath( target );
 
         if ( !HasRootPath( target ) )
             return true;
@@ -187,27 +183,27 @@ namespace Path
         return false;
     }
 
-    bool IsAbsolute( const String &path )
+    bool IsAbsolute( const std::string &path )
         { return fs::path(path).is_absolute(); }
 
-    bool IsRelative( const String &path )
+    bool IsRelative( const std::string &path )
         { return fs::path(path).is_relative(); }
 
-    String Append( const String &parent, const String &target )
+    std::string Append( const std::string &parent, const std::string &target )
     {
         fs::path path( parent );
         return MakeString( path / target );
     }
 
-    String MakeRelative( const String &parent, const String &target )
+    std::string MakeRelative( const std::string &parent, const std::string &target )
     {
         return MakeString( fs::relative( target, parent ) );
     }
 
-    String MakeAbsolute( const String &path )
+    std::string MakeAbsolute( const std::string &path )
     { return MakeString( fs::absolute( path ) ); }
 
-    String MakeDirectory( const String &path )
+    std::string MakeDirectory( const std::string &path )
     {
         if ( fs::is_directory( path ) )
             return path;

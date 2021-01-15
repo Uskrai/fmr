@@ -24,11 +24,10 @@
 namespace fmr
 {
 
-inline namespace Path
+namespace Path
 {
-    typedef std::string String;
-    const String EmptyString = "";
-    const wchar_t Separator = std::filesystem::path::preferred_separator;
+    const std::string EmptyString = "";
+    const char Separator = std::filesystem::path::preferred_separator;
     
     // // return long path
     // wxString GetFullPath( wxString path );
@@ -43,35 +42,35 @@ inline namespace Path
     // // return name with separator if directory
     // wxString GetNameWithSep( wxString path );
 
-    String GetSeparator();
+    std::string GetSeparator();
 
-    String GetName( String path );
+    std::string GetName( std::string path );
 
-    String GetParent( String path );
+    std::string GetParent( std::string path );
 
-    String GetRootPath( const String &path );
+    std::string GetRootPath( const std::string &path );
 
-    bool HasRootPath( const String &path );
+    bool HasRootPath( const std::string &path );
 
-    String GetDirName( const String &path );
+    std::string GetDirName( const std::string &path );
 
-    void RemoveDirSep( String &path );
+    void RemoveDirSep( std::string &path );
 
-    bool IsRoot( const String &path );
+    bool IsRoot( const std::string &path );
 
-    bool IsChild( const String &parent, String target );
+    bool IsChild( const std::string &parent, std::string target );
 
-    bool IsAbsolute( const String &path );
+    bool IsAbsolute( const std::string &path );
 
-    bool IsRelative( const String &path );
+    bool IsRelative( const std::string &path );
 
-    String Append( const String &parent, const String &target );
+    std::string Append( const std::string &parent, const std::string &target );
 
-    String MakeRelative( const String &parent, const String &target );
+    std::string MakeRelative( const std::string &parent, const std::string &target );
 
-    String MakeAbsolute( const String &path );
+    std::string MakeAbsolute( const std::string &path );
 
-    String MakeDirectory( const String &path );
+    std::string MakeDirectory( const std::string &path );
 
 
 } // namespace Path
