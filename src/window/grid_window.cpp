@@ -16,40 +16,56 @@
  */
 
 #include "window/grid_window.h"
+#include <wx/dcclient.h>
 
 namespace fmr
 {
 
+wxBEGIN_EVENT_TABLE( GridWindow, ScrolledWindow )
+    EVT_KEY_DOWN( GridWindow::OnKeyDown )
+    EVT_PAINT( GridWindow::OnPaint )
+wxEND_EVENT_TABLE()
+
 GridWindow::GridWindow(
-    wxWindow *parent,
-    wxWindowID id,
-    const wxPoint &pos,
-    const wxSize &size,
-    long style,
-    const wxString &name
-)   : wxWindow( parent, id, pos, size, 0, name )
+        wxWindow *parent,
+        wxWindowID id,
+        const wxPoint &pos,
+        const wxSize &size,
+        long style,
+        const wxString &name
+    )
 {
-    CreateGrid();
+    Create( parent, id, pos, size, style, name );
 }
 
 bool GridWindow::Create(
-    wxWindow *parent,
-    wxWindowID id,
-    const wxPoint &pos,
-    const wxSize &size,
-    long style,
-    const wxString &name
-)
+        wxWindow *parent,
+        wxWindowID id,
+        const wxPoint &pos,
+        const wxSize &size,
+        long style,
+        const wxString &name
+    )
 {
-    return Create( parent, id, pos, size, style, name )
+    return ScrolledWindow::Create( parent, id, pos, size, style, name )
             && CreateGrid();
 }
 
 bool GridWindow::CreateGrid( int rows, int cols, const wxSize &gap )
 {
-    sizer_ = new wxGridSizer( rows, cols, gap );
+    sizer_ = new wxFlexGridSizer( rows, cols, wxSize(10,10) );
     SetSizer( sizer_ );
     return sizer_;
 }
+
+void GridWindow::OnKeyDown( wxKeyEvent &event )
+{
+
+}
+
+void GridWindow::OnPaint( wxPaintEvent &event )
+{
+}
+
 
 } // namespace fmr

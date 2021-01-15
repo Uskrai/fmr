@@ -18,7 +18,7 @@
 #ifndef FMR_WINDOW_GRID_WINDOW
 #define FMR_WINDOW_GRID_WINDOW
 
-#include <wx/window.h>
+#include "window/scrolledwindow.h"
 #include <wx/sizer.h>
 
 namespace fmr
@@ -51,6 +51,11 @@ class GridWindow
 
 
         bool CreateGrid( int rows = 0, int cols = 0, const wxSize &gap = wxDefaultSize );
+
+    private:
+        void OnKeyDown( wxKeyEvent &event );
+        void OnPaint( wxPaintEvent &event );
+        wxDECLARE_EVENT_TABLE();
 };
 
 
