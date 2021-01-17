@@ -90,18 +90,16 @@ GridCellCoords FlexGridWindow::IndexToCell( int index ) const
     return GridCellCoords( row, col );
 }
 
-int FlexGridWindow::CellToIndex( GridCellCoords cell ) const
+int FlexGridWindow::CellToIndex( int row, int col, bool no_continous ) const
 {
-    return CellToIndex( cell.GetRow(), cell.GetCol() );
-}
-
-int FlexGridWindow::CellToIndex( int row, int col ) const
-{
-    if ( row > GetRows() || col > GetCols() )
-        return -1;
-
-    int index = col * GetCols();
-    return index + row;
+    int index = col * GetCols() + row;
+    if ( no_continous )
+    {
+        GridCellCoords cell = IndexToCell( index );
+        if ( cell.GetRow() != row || cell.GetCol() != col )
+            return -1;
+    }
+    return index;
 }
 
 void FlexGridWindow::SelectGridCursor( int index )
@@ -118,7 +116,7 @@ void FlexGridWindow::SelectGridCursor( int index )
 
 void FlexGridWindow::MakeCellVisible( int index )
 {
-    if ( IsExist( index ) )
+    if ( !IsExist( index ) )
         return;
 
     wxRect rect = vec_cells_.at( index )->GetRect();
@@ -144,11 +142,6 @@ void FlexGridWindow::GoToCell( int index )
     MakeCellVisible( index );
 }
 
-void FlexGridWindow::OnKeyDown( wxKeyEvent &event )
-{
-    event.Skip();
-}
-
 void FlexGridWindow::SetCellBorderWidth( int border )
 {
     cell_border_width_ = border;
@@ -171,6 +164,32 @@ void FlexGridWindow::SetCellHighlightPenWidth( int width )
     Refresh();
 }
 
+void FlexGridWindow::OnKeyDown( wxKeyEvent &event )
+{
+    if ( !IsExist( selected_index_ ) )
+    {
+        GoToCell(0);
+        Refresh();
+        event.Skip();
+        return;
+    }
+
+    GridCellCoords cell = IndexToCell( selected_index_ );
+
+    if ( event.GetKeyCode() == WXK_UP )
+        cell.SetCol( cell.GetCol() - 1 );
+
+    if ( event.GetKeyCode() == WXK_DOWN )
+        cell.SetCol( cell.GetCol() + 1 );
+
+    if ( event.GetKeyCode() == WXK_LEFT )
+        cell.SetRow( cell.GetRow() - 1 );
+    else if ( event.GetKeyCode() == WXK_RIGHT )
+        cell.SetRow( cell.GetRow() + 1 );
+
+    Refresh();
+    GoToCell( cell );
+}
 
 } // namespace fmr
 

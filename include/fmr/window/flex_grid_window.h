@@ -103,8 +103,9 @@ class FlexGridWindow
         { return MakeCellVisible( CellToIndex( row, col ) ); }
 
         GridCellCoords IndexToCell( int index ) const;
-        int CellToIndex( GridCellCoords ) const;
-        int CellToIndex( int row, int col ) const;
+        int CellToIndex( GridCellCoords cell, bool no_continous = false ) const
+        { return CellToIndex( cell.GetRow(), cell.GetCol(), no_continous ); }
+        int CellToIndex( int row, int col, bool no_continous = false ) const;
 
     private:
         void OnKeyDown( wxKeyEvent &event );

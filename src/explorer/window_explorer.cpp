@@ -226,7 +226,7 @@ void Window::OnGridEnter( wxKeyEvent &event )
     //     }
     //     return;
     // }
-    // event.Skip();
+    event.Skip();
 }
 
 void Window::Select( std::string name )
@@ -266,3 +266,4 @@ void Window::Select( std::string name )
 }; // namespace explorer
 
 }; // namespace fmr
+
