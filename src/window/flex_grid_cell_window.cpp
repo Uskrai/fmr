@@ -15,22 +15,22 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/window/grid_cell_window.h>
+#include <fmr/window/flex_grid_cell_window.h>
 
 namespace fmr
 {
 
-wxBEGIN_EVENT_TABLE( GridCellWindow, wxWindow )
-    EVT_PAINT( GridCellWindow::OnPaint )
-    EVT_SIZE( GridCellWindow::OnSize )
+wxBEGIN_EVENT_TABLE( FlexGridCellWindow, wxWindow )
+    EVT_PAINT( FlexGridCellWindow::OnPaint )
+    EVT_SIZE( FlexGridCellWindow::OnSize )
 wxEND_EVENT_TABLE()
 
-GridCellWindow::GridCellWindow( wxWindow *parent, wxWindowID id )
+FlexGridCellWindow::FlexGridCellWindow( wxWindow *parent, wxWindowID id )
 {
     Create( parent, id );
 }
 
-bool GridCellWindow::Create(
+bool FlexGridCellWindow::Create(
             wxWindow *parent,
             wxWindowID id
         )
@@ -41,14 +41,14 @@ bool GridCellWindow::Create(
     return ret;
 }
 
-void GridCellWindow::OnPaint( wxPaintEvent &event )
+void FlexGridCellWindow::OnPaint( wxPaintEvent &event )
 {
     wxPaintDC dc( this );
     DrawBorder( dc );
     event.Skip();
 }
 
-void GridCellWindow::OnSize( wxSizeEvent &event )
+void FlexGridCellWindow::OnSize( wxSizeEvent &event )
 {
     wxRect rect = wxRect( wxPoint(0,0), event.GetSize() );
 
@@ -59,7 +59,7 @@ void GridCellWindow::OnSize( wxSizeEvent &event )
     cell_window_->SetPosition( rect.GetPosition() );
 }
 
-wxSize GridCellWindow::GetMinSize() const
+wxSize FlexGridCellWindow::GetMinSize() const
 {
     if ( !cell_window_ )
         return wxWindow::GetMinSize();
@@ -68,7 +68,7 @@ wxSize GridCellWindow::GetMinSize() const
     return cell_window_->GetSize() + wxSize( GetBorderWidth() * 2, GetBorderWidth() * 2 );
 }
 
-void GridCellWindow::SetCellWindow( wxWindow *cell_window )
+void FlexGridCellWindow::SetCellWindow( wxWindow *cell_window )
 {
     cell_window_ = cell_window;
 
@@ -82,7 +82,7 @@ void GridCellWindow::SetCellWindow( wxWindow *cell_window )
     SendSizeEvent();
 }
 
-wxRect GridCellWindow::GetCellRect() const
+wxRect FlexGridCellWindow::GetCellRect() const
 {
     wxRect rect;
 
@@ -94,7 +94,7 @@ wxRect GridCellWindow::GetCellRect() const
     return rect;
 }
 
-void GridCellWindow::DrawBorder( wxDC &dc )
+void FlexGridCellWindow::DrawBorder( wxDC &dc )
 {
     if ( !is_selected_ )
         return;

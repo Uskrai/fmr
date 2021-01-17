@@ -19,7 +19,7 @@
 #define FMR_WINDOW_FMR_GRID_WINDOW
 
 #include <fmr/window/scrolledwindow.h>
-#include <fmr/window/grid_cell_window.h>
+#include <fmr/window/flex_grid_cell_window.h>
 #include <wx/sizer.h>
 
 namespace fmr
@@ -30,7 +30,7 @@ class FlexGridWindow
 {
     protected:
         wxGridSizer *sizer_;
-        wxVector<GridCellWindow*> vec_cells_;
+        wxVector<FlexGridCellWindow*> vec_cells_;
         int selected_index_ = -1;
         int cell_border_width_ = 0, cell_highlight_width_ = 0;
 
@@ -64,7 +64,7 @@ class FlexGridWindow
 
         bool CreateGrid( int rows = 0, int cols = 0, const wxSize &gap = wxDefaultSize );
 
-        void Add( GridCellWindow *window );
+        void Add( FlexGridCellWindow *window );
         void Add( wxWindow *window_cell );
 
     private:

@@ -25,7 +25,7 @@
 namespace fmr
 {
 
-class GridCellWindow
+class FlexGridCellWindow
     : public wxWindow
 {
     protected:
@@ -35,7 +35,7 @@ class GridCellWindow
         int border_width_ = 0, highlight_width_ = 0;
 
     public:
-        GridCellWindow(
+        FlexGridCellWindow(
             wxWindow *parent,
             wxWindowID id
         );

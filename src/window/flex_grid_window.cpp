@@ -57,7 +57,7 @@ bool FlexGridWindow::CreateGrid( int rows, int cols, const wxSize &gap )
     return sizer_;
 }
 
-void FlexGridWindow::Add( GridCellWindow *window )
+void FlexGridWindow::Add( FlexGridCellWindow *window )
 {
     window->SetBorderWidth( GetCellBorderWidth() );
     window->SetHighlightPenWidth( GetCellHighlightPenWidth() );
@@ -66,8 +66,8 @@ void FlexGridWindow::Add( GridCellWindow *window )
 
 void FlexGridWindow::Add( wxWindow *cell )
 {
-    GridCellWindow *window;
-    window = new GridCellWindow( this, wxID_ANY );
+    FlexGridCellWindow *window;
+    window = new FlexGridCellWindow( this, wxID_ANY );
 
     cell->Reparent( window );
     window->SetCellWindow( cell );

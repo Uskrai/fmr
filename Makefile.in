@@ -167,14 +167,15 @@ lib_default_handler_la_OBJECTS = $(am_lib_default_handler_la_OBJECTS)
 lib_find_explorer_la_DEPENDENCIES = libthread.la
 am_lib_find_explorer_la_OBJECTS = $(explorer)/find_explorer.lo
 lib_find_explorer_la_OBJECTS = $(am_lib_find_explorer_la_OBJECTS)
-lib_flex_grid_window_la_DEPENDENCIES = lib_grid_cell_window.la
+lib_flex_grid_cell_window_la_LIBADD =
+am_lib_flex_grid_cell_window_la_OBJECTS =  \
+	$(window)/flex_grid_cell_window.lo
+lib_flex_grid_cell_window_la_OBJECTS =  \
+	$(am_lib_flex_grid_cell_window_la_OBJECTS)
+lib_flex_grid_window_la_DEPENDENCIES = lib_flex_grid_cell_window.la
 am_lib_flex_grid_window_la_OBJECTS = $(window)/flex_grid_window.lo
 lib_flex_grid_window_la_OBJECTS =  \
 	$(am_lib_flex_grid_window_la_OBJECTS)
-lib_grid_cell_window_la_LIBADD =
-am_lib_grid_cell_window_la_OBJECTS = $(window)/grid_cell_window.lo
-lib_grid_cell_window_la_OBJECTS =  \
-	$(am_lib_grid_cell_window_la_OBJECTS)
 lib_handler_factory_la_DEPENDENCIES = lib_default_handler.la \
 	lib_wxarchive_handler.la lib_compare.la lib_path.la
 am_lib_handler_factory_la_OBJECTS = $(handler)/handler_factory.lo
@@ -283,8 +284,8 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap.Plo \
 	$(reader)/$(DEPDIR)/window_reader.Plo \
 	$(reader)/$(DEPDIR)/zoom_reader.Plo \
 	$(thread)/$(DEPDIR)/thread.Plo \
+	$(window)/$(DEPDIR)/flex_grid_cell_window.Plo \
 	$(window)/$(DEPDIR)/flex_grid_window.Plo \
-	$(window)/$(DEPDIR)/grid_cell_window.Plo \
 	$(window)/$(DEPDIR)/scrolledwindow.Plo \
 	src/main/$(DEPDIR)/app.Po
 am__mv = mv -f
@@ -311,8 +312,8 @@ SOURCES = $(lib_compare_la_SOURCES) \
 	$(lib_controller_reader_la_SOURCES) \
 	$(lib_default_handler_la_SOURCES) \
 	$(lib_find_explorer_la_SOURCES) \
+	$(lib_flex_grid_cell_window_la_SOURCES) \
 	$(lib_flex_grid_window_la_SOURCES) \
-	$(lib_grid_cell_window_la_SOURCES) \
 	$(lib_handler_factory_la_SOURCES) $(lib_image_util_la_SOURCES) \
 	$(lib_image_window_explorer_la_SOURCES) \
 	$(lib_load_explorer_la_SOURCES) $(lib_load_reader_la_SOURCES) \
@@ -331,8 +332,8 @@ DIST_SOURCES = $(lib_compare_la_SOURCES) \
 	$(lib_controller_reader_la_SOURCES) \
 	$(lib_default_handler_la_SOURCES) \
 	$(lib_find_explorer_la_SOURCES) \
+	$(lib_flex_grid_cell_window_la_SOURCES) \
 	$(lib_flex_grid_window_la_SOURCES) \
-	$(lib_grid_cell_window_la_SOURCES) \
 	$(lib_handler_factory_la_SOURCES) $(lib_image_util_la_SOURCES) \
 	$(lib_image_window_explorer_la_SOURCES) \
 	$(lib_load_explorer_la_SOURCES) $(lib_load_reader_la_SOURCES) \
@@ -641,11 +642,11 @@ libpanel_la_SOURCES = $(gui)/panel.cpp
 libpanel_la_LIBADD = lib_window_reader.la lib_window_explorer.la
 window = src/window
 windowdir = @abs_builddir@/window
-window_LTLIBRARIES = libscrolledwindow.la lib_flex_grid_window.la lib_grid_cell_window.la
+window_LTLIBRARIES = libscrolledwindow.la lib_flex_grid_window.la lib_flex_grid_cell_window.la
 libscrolledwindow_la_SOURCES = $(window)/scrolledwindow.cpp
 lib_flex_grid_window_la_SOURCES = $(window)/flex_grid_window.cpp
-lib_flex_grid_window_la_LIBADD = lib_grid_cell_window.la
-lib_grid_cell_window_la_SOURCES = $(window)/grid_cell_window.cpp
+lib_flex_grid_window_la_LIBADD = lib_flex_grid_cell_window.la
+lib_flex_grid_cell_window_la_SOURCES = $(window)/flex_grid_cell_window.cpp
 thread = src/thread
 threaddir = @abs_builddir@/thread
 thread_LTLIBRARIES = libthread.la
@@ -1073,16 +1074,16 @@ $(window)/$(am__dirstamp):
 $(window)/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) $(window)/$(DEPDIR)
 	@: > $(window)/$(DEPDIR)/$(am__dirstamp)
+$(window)/flex_grid_cell_window.lo: $(window)/$(am__dirstamp) \
+	$(window)/$(DEPDIR)/$(am__dirstamp)
+
+lib_flex_grid_cell_window.la: $(lib_flex_grid_cell_window_la_OBJECTS) $(lib_flex_grid_cell_window_la_DEPENDENCIES) $(EXTRA_lib_flex_grid_cell_window_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(windowdir) $(lib_flex_grid_cell_window_la_OBJECTS) $(lib_flex_grid_cell_window_la_LIBADD) $(LIBS)
 $(window)/flex_grid_window.lo: $(window)/$(am__dirstamp) \
 	$(window)/$(DEPDIR)/$(am__dirstamp)
 
 lib_flex_grid_window.la: $(lib_flex_grid_window_la_OBJECTS) $(lib_flex_grid_window_la_DEPENDENCIES) $(EXTRA_lib_flex_grid_window_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(windowdir) $(lib_flex_grid_window_la_OBJECTS) $(lib_flex_grid_window_la_LIBADD) $(LIBS)
-$(window)/grid_cell_window.lo: $(window)/$(am__dirstamp) \
-	$(window)/$(DEPDIR)/$(am__dirstamp)
-
-lib_grid_cell_window.la: $(lib_grid_cell_window_la_OBJECTS) $(lib_grid_cell_window_la_DEPENDENCIES) $(EXTRA_lib_grid_cell_window_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(windowdir) $(lib_grid_cell_window_la_OBJECTS) $(lib_grid_cell_window_la_LIBADD) $(LIBS)
 $(handler)/handler_factory.lo: $(handler)/$(am__dirstamp) \
 	$(handler)/$(DEPDIR)/$(am__dirstamp)
 
@@ -1261,8 +1262,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/window_reader.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/zoom_reader.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/thread.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/flex_grid_cell_window.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/flex_grid_window.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/grid_cell_window.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/scrolledwindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@src/main/$(DEPDIR)/app.Po@am__quote@ # am--include-marker
 
@@ -1706,8 +1707,8 @@ distclean: distclean-recursive
 	-rm -f $(reader)/$(DEPDIR)/window_reader.Plo
 	-rm -f $(reader)/$(DEPDIR)/zoom_reader.Plo
 	-rm -f $(thread)/$(DEPDIR)/thread.Plo
+	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_window.Plo
-	-rm -f $(window)/$(DEPDIR)/grid_cell_window.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolledwindow.Plo
 	-rm -f src/main/$(DEPDIR)/app.Po
 	-rm -f Makefile
@@ -1784,8 +1785,8 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(reader)/$(DEPDIR)/window_reader.Plo
 	-rm -f $(reader)/$(DEPDIR)/zoom_reader.Plo
 	-rm -f $(thread)/$(DEPDIR)/thread.Plo
+	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_window.Plo
-	-rm -f $(window)/$(DEPDIR)/grid_cell_window.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolledwindow.Plo
 	-rm -f src/main/$(DEPDIR)/app.Po
 	-rm -f Makefile

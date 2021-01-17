@@ -96,13 +96,13 @@ gui_LTLIBRARIES = libframe.la libpanel.la
 
 window = src/window
 windowdir = @abs_builddir@/window
-window_LTLIBRARIES = libscrolledwindow.la lib_flex_grid_window.la lib_grid_cell_window.la
+window_LTLIBRARIES = libscrolledwindow.la lib_flex_grid_window.la lib_flex_grid_cell_window.la
     libscrolledwindow_la_SOURCES = $(window)/scrolledwindow.cpp
 
     lib_flex_grid_window_la_SOURCES = $(window)/flex_grid_window.cpp
-    lib_flex_grid_window_la_LIBADD = lib_grid_cell_window.la
+    lib_flex_grid_window_la_LIBADD = lib_flex_grid_cell_window.la
 
-    lib_grid_cell_window_la_SOURCES = $(window)/grid_cell_window.cpp
+    lib_flex_grid_cell_window_la_SOURCES = $(window)/flex_grid_cell_window.cpp
 
 thread = src/thread
 threaddir = @abs_builddir@/thread
