@@ -2,7 +2,8 @@ build*
 sample
 test/ignore
 .cache
-autom4te.cache/
+libtool
+/autom4te.cache
 .ccls*
 config.log
 config.status
