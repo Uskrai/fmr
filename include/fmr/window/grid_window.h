@@ -1,16 +1,16 @@
 /*
- *  Copyright (c) 2020 Uskrai
- *  
+ *  Copyright (c) 2020-2021 Uskrai
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
@@ -19,16 +19,21 @@
 #define FMR_WINDOW_GRID_WINDOW
 
 #include <fmr/window/scrolledwindow.h>
+#include <fmr/window/grid_cell_window.h>
 #include <wx/sizer.h>
 
 namespace fmr
 {
+
+inline const wxWindowID GridCellWindowID = wxID_HIGHEST + 110;
 
 class GridWindow
     : public ScrolledWindow
 {
     protected:
         wxGridSizer *sizer_;
+        wxVector<GridCellWindow*> vec_cells_;
+        int cell_border_width_ = 0, cell_highlight_width_ = 0;
 
     public:
         GridWindow(
@@ -49,12 +54,24 @@ class GridWindow
             const wxString &name = wxPanelNameStr
         );
 
+        int GetCellBorderWidth() const
+        { return cell_border_width_; }
+
+        int GetCellHighlightPenWidth() const
+        { return cell_highlight_width_; }
+
+        void SetCellBorderWidth( int size );
+        void SetCellHighlightPenWidth( int width );
 
         bool CreateGrid( int rows = 0, int cols = 0, const wxSize &gap = wxDefaultSize );
 
+        void Add( GridCellWindow *window, const wxSize &size = wxDefaultSize );
+        void Add( wxWindow *window_cell, const wxSize &size = wxDefaultSize );
+        void Add( wxWindow *window_cell, int width, int height )
+        { Add( window_cell, wxSize( width, height ) ); }
+
     private:
         void OnKeyDown( wxKeyEvent &event );
-        void OnPaint( wxPaintEvent &event );
         wxDECLARE_EVENT_TABLE();
 };
 

@@ -99,8 +99,9 @@ bool Window::Open( std::shared_ptr<AbstractOpenableHandler> handler )
         idx++;
     }
 
-    int cur_row = 0;
-    int cur_col = 0;
+    SetCellBorderWidth( 10 );
+    SetCellHighlightPenWidth( 3 );
+
     for ( auto &it : list_item )
     {
         auto renderer =  new ImageWindow(
@@ -113,16 +114,10 @@ bool Window::Open( std::shared_ptr<AbstractOpenableHandler> handler )
         renderer->SetBitmap( it.bitmap );
         renderer->SetStream( it.stream );
         renderer->SetBackgroundColour( *wxBLACK );
-        GetSizer()->Add( renderer );
+
+        Add( renderer, child_size );
 
         list_renderer_.push_back( renderer );
-
-        cur_col++;
-        if ( cur_col >= column )
-        {
-            cur_row += 1;
-            cur_col = 0;
-        }
     }
 
 
@@ -130,7 +125,6 @@ bool Window::Open( std::shared_ptr<AbstractOpenableHandler> handler )
     controller_.SetParameter( list_item );
     controller_.Load();
     Refresh();
-    GetSizer()->Layout();
     // GoToCell(0,0);
     handler_ = handler;
     return true;
