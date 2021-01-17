@@ -20,10 +20,16 @@
 
 #include <fmr/window/scrolledwindow.h>
 #include <fmr/window/flex_grid_cell_window.h>
+#include <fmr/common/vector.h>
 #include <wx/sizer.h>
+#include <wx/grid.h>
+
+#include <memory>
 
 namespace fmr
 {
+
+typedef wxGridCellCoords GridCellCoords;
 
 class FlexGridWindow
     : public ScrolledWindow
@@ -31,7 +37,7 @@ class FlexGridWindow
     protected:
         wxGridSizer *sizer_;
         wxVector<FlexGridCellWindow*> vec_cells_;
-        int selected_index_ = -1;
+        size_t selected_index_ = -1;
         int cell_border_width_ = 0, cell_highlight_width_ = 0;
 
     public:
@@ -59,6 +65,11 @@ class FlexGridWindow
         int GetCellHighlightPenWidth() const
         { return cell_highlight_width_; }
 
+        int GetRows() const
+        { return sizer_->GetRows(); }
+        int GetCols() const
+        { return sizer_->GetCols(); }
+
         void SetCellBorderWidth( int size );
         void SetCellHighlightPenWidth( int width );
 
@@ -66,6 +77,34 @@ class FlexGridWindow
 
         void Add( FlexGridCellWindow *window );
         void Add( wxWindow *window_cell );
+
+        bool IsExist( int index ) const;
+        bool IsExist( GridCellCoords cell ) const
+        { return IsExist( cell.GetRow(), cell.GetCol() ); }
+        bool IsExist( int row, int col ) const
+        { return IsExist( CellToIndex( row, col ) ); }
+
+        void SelectGridCursor( int index );
+        void SelectGridCursor( GridCellCoords cell )
+        { return SelectGridCursor( cell.GetRow(), cell.GetCol() ); }
+        void SelectGridCursor( int row, int col )
+        { return SelectGridCursor( CellToIndex( row, col ) ); }
+
+        void GoToCell( int index );
+        void GoToCell( GridCellCoords cell )
+        { return GoToCell( cell.GetRow(), cell.GetCol() ); }
+        void GoToCell( int row, int col )
+        { return GoToCell( CellToIndex( row, col ) ); }
+
+        void MakeCellVisible( int index );
+        void MakeCellVisible( GridCellCoords cell )
+        { return MakeCellVisible( cell.GetRow(), cell.GetCol() ); }
+        void MakeCellVisible( int row, int col )
+        { return MakeCellVisible( CellToIndex( row, col ) ); }
+
+        GridCellCoords IndexToCell( int index ) const;
+        int CellToIndex( GridCellCoords ) const;
+        int CellToIndex( int row, int col ) const;
 
     private:
         void OnKeyDown( wxKeyEvent &event );

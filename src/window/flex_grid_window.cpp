@@ -62,6 +62,7 @@ void FlexGridWindow::Add( FlexGridCellWindow *window )
     window->SetBorderWidth( GetCellBorderWidth() );
     window->SetHighlightPenWidth( GetCellHighlightPenWidth() );
     sizer_->Add( window );
+    vec_cells_.push_back( window );
 }
 
 void FlexGridWindow::Add( wxWindow *cell )
@@ -73,6 +74,74 @@ void FlexGridWindow::Add( wxWindow *cell )
     window->SetCellWindow( cell );
 
     Add( window );
+}
+
+bool FlexGridWindow::IsExist( int index ) const
+{ return Vector::IsExist( vec_cells_, index ); }
+
+GridCellCoords FlexGridWindow::IndexToCell( int index ) const
+{
+    if ( index < 0 )
+        return GridCellCoords( -1, -1 );
+
+    int col = index / GetCols();
+    int row = index - GetCols() * col;
+
+    return GridCellCoords( row, col );
+}
+
+int FlexGridWindow::CellToIndex( GridCellCoords cell ) const
+{
+    return CellToIndex( cell.GetRow(), cell.GetCol() );
+}
+
+int FlexGridWindow::CellToIndex( int row, int col ) const
+{
+    if ( row > GetRows() || col > GetCols() )
+        return -1;
+
+    int index = col * GetCols();
+    return index + row;
+}
+
+void FlexGridWindow::SelectGridCursor( int index )
+{
+    if ( !IsExist( index ) )
+        return;
+
+    if ( IsExist( selected_index_ ) )
+        vec_cells_.at( selected_index_ )->SetSelected( false );
+
+    vec_cells_.at( index )->SetSelected();
+    selected_index_ = index;
+}
+
+void FlexGridWindow::MakeCellVisible( int index )
+{
+    if ( IsExist( index ) )
+        return;
+
+    wxRect rect = vec_cells_.at( index )->GetRect();
+    wxRect view_rect( GetViewStart(), GetClientSize() );
+    wxPoint scroll_to = wxDefaultPosition;
+
+    if ( view_rect.GetLeft() > rect.GetLeft() )
+        scroll_to.x = rect.GetLeft();
+    else if ( view_rect.GetRight() < rect.GetRight() )
+        scroll_to.x = rect.GetRight() - view_rect.GetWidth();
+
+    if ( view_rect.GetTop() > rect.GetTop() )
+        scroll_to.y = rect.GetTop();
+    else if ( view_rect.GetBottom() < rect.GetBottom() )
+        scroll_to.y = rect.GetBottom() - view_rect.GetHeight();
+
+    Scroll( scroll_to );
+}
+
+void FlexGridWindow::GoToCell( int index )
+{
+    SelectGridCursor( index );
+    MakeCellVisible( index );
 }
 
 void FlexGridWindow::OnKeyDown( wxKeyEvent &event )
