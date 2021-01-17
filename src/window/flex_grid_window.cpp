@@ -166,29 +166,23 @@ void FlexGridWindow::SetCellHighlightPenWidth( int width )
 
 void FlexGridWindow::OnKeyDown( wxKeyEvent &event )
 {
-    if ( !IsExist( selected_index_ ) )
-    {
-        GoToCell(0);
-        Refresh();
-        event.Skip();
-        return;
-    }
-
     GridCellCoords cell = IndexToCell( selected_index_ );
 
-    if ( event.GetKeyCode() == WXK_UP )
-        cell.SetCol( cell.GetCol() - 1 );
+    if ( !IsExist( selected_index_ ) )
+        cell = IndexToCell( 0 );
 
-    if ( event.GetKeyCode() == WXK_DOWN )
+    else if ( event.GetKeyCode() == WXK_UP )
+        cell.SetCol( cell.GetCol() - 1 );
+    else if ( event.GetKeyCode() == WXK_DOWN )
         cell.SetCol( cell.GetCol() + 1 );
 
-    if ( event.GetKeyCode() == WXK_LEFT )
+    else if ( event.GetKeyCode() == WXK_LEFT )
         cell.SetRow( cell.GetRow() - 1 );
     else if ( event.GetKeyCode() == WXK_RIGHT )
         cell.SetRow( cell.GetRow() + 1 );
 
-    Refresh();
     GoToCell( cell );
+    Refresh();
 }
 
 } // namespace fmr
