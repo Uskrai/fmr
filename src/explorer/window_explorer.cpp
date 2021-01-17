@@ -27,7 +27,7 @@ namespace explorer
 {
 
 
-wxBEGIN_EVENT_TABLE( Window, GridWindow )
+wxBEGIN_EVENT_TABLE( Window, FlexGridWindow )
         EVT_COMMAND( kLoadThreadID, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
         EVT_COMMAND( kLoadThreadID, EVT_COMMAND_THREAD_COMPLETED, Window::OnThreadUpdate )
         EVT_CHAR_HOOK( Window::OnGridEnter )
@@ -40,7 +40,7 @@ Window::Window(
         const wxSize &size,
         const long &style,
         const wxString &name
-)   : GridWindow( parent, id, pos, size, style, name)
+)   : FlexGridWindow( parent, id, pos, size, style, name)
 {
     // HideColLabels();
     // HideRowLabels();
@@ -115,7 +115,7 @@ bool Window::Open( std::shared_ptr<AbstractOpenableHandler> handler )
         renderer->SetStream( it.stream );
         renderer->SetBackgroundColour( *wxBLACK );
 
-        Add( renderer, child_size );
+        Add( renderer );
 
         list_renderer_.push_back( renderer );
     }

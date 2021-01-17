@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_WINDOW_GRID_WINDOW
-#define FMR_WINDOW_GRID_WINDOW
+#ifndef FMR_WINDOW_FMR_GRID_WINDOW
+#define FMR_WINDOW_FMR_GRID_WINDOW
 
 #include <fmr/window/scrolledwindow.h>
 #include <fmr/window/grid_cell_window.h>
@@ -25,18 +25,17 @@
 namespace fmr
 {
 
-inline const wxWindowID GridCellWindowID = wxID_HIGHEST + 110;
-
-class GridWindow
+class FlexGridWindow
     : public ScrolledWindow
 {
     protected:
         wxGridSizer *sizer_;
         wxVector<GridCellWindow*> vec_cells_;
+        int selected_index_ = -1;
         int cell_border_width_ = 0, cell_highlight_width_ = 0;
 
     public:
-        GridWindow(
+        FlexGridWindow(
             wxWindow *parent,
             wxWindowID id,
             const wxPoint &pos = wxDefaultPosition,
@@ -65,10 +64,8 @@ class GridWindow
 
         bool CreateGrid( int rows = 0, int cols = 0, const wxSize &gap = wxDefaultSize );
 
-        void Add( GridCellWindow *window, const wxSize &size = wxDefaultSize );
-        void Add( wxWindow *window_cell, const wxSize &size = wxDefaultSize );
-        void Add( wxWindow *window_cell, int width, int height )
-        { Add( window_cell, wxSize( width, height ) ); }
+        void Add( GridCellWindow *window );
+        void Add( wxWindow *window_cell );
 
     private:
         void OnKeyDown( wxKeyEvent &event );
@@ -79,3 +76,4 @@ class GridWindow
 }; // namespace fmr
 
 #endif
+

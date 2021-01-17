@@ -18,7 +18,7 @@
 #ifndef FMR_EXPLORER_WINDOW
 #define FMR_EXPLORER_WINDOW
 
-#include <fmr/window/grid_window.h>
+#include <fmr/window/flex_grid_window.h>
 #include <fmr/explorer/common.h>
 #include <fmr/explorer/controller_explorer.h>
 #include <fmr/explorer/image_window_explorer.h>
@@ -40,7 +40,7 @@ namespace explorer
 
 
 class Window
-    : public GridWindow
+    : public FlexGridWindow
 {
     public:
         Window(

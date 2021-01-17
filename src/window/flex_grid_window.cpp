@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/window/grid_window.h>
+#include <fmr/window/flex_grid_window.h>
 #include <wx/dcclient.h>
 
 namespace fmr
 {
 
-wxBEGIN_EVENT_TABLE( GridWindow, ScrolledWindow )
-    EVT_KEY_DOWN( GridWindow::OnKeyDown )
+wxBEGIN_EVENT_TABLE( FlexGridWindow, ScrolledWindow )
+    EVT_KEY_DOWN( FlexGridWindow::OnKeyDown )
 wxEND_EVENT_TABLE()
 
-GridWindow::GridWindow(
+FlexGridWindow::FlexGridWindow(
         wxWindow *parent,
         wxWindowID id,
         const wxPoint &pos,
@@ -37,7 +37,7 @@ GridWindow::GridWindow(
     Create( parent, id, pos, size, style, name );
 }
 
-bool GridWindow::Create(
+bool FlexGridWindow::Create(
         wxWindow *parent,
         wxWindowID id,
         const wxPoint &pos,
@@ -50,21 +50,21 @@ bool GridWindow::Create(
             && CreateGrid();
 }
 
-bool GridWindow::CreateGrid( int rows, int cols, const wxSize &gap )
+bool FlexGridWindow::CreateGrid( int rows, int cols, const wxSize &gap )
 {
-    sizer_ = new wxFlexGridSizer( rows, cols, wxSize(10,10) );
+    sizer_ = new wxFlexGridSizer( rows, cols, gap );
     SetSizer( sizer_ );
     return sizer_;
 }
 
-void GridWindow::Add( GridCellWindow *window, const wxSize &size )
+void FlexGridWindow::Add( GridCellWindow *window )
 {
     window->SetBorderWidth( GetCellBorderWidth() );
     window->SetHighlightPenWidth( GetCellHighlightPenWidth() );
     sizer_->Add( window );
 }
 
-void GridWindow::Add( wxWindow *cell, const wxSize &size )
+void FlexGridWindow::Add( wxWindow *cell )
 {
     GridCellWindow *window;
     window = new GridCellWindow( this, wxID_ANY );
@@ -72,15 +72,15 @@ void GridWindow::Add( wxWindow *cell, const wxSize &size )
     cell->Reparent( window );
     window->SetCellWindow( cell );
 
-    Add( window, size );
+    Add( window );
 }
 
-void GridWindow::OnKeyDown( wxKeyEvent &event )
+void FlexGridWindow::OnKeyDown( wxKeyEvent &event )
 {
     event.Skip();
 }
 
-void GridWindow::SetCellBorderWidth( int border )
+void FlexGridWindow::SetCellBorderWidth( int border )
 {
     cell_border_width_ = border;
 
@@ -91,7 +91,7 @@ void GridWindow::SetCellBorderWidth( int border )
     Refresh();
 }
 
-void GridWindow::SetCellHighlightPenWidth( int width )
+void FlexGridWindow::SetCellHighlightPenWidth( int width )
 {
     cell_highlight_width_ = width;
 
@@ -104,3 +104,4 @@ void GridWindow::SetCellHighlightPenWidth( int width )
 
 
 } // namespace fmr
+
