@@ -50,6 +50,9 @@ class FlexGridCellWindow
         void SetSelected( bool is_selected = true )
         { is_selected_ = is_selected; }
 
+        bool IsSelected() const
+        { return is_selected_; }
+
         bool AcceptsFocus() const override
         { return false; }
 
