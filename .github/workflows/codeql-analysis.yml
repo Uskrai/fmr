@@ -67,6 +67,7 @@ jobs:
         # ./configure --prefix=$(realpath $(pwd)/..)
         # make -j3 && make install
         # cd .. && mkdir build && cd build
-        ../configure
+        # ../configure
+        sudo apt search libwx
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
