@@ -72,7 +72,7 @@ jobs:
         rm aux-build/config*
         autoreconf -ivf
         ./configure --disable-shared
-        for * in src; do ls -la $i; done
+        for i in src/*; do ls -la $i; done
         make -j10
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
