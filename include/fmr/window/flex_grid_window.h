@@ -67,6 +67,8 @@ class FlexGridWindow
         void Add( FlexGridCellWindow *window );
         void Add( wxWindow *window_cell );
 
+        void ClearCell();
+
         FlexGridCellWindow *GetSelectedCell()
         { return GetCellWindow( selected_index_ ); }
 
@@ -87,6 +89,9 @@ class FlexGridWindow
         { return SelectGridCursor( cell.GetRow(), cell.GetCol() ); }
         void SelectGridCursor( int row, int col )
         { return SelectGridCursor( CellToIndex( row, col ) ); }
+
+        void ResetCellPosition()
+        { selected_index_ = -1; }
 
         void GoToCell( size_t index );
         void GoToCell( GridCellCoords cell )

@@ -54,6 +54,9 @@ bool FlexGridWindow::CreateGrid( int rows, int cols, const wxSize &gap )
 {
     sizer_ = new wxFlexGridSizer( rows, cols, gap );
     SetSizer( sizer_ );
+    for ( auto &it : vec_cells_ )
+        sizer_->Add( it );
+
     return sizer_;
 }
 
@@ -74,6 +77,22 @@ void FlexGridWindow::Add( wxWindow *cell )
     window->SetCellWindow( cell );
 
     Add( window );
+}
+
+void FlexGridWindow::ClearCell()
+{
+    if ( sizer_ )
+        sizer_->Clear();
+
+    vec_cells_.clear();
+}
+
+FlexGridCellWindow *FlexGridWindow::GetCellWindow( size_t index )
+{
+    if ( IsExist( index ) )
+        return vec_cells_[index];
+
+    return nullptr;
 }
 
 bool FlexGridWindow::IsExist( size_t index ) const
