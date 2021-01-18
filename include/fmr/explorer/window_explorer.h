@@ -64,6 +64,12 @@ class Window
         bool Open( std::shared_ptr<AbstractOpenableHandler> handler );
         bool Open( const std::string &name );
 
+        bool OpenCell( int index );
+        bool OpenCell( int row, int col )
+        { return OpenCell( CellToIndex( row, col ) ); }
+        bool OpenCell( GridCellCoords cell )
+        { return OpenCell( cell.GetRow(), cell.GetCol() ); }
+
         void Select( std::string name );
 
         void Clear();

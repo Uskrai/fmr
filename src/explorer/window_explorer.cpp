@@ -137,6 +137,49 @@ bool Window::Open( const std::string &name )
     return Open( handler );
 }
 
+bool Window::OpenCell( int index )
+{
+    auto opening_cell = GetCellWindow( index );
+    if ( !opening_cell )
+        return false;
+
+    auto item = map_window_[ opening_cell->GetCellWindow() ];
+
+    if ( !item.stream )
+        return false;
+
+    std::string path = handler_->GetItemPath( *item.stream );
+
+    auto handler = std::shared_ptr<AbstractOpenableHandler>(
+                HandlerFactory::NewOpenableHandler( path )
+            );
+
+    if ( handler )
+    {
+        handler->Traverse();
+        for ( auto &it : handler->GetChild() )
+        {
+            handler->GetStream( it );
+            if (! wxImage::CanRead( *it.GetStream() ) )
+                return Open( path );
+        }
+
+        wxCommandEvent *event = new wxCommandEvent(
+                    EVT_OPEN_FILE,
+                    GetId()
+                );
+
+        event->SetString( path );
+
+        wxQueueEvent(
+                    GetParent(),
+                    event
+                );
+        return true;
+    }
+    return false;
+}
+
 void Window::Clear()
 {
     ClearCell( true );
@@ -155,70 +198,30 @@ void Window::OnThreadUpdate( wxCommandEvent &event )
 
 void Window::OnGridEnter( wxKeyEvent &event )
 {
-    // int key_code = event.GetKeyCode();
-    // if ( key_code == WXK_RETURN || key_code == WXK_NUMPAD_ENTER )
-    // {
-    //     size_t idx = 0;
-    //     for( const auto &it : list_cell_pos_ )
-    //     {
-    //         if ( it == selected_cell_ )
-    //         {
-    //             auto &stream = list_item_.at(idx).stream;
+    int key_code = event.GetKeyCode();
 
-    //             if ( !stream )
-    //                 return;
+    if ( key_code == WXK_RETURN || key_code == WXK_NUMPAD_ENTER )
+        if ( OpenCell( selected_index_ ) )
+            return;
 
-    //             std::string path = handler_->GetItemPath( *stream );
+    if ( key_code == WXK_BACK )
+    {
+        if ( handler_->GetParent() )
+        {
+            std::string curr_name = handler_->GetName();
+            std::string name = handler_->GetParent()->GetName();
+            std::shared_ptr<AbstractOpenableHandler> handler(
+                HandlerFactory::NewOpenableHandler( name )
+            );
 
-    //             auto handler = std::shared_ptr<AbstractHandler>(
-    //                 HandlerFactory::NewHandler( path )
-    //             );
+            Open( handler );
 
-    //             if ( !handler )
-    //                 return;
-
-    //             handler->Traverse( true );
-
-    //             if ( wxFileName::DirExists( path ) )
-    //                 for ( const auto &it : handler->GetChild() )
-    //                     if ( ! wxImage::CanRead( *it.GetStream() ) )
-    //                         return void( Open( path ) );
-
-    //             wxCommandEvent *open_event = new wxCommandEvent(
-    //                     EVT_OPEN_FILE,
-    //                     GetId()
-    //             );
-
-    //             open_event->SetString( path );
-
-    //             wxQueueEvent(
-    //                 GetParent(),
-    //                 open_event
-    //             );
-    //         }
-    //         idx++;
-    //     }
-    //     return;
-    // }
-
-    // if ( key_code == WXK_BACK )
-    // {
-    //     if ( handler_->GetParent() )
-    //     {
-    //         std::string curr_name = handler_->GetName();
-    //         std::string name = handler_->GetParent()->GetName();
-    //         std::shared_ptr<AbstractOpenableHandler> handler(
-    //             HandlerFactory::NewOpenableHandler( name )
-    //         );
-
-    //         Open( handler );
-
-    //         size_t idx = handler->Index( curr_name );
-    //         if ( handler->IsExist( idx ) )
-    //             Select( handler->Item( idx ).GetName() );
-    //     }
-    //     return;
-    // }
+            size_t idx = handler->Index( curr_name );
+            if ( handler->IsExist( idx ) )
+                Select( handler->Item( idx ).GetName() );
+            return;
+        }
+    }
     event.Skip();
 }
 
