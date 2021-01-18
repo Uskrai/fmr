@@ -76,10 +76,10 @@ void FlexGridWindow::Add( wxWindow *cell )
     Add( window );
 }
 
-bool FlexGridWindow::IsExist( int index ) const
+bool FlexGridWindow::IsExist( size_t index ) const
 { return Vector::IsExist( vec_cells_, index ); }
 
-GridCellCoords FlexGridWindow::IndexToCell( int index ) const
+GridCellCoords FlexGridWindow::IndexToCell( size_t index ) const
 {
     if ( index < 0 )
         return GridCellCoords( -1, -1 );
@@ -92,7 +92,7 @@ GridCellCoords FlexGridWindow::IndexToCell( int index ) const
 
 int FlexGridWindow::CellToIndex( int row, int col, bool no_continous ) const
 {
-    int index = col * GetCols() + row;
+    size_t index = col * GetCols() + row;
     if ( no_continous )
     {
         GridCellCoords cell = IndexToCell( index );
@@ -102,7 +102,7 @@ int FlexGridWindow::CellToIndex( int row, int col, bool no_continous ) const
     return index;
 }
 
-void FlexGridWindow::SelectGridCursor( int index )
+void FlexGridWindow::SelectGridCursor( size_t index )
 {
     if ( !IsExist( index ) )
         return;
@@ -114,7 +114,7 @@ void FlexGridWindow::SelectGridCursor( int index )
     selected_index_ = index;
 }
 
-void FlexGridWindow::MakeCellVisible( int index )
+void FlexGridWindow::MakeCellVisible( size_t index )
 {
     if ( !IsExist( index ) )
         return;
@@ -136,7 +136,7 @@ void FlexGridWindow::MakeCellVisible( int index )
     Scroll( scroll_to );
 }
 
-void FlexGridWindow::GoToCell( int index )
+void FlexGridWindow::GoToCell( size_t index )
 {
     SelectGridCursor( index );
     MakeCellVisible( index );

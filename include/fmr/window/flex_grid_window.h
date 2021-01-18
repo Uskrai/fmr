@@ -59,17 +59,6 @@ class FlexGridWindow
             const wxString &name = wxPanelNameStr
         );
 
-        int GetCellBorderWidth() const
-        { return cell_border_width_; }
-
-        int GetCellHighlightPenWidth() const
-        { return cell_highlight_width_; }
-
-        int GetRows() const
-        { return sizer_->GetRows(); }
-        int GetCols() const
-        { return sizer_->GetCols(); }
-
         void SetCellBorderWidth( int size );
         void SetCellHighlightPenWidth( int width );
 
@@ -93,25 +82,25 @@ class FlexGridWindow
         bool IsExist( int row, int col ) const
         { return IsExist( CellToIndex( row, col ) ); }
 
-        void SelectGridCursor( int index );
+        void SelectGridCursor( size_t index );
         void SelectGridCursor( GridCellCoords cell )
         { return SelectGridCursor( cell.GetRow(), cell.GetCol() ); }
         void SelectGridCursor( int row, int col )
         { return SelectGridCursor( CellToIndex( row, col ) ); }
 
-        void GoToCell( int index );
+        void GoToCell( size_t index );
         void GoToCell( GridCellCoords cell )
         { return GoToCell( cell.GetRow(), cell.GetCol() ); }
         void GoToCell( int row, int col )
         { return GoToCell( CellToIndex( row, col ) ); }
 
-        void MakeCellVisible( int index );
+        void MakeCellVisible( size_t index );
         void MakeCellVisible( GridCellCoords cell )
         { return MakeCellVisible( cell.GetRow(), cell.GetCol() ); }
         void MakeCellVisible( int row, int col )
         { return MakeCellVisible( CellToIndex( row, col ) ); }
 
-        GridCellCoords IndexToCell( int index ) const;
+        GridCellCoords IndexToCell( size_t index ) const;
         int CellToIndex( GridCellCoords cell, bool no_continous = false ) const
         { return CellToIndex( cell.GetRow(), cell.GetCol(), no_continous ); }
         int CellToIndex( int row, int col, bool no_continous = false ) const;
