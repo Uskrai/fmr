@@ -63,9 +63,9 @@ jobs:
         mkdir temp && cd temp
         git clone --single-branch --branch v3.0.5 --depth 1 https://github.com/wxWidgets/wxWidgets
         cd wxWidgets
-        ./configure --prefix=../
+        ./configure --prefix=$(realpath $(pwd)/..)
         make -j3 && make install
         cd .. && mkdir build && cd build
-        ../../configure --disable-shared --with-wx-prefix=../
+        ../../configure --disable-shared --with-wx-prefix=$(realpath $(pwd)/..)
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
