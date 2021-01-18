@@ -66,13 +66,13 @@ bool Window::Open( std::shared_ptr<AbstractOpenableHandler> handler )
     handler->Traverse( false );
 
     int column = 5;
-    int row = ceil(double(handler->Size()) / double(column));
+    int row = ceil(double(handler->Size()) / double(column) );
 
     Clear();
 
-    int both_size = GetSize().GetWidth() / column;
-    // SetDefaultRowSize( size );
-    // SetDefaultColSize( size );
+    // 11 * 2 * column is an offset from border
+    // and gap multiplied by column
+    int both_size = ( (GetSize().GetWidth() - (11 * 2 * column) ) / column);
 
     wxSize child_size = wxSize( both_size, both_size );
     wxSize best_bitmap_size = ImageWindow::GetBestBitmapSize(
@@ -82,8 +82,6 @@ bool Window::Open( std::shared_ptr<AbstractOpenableHandler> handler )
     controller_.SetThumbSize( best_bitmap_size );
 
 
-    // GetTable()->AppendRows( row );
-    // GetTable()->AppendCols( column );
     CreateGrid( row, column, wxSize( 1, 1 ) );
 
     std::vector<StreamBitmap> list_item;
@@ -92,41 +90,38 @@ bool Window::Open( std::shared_ptr<AbstractOpenableHandler> handler )
     size_t idx = 0;
     for ( auto &it : handler->GetChild() )
     {
-        list_item.at(idx).stream =
-            std::shared_ptr<SStream>( new SStream( it ) );
-        list_item.at(idx).bitmap =
-            std::shared_ptr<SBitmap>( new SBitmap() );
+        auto &item = list_item.at(idx);
+        item.stream = std::shared_ptr<SStream>( new SStream( it ) );
+        item.bitmap = std::shared_ptr<SBitmap>( new SBitmap() );
+
+        ImageWindow *image_cell_window = new ImageWindow(
+                    this,
+                    wxID_ANY,
+                    wxDefaultPosition,
+                    child_size
+                );
+
+        image_cell_window->SetBitmap( item.bitmap );
+        image_cell_window->SetStream( item.stream );
+        image_cell_window->SetBackgroundColour( *wxBLACK );
+
+        Add( image_cell_window );
+
+        map_window_.insert( std::make_pair( image_cell_window, item ) );
+
         idx++;
     }
 
     SetCellBorderWidth( 10 );
     SetCellHighlightPenWidth( 3 );
 
-    for ( auto &it : list_item )
-    {
-        auto renderer =  new ImageWindow(
-            this,
-            wxID_ANY,
-            wxDefaultPosition,
-            child_size
-        );
-
-        renderer->SetBitmap( it.bitmap );
-        renderer->SetStream( it.stream );
-        renderer->SetBackgroundColour( *wxBLACK );
-
-        Add( renderer );
-
-        list_renderer_.push_back( renderer );
-    }
-
-
     list_item_ = list_item;
     controller_.SetParameter( list_item );
     controller_.Load();
     Refresh();
-    // GoToCell(0,0);
     handler_ = handler;
+    Layout();
+    FitInside();
     return true;
 }
 
@@ -144,15 +139,13 @@ bool Window::Open( const std::string &name )
 
 void Window::Clear()
 {
-    // list_cell_pos_.clear();
+    ClearCell( true );
+    ResetCellPosition();
+    map_window_.clear();
     list_item_.clear();
     list_renderer_.clear();
     controller_.Clear();
     handler_.reset();
-    // if ( grid_table_->GetRowsCount() > 0 )
-        // grid_table_->DeleteRows( 0, grid_table_->GetRowsCount() );
-    // if ( grid_table_->GetColsCount() > 0 )
-        // grid_table_->DeleteCols( 0, grid_table_->GetColsCount() );
 }
 
 void Window::OnThreadUpdate( wxCommandEvent &event )

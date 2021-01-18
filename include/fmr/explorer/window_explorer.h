@@ -27,6 +27,7 @@
 #include <fmr/common/path.h>
 
 #include <memory>
+#include <map>
 
 class wxPanel;
 
@@ -42,6 +43,14 @@ namespace explorer
 class Window
     : public FlexGridWindow
 {
+    protected:
+        Controller controller_ = Controller( this );
+        std::map<wxWindow*, StreamBitmap> map_window_;
+        std::shared_ptr<AbstractOpenableHandler> handler_;
+        std::vector<SBitmap> list_bitmap_;
+        std::vector<StreamBitmap> list_item_;
+        std::vector<ImageWindow*> list_renderer_;
+
     public:
         Window(
             wxWindow *parent,
@@ -60,12 +69,6 @@ class Window
         void Clear();
         bool Destroy();
     protected:
-        Controller controller_ = Controller( this );
-        std::shared_ptr<AbstractOpenableHandler> handler_;
-        std::vector<SBitmap> list_bitmap_;
-        std::vector<StreamBitmap> list_item_;
-        std::vector<ImageWindow*> list_renderer_;
-
         // wxGridTableBase *grid_table_;
 
         // std::vector<wxGridCellCoords> list_cell_pos_;
