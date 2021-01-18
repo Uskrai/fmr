@@ -26,6 +26,7 @@ jobs:
         make
         sudo make install
         cd ..
+        autoreconf -ivf
     - name: configure
       run: ./configure
     - name: make
