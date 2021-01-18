@@ -67,7 +67,9 @@ jobs:
         # ./configure --prefix=$(realpath $(pwd)/..)
         # make -j3 && make install
         # cd .. && mkdir build && cd build
+        mv aux-build/*.m4 . && rm aux-build/*
         automake --add-missing && autoreconf
+        mv *.m4 aux-build
         mkdir build && cd build
         ../configure
         make -j10
