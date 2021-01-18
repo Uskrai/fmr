@@ -25,7 +25,7 @@ jobs:
         ./configure
         make
         sudo make install
-        cd ..
+        cd ../aux-build && libtoolize && cd ..
         autoreconf -ivf
     - name: configure
       run: ./configure
