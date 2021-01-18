@@ -35,7 +35,7 @@ class FlexGridWindow
     : public ScrolledWindow
 {
     protected:
-        wxGridSizer *sizer_;
+        wxGridSizer *sizer_ = nullptr;
         wxVector<FlexGridCellWindow*> vec_cells_;
         size_t selected_index_ = -1;
         int cell_border_width_ = 0, cell_highlight_width_ = 0;
