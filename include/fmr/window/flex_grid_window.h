@@ -67,7 +67,7 @@ class FlexGridWindow
         void Add( FlexGridCellWindow *window );
         void Add( wxWindow *window_cell );
 
-        void ClearCell();
+        void ClearCell( bool delete_child_window );
 
         FlexGridCellWindow *GetSelectedCell()
         { return GetCellWindow( selected_index_ ); }

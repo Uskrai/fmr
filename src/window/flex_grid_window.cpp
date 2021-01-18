@@ -79,10 +79,10 @@ void FlexGridWindow::Add( wxWindow *cell )
     Add( window );
 }
 
-void FlexGridWindow::ClearCell()
+void FlexGridWindow::ClearCell( bool delete_child_window )
 {
     if ( sizer_ )
-        sizer_->Clear();
+        sizer_->Clear( delete_child_window );
 
     vec_cells_.clear();
 }
