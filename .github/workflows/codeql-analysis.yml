@@ -68,6 +68,6 @@ jobs:
         # make -j3 && make install
         # cd .. && mkdir build && cd build
         # ../configure
-        sudo apt search libwx
+        sudo apt search libwx*-dev
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
