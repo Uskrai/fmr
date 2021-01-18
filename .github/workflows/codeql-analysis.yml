@@ -68,7 +68,7 @@ jobs:
         # make -j3 && make install
         # cd .. && mkdir build && cd build
         mkdir bk
-        mv aux-build/{*.m4,install-sh,install.sh,shtool} bk/ 
+        mv aux-build/{*.m4,*sh*} bk/ 
         rm aux-build/*
         automake --add-missing && autoreconf
         mv bk/* aux-build
