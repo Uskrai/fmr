@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reader/zoom_reader.h"
+#include <fmr/reader/zoom_reader.h>
+#include <fmr/bitmap/image_util.h>
 
-#include "bitmap/image_util.h"
 #include "wx/log.h"
 
 namespace fmr

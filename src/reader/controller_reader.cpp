@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reader/controller_reader.h"
-#include "handler/handler_factory.h"
+#include <fmr/reader/controller_reader.h>
+#include <fmr/handler/handler_factory.h>
 
 namespace fmr
 {

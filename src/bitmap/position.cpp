@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "bitmap/position.h"
+#include <fmr/bitmap/position.h>
 #include <wx/window.h>
 
 namespace fmr

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "explorer/window_explorer.h"
+#include <fmr/explorer/window_explorer.h>
 #include <wx/filename.h>
 
 namespace fmr
@@ -27,7 +27,7 @@ namespace explorer
 {
 
 
-wxBEGIN_EVENT_TABLE( Window, GridWindow )
+wxBEGIN_EVENT_TABLE( Window, FlexGridWindow )
         EVT_COMMAND( kLoadThreadID, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
         EVT_COMMAND( kLoadThreadID, EVT_COMMAND_THREAD_COMPLETED, Window::OnThreadUpdate )
         EVT_CHAR_HOOK( Window::OnGridEnter )
@@ -40,7 +40,7 @@ Window::Window(
         const wxSize &size,
         const long &style,
         const wxString &name
-)   : GridWindow( parent, id, pos, size, style, name)
+)   : FlexGridWindow( parent, id, pos, size, style, name)
 {
     // HideColLabels();
     // HideRowLabels();
@@ -66,13 +66,13 @@ bool Window::Open( std::shared_ptr<AbstractOpenableHandler> handler )
     handler->Traverse( false );
 
     int column = 5;
-    int row = ceil(double(handler->Size()) / double(column));
+    int row = ceil(double(handler->Size()) / double(column) );
 
     Clear();
 
-    int both_size = GetSize().GetWidth() / column;
-    // SetDefaultRowSize( size );
-    // SetDefaultColSize( size );
+    // 11 * 2 * column is an offset from border
+    // and gap multiplied by column
+    int both_size = ( (GetSize().GetWidth() - (11 * 2 * column) ) / column);
 
     wxSize child_size = wxSize( both_size, both_size );
     wxSize best_bitmap_size = ImageWindow::GetBestBitmapSize(
@@ -82,8 +82,6 @@ bool Window::Open( std::shared_ptr<AbstractOpenableHandler> handler )
     controller_.SetThumbSize( best_bitmap_size );
 
 
-    // GetTable()->AppendRows( row );
-    // GetTable()->AppendCols( column );
     CreateGrid( row, column, wxSize( 1, 1 ) );
 
     std::vector<StreamBitmap> list_item;
@@ -92,47 +90,38 @@ bool Window::Open( std::shared_ptr<AbstractOpenableHandler> handler )
     size_t idx = 0;
     for ( auto &it : handler->GetChild() )
     {
-        list_item.at(idx).stream =
-            std::shared_ptr<SStream>( new SStream( it ) );
-        list_item.at(idx).bitmap =
-            std::shared_ptr<SBitmap>( new SBitmap() );
+        auto &item = list_item.at(idx);
+        item.stream = std::shared_ptr<SStream>( new SStream( it ) );
+        item.bitmap = std::shared_ptr<SBitmap>( new SBitmap() );
+
+        ImageWindow *image_cell_window = new ImageWindow(
+                    this,
+                    wxID_ANY,
+                    wxDefaultPosition,
+                    child_size
+                );
+
+        image_cell_window->SetBitmap( item.bitmap );
+        image_cell_window->SetStream( item.stream );
+        image_cell_window->SetBackgroundColour( *wxBLACK );
+
+        Add( image_cell_window );
+
+        map_window_.insert( std::make_pair( image_cell_window, item ) );
+
         idx++;
     }
 
-    int cur_row = 0;
-    int cur_col = 0;
-    for ( auto &it : list_item )
-    {
-        auto renderer =  new ImageWindow(
-            this,
-            wxID_ANY,
-            wxDefaultPosition,
-            child_size
-        );
-
-        renderer->SetBitmap( it.bitmap );
-        renderer->SetStream( it.stream );
-        renderer->SetBackgroundColour( *wxBLACK );
-        GetSizer()->Add( renderer );
-
-        list_renderer_.push_back( renderer );
-
-        cur_col++;
-        if ( cur_col >= column )
-        {
-            cur_row += 1;
-            cur_col = 0;
-        }
-    }
-
+    SetCellBorderWidth( 10 );
+    SetCellHighlightPenWidth( 3 );
 
     list_item_ = list_item;
     controller_.SetParameter( list_item );
     controller_.Load();
     Refresh();
-    GetSizer()->Layout();
-    // GoToCell(0,0);
     handler_ = handler;
+    Layout();
+    FitInside();
     return true;
 }
 
@@ -148,17 +137,97 @@ bool Window::Open( const std::string &name )
     return Open( handler );
 }
 
+bool Window::OpenCell( int index )
+{
+    auto opening_cell = GetCellWindow( index );
+    if ( !opening_cell )
+        return false;
+
+    auto item = map_window_[ opening_cell->GetCellWindow() ];
+
+    if ( !item.stream )
+        return false;
+
+    std::string path = handler_->GetItemPath( *item.stream );
+
+    auto handler = std::shared_ptr<AbstractOpenableHandler>(
+                HandlerFactory::NewOpenableHandler( path )
+            );
+
+    if ( handler )
+    {
+        handler->Traverse();
+        for ( auto &it : handler->GetChild() )
+        {
+            handler->GetStream( it );
+            if (! wxImage::CanRead( *it.GetStream() ) )
+                return Open( path );
+        }
+
+        wxCommandEvent *event = new wxCommandEvent(
+                    EVT_OPEN_FILE,
+                    GetId()
+                );
+
+        event->SetString( path );
+
+        wxQueueEvent(
+                    GetParent(),
+                    event
+                );
+        return true;
+    }
+    return false;
+}
+
+bool Window::OpenParent( const std::string &path )
+{
+    auto child_handler = std::unique_ptr<AbstractHandler>(
+                HandlerFactory::NewHandler( path )
+            );
+
+    if ( ! child_handler )
+        return false;
+
+    std::string parent_path = handler_->GetParent()->GetName();
+
+    if ( ! Open( parent_path ) )
+        return false;
+
+    std::shared_ptr<AbstractOpenableHandler> handler(
+                HandlerFactory::NewOpenableHandler( parent_path )
+            );
+
+    if ( ! handler )
+        return false;
+
+    handler->Traverse();
+
+    size_t idx = handler->Index( path );
+    if ( handler->IsExist( idx ) )
+        Select( handler->Item( idx ).GetName() );
+
+    return true;
+}
+
+bool Window::OpenParent()
+{
+    if ( ! handler_ )
+        return false;
+
+    std::string path = handler_->GetName();
+    return OpenParent( path );
+}
+
 void Window::Clear()
 {
-    // list_cell_pos_.clear();
+    ClearCell( true );
+    ResetCellPosition();
+    map_window_.clear();
     list_item_.clear();
     list_renderer_.clear();
     controller_.Clear();
     handler_.reset();
-    // if ( grid_table_->GetRowsCount() > 0 )
-        // grid_table_->DeleteRows( 0, grid_table_->GetRowsCount() );
-    // if ( grid_table_->GetColsCount() > 0 )
-        // grid_table_->DeleteCols( 0, grid_table_->GetColsCount() );
 }
 
 void Window::OnThreadUpdate( wxCommandEvent &event )
@@ -168,87 +237,35 @@ void Window::OnThreadUpdate( wxCommandEvent &event )
 
 void Window::OnGridEnter( wxKeyEvent &event )
 {
-    // int key_code = event.GetKeyCode();
-    // if ( key_code == WXK_RETURN || key_code == WXK_NUMPAD_ENTER )
-    // {
-    //     size_t idx = 0;
-    //     for( const auto &it : list_cell_pos_ )
-    //     {
-    //         if ( it == selected_cell_ )
-    //         {
-    //             auto &stream = list_item_.at(idx).stream;
+    int key_code = event.GetKeyCode();
 
-    //             if ( !stream )
-    //                 return;
+    if ( key_code == WXK_RETURN || key_code == WXK_NUMPAD_ENTER )
+        if ( OpenCell( selected_index_ ) )
+            return;
 
-    //             std::string path = handler_->GetItemPath( *stream );
+    if ( key_code == WXK_BACK )
+        if ( OpenParent() )
+            return;
 
-    //             auto handler = std::shared_ptr<AbstractHandler>(
-    //                 HandlerFactory::NewHandler( path )
-    //             );
-
-    //             if ( !handler )
-    //                 return;
-
-    //             handler->Traverse( true );
-
-    //             if ( wxFileName::DirExists( path ) )
-    //                 for ( const auto &it : handler->GetChild() )
-    //                     if ( ! wxImage::CanRead( *it.GetStream() ) )
-    //                         return void( Open( path ) );
-
-    //             wxCommandEvent *open_event = new wxCommandEvent(
-    //                     EVT_OPEN_FILE,
-    //                     GetId()
-    //             );
-
-    //             open_event->SetString( path );
-
-    //             wxQueueEvent(
-    //                 GetParent(),
-    //                 open_event
-    //             );
-    //         }
-    //         idx++;
-    //     }
-    //     return;
-    // }
-
-    // if ( key_code == WXK_BACK )
-    // {
-    //     if ( handler_->GetParent() )
-    //     {
-    //         std::string curr_name = handler_->GetName();
-    //         std::string name = handler_->GetParent()->GetName();
-    //         std::shared_ptr<AbstractOpenableHandler> handler(
-    //             HandlerFactory::NewOpenableHandler( name )
-    //         );
-
-    //         Open( handler );
-
-    //         size_t idx = handler->Index( curr_name );
-    //         if ( handler->IsExist( idx ) )
-    //             Select( handler->Item( idx ).GetName() );
-    //     }
-    //     return;
-    // }
-    // event.Skip();
+    event.Skip();
 }
 
 void Window::Select( std::string name )
 {
+    if ( !handler_ )
+        return;
+
     name = Path::GetName( name );
 
-    // size_t idx = 0;
-    // for ( const auto &it : list_cell_pos_ )
-    // {
-    //     // auto renderer = list_renderer_[idx];
-    //     // if ( renderer->GetStream() )
-    //     //     if ( renderer->GetStream()->GetName() == name )
-    //     //         return GoToCell( it );
+    for ( size_t idx = 0; idx < list_item_.size(); idx++ )
+    {
+        auto &it = list_item_.at(idx);
+        if ( ! it.stream )
+            continue;
 
-    //     idx++;
-    // }
+        if ( it.stream->GetName() == name )
+            return GoToCell( idx );
+    }
 }
 
 // void Window::OnGridSelect( wxGridEvent &event )
@@ -272,3 +289,4 @@ void Window::Select( std::string name )
 }; // namespace explorer
 
 }; // namespace fmr
+

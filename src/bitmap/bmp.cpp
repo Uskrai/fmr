@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "bitmap/bmp.h"
+#include <fmr/bitmap/bmp.h>
 
 namespace fmr
 {

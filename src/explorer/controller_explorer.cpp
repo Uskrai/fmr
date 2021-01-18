@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "explorer/controller_explorer.h"
-#include "base/vector.h"
+#include <fmr/explorer/controller_explorer.h>
+#include <fmr/common/vector.h>
 
 #include <wx/log.h>
 

@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reader/load_reader.h"
-#include "bitmap/image_util.h"
+#include <fmr/reader/load_reader.h>
+#include <fmr/bitmap/image_util.h>
+
 #include <wx/log.h>
 
 namespace fmr

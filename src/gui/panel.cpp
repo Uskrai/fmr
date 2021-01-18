@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "gui/panel.h"
-#include "base/path.h"
-#include "base/config.h"
-#include "handler/abstract_handler.h"
+#include <fmr/gui/panel.h>
+#include <fmr/common/path.h>
+#include <fmr/common/config.h>
+#include <fmr/handler/abstract_handler.h>
 
 #include <wx/sizer.h>
 

@@ -15,9 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "thread/thread.h"
-
-#include "window/scrolledwindow.h"
+#include <fmr/thread/thread.h>
 
 namespace fmr
 {
@@ -75,7 +73,6 @@ bool ThreadController::Wait( int thread_id, wxCriticalSection &lock )
 
 bool ThreadController::DeleteThread( int thread_id, wxCriticalSection &lock )
 {
-    wxStopWatch sw;
     if ( Delete( thread_id, lock ) )
     {
         return Wait( thread_id, lock );

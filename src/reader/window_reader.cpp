@@ -15,11 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "reader/window_reader.h"
-
-#include "base/config.h"
-#include "bitmap/bitmap.h"
-#include "handler/handler_factory.h"
+#include <fmr/reader/window_reader.h>
+#include <fmr/bitmap/bitmap.h>
+#include <fmr/handler/handler_factory.h>
 
 #include <wx/log.h>
 #include <wx/scrolbar.h>
