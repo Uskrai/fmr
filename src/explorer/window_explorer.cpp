@@ -252,18 +252,20 @@ void Window::OnGridEnter( wxKeyEvent &event )
 
 void Window::Select( std::string name )
 {
+    if ( !handler_ )
+        return;
+
     name = Path::GetName( name );
 
-    // size_t idx = 0;
-    // for ( const auto &it : list_cell_pos_ )
-    // {
-    //     // auto renderer = list_renderer_[idx];
-    //     // if ( renderer->GetStream() )
-    //     //     if ( renderer->GetStream()->GetName() == name )
-    //     //         return GoToCell( it );
+    for ( size_t idx = 0; idx < list_item_.size(); idx++ )
+    {
+        auto &it = list_item_.at(idx);
+        if ( ! it.stream )
+            continue;
 
-    //     idx++;
-    // }
+        if ( it.stream->GetName() == name )
+            return GoToCell( idx );
+    }
 }
 
 // void Window::OnGridSelect( wxGridEvent &event )
