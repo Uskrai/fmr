@@ -69,5 +69,6 @@ jobs:
         # make -j3 && make install
         # cd .. && mkdir build && cd build
         ../configure
+        make -j10
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
