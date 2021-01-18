@@ -60,7 +60,6 @@ jobs:
     #    uses a compiled language
 
     - run: |
-        mkdir temp && cd temp
         sudo apt install libwxsqlite3-3.0-dev libwxsqlite3-3.0-dev libwxgtk-webview3.0-gtk3-dev\
               libwxgtk-media3.0-dev libwxbase3.0-dev
         # git clone --single-branch --branch v3.0.5 --depth 1 https://github.com/wxWidgets/wxWidgets
@@ -68,6 +67,8 @@ jobs:
         # ./configure --prefix=$(realpath $(pwd)/..)
         # make -j3 && make install
         # cd .. && mkdir build && cd build
+        autoreconf
+        mkdir build && cd build
         ../configure
         make -j10
     - name: Perform CodeQL Analysis
