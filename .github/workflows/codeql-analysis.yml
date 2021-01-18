@@ -69,6 +69,7 @@ jobs:
         # mkdir bk
         # mv aux-build/{*.m4,*sh*} bk/ 
         # rm aux-build/*
+        rm aux-build/config*
         autoreconf -ivf
         ./configure --disable-shared
         make -j10
