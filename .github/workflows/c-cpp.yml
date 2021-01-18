@@ -18,13 +18,14 @@ jobs:
         sudo apt install libwxsqlite3-3.0-dev libwxsqlite3-3.0-dev libwxgtk-webview3.0-gtk3-dev\
               libwxgtk-media3.0-dev libwxbase3.0-dev autotools-dev
     - name : install automake
-          wget http://ftp.gnu.org/gnu/automake/automake-1.16.tar.gz
-          tar xvfz automake-1.16.tar.gz
-          cd automake-1.16
-          ./configure
-          make
-          make install
-          cd ..
+      run : |
+        wget http://ftp.gnu.org/gnu/automake/automake-1.16.tar.gz
+        tar xvfz automake-1.16.tar.gz
+        cd automake-1.16
+        ./configure
+        make
+        make install
+        cd ..
     - name: configure
       run: ./configure
     - name: make
