@@ -54,7 +54,8 @@ class StreamBitmapEvent
             stream_bitmap_ = other.stream_bitmap_;
         }
 
-        StreamBitmapEvent Clone() { return StreamBitmapEvent( *this ); }
+        using wxCommandEvent::Clone;
+        wxEvent *Clone() { return new StreamBitmapEvent( *this ); }
 
         StreamBitmap &GetStreamBitmap() { return stream_bitmap_; }
 
