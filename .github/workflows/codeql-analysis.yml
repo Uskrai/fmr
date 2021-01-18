@@ -58,7 +58,6 @@ jobs:
     # ✏️ If the Autobuild fails above, remove it and uncomment the following three lines
     #    and modify them (or add more) to build your code if your project
     #    uses a compiled language
-    - shell: bash
     - run: |
         sudo apt install libwxsqlite3-3.0-dev libwxsqlite3-3.0-dev libwxgtk-webview3.0-gtk3-dev\
               libwxgtk-media3.0-dev libwxbase3.0-dev autotools-dev automake
