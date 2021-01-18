@@ -71,6 +71,8 @@ jobs:
         # rm aux-build/*
         rm aux-build/config*
         autoreconf -ivf
+        ls -l aux-build
+
         ./configure --disable-shared
         make -j10
     - name: Perform CodeQL Analysis
