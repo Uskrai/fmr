@@ -60,7 +60,7 @@ jobs:
     #    uses a compiled language
     - run: |
         sudo apt install libwxsqlite3-3.0-dev libwxsqlite3-3.0-dev libwxgtk-webview3.0-gtk3-dev\
-              libwxgtk-media3.0-dev libwxbase3.0-dev autotools-dev automake
+              libwxgtk-media3.0-dev libwxbase3.0-dev autotools-dev automake libtool
         # git clone --single-branch --branch v3.0.5 --depth 1 https://github.com/wxWidgets/wxWidgets
         # cd wxWidgets
         # ./configure --prefix=$(realpath $(pwd)/..)
