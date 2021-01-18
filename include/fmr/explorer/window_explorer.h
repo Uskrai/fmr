@@ -70,6 +70,9 @@ class Window
         bool OpenCell( GridCellCoords cell )
         { return OpenCell( cell.GetRow(), cell.GetCol() ); }
 
+        bool OpenParent();
+        bool OpenParent( const std::string &path );
+
         void Select( std::string name );
 
         void Clear();

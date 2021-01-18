@@ -180,6 +180,45 @@ bool Window::OpenCell( int index )
     return false;
 }
 
+bool Window::OpenParent( const std::string &path )
+{
+    auto child_handler = std::unique_ptr<AbstractHandler>(
+                HandlerFactory::NewHandler( path )
+            );
+
+    if ( ! child_handler )
+        return false;
+
+    std::string parent_path = handler_->GetParent()->GetName();
+
+    if ( ! Open( parent_path ) )
+        return false;
+
+    std::shared_ptr<AbstractOpenableHandler> handler(
+                HandlerFactory::NewOpenableHandler( parent_path )
+            );
+
+    if ( ! handler )
+        return false;
+
+    handler->Traverse();
+
+    size_t idx = handler->Index( path );
+    if ( handler->IsExist( idx ) )
+        Select( handler->Item( idx ).GetName() );
+
+    return true;
+}
+
+bool Window::OpenParent()
+{
+    if ( ! handler_ )
+        return false;
+
+    std::string path = handler_->GetName();
+    return OpenParent( path );
+}
+
 void Window::Clear()
 {
     ClearCell( true );
@@ -205,23 +244,9 @@ void Window::OnGridEnter( wxKeyEvent &event )
             return;
 
     if ( key_code == WXK_BACK )
-    {
-        if ( handler_->GetParent() )
-        {
-            std::string curr_name = handler_->GetName();
-            std::string name = handler_->GetParent()->GetName();
-            std::shared_ptr<AbstractOpenableHandler> handler(
-                HandlerFactory::NewOpenableHandler( name )
-            );
-
-            Open( handler );
-
-            size_t idx = handler->Index( curr_name );
-            if ( handler->IsExist( idx ) )
-                Select( handler->Item( idx ).GetName() );
+        if ( OpenParent() )
             return;
-        }
-    }
+
     event.Skip();
 }
 
