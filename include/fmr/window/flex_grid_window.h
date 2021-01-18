@@ -78,7 +78,16 @@ class FlexGridWindow
         void Add( FlexGridCellWindow *window );
         void Add( wxWindow *window_cell );
 
-        bool IsExist( int index ) const;
+        FlexGridCellWindow *GetSelectedCell()
+        { return GetCellWindow( selected_index_ ); }
+
+        FlexGridCellWindow *GetCellWindow( size_t index );
+        FlexGridCellWindow *GetCellWindow( GridCellCoords cell )
+        { return GetCellWindow( cell.GetRow(), cell.GetCol() ); }
+        FlexGridCellWindow *GetCellWindow( int row, int col )
+        { return GetCellWindow( CellToIndex( row, col ) ); }
+
+        bool IsExist( size_t index ) const;
         bool IsExist( GridCellCoords cell ) const
         { return IsExist( cell.GetRow(), cell.GetCol() ); }
         bool IsExist( int row, int col ) const
@@ -106,6 +115,17 @@ class FlexGridWindow
         int CellToIndex( GridCellCoords cell, bool no_continous = false ) const
         { return CellToIndex( cell.GetRow(), cell.GetCol(), no_continous ); }
         int CellToIndex( int row, int col, bool no_continous = false ) const;
+
+        int GetCellBorderWidth() const
+        { return cell_border_width_; }
+
+        int GetCellHighlightPenWidth() const
+        { return cell_highlight_width_; }
+
+        int GetRows() const
+        { return sizer_->GetRows(); }
+        int GetCols() const
+        { return sizer_->GetCols(); }
 
     private:
         void OnKeyDown( wxKeyEvent &event );
