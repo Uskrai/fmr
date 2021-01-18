@@ -17,6 +17,8 @@ jobs:
       run : |
         sudo apt install libwxsqlite3-3.0-dev libwxsqlite3-3.0-dev libwxgtk-webview3.0-gtk3-dev\
               libwxgtk-media3.0-dev libwxbase3.0-dev autotools-dev automake libtool
+    - name : reinstall
+      run : autoreconf -ivf
     - name: configure
       run: ./configure
     - name: make
