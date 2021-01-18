@@ -24,7 +24,7 @@ jobs:
         cd automake-1.16
         ./configure
         make
-        make install
+        sudo make install
         cd ..
     - name: configure
       run: ./configure
