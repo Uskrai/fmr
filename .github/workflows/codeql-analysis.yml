@@ -70,8 +70,7 @@ jobs:
         # mv aux-build/{*.m4,*sh*} bk/ 
         # rm aux-build/*
         autoreconf -ivf
-        mkdir build && cd build
-        ../configure --disable-shared
+        ./configure --disable-shared
         make -j10
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
