@@ -61,7 +61,7 @@ jobs:
 
     - run: |
         mkdir temp && cd temp
-        sudo apt install libgtk-3-dev libwxbase3.0-0v5 libwxgtk3.0-gtk3-0v5 libwxgtk-webview3.0-gtk3-0v5
+        sudo apt install libwxbase3.0-0v5 libwxgtk3.0-gtk3-0v5 libwxgtk-webview3.0-gtk3-0v5
         # git clone --single-branch --branch v3.0.5 --depth 1 https://github.com/wxWidgets/wxWidgets
         # cd wxWidgets
         # ./configure --prefix=$(realpath $(pwd)/..)
