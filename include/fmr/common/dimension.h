@@ -76,6 +76,25 @@ namespace dimension
         return wxORIENTATION_MASK;
     }
 
+    /**
+    * @brief: return orientation from wxDirection
+    *
+    * @param: direction to check the orientation
+    *
+    * @return: will return the orientation respectively
+    * will return wxBOTH if not found ( not up,down,left, or right )
+    */
+    inline wxOrientation GetOrient( const wxDirection &direction )
+    {
+        if ( direction == wxUP || direction == wxDOWN )
+            return wxVERTICAL;
+
+        if ( direction == wxLEFT || direction == wxRIGHT )
+            return wxHORIZONTAL;
+
+        return wxBOTH;
+    }
+
     inline wxPoint Make( const wxPoint &pt, wxOrientation orient, int pos )
     {
         wxPoint temp( pt );

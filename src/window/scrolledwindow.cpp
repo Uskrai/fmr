@@ -214,7 +214,10 @@ void ScrolledWindow::OnScrollLine( wxScrollWinEvent &event )
     int step = pos - scroll_pos;
     wxDirection direction = dimension::GetDirection( orient, step );
     bool is_top = scroll_pos == 0;
+
     bool is_bottom = scroll_pos == bottom_edge;
+    is_bottom = is_bottom || GetScrollRange( orient ) < dimension::Get( GetClientSize(), orient );
+
     bool is_below_bottom = is_bottom && pos >= bottom_edge;
     bool is_over_top = is_top && pos <= 0;
     bool is_edge = (is_top && is_over_top) || (is_bottom && is_below_bottom );
