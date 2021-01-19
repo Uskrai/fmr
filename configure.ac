@@ -37,7 +37,7 @@ AC_CONFIG_FILES([Makefile test/Makefile])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 
 AM_PROG_AR([act-if-fail])
-LT_INIT([shared disable-static])
+LT_INIT([shared disable-static win32-dll])
 
 # check for os
 build_linux=no
@@ -67,7 +67,7 @@ AX_CXX_COMPILE_STDCXX([17],[noext],[mandatory])
 if test "$HAVE_CXX17" != 1; then
 	AC_MSG_ERROR([This Application need c++17 support])
 fi
-CXXFLAGS="$CXXFLAGS -std=c++17"
+# CXXFLAGS="$CXXFLAGS -std=c++17"
 
 # check for libraries
 AM_OPTIONS_WXCONFIG
