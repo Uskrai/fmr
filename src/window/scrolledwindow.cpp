@@ -110,6 +110,11 @@ void ScrolledWindow::OnPaint( wxPaintEvent &event )
 
 void ScrolledWindow::OnScroll( wxScrollWinEvent &event )
 {
+    wxOrientation orient = dimension::GetOrient( event.GetOrientation() );
+    if ( orient == wxVERTICAL )
+        DoScroll( -1, event.GetPosition() );
+    else if ( orient == wxHORIZONTAL )
+        DoScroll( event.GetPosition(), -1 );
 }
 
 void ScrolledWindow::AdjustScrollBar()
@@ -221,9 +226,7 @@ void ScrolledWindow::OnScrollLine( wxScrollWinEvent &event )
     bool is_edge = (is_top && is_over_top) || (is_bottom && is_below_bottom );
 
     if ( !is_edge || direction == wxALL )
-    {
-        Scroll( orient, step );
-    }
+        event.Skip();
     else
     {
         // this will inverse the direction
@@ -300,6 +303,7 @@ void ScrolledWindow::OnMouseWheel( wxMouseEvent &event )
 
 void ScrolledWindow::OnMouseMotion( wxMouseEvent &event )
 {
+    // TODO: make this member var
     static wxPoint lastPos;
     // only scroll for default if there is
     // no modifier ( ctrl,alt,shift,etc )
@@ -328,10 +332,6 @@ void ScrolledWindow::OnMouseMotion( wxMouseEvent &event )
 
 void ScrolledWindow::OnScrollThumbTrack( wxScrollWinEvent &event )
 {
-    wxOrientation orient = dimension::GetOrient(  event.GetOrientation() );
-    wxPoint pos = GetViewStart();
-    dimension::Set( pos, orient, event.GetPosition() );
-    Scroll( pos );
     event.Skip();
 }
 
