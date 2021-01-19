@@ -85,6 +85,8 @@ class ScrolledWindow : public wxScrolledCanvas
         void OnKey( wxKeyEvent &event );
         wxTimer m_timer;
     private:
+        void BindEvent();
+
         void OnSize( wxSizeEvent &event );
         void OnPaint( wxPaintEvent &event );
         void OnMouseWheel( wxMouseEvent &event );
@@ -97,10 +99,8 @@ class ScrolledWindow : public wxScrolledCanvas
         void OnLineDown( wxScrollWinEvent &event );
         virtual void OnDraw( wxDC &dc ) {};
 
-        wxDECLARE_EVENT_TABLE();
-
         void DoSetVirtualSize( int width, int height );
-        virtual void DoPrepareDC( wxDC &dc );
+        // virtual void DoPrepareDC( wxDC &dc );
         void DoScrollLine( wxEventType type, wxOrientation orient, int step );
 };
 

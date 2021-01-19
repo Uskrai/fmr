@@ -76,6 +76,25 @@ namespace dimension
         return wxORIENTATION_MASK;
     }
 
+    /**
+    * @brief: return orientation from wxDirection
+    *
+    * @param: direction to check the orientation
+    *
+    * @return: will return the orientation respectively
+    * will return wxBOTH if not found ( not up,down,left, or right )
+    */
+    inline wxOrientation GetOrient( const wxDirection &direction )
+    {
+        if ( direction == wxUP || direction == wxDOWN )
+            return wxVERTICAL;
+
+        if ( direction == wxLEFT || direction == wxRIGHT )
+            return wxHORIZONTAL;
+
+        return wxBOTH;
+    }
+
     inline wxPoint Make( const wxPoint &pt, wxOrientation orient, int pos )
     {
         wxPoint temp( pt );
@@ -83,10 +102,26 @@ namespace dimension
         return temp;
     }
 
-    // wxDirection GetDirection( const wxPoint &pos, const wxOrientation &orient )
-    // {
-        // return 
-    // }
+    /**
+    * @brief: return Direction from wxKeyEvent
+    *
+    * @param: key_code return value from wxKeyEvent.GetKeyCode()
+    *
+    * @return: return the respective Direction
+    * will return wxALL if not found
+    */
+    inline wxDirection GetDirection( int key_code )
+    {
+        if ( key_code == WXK_UP )
+            return wxUP;
+        else if ( key_code == WXK_DOWN )
+            return wxDOWN;
+        else if ( key_code == WXK_LEFT )
+            return wxLEFT;
+        else if ( key_code == WXK_RIGHT )
+            return wxRIGHT;
+        return wxALL;
+    }
 }
 
 #endif

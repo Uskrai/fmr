@@ -101,9 +101,10 @@ bool Window::Open( std::shared_ptr<AbstractOpenableHandler> handler )
                     child_size
                 );
 
+        image_cell_window->SetBackgroundColour( *wxBLACK );
+        image_cell_window->SetForegroundColour( *wxWHITE );
         image_cell_window->SetBitmap( item.bitmap );
         image_cell_window->SetStream( item.stream );
-        image_cell_window->SetBackgroundColour( *wxBLACK );
 
         Add( image_cell_window );
 
@@ -264,7 +265,7 @@ void Window::Select( std::string name )
             continue;
 
         if ( it.stream->GetName() == name )
-            return GoToCell( idx );
+            GoToCell( idx );
     }
 }
 

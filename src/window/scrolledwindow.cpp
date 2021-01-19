@@ -16,24 +16,12 @@
  */
 
 #include <fmr/window/scrolledwindow.h>
+#include <fmr/common/event.h>
 #include <fmr/common/dimension.h>
 #include <wx/scrolbar.h>
 #include <wx/dc.h>
 #include <wx/dcclient.h>
 #include <wx/event.h>
-
-wxBEGIN_EVENT_TABLE( ScrolledWindow, wxScrolledCanvas )
-    EVT_SIZE( ScrolledWindow::OnSize )
-    EVT_PAINT( ScrolledWindow::OnPaint )
-    EVT_KEY_DOWN( ScrolledWindow::OnKey )
-    EVT_MOUSEWHEEL( ScrolledWindow::OnMouseWheel )
-    EVT_MOTION( ScrolledWindow::OnMouseMotion )
-    EVT_SCROLLWIN_LINEUP( ScrolledWindow::OnScrollLine )
-    EVT_SCROLLWIN_LINEDOWN ( ScrolledWindow::OnScrollLine )
-    EVT_SCROLLWIN_THUMBTRACK( ScrolledWindow::OnScrollThumbTrack )
-    EVT_SCROLLWIN( ScrolledWindow::OnScroll )
-    EVT_TIMER( ScrolledTimerID, ScrolledWindow::OnSetVirtualSize)
-wxEND_EVENT_TABLE()
 
 ScrolledWindow::ScrolledWindow( wxWindow *parent,
                                 wxWindowID id,
@@ -63,7 +51,36 @@ bool ScrolledWindow::Create(    wxWindow *parent,
     m_timer.SetOwner( this, ScrolledTimerID );
     CreateScrollBar( wxBOTH );
     SetVirtualSize(0,0);
+    BindEvent();
     return ret;
+}
+
+void ScrolledWindow::BindEvent()
+{
+    std::vector<wxEventTypeTag<wxScrollWinEvent>> scroll_win_event = {
+        wxEVT_SCROLLWIN_TOP,
+        wxEVT_SCROLLWIN_BOTTOM,
+        wxEVT_SCROLLWIN_LINEUP,
+        wxEVT_SCROLLWIN_LINEDOWN,
+        wxEVT_SCROLLWIN_PAGEUP,
+        wxEVT_SCROLLWIN_PAGEDOWN,
+        wxEVT_SCROLLWIN_THUMBTRACK,
+        wxEVT_SCROLLWIN_THUMBRELEASE
+    };
+
+    // bind the scroll_event first, i don't know why
+    // the event order is descending
+    event::Bind( scroll_win_event, &ScrolledWindow::OnScroll, this );
+
+    Bind( wxEVT_SIZE, &ScrolledWindow::OnSize, this );
+    Bind( wxEVT_PAINT, &ScrolledWindow::OnPaint, this );
+    Bind( wxEVT_KEY_DOWN, &ScrolledWindow::OnKey, this );
+    Bind( wxEVT_MOUSEWHEEL, &ScrolledWindow::OnMouseWheel, this );
+    Bind( wxEVT_MOTION, &ScrolledWindow::OnMouseMotion, this );
+    Bind( wxEVT_SCROLLWIN_LINEUP, &ScrolledWindow::OnScrollLine, this );
+    Bind( wxEVT_SCROLLWIN_LINEDOWN, &ScrolledWindow::OnScrollLine, this );
+    Bind( wxEVT_SCROLLWIN_THUMBTRACK, &ScrolledWindow::OnScrollThumbTrack, this );
+    Bind( wxEVT_TIMER, &ScrolledWindow::OnSetVirtualSize, this, ScrolledTimerID );
 }
 
 void ScrolledWindow::CreateScrollBar( wxOrientation orient )
@@ -79,10 +96,10 @@ void ScrolledWindow::OnSize( wxSizeEvent &event )
     event.Skip();
 }
 
-void ScrolledWindow::DoPrepareDC( wxDC &dc )
-{
-    dc.SetDeviceOrigin( -GetViewStart().x, -GetViewStart().y );
-}
+// void ScrolledWindow::DoPrepareDC( wxDC &dc )
+// {
+    // dc.SetDeviceOrigin( -GetViewStart().x, -GetViewStart().y );
+// }
 
 void ScrolledWindow::OnPaint( wxPaintEvent &event )
 {
@@ -93,17 +110,16 @@ void ScrolledWindow::OnPaint( wxPaintEvent &event )
 
 void ScrolledWindow::OnScroll( wxScrollWinEvent &event )
 {
+    wxOrientation orient = dimension::GetOrient( event.GetOrientation() );
+    if ( orient == wxVERTICAL )
+        DoScroll( -1, event.GetPosition() );
+    else if ( orient == wxHORIZONTAL )
+        DoScroll( event.GetPosition(), -1 );
 }
 
 void ScrolledWindow::AdjustScrollBar()
 {
-    SetScrollbar(
-        wxVERTICAL,
-        GetScrollPos( wxVERTICAL ),
-        GetClientSize().GetHeight(),
-        GetVirtualSize().GetHeight()
-    );
-
+    AdjustScrollbars();
 }
 
 int ScrolledWindow::GetScrollPos( const wxOrientation &orient ) const
@@ -198,15 +214,16 @@ void ScrolledWindow::OnScrollLine( wxScrollWinEvent &event )
     int step = pos - scroll_pos;
     wxDirection direction = dimension::GetDirection( orient, step );
     bool is_top = scroll_pos == 0;
+
     bool is_bottom = scroll_pos == bottom_edge;
+    is_bottom = is_bottom || GetScrollRange( orient ) < dimension::Get( GetClientSize(), orient );
+
     bool is_below_bottom = is_bottom && pos >= bottom_edge;
     bool is_over_top = is_top && pos <= 0;
     bool is_edge = (is_top && is_over_top) || (is_bottom && is_below_bottom );
 
     if ( !is_edge || direction == wxALL )
-    {
-        Scroll( orient, step );
-    }
+        event.Skip();
     else
     {
         // this will inverse the direction
@@ -222,38 +239,25 @@ void ScrolledWindow::OnScrollLine( wxScrollWinEvent &event )
 
 void ScrolledWindow::OnKey( wxKeyEvent &event )
 {
-    bool isUp = event.GetKeyCode() == WXK_UP;
-    bool isDown = event.GetKeyCode() == WXK_DOWN;
-    bool isLeft = event.GetKeyCode() == WXK_LEFT;
-    bool isRight = event.GetKeyCode() == WXK_RIGHT;
+    wxDirection direction = dimension::GetDirection( event.GetKeyCode() );
 
     // only scroll for default if there is
     // no modifier ( ctrl,alt,shift, etc )
     // is pressed
     if ( ! event.HasAnyModifiers() )
     {
-        if ( isUp || isDown || isLeft || isRight )
+        if ( direction != wxALL )
         {
-            wxOrientation orient;
-
-            // set orientation to vertical
-            // if key is up or down
-            if ( isUp || isDown )
-                orient = wxVERTICAL;
-
-            // set orientation to horizontal
-            // if key is left or right
-            if ( isLeft || isRight )
-                orient = wxHORIZONTAL;
+            wxOrientation orient = dimension::GetOrient( direction );
 
             // if key is up or left
             // then lineup
-            if ( isUp || isLeft )
+            if ( direction == wxUP || direction == wxLEFT )
                 LineUp( orient, m_stepPerKey );
 
             // if key is down or right
             // then linedown
-            if ( isDown || isRight )
+            if ( direction == wxDOWN || direction == wxRIGHT )
                 LineDown( orient, m_stepPerKey );
 
             return;
@@ -283,6 +287,7 @@ void ScrolledWindow::OnMouseWheel( wxMouseEvent &event )
 
 void ScrolledWindow::OnMouseMotion( wxMouseEvent &event )
 {
+    // TODO: make this member var
     static wxPoint lastPos;
     // only scroll for default if there is
     // no modifier ( ctrl,alt,shift,etc )
@@ -311,10 +316,6 @@ void ScrolledWindow::OnMouseMotion( wxMouseEvent &event )
 
 void ScrolledWindow::OnScrollThumbTrack( wxScrollWinEvent &event )
 {
-    wxOrientation orient = dimension::GetOrient(  event.GetOrientation() );
-    wxPoint pos = GetViewStart();
-    dimension::Set( pos, orient, event.GetPosition() );
-    Scroll( pos );
     event.Skip();
 }
 

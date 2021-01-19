@@ -142,113 +142,54 @@ LTLIBRARIES = $(bitmap_LTLIBRARIES) $(common_LTLIBRARIES) \
 	$(explorer_LTLIBRARIES) $(gui_LTLIBRARIES) \
 	$(handler_LTLIBRARIES) $(reader_LTLIBRARIES) \
 	$(thread_LTLIBRARIES) $(window_LTLIBRARIES)
-lib_compare_la_LIBADD =
+lib_bitmap_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
-am_lib_compare_la_OBJECTS = $(common)/compare.lo
-lib_compare_la_OBJECTS = $(am_lib_compare_la_OBJECTS)
+am_lib_bitmap_la_OBJECTS = $(bitmap)/bmp.lo $(bitmap)/bitmap.lo \
+	$(bitmap)/size.lo $(bitmap)/image_util.lo \
+	$(bitmap)/position.lo
+lib_bitmap_la_OBJECTS = $(am_lib_bitmap_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-lib_controller_explorer_la_DEPENDENCIES = lib_find_explorer.la
-am_lib_controller_explorer_la_OBJECTS =  \
-	$(explorer)/controller_explorer.lo
-lib_controller_explorer_la_OBJECTS =  \
-	$(am_lib_controller_explorer_la_OBJECTS)
-lib_controller_reader_la_DEPENDENCIES = lib_load_reader.la \
-	lib_handler_factory.la libbitmap.la lib_zoom_reader.la \
-	libthread.la
-am_lib_controller_reader_la_OBJECTS = $(reader)/controller_reader.lo
-lib_controller_reader_la_OBJECTS =  \
-	$(am_lib_controller_reader_la_OBJECTS)
-lib_default_handler_la_DEPENDENCIES = lib_struct_stream.la
-am_lib_default_handler_la_OBJECTS = $(handler)/default_handler.lo
-lib_default_handler_la_OBJECTS = $(am_lib_default_handler_la_OBJECTS)
-lib_find_explorer_la_DEPENDENCIES = libthread.la
-am_lib_find_explorer_la_OBJECTS = $(explorer)/find_explorer.lo
-lib_find_explorer_la_OBJECTS = $(am_lib_find_explorer_la_OBJECTS)
-lib_flex_grid_cell_window_la_LIBADD =
-am_lib_flex_grid_cell_window_la_OBJECTS =  \
-	$(window)/flex_grid_cell_window.lo
-lib_flex_grid_cell_window_la_OBJECTS =  \
-	$(am_lib_flex_grid_cell_window_la_OBJECTS)
-lib_flex_grid_window_la_DEPENDENCIES = lib_flex_grid_cell_window.la
-am_lib_flex_grid_window_la_OBJECTS = $(window)/flex_grid_window.lo
-lib_flex_grid_window_la_OBJECTS =  \
-	$(am_lib_flex_grid_window_la_OBJECTS)
-lib_handler_factory_la_DEPENDENCIES = lib_default_handler.la \
-	lib_wxarchive_handler.la lib_compare.la lib_path.la
-am_lib_handler_factory_la_OBJECTS = $(handler)/handler_factory.lo
-lib_handler_factory_la_OBJECTS = $(am_lib_handler_factory_la_OBJECTS)
-lib_image_util_la_DEPENDENCIES = lib_struct_stream.la
-am_lib_image_util_la_OBJECTS = $(bitmap)/image_util.lo
-lib_image_util_la_OBJECTS = $(am_lib_image_util_la_OBJECTS)
-lib_image_window_explorer_la_DEPENDENCIES = lib_path.la
-am_lib_image_window_explorer_la_OBJECTS =  \
-	$(explorer)/image_window_explorer.lo
-lib_image_window_explorer_la_OBJECTS =  \
-	$(am_lib_image_window_explorer_la_OBJECTS)
-lib_load_explorer_la_DEPENDENCIES = libthread.la lib_image_util.la
-am_lib_load_explorer_la_OBJECTS = $(explorer)/load_explorer.lo
-lib_load_explorer_la_OBJECTS = $(am_lib_load_explorer_la_OBJECTS)
-lib_load_reader_la_DEPENDENCIES = libthread.la lib_image_util.la
-am_lib_load_reader_la_OBJECTS = $(reader)/load_reader.lo
-lib_load_reader_la_OBJECTS = $(am_lib_load_reader_la_OBJECTS)
+lib_compare_la_LIBADD =
+am_lib_compare_la_OBJECTS = $(common)/compare.lo
+lib_compare_la_OBJECTS = $(am_lib_compare_la_OBJECTS)
+lib_explorer_la_DEPENDENCIES = lib_handler.la lib_thread.la \
+	lib_window.la
+am_lib_explorer_la_OBJECTS = $(explorer)/window_explorer.lo \
+	$(explorer)/controller_explorer.lo \
+	$(explorer)/image_window_explorer.lo \
+	$(explorer)/find_explorer.lo $(explorer)/load_explorer.lo
+lib_explorer_la_OBJECTS = $(am_lib_explorer_la_OBJECTS)
+lib_frame_la_DEPENDENCIES = lib_explorer.la lib_reader.la
+am_lib_frame_la_OBJECTS = $(gui)/frame.lo $(gui)/panel.lo
+lib_frame_la_OBJECTS = $(am_lib_frame_la_OBJECTS)
+lib_handler_la_DEPENDENCIES = lib_path.la lib_compare.la
+am_lib_handler_la_OBJECTS = $(handler)/default_handler.lo \
+	$(handler)/wxarchive_handler.lo $(handler)/handler_factory.lo \
+	$(handler)/struct_stream.lo $(handler)/std_handler.lo
+lib_handler_la_OBJECTS = $(am_lib_handler_la_OBJECTS)
 lib_path_la_LIBADD =
 am_lib_path_la_OBJECTS = $(common)/path.lo
 lib_path_la_OBJECTS = $(am_lib_path_la_OBJECTS)
-lib_std_handler_la_DEPENDENCIES = lib_struct_stream.la lib_path.la
-am_lib_std_handler_la_OBJECTS = $(handler)/std_handler.lo
-lib_std_handler_la_OBJECTS = $(am_lib_std_handler_la_OBJECTS)
-lib_struct_stream_la_LIBADD =
-am_lib_struct_stream_la_OBJECTS = $(handler)/struct_stream.lo
-lib_struct_stream_la_OBJECTS = $(am_lib_struct_stream_la_OBJECTS)
-lib_window_explorer_la_DEPENDENCIES = lib_controller_explorer.la \
-	lib_image_window_explorer.la lib_find_explorer.la \
-	lib_load_explorer.la lib_flex_grid_window.la
-am_lib_window_explorer_la_OBJECTS = $(explorer)/window_explorer.lo
-lib_window_explorer_la_OBJECTS = $(am_lib_window_explorer_la_OBJECTS)
-lib_window_reader_la_DEPENDENCIES = lib_load_reader.la \
-	lib_handler_factory.la libscrolledwindow.la libbitmap.la \
-	libbmp.la lib_zoom_reader.la lib_controller_reader.la \
-	libthread.la
-am_lib_window_reader_la_OBJECTS = $(reader)/window_reader.lo
-lib_window_reader_la_OBJECTS = $(am_lib_window_reader_la_OBJECTS)
-lib_wxarchive_handler_la_DEPENDENCIES = lib_default_handler.la \
-	lib_compare.la lib_path.la
-am_lib_wxarchive_handler_la_OBJECTS = $(handler)/wxarchive_handler.lo
-lib_wxarchive_handler_la_OBJECTS =  \
-	$(am_lib_wxarchive_handler_la_OBJECTS)
-lib_zoom_reader_la_DEPENDENCIES = libthread.la lib_struct_stream.la
-am_lib_zoom_reader_la_OBJECTS = $(reader)/zoom_reader.lo
-lib_zoom_reader_la_OBJECTS = $(am_lib_zoom_reader_la_OBJECTS)
-libbitmap_la_DEPENDENCIES = libsize.la libposition.la libbmp.la
-am_libbitmap_la_OBJECTS = $(bitmap)/bitmap.lo
-libbitmap_la_OBJECTS = $(am_libbitmap_la_OBJECTS)
-libbmp_la_LIBADD =
-am_libbmp_la_OBJECTS = $(bitmap)/bmp.lo
-libbmp_la_OBJECTS = $(am_libbmp_la_OBJECTS)
-libframe_la_DEPENDENCIES = libpanel.la
-am_libframe_la_OBJECTS = $(gui)/frame.lo
-libframe_la_OBJECTS = $(am_libframe_la_OBJECTS)
-libpanel_la_DEPENDENCIES = lib_window_reader.la lib_window_explorer.la
-am_libpanel_la_OBJECTS = $(gui)/panel.lo
-libpanel_la_OBJECTS = $(am_libpanel_la_OBJECTS)
-libposition_la_LIBADD =
-am_libposition_la_OBJECTS = $(bitmap)/position.lo
-libposition_la_OBJECTS = $(am_libposition_la_OBJECTS)
-libscrolledwindow_la_LIBADD =
-am_libscrolledwindow_la_OBJECTS = $(window)/scrolledwindow.lo
-libscrolledwindow_la_OBJECTS = $(am_libscrolledwindow_la_OBJECTS)
-libsize_la_LIBADD =
-am_libsize_la_OBJECTS = $(bitmap)/size.lo
-libsize_la_OBJECTS = $(am_libsize_la_OBJECTS)
-libthread_la_LIBADD =
-am_libthread_la_OBJECTS = $(thread)/thread.lo
-libthread_la_OBJECTS = $(am_libthread_la_OBJECTS)
-am_fmr_OBJECTS = src/main/app.$(OBJEXT)
+lib_reader_la_DEPENDENCIES = lib_bitmap.la lib_handler.la \
+	lib_window.la lib_thread.la
+am_lib_reader_la_OBJECTS = $(reader)/window_reader.lo \
+	$(reader)/controller_reader.lo $(reader)/load_reader.lo \
+	$(reader)/zoom_reader.lo
+lib_reader_la_OBJECTS = $(am_lib_reader_la_OBJECTS)
+lib_thread_la_LIBADD =
+am_lib_thread_la_OBJECTS = $(thread)/thread.lo
+lib_thread_la_OBJECTS = $(am_lib_thread_la_OBJECTS)
+lib_window_la_LIBADD =
+am_lib_window_la_OBJECTS = $(window)/scrolledwindow.lo \
+	$(window)/flex_grid_window.lo \
+	$(window)/flex_grid_cell_window.lo
+lib_window_la_OBJECTS = $(am_lib_window_la_OBJECTS)
+am_fmr_OBJECTS = $(fmr)/app.$(OBJEXT)
 fmr_OBJECTS = $(am_fmr_OBJECTS)
-fmr_DEPENDENCIES = libframe.la
+fmr_DEPENDENCIES = lib_frame.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -273,7 +214,8 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap.Plo \
 	$(explorer)/$(DEPDIR)/image_window_explorer.Plo \
 	$(explorer)/$(DEPDIR)/load_explorer.Plo \
 	$(explorer)/$(DEPDIR)/window_explorer.Plo \
-	$(gui)/$(DEPDIR)/frame.Plo $(gui)/$(DEPDIR)/panel.Plo \
+	$(fmr)/$(DEPDIR)/app.Po $(gui)/$(DEPDIR)/frame.Plo \
+	$(gui)/$(DEPDIR)/panel.Plo \
 	$(handler)/$(DEPDIR)/default_handler.Plo \
 	$(handler)/$(DEPDIR)/handler_factory.Plo \
 	$(handler)/$(DEPDIR)/std_handler.Plo \
@@ -286,8 +228,7 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap.Plo \
 	$(thread)/$(DEPDIR)/thread.Plo \
 	$(window)/$(DEPDIR)/flex_grid_cell_window.Plo \
 	$(window)/$(DEPDIR)/flex_grid_window.Plo \
-	$(window)/$(DEPDIR)/scrolledwindow.Plo \
-	src/main/$(DEPDIR)/app.Po
+	$(window)/$(DEPDIR)/scrolledwindow.Plo
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -307,46 +248,16 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(lib_compare_la_SOURCES) \
-	$(lib_controller_explorer_la_SOURCES) \
-	$(lib_controller_reader_la_SOURCES) \
-	$(lib_default_handler_la_SOURCES) \
-	$(lib_find_explorer_la_SOURCES) \
-	$(lib_flex_grid_cell_window_la_SOURCES) \
-	$(lib_flex_grid_window_la_SOURCES) \
-	$(lib_handler_factory_la_SOURCES) $(lib_image_util_la_SOURCES) \
-	$(lib_image_window_explorer_la_SOURCES) \
-	$(lib_load_explorer_la_SOURCES) $(lib_load_reader_la_SOURCES) \
-	$(lib_path_la_SOURCES) $(lib_std_handler_la_SOURCES) \
-	$(lib_struct_stream_la_SOURCES) \
-	$(lib_window_explorer_la_SOURCES) \
-	$(lib_window_reader_la_SOURCES) \
-	$(lib_wxarchive_handler_la_SOURCES) \
-	$(lib_zoom_reader_la_SOURCES) $(libbitmap_la_SOURCES) \
-	$(libbmp_la_SOURCES) $(libframe_la_SOURCES) \
-	$(libpanel_la_SOURCES) $(libposition_la_SOURCES) \
-	$(libscrolledwindow_la_SOURCES) $(libsize_la_SOURCES) \
-	$(libthread_la_SOURCES) $(fmr_SOURCES)
-DIST_SOURCES = $(lib_compare_la_SOURCES) \
-	$(lib_controller_explorer_la_SOURCES) \
-	$(lib_controller_reader_la_SOURCES) \
-	$(lib_default_handler_la_SOURCES) \
-	$(lib_find_explorer_la_SOURCES) \
-	$(lib_flex_grid_cell_window_la_SOURCES) \
-	$(lib_flex_grid_window_la_SOURCES) \
-	$(lib_handler_factory_la_SOURCES) $(lib_image_util_la_SOURCES) \
-	$(lib_image_window_explorer_la_SOURCES) \
-	$(lib_load_explorer_la_SOURCES) $(lib_load_reader_la_SOURCES) \
-	$(lib_path_la_SOURCES) $(lib_std_handler_la_SOURCES) \
-	$(lib_struct_stream_la_SOURCES) \
-	$(lib_window_explorer_la_SOURCES) \
-	$(lib_window_reader_la_SOURCES) \
-	$(lib_wxarchive_handler_la_SOURCES) \
-	$(lib_zoom_reader_la_SOURCES) $(libbitmap_la_SOURCES) \
-	$(libbmp_la_SOURCES) $(libframe_la_SOURCES) \
-	$(libpanel_la_SOURCES) $(libposition_la_SOURCES) \
-	$(libscrolledwindow_la_SOURCES) $(libsize_la_SOURCES) \
-	$(libthread_la_SOURCES) $(fmr_SOURCES)
+SOURCES = $(lib_bitmap_la_SOURCES) $(lib_compare_la_SOURCES) \
+	$(lib_explorer_la_SOURCES) $(lib_frame_la_SOURCES) \
+	$(lib_handler_la_SOURCES) $(lib_path_la_SOURCES) \
+	$(lib_reader_la_SOURCES) $(lib_thread_la_SOURCES) \
+	$(lib_window_la_SOURCES) $(fmr_SOURCES)
+DIST_SOURCES = $(lib_bitmap_la_SOURCES) $(lib_compare_la_SOURCES) \
+	$(lib_explorer_la_SOURCES) $(lib_frame_la_SOURCES) \
+	$(lib_handler_la_SOURCES) $(lib_path_la_SOURCES) \
+	$(lib_reader_la_SOURCES) $(lib_thread_la_SOURCES) \
+	$(lib_window_la_SOURCES) $(fmr_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -446,6 +357,7 @@ ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AR = @AR@
+AS = @AS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -585,74 +497,78 @@ lib_compare_la_SOURCES = $(common)/compare.cpp
 lib_path_la_SOURCES = $(common)/path.cpp
 handler = src/handler
 handlerdir = @abs_builddir@/handler
-handler_LTLIBRARIES = lib_default_handler.la lib_wxarchive_handler.la lib_handler_factory.la lib_struct_stream.la lib_std_handler.la
-lib_default_handler_la_SOURCES = $(handler)/default_handler.cpp
-lib_default_handler_la_LIBADD = lib_struct_stream.la
-lib_wxarchive_handler_la_SOURCES = $(handler)/wxarchive_handler.cpp
-lib_wxarchive_handler_la_LIBADD = lib_default_handler.la lib_compare.la lib_path.la
-lib_handler_factory_la_SOURCES = $(handler)/handler_factory.cpp
-lib_handler_factory_la_LIBADD = lib_default_handler.la lib_wxarchive_handler.la lib_compare.la lib_path.la
-lib_struct_stream_la_SOURCES = $(handler)/struct_stream.cpp
-lib_std_handler_la_SOURCES = $(handler)/std_handler.cpp
-lib_std_handler_la_LIBADD = lib_struct_stream.la lib_path.la
+handler_LTLIBRARIES = lib_handler.la
+lib_handler_la_SOURCES = $(handler)/default_handler.cpp \
+						 $(handler)/wxarchive_handler.cpp \
+						 $(handler)/handler_factory.cpp \
+						 $(handler)/struct_stream.cpp \
+						 $(handler)/std_handler.cpp
+
+lib_handler_la_LIBADD = lib_path.la \
+						lib_compare.la
+
 
 # make libraries for bitmap
 bitmap = src/bitmap
 bitmapdir = @abs_builddir@/bitmap
-bitmap_LTLIBRARIES = libbitmap.la libsize.la libposition.la libbmp.la lib_image_util.la
-libbmp_la_SOURCES = $(bitmap)/bmp.cpp
-libbitmap_la_SOURCES = $(bitmap)/bitmap.cpp
-libbitmap_la_LIBADD = libsize.la libposition.la libbmp.la
-libsize_la_SOURCES = $(bitmap)/size.cpp
-lib_image_util_la_SOURCES = $(bitmap)/image_util.cpp
-lib_image_util_la_LIBADD = lib_struct_stream.la
-libposition_la_SOURCES = $(bitmap)/position.cpp
+bitmap_LTLIBRARIES = lib_bitmap.la
+lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
+						$(bitmap)/bitmap.cpp \
+						$(bitmap)/size.cpp \
+						$(bitmap)/image_util.cpp \
+						$(bitmap)/position.cpp
+
 reader = src/reader
-readerdir = @abs_builddir@/reader   
-reader_LTLIBRARIES = lib_load_reader.la lib_window_reader.la lib_zoom_reader.la lib_controller_reader.la
-lib_load_reader_la_SOURCES = $(reader)/load_reader.cpp
-lib_load_reader_la_LIBADD = libthread.la lib_image_util.la
-lib_zoom_reader_la_SOURCES = $(reader)/zoom_reader.cpp
-lib_zoom_reader_la_LIBADD = libthread.la lib_struct_stream.la
-lib_controller_reader_la_SOURCES = $(reader)/controller_reader.cpp
-lib_controller_reader_la_LIBADD = lib_load_reader.la lib_handler_factory.la libbitmap.la lib_zoom_reader.la libthread.la
-lib_window_reader_la_SOURCES = $(reader)/window_reader.cpp
-lib_window_reader_la_LIBADD = lib_load_reader.la lib_handler_factory.la libscrolledwindow.la libbitmap.la libbmp.la lib_zoom_reader.la lib_controller_reader.la libthread.la
+readerdir = @abs_builddir@/reader
+reader_LTLIBRARIES = lib_reader.la
+lib_reader_la_SOURCES = $(reader)/window_reader.cpp \
+						$(reader)/controller_reader.cpp \
+						$(reader)/load_reader.cpp \
+						$(reader)/zoom_reader.cpp
+
+lib_reader_la_LIBADD = lib_bitmap.la \
+					   lib_handler.la \
+					   lib_window.la \
+					   lib_thread.la
+
 explorer = src/explorer
 explorerdir = @abs_builddir@/explorer
-explorer_LTLIBRARIES = lib_window_explorer.la lib_controller_explorer.la lib_image_window_explorer.la lib_find_explorer.la lib_load_explorer.la
-lib_window_explorer_la_SOURCES = $(explorer)/window_explorer.cpp
-lib_window_explorer_la_LIBADD = lib_controller_explorer.la lib_image_window_explorer.la lib_find_explorer.la lib_load_explorer.la lib_flex_grid_window.la
-lib_controller_explorer_la_SOURCES = $(explorer)/controller_explorer.cpp
-lib_controller_explorer_la_LIBADD = lib_find_explorer.la
-lib_image_window_explorer_la_SOURCES = $(explorer)/image_window_explorer.cpp
-lib_image_window_explorer_la_LIBADD = lib_path.la
-lib_find_explorer_la_SOURCES = $(explorer)/find_explorer.cpp
-lib_find_explorer_la_LIBADD = libthread.la
-lib_load_explorer_la_SOURCES = $(explorer)/load_explorer.cpp
-lib_load_explorer_la_LIBADD = libthread.la lib_image_util.la
+explorer_LTLIBRARIES = lib_explorer.la
+lib_explorer_la_SOURCES = $(explorer)/window_explorer.cpp \
+						  $(explorer)/controller_explorer.cpp \
+						  $(explorer)/image_window_explorer.cpp \
+						  $(explorer)/find_explorer.cpp \
+						  $(explorer)/load_explorer.cpp
+
+lib_explorer_la_LIBADD = lib_handler.la \
+						 lib_thread.la \
+						 lib_window.la
+
 
 # make libraries for gui
 gui = src/gui
 guidir = @abs_builddir@/gui
-gui_LTLIBRARIES = libframe.la libpanel.la
-libframe_la_SOURCES = $(gui)/frame.cpp
-libframe_la_LIBADD = libpanel.la
-libpanel_la_SOURCES = $(gui)/panel.cpp
-libpanel_la_LIBADD = lib_window_reader.la lib_window_explorer.la
+gui_LTLIBRARIES = lib_frame.la
+lib_frame_la_SOURCES = $(gui)/frame.cpp \
+					   $(gui)/panel.cpp
+
+lib_frame_la_LIBADD = lib_explorer.la \
+					  lib_reader.la
+
 window = src/window
 windowdir = @abs_builddir@/window
-window_LTLIBRARIES = libscrolledwindow.la lib_flex_grid_window.la lib_flex_grid_cell_window.la
-libscrolledwindow_la_SOURCES = $(window)/scrolledwindow.cpp
-lib_flex_grid_window_la_SOURCES = $(window)/flex_grid_window.cpp
-lib_flex_grid_window_la_LIBADD = lib_flex_grid_cell_window.la
-lib_flex_grid_cell_window_la_SOURCES = $(window)/flex_grid_cell_window.cpp
+window_LTLIBRARIES = lib_window.la
+lib_window_la_SOURCES = $(window)/scrolledwindow.cpp \
+						$(window)/flex_grid_window.cpp \
+						$(window)/flex_grid_cell_window.cpp
+
 thread = src/thread
 threaddir = @abs_builddir@/thread
-thread_LTLIBRARIES = libthread.la
-libthread_la_SOURCES = $(thread)/thread.cpp
-fmr_SOURCES = src/main/app.cpp
-fmr_LDADD = libframe.la
+thread_LTLIBRARIES = lib_thread.la
+lib_thread_la_SOURCES = $(thread)/thread.cpp
+fmr = src/main
+fmr_SOURCES = $(fmr)/app.cpp
+fmr_LDADD = lib_frame.la
 all: all-recursive
 
 .SUFFIXES:
@@ -1019,6 +935,25 @@ clean-windowLTLIBRARIES:
 	  echo rm -f $${locs}; \
 	  rm -f $${locs}; \
 	}
+$(bitmap)/$(am__dirstamp):
+	@$(MKDIR_P) $(bitmap)
+	@: > $(bitmap)/$(am__dirstamp)
+$(bitmap)/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) $(bitmap)/$(DEPDIR)
+	@: > $(bitmap)/$(DEPDIR)/$(am__dirstamp)
+$(bitmap)/bmp.lo: $(bitmap)/$(am__dirstamp) \
+	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
+$(bitmap)/bitmap.lo: $(bitmap)/$(am__dirstamp) \
+	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
+$(bitmap)/size.lo: $(bitmap)/$(am__dirstamp) \
+	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
+$(bitmap)/image_util.lo: $(bitmap)/$(am__dirstamp) \
+	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
+$(bitmap)/position.lo: $(bitmap)/$(am__dirstamp) \
+	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
+
+lib_bitmap.la: $(lib_bitmap_la_OBJECTS) $(lib_bitmap_la_DEPENDENCIES) $(EXTRA_lib_bitmap_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(bitmapdir) $(lib_bitmap_la_OBJECTS) $(lib_bitmap_la_LIBADD) $(LIBS)
 $(common)/$(am__dirstamp):
 	@$(MKDIR_P) $(common)
 	@: > $(common)/$(am__dirstamp)
@@ -1036,130 +971,19 @@ $(explorer)/$(am__dirstamp):
 $(explorer)/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) $(explorer)/$(DEPDIR)
 	@: > $(explorer)/$(DEPDIR)/$(am__dirstamp)
+$(explorer)/window_explorer.lo: $(explorer)/$(am__dirstamp) \
+	$(explorer)/$(DEPDIR)/$(am__dirstamp)
 $(explorer)/controller_explorer.lo: $(explorer)/$(am__dirstamp) \
 	$(explorer)/$(DEPDIR)/$(am__dirstamp)
-
-lib_controller_explorer.la: $(lib_controller_explorer_la_OBJECTS) $(lib_controller_explorer_la_DEPENDENCIES) $(EXTRA_lib_controller_explorer_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(explorerdir) $(lib_controller_explorer_la_OBJECTS) $(lib_controller_explorer_la_LIBADD) $(LIBS)
-$(reader)/$(am__dirstamp):
-	@$(MKDIR_P) $(reader)
-	@: > $(reader)/$(am__dirstamp)
-$(reader)/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) $(reader)/$(DEPDIR)
-	@: > $(reader)/$(DEPDIR)/$(am__dirstamp)
-$(reader)/controller_reader.lo: $(reader)/$(am__dirstamp) \
-	$(reader)/$(DEPDIR)/$(am__dirstamp)
-
-lib_controller_reader.la: $(lib_controller_reader_la_OBJECTS) $(lib_controller_reader_la_DEPENDENCIES) $(EXTRA_lib_controller_reader_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(readerdir) $(lib_controller_reader_la_OBJECTS) $(lib_controller_reader_la_LIBADD) $(LIBS)
-$(handler)/$(am__dirstamp):
-	@$(MKDIR_P) $(handler)
-	@: > $(handler)/$(am__dirstamp)
-$(handler)/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) $(handler)/$(DEPDIR)
-	@: > $(handler)/$(DEPDIR)/$(am__dirstamp)
-$(handler)/default_handler.lo: $(handler)/$(am__dirstamp) \
-	$(handler)/$(DEPDIR)/$(am__dirstamp)
-
-lib_default_handler.la: $(lib_default_handler_la_OBJECTS) $(lib_default_handler_la_DEPENDENCIES) $(EXTRA_lib_default_handler_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(handlerdir) $(lib_default_handler_la_OBJECTS) $(lib_default_handler_la_LIBADD) $(LIBS)
-$(explorer)/find_explorer.lo: $(explorer)/$(am__dirstamp) \
-	$(explorer)/$(DEPDIR)/$(am__dirstamp)
-
-lib_find_explorer.la: $(lib_find_explorer_la_OBJECTS) $(lib_find_explorer_la_DEPENDENCIES) $(EXTRA_lib_find_explorer_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(explorerdir) $(lib_find_explorer_la_OBJECTS) $(lib_find_explorer_la_LIBADD) $(LIBS)
-$(window)/$(am__dirstamp):
-	@$(MKDIR_P) $(window)
-	@: > $(window)/$(am__dirstamp)
-$(window)/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) $(window)/$(DEPDIR)
-	@: > $(window)/$(DEPDIR)/$(am__dirstamp)
-$(window)/flex_grid_cell_window.lo: $(window)/$(am__dirstamp) \
-	$(window)/$(DEPDIR)/$(am__dirstamp)
-
-lib_flex_grid_cell_window.la: $(lib_flex_grid_cell_window_la_OBJECTS) $(lib_flex_grid_cell_window_la_DEPENDENCIES) $(EXTRA_lib_flex_grid_cell_window_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(windowdir) $(lib_flex_grid_cell_window_la_OBJECTS) $(lib_flex_grid_cell_window_la_LIBADD) $(LIBS)
-$(window)/flex_grid_window.lo: $(window)/$(am__dirstamp) \
-	$(window)/$(DEPDIR)/$(am__dirstamp)
-
-lib_flex_grid_window.la: $(lib_flex_grid_window_la_OBJECTS) $(lib_flex_grid_window_la_DEPENDENCIES) $(EXTRA_lib_flex_grid_window_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(windowdir) $(lib_flex_grid_window_la_OBJECTS) $(lib_flex_grid_window_la_LIBADD) $(LIBS)
-$(handler)/handler_factory.lo: $(handler)/$(am__dirstamp) \
-	$(handler)/$(DEPDIR)/$(am__dirstamp)
-
-lib_handler_factory.la: $(lib_handler_factory_la_OBJECTS) $(lib_handler_factory_la_DEPENDENCIES) $(EXTRA_lib_handler_factory_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(handlerdir) $(lib_handler_factory_la_OBJECTS) $(lib_handler_factory_la_LIBADD) $(LIBS)
-$(bitmap)/$(am__dirstamp):
-	@$(MKDIR_P) $(bitmap)
-	@: > $(bitmap)/$(am__dirstamp)
-$(bitmap)/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) $(bitmap)/$(DEPDIR)
-	@: > $(bitmap)/$(DEPDIR)/$(am__dirstamp)
-$(bitmap)/image_util.lo: $(bitmap)/$(am__dirstamp) \
-	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
-
-lib_image_util.la: $(lib_image_util_la_OBJECTS) $(lib_image_util_la_DEPENDENCIES) $(EXTRA_lib_image_util_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(bitmapdir) $(lib_image_util_la_OBJECTS) $(lib_image_util_la_LIBADD) $(LIBS)
 $(explorer)/image_window_explorer.lo: $(explorer)/$(am__dirstamp) \
 	$(explorer)/$(DEPDIR)/$(am__dirstamp)
-
-lib_image_window_explorer.la: $(lib_image_window_explorer_la_OBJECTS) $(lib_image_window_explorer_la_DEPENDENCIES) $(EXTRA_lib_image_window_explorer_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(explorerdir) $(lib_image_window_explorer_la_OBJECTS) $(lib_image_window_explorer_la_LIBADD) $(LIBS)
+$(explorer)/find_explorer.lo: $(explorer)/$(am__dirstamp) \
+	$(explorer)/$(DEPDIR)/$(am__dirstamp)
 $(explorer)/load_explorer.lo: $(explorer)/$(am__dirstamp) \
 	$(explorer)/$(DEPDIR)/$(am__dirstamp)
 
-lib_load_explorer.la: $(lib_load_explorer_la_OBJECTS) $(lib_load_explorer_la_DEPENDENCIES) $(EXTRA_lib_load_explorer_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(explorerdir) $(lib_load_explorer_la_OBJECTS) $(lib_load_explorer_la_LIBADD) $(LIBS)
-$(reader)/load_reader.lo: $(reader)/$(am__dirstamp) \
-	$(reader)/$(DEPDIR)/$(am__dirstamp)
-
-lib_load_reader.la: $(lib_load_reader_la_OBJECTS) $(lib_load_reader_la_DEPENDENCIES) $(EXTRA_lib_load_reader_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(readerdir) $(lib_load_reader_la_OBJECTS) $(lib_load_reader_la_LIBADD) $(LIBS)
-$(common)/path.lo: $(common)/$(am__dirstamp) \
-	$(common)/$(DEPDIR)/$(am__dirstamp)
-
-lib_path.la: $(lib_path_la_OBJECTS) $(lib_path_la_DEPENDENCIES) $(EXTRA_lib_path_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(commondir) $(lib_path_la_OBJECTS) $(lib_path_la_LIBADD) $(LIBS)
-$(handler)/std_handler.lo: $(handler)/$(am__dirstamp) \
-	$(handler)/$(DEPDIR)/$(am__dirstamp)
-
-lib_std_handler.la: $(lib_std_handler_la_OBJECTS) $(lib_std_handler_la_DEPENDENCIES) $(EXTRA_lib_std_handler_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(handlerdir) $(lib_std_handler_la_OBJECTS) $(lib_std_handler_la_LIBADD) $(LIBS)
-$(handler)/struct_stream.lo: $(handler)/$(am__dirstamp) \
-	$(handler)/$(DEPDIR)/$(am__dirstamp)
-
-lib_struct_stream.la: $(lib_struct_stream_la_OBJECTS) $(lib_struct_stream_la_DEPENDENCIES) $(EXTRA_lib_struct_stream_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(handlerdir) $(lib_struct_stream_la_OBJECTS) $(lib_struct_stream_la_LIBADD) $(LIBS)
-$(explorer)/window_explorer.lo: $(explorer)/$(am__dirstamp) \
-	$(explorer)/$(DEPDIR)/$(am__dirstamp)
-
-lib_window_explorer.la: $(lib_window_explorer_la_OBJECTS) $(lib_window_explorer_la_DEPENDENCIES) $(EXTRA_lib_window_explorer_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(explorerdir) $(lib_window_explorer_la_OBJECTS) $(lib_window_explorer_la_LIBADD) $(LIBS)
-$(reader)/window_reader.lo: $(reader)/$(am__dirstamp) \
-	$(reader)/$(DEPDIR)/$(am__dirstamp)
-
-lib_window_reader.la: $(lib_window_reader_la_OBJECTS) $(lib_window_reader_la_DEPENDENCIES) $(EXTRA_lib_window_reader_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(readerdir) $(lib_window_reader_la_OBJECTS) $(lib_window_reader_la_LIBADD) $(LIBS)
-$(handler)/wxarchive_handler.lo: $(handler)/$(am__dirstamp) \
-	$(handler)/$(DEPDIR)/$(am__dirstamp)
-
-lib_wxarchive_handler.la: $(lib_wxarchive_handler_la_OBJECTS) $(lib_wxarchive_handler_la_DEPENDENCIES) $(EXTRA_lib_wxarchive_handler_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(handlerdir) $(lib_wxarchive_handler_la_OBJECTS) $(lib_wxarchive_handler_la_LIBADD) $(LIBS)
-$(reader)/zoom_reader.lo: $(reader)/$(am__dirstamp) \
-	$(reader)/$(DEPDIR)/$(am__dirstamp)
-
-lib_zoom_reader.la: $(lib_zoom_reader_la_OBJECTS) $(lib_zoom_reader_la_DEPENDENCIES) $(EXTRA_lib_zoom_reader_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(readerdir) $(lib_zoom_reader_la_OBJECTS) $(lib_zoom_reader_la_LIBADD) $(LIBS)
-$(bitmap)/bitmap.lo: $(bitmap)/$(am__dirstamp) \
-	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
-
-libbitmap.la: $(libbitmap_la_OBJECTS) $(libbitmap_la_DEPENDENCIES) $(EXTRA_libbitmap_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(bitmapdir) $(libbitmap_la_OBJECTS) $(libbitmap_la_LIBADD) $(LIBS)
-$(bitmap)/bmp.lo: $(bitmap)/$(am__dirstamp) \
-	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
-
-libbmp.la: $(libbmp_la_OBJECTS) $(libbmp_la_DEPENDENCIES) $(EXTRA_libbmp_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(bitmapdir) $(libbmp_la_OBJECTS) $(libbmp_la_LIBADD) $(LIBS)
+lib_explorer.la: $(lib_explorer_la_OBJECTS) $(lib_explorer_la_DEPENDENCIES) $(EXTRA_lib_explorer_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(explorerdir) $(lib_explorer_la_OBJECTS) $(lib_explorer_la_LIBADD) $(LIBS)
 $(gui)/$(am__dirstamp):
 	@$(MKDIR_P) $(gui)
 	@: > $(gui)/$(am__dirstamp)
@@ -1168,29 +992,52 @@ $(gui)/$(DEPDIR)/$(am__dirstamp):
 	@: > $(gui)/$(DEPDIR)/$(am__dirstamp)
 $(gui)/frame.lo: $(gui)/$(am__dirstamp) \
 	$(gui)/$(DEPDIR)/$(am__dirstamp)
-
-libframe.la: $(libframe_la_OBJECTS) $(libframe_la_DEPENDENCIES) $(EXTRA_libframe_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(guidir) $(libframe_la_OBJECTS) $(libframe_la_LIBADD) $(LIBS)
 $(gui)/panel.lo: $(gui)/$(am__dirstamp) \
 	$(gui)/$(DEPDIR)/$(am__dirstamp)
 
-libpanel.la: $(libpanel_la_OBJECTS) $(libpanel_la_DEPENDENCIES) $(EXTRA_libpanel_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(guidir) $(libpanel_la_OBJECTS) $(libpanel_la_LIBADD) $(LIBS)
-$(bitmap)/position.lo: $(bitmap)/$(am__dirstamp) \
-	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
+lib_frame.la: $(lib_frame_la_OBJECTS) $(lib_frame_la_DEPENDENCIES) $(EXTRA_lib_frame_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(guidir) $(lib_frame_la_OBJECTS) $(lib_frame_la_LIBADD) $(LIBS)
+$(handler)/$(am__dirstamp):
+	@$(MKDIR_P) $(handler)
+	@: > $(handler)/$(am__dirstamp)
+$(handler)/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) $(handler)/$(DEPDIR)
+	@: > $(handler)/$(DEPDIR)/$(am__dirstamp)
+$(handler)/default_handler.lo: $(handler)/$(am__dirstamp) \
+	$(handler)/$(DEPDIR)/$(am__dirstamp)
+$(handler)/wxarchive_handler.lo: $(handler)/$(am__dirstamp) \
+	$(handler)/$(DEPDIR)/$(am__dirstamp)
+$(handler)/handler_factory.lo: $(handler)/$(am__dirstamp) \
+	$(handler)/$(DEPDIR)/$(am__dirstamp)
+$(handler)/struct_stream.lo: $(handler)/$(am__dirstamp) \
+	$(handler)/$(DEPDIR)/$(am__dirstamp)
+$(handler)/std_handler.lo: $(handler)/$(am__dirstamp) \
+	$(handler)/$(DEPDIR)/$(am__dirstamp)
 
-libposition.la: $(libposition_la_OBJECTS) $(libposition_la_DEPENDENCIES) $(EXTRA_libposition_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(bitmapdir) $(libposition_la_OBJECTS) $(libposition_la_LIBADD) $(LIBS)
-$(window)/scrolledwindow.lo: $(window)/$(am__dirstamp) \
-	$(window)/$(DEPDIR)/$(am__dirstamp)
+lib_handler.la: $(lib_handler_la_OBJECTS) $(lib_handler_la_DEPENDENCIES) $(EXTRA_lib_handler_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(handlerdir) $(lib_handler_la_OBJECTS) $(lib_handler_la_LIBADD) $(LIBS)
+$(common)/path.lo: $(common)/$(am__dirstamp) \
+	$(common)/$(DEPDIR)/$(am__dirstamp)
 
-libscrolledwindow.la: $(libscrolledwindow_la_OBJECTS) $(libscrolledwindow_la_DEPENDENCIES) $(EXTRA_libscrolledwindow_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(windowdir) $(libscrolledwindow_la_OBJECTS) $(libscrolledwindow_la_LIBADD) $(LIBS)
-$(bitmap)/size.lo: $(bitmap)/$(am__dirstamp) \
-	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
+lib_path.la: $(lib_path_la_OBJECTS) $(lib_path_la_DEPENDENCIES) $(EXTRA_lib_path_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(commondir) $(lib_path_la_OBJECTS) $(lib_path_la_LIBADD) $(LIBS)
+$(reader)/$(am__dirstamp):
+	@$(MKDIR_P) $(reader)
+	@: > $(reader)/$(am__dirstamp)
+$(reader)/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) $(reader)/$(DEPDIR)
+	@: > $(reader)/$(DEPDIR)/$(am__dirstamp)
+$(reader)/window_reader.lo: $(reader)/$(am__dirstamp) \
+	$(reader)/$(DEPDIR)/$(am__dirstamp)
+$(reader)/controller_reader.lo: $(reader)/$(am__dirstamp) \
+	$(reader)/$(DEPDIR)/$(am__dirstamp)
+$(reader)/load_reader.lo: $(reader)/$(am__dirstamp) \
+	$(reader)/$(DEPDIR)/$(am__dirstamp)
+$(reader)/zoom_reader.lo: $(reader)/$(am__dirstamp) \
+	$(reader)/$(DEPDIR)/$(am__dirstamp)
 
-libsize.la: $(libsize_la_OBJECTS) $(libsize_la_DEPENDENCIES) $(EXTRA_libsize_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(bitmapdir) $(libsize_la_OBJECTS) $(libsize_la_LIBADD) $(LIBS)
+lib_reader.la: $(lib_reader_la_OBJECTS) $(lib_reader_la_DEPENDENCIES) $(EXTRA_lib_reader_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(readerdir) $(lib_reader_la_OBJECTS) $(lib_reader_la_LIBADD) $(LIBS)
 $(thread)/$(am__dirstamp):
 	@$(MKDIR_P) $(thread)
 	@: > $(thread)/$(am__dirstamp)
@@ -1200,16 +1047,31 @@ $(thread)/$(DEPDIR)/$(am__dirstamp):
 $(thread)/thread.lo: $(thread)/$(am__dirstamp) \
 	$(thread)/$(DEPDIR)/$(am__dirstamp)
 
-libthread.la: $(libthread_la_OBJECTS) $(libthread_la_DEPENDENCIES) $(EXTRA_libthread_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(threaddir) $(libthread_la_OBJECTS) $(libthread_la_LIBADD) $(LIBS)
-src/main/$(am__dirstamp):
-	@$(MKDIR_P) src/main
-	@: > src/main/$(am__dirstamp)
-src/main/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) src/main/$(DEPDIR)
-	@: > src/main/$(DEPDIR)/$(am__dirstamp)
-src/main/app.$(OBJEXT): src/main/$(am__dirstamp) \
-	src/main/$(DEPDIR)/$(am__dirstamp)
+lib_thread.la: $(lib_thread_la_OBJECTS) $(lib_thread_la_DEPENDENCIES) $(EXTRA_lib_thread_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(threaddir) $(lib_thread_la_OBJECTS) $(lib_thread_la_LIBADD) $(LIBS)
+$(window)/$(am__dirstamp):
+	@$(MKDIR_P) $(window)
+	@: > $(window)/$(am__dirstamp)
+$(window)/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) $(window)/$(DEPDIR)
+	@: > $(window)/$(DEPDIR)/$(am__dirstamp)
+$(window)/scrolledwindow.lo: $(window)/$(am__dirstamp) \
+	$(window)/$(DEPDIR)/$(am__dirstamp)
+$(window)/flex_grid_window.lo: $(window)/$(am__dirstamp) \
+	$(window)/$(DEPDIR)/$(am__dirstamp)
+$(window)/flex_grid_cell_window.lo: $(window)/$(am__dirstamp) \
+	$(window)/$(DEPDIR)/$(am__dirstamp)
+
+lib_window.la: $(lib_window_la_OBJECTS) $(lib_window_la_DEPENDENCIES) $(EXTRA_lib_window_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(windowdir) $(lib_window_la_OBJECTS) $(lib_window_la_LIBADD) $(LIBS)
+$(fmr)/$(am__dirstamp):
+	@$(MKDIR_P) $(fmr)
+	@: > $(fmr)/$(am__dirstamp)
+$(fmr)/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) $(fmr)/$(DEPDIR)
+	@: > $(fmr)/$(DEPDIR)/$(am__dirstamp)
+$(fmr)/app.$(OBJEXT): $(fmr)/$(am__dirstamp) \
+	$(fmr)/$(DEPDIR)/$(am__dirstamp)
 
 fmr$(EXEEXT): $(fmr_OBJECTS) $(fmr_DEPENDENCIES) $(EXTRA_fmr_DEPENDENCIES) 
 	@rm -f fmr$(EXEEXT)
@@ -1223,6 +1085,7 @@ mostlyclean-compile:
 	-rm -f $(common)/*.lo
 	-rm -f $(explorer)/*.$(OBJEXT)
 	-rm -f $(explorer)/*.lo
+	-rm -f $(fmr)/*.$(OBJEXT)
 	-rm -f $(gui)/*.$(OBJEXT)
 	-rm -f $(gui)/*.lo
 	-rm -f $(handler)/*.$(OBJEXT)
@@ -1233,7 +1096,6 @@ mostlyclean-compile:
 	-rm -f $(thread)/*.lo
 	-rm -f $(window)/*.$(OBJEXT)
 	-rm -f $(window)/*.lo
-	-rm -f src/main/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -1250,6 +1112,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/image_window_explorer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/load_explorer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/window_explorer.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(fmr)/$(DEPDIR)/app.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(gui)/$(DEPDIR)/frame.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(gui)/$(DEPDIR)/panel.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/default_handler.Plo@am__quote@ # am--include-marker
@@ -1265,7 +1128,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/flex_grid_cell_window.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/flex_grid_window.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/scrolledwindow.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@src/main/$(DEPDIR)/app.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -1651,14 +1513,14 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-rm -f src/main/$(DEPDIR)/$(am__dirstamp)
-	-rm -f src/main/$(am__dirstamp)
 	-test -z "$(bitmap)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(bitmap)/$(DEPDIR)/$(am__dirstamp)
 	-test -z "$(bitmap)/$(am__dirstamp)" || rm -f $(bitmap)/$(am__dirstamp)
 	-test -z "$(common)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(common)/$(DEPDIR)/$(am__dirstamp)
 	-test -z "$(common)/$(am__dirstamp)" || rm -f $(common)/$(am__dirstamp)
 	-test -z "$(explorer)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(explorer)/$(DEPDIR)/$(am__dirstamp)
 	-test -z "$(explorer)/$(am__dirstamp)" || rm -f $(explorer)/$(am__dirstamp)
+	-test -z "$(fmr)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(fmr)/$(DEPDIR)/$(am__dirstamp)
+	-test -z "$(fmr)/$(am__dirstamp)" || rm -f $(fmr)/$(am__dirstamp)
 	-test -z "$(gui)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(gui)/$(DEPDIR)/$(am__dirstamp)
 	-test -z "$(gui)/$(am__dirstamp)" || rm -f $(gui)/$(am__dirstamp)
 	-test -z "$(handler)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(handler)/$(DEPDIR)/$(am__dirstamp)
@@ -1695,6 +1557,7 @@ distclean: distclean-recursive
 	-rm -f $(explorer)/$(DEPDIR)/image_window_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/load_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/window_explorer.Plo
+	-rm -f $(fmr)/$(DEPDIR)/app.Po
 	-rm -f $(gui)/$(DEPDIR)/frame.Plo
 	-rm -f $(gui)/$(DEPDIR)/panel.Plo
 	-rm -f $(handler)/$(DEPDIR)/default_handler.Plo
@@ -1710,7 +1573,6 @@ distclean: distclean-recursive
 	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_window.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolledwindow.Plo
-	-rm -f src/main/$(DEPDIR)/app.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-tags
@@ -1773,6 +1635,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(explorer)/$(DEPDIR)/image_window_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/load_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/window_explorer.Plo
+	-rm -f $(fmr)/$(DEPDIR)/app.Po
 	-rm -f $(gui)/$(DEPDIR)/frame.Plo
 	-rm -f $(gui)/$(DEPDIR)/panel.Plo
 	-rm -f $(handler)/$(DEPDIR)/default_handler.Plo
@@ -1788,7 +1651,6 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_window.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolledwindow.Plo
-	-rm -f src/main/$(DEPDIR)/app.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -1846,9 +1708,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-bitmapLTLIBRARIES \
 
 .PRECIOUS: Makefile
 
-    # make source and link for bitmap
-    # make source and link for frame
-    # make source and link for panel
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
