@@ -96,10 +96,10 @@ void ScrolledWindow::OnSize( wxSizeEvent &event )
     event.Skip();
 }
 
-void ScrolledWindow::DoPrepareDC( wxDC &dc )
-{
-    dc.SetDeviceOrigin( -GetViewStart().x, -GetViewStart().y );
-}
+// void ScrolledWindow::DoPrepareDC( wxDC &dc )
+// {
+    // dc.SetDeviceOrigin( -GetViewStart().x, -GetViewStart().y );
+// }
 
 void ScrolledWindow::OnPaint( wxPaintEvent &event )
 {
@@ -119,13 +119,7 @@ void ScrolledWindow::OnScroll( wxScrollWinEvent &event )
 
 void ScrolledWindow::AdjustScrollBar()
 {
-    SetScrollbar(
-        wxVERTICAL,
-        GetScrollPos( wxVERTICAL ),
-        GetClientSize().GetHeight(),
-        GetVirtualSize().GetHeight()
-    );
-
+    AdjustScrollbars();
 }
 
 int ScrolledWindow::GetScrollPos( const wxOrientation &orient ) const

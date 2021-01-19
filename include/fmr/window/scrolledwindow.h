@@ -100,7 +100,7 @@ class ScrolledWindow : public wxScrolledCanvas
         virtual void OnDraw( wxDC &dc ) {};
 
         void DoSetVirtualSize( int width, int height );
-        virtual void DoPrepareDC( wxDC &dc );
+        // virtual void DoPrepareDC( wxDC &dc );
         void DoScrollLine( wxEventType type, wxOrientation orient, int step );
 };
 
