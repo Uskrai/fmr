@@ -85,6 +85,8 @@ class ScrolledWindow : public wxScrolledCanvas
         void OnKey( wxKeyEvent &event );
         wxTimer m_timer;
     private:
+        void BindEvent();
+
         void OnSize( wxSizeEvent &event );
         void OnPaint( wxPaintEvent &event );
         void OnMouseWheel( wxMouseEvent &event );

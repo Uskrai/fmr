@@ -16,24 +16,12 @@
  */
 
 #include <fmr/window/scrolledwindow.h>
+#include <fmr/common/event.h>
 #include <fmr/common/dimension.h>
 #include <wx/scrolbar.h>
 #include <wx/dc.h>
 #include <wx/dcclient.h>
 #include <wx/event.h>
-
-wxBEGIN_EVENT_TABLE( ScrolledWindow, wxScrolledCanvas )
-    EVT_SIZE( ScrolledWindow::OnSize )
-    EVT_PAINT( ScrolledWindow::OnPaint )
-    EVT_KEY_DOWN( ScrolledWindow::OnKey )
-    EVT_MOUSEWHEEL( ScrolledWindow::OnMouseWheel )
-    EVT_MOTION( ScrolledWindow::OnMouseMotion )
-    EVT_SCROLLWIN_LINEUP( ScrolledWindow::OnScrollLine )
-    EVT_SCROLLWIN_LINEDOWN ( ScrolledWindow::OnScrollLine )
-    EVT_SCROLLWIN_THUMBTRACK( ScrolledWindow::OnScrollThumbTrack )
-    EVT_SCROLLWIN( ScrolledWindow::OnScroll )
-    EVT_TIMER( ScrolledTimerID, ScrolledWindow::OnSetVirtualSize)
-wxEND_EVENT_TABLE()
 
 ScrolledWindow::ScrolledWindow( wxWindow *parent,
                                 wxWindowID id,
@@ -63,7 +51,36 @@ bool ScrolledWindow::Create(    wxWindow *parent,
     m_timer.SetOwner( this, ScrolledTimerID );
     CreateScrollBar( wxBOTH );
     SetVirtualSize(0,0);
+    BindEvent();
     return ret;
+}
+
+void ScrolledWindow::BindEvent()
+{
+    std::vector<wxEventTypeTag<wxScrollWinEvent>> scroll_win_event = {
+        wxEVT_SCROLLWIN_TOP,
+        wxEVT_SCROLLWIN_BOTTOM,
+        wxEVT_SCROLLWIN_LINEUP,
+        wxEVT_SCROLLWIN_LINEDOWN,
+        wxEVT_SCROLLWIN_PAGEUP,
+        wxEVT_SCROLLWIN_PAGEDOWN,
+        wxEVT_SCROLLWIN_THUMBTRACK,
+        wxEVT_SCROLLWIN_THUMBRELEASE
+    };
+
+    // bind the scroll_event first, i don't know why
+    // the event order is descending
+    event::Bind( scroll_win_event, &ScrolledWindow::OnScroll, this );
+
+    Bind( wxEVT_SIZE, &ScrolledWindow::OnSize, this );
+    Bind( wxEVT_PAINT, &ScrolledWindow::OnPaint, this );
+    Bind( wxEVT_KEY_DOWN, &ScrolledWindow::OnKey, this );
+    Bind( wxEVT_MOUSEWHEEL, &ScrolledWindow::OnMouseWheel, this );
+    Bind( wxEVT_MOTION, &ScrolledWindow::OnMouseMotion, this );
+    Bind( wxEVT_SCROLLWIN_LINEUP, &ScrolledWindow::OnScrollLine, this );
+    Bind( wxEVT_SCROLLWIN_LINEDOWN, &ScrolledWindow::OnScrollLine, this );
+    Bind( wxEVT_SCROLLWIN_THUMBTRACK, &ScrolledWindow::OnScrollThumbTrack, this );
+    Bind( wxEVT_TIMER, &ScrolledWindow::OnSetVirtualSize, this, ScrolledTimerID );
 }
 
 void ScrolledWindow::CreateScrollBar( wxOrientation orient )

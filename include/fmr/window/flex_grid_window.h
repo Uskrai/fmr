@@ -122,8 +122,9 @@ class FlexGridWindow
         { return sizer_->GetCols(); }
 
     private:
+        void BindEvent();
+
         void OnKeyDown( wxKeyEvent &event );
-        wxDECLARE_EVENT_TABLE();
 };
 
 

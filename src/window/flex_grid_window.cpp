@@ -21,10 +21,6 @@
 namespace fmr
 {
 
-wxBEGIN_EVENT_TABLE( FlexGridWindow, ScrolledWindow )
-    EVT_KEY_DOWN( FlexGridWindow::OnKeyDown )
-wxEND_EVENT_TABLE()
-
 FlexGridWindow::FlexGridWindow(
         wxWindow *parent,
         wxWindowID id,
@@ -46,8 +42,14 @@ bool FlexGridWindow::Create(
         const wxString &name
     )
 {
-    return ScrolledWindow::Create( parent, id, pos, size, style, name )
-            && CreateGrid();
+    bool ret = ScrolledWindow::Create( parent, id, pos, size, style, name );
+    BindEvent();
+    return ret && CreateGrid();
+}
+
+void FlexGridWindow::BindEvent()
+{
+    Bind( wxEVT_KEY_DOWN, &FlexGridWindow::OnKeyDown, this );
 }
 
 bool FlexGridWindow::CreateGrid( int rows, int cols, const wxSize &gap )
