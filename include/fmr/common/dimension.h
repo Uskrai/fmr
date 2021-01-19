@@ -83,10 +83,26 @@ namespace dimension
         return temp;
     }
 
-    // wxDirection GetDirection( const wxPoint &pos, const wxOrientation &orient )
-    // {
-        // return 
-    // }
+    /**
+    * @brief: return Direction from wxKeyEvent
+    *
+    * @param: key_code return value from wxKeyEvent.GetKeyCode()
+    *
+    * @return: return the respective Direction
+    * will return wxALL if not found
+    */
+    inline wxDirection GetDirection( int key_code )
+    {
+        if ( key_code == WXK_UP )
+            return wxUP;
+        else if ( key_code == WXK_DOWN )
+            return wxDOWN;
+        else if ( key_code == WXK_LEFT )
+            return wxLEFT;
+        else if ( key_code == WXK_RIGHT )
+            return wxRIGHT;
+        return wxALL;
+    }
 }
 
 #endif

@@ -16,6 +16,7 @@
  */
 
 #include <fmr/window/flex_grid_window.h>
+#include <fmr/common/dimension.h>
 #include <wx/dcclient.h>
 
 namespace fmr
@@ -185,25 +186,44 @@ void FlexGridWindow::SetCellHighlightPenWidth( int width )
     Refresh();
 }
 
+GridCellCoords FlexGridWindow::CellFromSelected( wxDirection direction, bool no_continous )
+{
+    GridCellCoords cell = IndexToCell( selected_index_ );
+    if ( direction == wxUP )
+        cell.SetCol( cell.GetCol() - 1 );
+    else if ( direction == wxDOWN )
+        cell.SetCol( cell.GetCol() + 1 );
+
+    if ( direction == wxLEFT )
+        cell.SetRow( cell.GetRow() - 1 );
+    else if ( direction == wxRIGHT )
+        cell.SetRow( cell.GetRow() + 1 );
+
+    if ( ! no_continous )
+        return cell;
+
+    size_t index = CellToIndex( cell, false );
+
+    return IndexToCell( index );
+}
+
 void FlexGridWindow::OnKeyDown( wxKeyEvent &event )
 {
     GridCellCoords cell = IndexToCell( selected_index_ );
 
+    wxDirection direction = dimension::GetDirection( event.GetKeyCode() );
+
     if ( !IsExist( selected_index_ ) )
         cell = IndexToCell( 0 );
+    else
+        cell = CellFromSelected( direction );
 
-    else if ( event.GetKeyCode() == WXK_UP )
-        cell.SetCol( cell.GetCol() - 1 );
-    else if ( event.GetKeyCode() == WXK_DOWN )
-        cell.SetCol( cell.GetCol() + 1 );
-
-    else if ( event.GetKeyCode() == WXK_LEFT )
-        cell.SetRow( cell.GetRow() - 1 );
-    else if ( event.GetKeyCode() == WXK_RIGHT )
-        cell.SetRow( cell.GetRow() + 1 );
-
-    GoToCell( cell );
-    Refresh();
+    if ( direction != wxALL && IsExist( cell ) )
+    {
+        GoToCell( cell );
+        Refresh();
+        return;
+    }
 }
 
 } // namespace fmr

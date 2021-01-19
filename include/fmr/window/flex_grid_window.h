@@ -121,6 +121,8 @@ class FlexGridWindow
         int GetCols() const
         { return sizer_->GetCols(); }
 
+        GridCellCoords CellFromSelected( wxDirection direction, bool no_continous = false );
+
     private:
         void BindEvent();
 
