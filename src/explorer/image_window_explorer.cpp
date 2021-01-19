@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "fmr/common/dimension.h"
 #include <fmr/explorer/image_window_explorer.h>
 #include <fmr/bitmap/bmp.h>
 #include <fmr/common/path.h>
@@ -28,11 +29,6 @@ namespace fmr
 namespace explorer
 {
 
-wxBEGIN_EVENT_TABLE( ImageWindow, wxWindow )
-    EVT_PAINT( ImageWindow::OnPaint )
-    EVT_SIZE( ImageWindow::OnSize )
-wxEND_EVENT_TABLE()
-
 ImageWindow::ImageWindow(
     wxWindow *parent,
     wxWindowID id,
@@ -40,26 +36,31 @@ ImageWindow::ImageWindow(
     const wxSize &size,
     long style,
     const wxString &name
-)   : wxWindow( parent, id, pos, size, style, name )
+    )
 {
-
+    Create( parent, id, pos, size, style, name );
 }
 
-ImageWindow::ImageWindow( const StreamBitmap &stream_bitmap )
+bool ImageWindow::Create( wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, long style, const wxString &name )
 {
-    SetStream( stream_bitmap.stream );
-    SetBitmap( stream_bitmap.bitmap );
+    BindEvent();
+    bool ret = wxWindow::Create( parent, id, pos, size, style, name );
+    window_text_ = new wxStaticText( this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_MIDDLE | wxST_NO_AUTORESIZE | wxALIGN_CENTER_HORIZONTAL );
+
+    sizer_ = new wxBoxSizer( wxVERTICAL );
+    sizer_->AddSpacer( GetBestBitmapSize( GetSize() ).GetHeight()  );
+    sizer_->Add( window_text_, wxSizerFlags(1).Align( wxBOTTOM ).Expand() );
+
+    SetSizer( sizer_ );
+    Layout();
+    return ret;
 }
 
-ImageWindow::ImageWindow( const ImageWindow &other )
+void ImageWindow::BindEvent()
 {
-    stream_ = std::make_shared<SStream>
-        ( SStream( *other.stream_ ) );
+    Bind( wxEVT_PAINT, &ImageWindow::OnPaint, this );
+    Bind( wxEVT_SIZE, &ImageWindow::OnSize, this );
 
-    bitmap_ = std::make_shared<SBitmap>
-        ( SBitmap( *other.bitmap_ ) );
-
-    refresh_scheduled_ = true;
 }
 
 void ImageWindow::SetBitmap( std::shared_ptr<SBitmap> bmp )
@@ -71,7 +72,15 @@ void ImageWindow::SetBitmap( std::shared_ptr<SBitmap> bmp )
 void ImageWindow::SetStream( std::shared_ptr<SStream> stream )
 {
     stream_ = stream;
-    refresh_scheduled_ = true;
+    wxString string;
+    if ( stream )
+        String::FromUTF8( stream->GetName(), string );
+
+    if ( window_text_ )
+    {
+        window_text_->SetLabelText( string );
+        window_text_->Wrap( GetClientSize().GetWidth() - 20 );
+    }
 }
 
 const std::shared_ptr<SStream> ImageWindow::GetStream() const
@@ -89,7 +98,7 @@ std::shared_ptr<SBitmap> ImageWindow::GetBitmap()
 wxSize ImageWindow::GetBestBitmapSize( const wxSize &size )
 {
     wxSize best_size = size;
-    best_size.Scale( 1, 0.8 );
+    best_size.Scale( 1, 0.9 );
     return best_size;
 }
 
@@ -209,12 +218,12 @@ void ImageWindow::OnPaint( wxPaintEvent &event )
         dc.DrawBitmap( bitmap_->GetBitmap(), bitmap_position_ );
 
 
-    for ( const auto & it : vec_string_draw_ )
-    {
-        wxString string;
-        String::FromUTF8( it.filename, string );
-        dc.DrawText( string , it.rect.GetPosition() );
-    }
+    // for ( const auto & it : vec_string_draw_ )
+    // {
+        // wxString string;
+        // String::FromUTF8( it.filename, string );
+        // dc.DrawText( string , it.rect.GetPosition() );
+    // }
 }
 
 void ImageWindow::OnSize( wxSizeEvent &event ){ refresh_scheduled_ = true;}

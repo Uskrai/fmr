@@ -23,6 +23,9 @@
 #include <fmr/common/string.h>
 
 #include <wx/window.h>
+#include <wx/stattext.h>
+#include <wx/sizer.h>
+
 #include <memory>
 
 namespace fmr
@@ -45,6 +48,9 @@ class ImageWindow
 
         bool refresh_scheduled_ = false;
 
+        wxStaticText *window_text_ = nullptr;
+        wxSizer *sizer_ = nullptr;
+
     public:
         ImageWindow(){};
         ImageWindow(
@@ -56,8 +62,14 @@ class ImageWindow
             const wxString &name = wxPanelNameStr
         );
 
-        ImageWindow( const StreamBitmap &stream_bitmap );
-        ImageWindow( const ImageWindow &other  );
+        bool Create(
+                    wxWindow *parent,
+                    wxWindowID id = wxID_ANY,
+                    const wxPoint &pos = wxDefaultPosition,
+                    const wxSize &size = wxDefaultSize,
+                    long style = 0,
+                    const wxString &name = wxPanelNameStr
+                );
 
         void SetBitmap( std::shared_ptr<SBitmap> bmp );
         void SetStream( std::shared_ptr<SStream> stream );
@@ -74,10 +86,8 @@ class ImageWindow
         void PrepareRect( const wxRect &rect );
         void PrepareStringPos( wxDC &dc, const wxRect &rect );
 
-        // virtual void Move( int x, int y, int flags = wxSIZE_USE_EXISTING );
-
     private:
-        wxDECLARE_EVENT_TABLE();
+        void BindEvent();
 
         void OnPaint( wxPaintEvent &event );
         void OnSize( wxSizeEvent &event );
