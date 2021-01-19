@@ -186,6 +186,7 @@ void FlexGridWindow::OnKeyDown(wxKeyEvent &event) {
     Refresh();
     return;
   }
+  event.Skip();
 }
 
 }  // namespace fmr

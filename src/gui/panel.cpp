@@ -43,7 +43,6 @@ Panel::Panel(wxWindow *parent, wxWindowID id, wxPoint position, wxSize size)
 };
 
 void Panel::BindEvent() {
-  reader_->Bind(wxEVT_KEY_DOWN, &Panel::OnKeyDown, this);
   Bind(EVT_OPEN_FILE, &Panel::OnExplorerOpenFile, this);
 }
 

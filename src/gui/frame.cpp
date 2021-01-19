@@ -47,6 +47,7 @@ void Frame::BindEvent() {
   Bind(wxEVT_MENU, &Frame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &Frame::OpenFile, this, kFrameOpenFile);
   Bind(wxEVT_CLOSE_WINDOW, &Frame::OnClose, this);
+  Bind(wxEVT_MENU, &Frame::OnOpenExplorer, this, kFrameOpenExplorer);
 }
 
 void Frame::OnClose(wxCloseEvent& event) {
@@ -70,6 +71,7 @@ wxMenuBar* Frame::MenuBar() {
 wxMenu* Frame::MenuFile() {
   wxMenu* menuFile = new wxMenu;
   menuFile->Append(kFrameOpenFile, "&Open File \tCtrl+O");
+  menuFile->Append(kFrameOpenExplorer, "&Open Explorer \tBACK");
   menuFile->AppendSeparator();
   menuFile->Append(wxID_EXIT);
 
@@ -96,6 +98,8 @@ void Frame::OpenFile(wxCommandEvent& event) {
   event.Skip();
   openDialog->Destroy();
 }
+
+void Frame::OnOpenExplorer(wxCommandEvent& event) { m_panel->OpenExplorer(); }
 
 void Frame::SetPanel() {
   m_panel = new Panel(this, PANEL, wxPoint(-1, -1), GetSize());
