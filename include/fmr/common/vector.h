@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020 Uskrai
+ *  Copyright (c) 2020-2021 Uskrai
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,25 +20,20 @@
 
 #include "stddef.h"
 
-namespace fmr
-{
+namespace fmr {
 
-namespace Vector
-{
-    template< typename T>
-    constexpr bool IsExist( const T& vec, size_t idx )
-    {
-        return idx < vec.size();
-    }
+namespace Vector {
+template <typename T>
+constexpr bool IsExist(const T& vec, size_t idx) {
+  return idx < vec.size();
+}
 
-    template<typename T>
-    void Push( const T&source, T& destination )
-    {
-        for ( const auto &it : source )
-            destination.push_back( it );
-    }
-};
+template <typename T>
+void Push(const T& source, T& destination) {
+  for (const auto& it : source) destination.push_back(it);
+}
+};  // namespace Vector
 
-}; // namespace fmr
+};  // namespace fmr
 
 #endif

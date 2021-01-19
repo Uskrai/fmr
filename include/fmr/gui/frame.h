@@ -1,16 +1,16 @@
-/* 
- *  Copyright (c) 2020 Uskrai
- *  
+/*
+ *  Copyright (c) 2020-2021 Uskrai
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
@@ -26,44 +26,37 @@ class wxMenuBar;
 class wxMenu;
 class wxStatusBar;
 
-namespace fmr
-{
+namespace fmr {
 
-enum
-{
-    kPanel = wxID_HIGHEST + 2001,
-    kFrameOpenFile
+enum { kPanel = wxID_HIGHEST + 2001, kFrameOpenFile };
+
+class Frame : public wxFrame {
+ public:
+  Frame(const wxString& title, const wxPoint& pos, const wxSize& size,
+        long style);
+
+  Panel* m_panel = NULL;
+  wxBoxSizer* sizer;
+
+ private:
+  void BindEvent();
+  void SetPanel();
+
+  // event
+  void OnHello(wxCommandEvent& event);
+  void OnExit(wxCommandEvent& event);
+  void OnAbout(wxCommandEvent& event);
+
+  void OnClose(wxCloseEvent& event);
+  void OpenFile(wxCommandEvent& event);
+
+  wxStatusBar* StatusBar();
+
+  wxMenuBar* MenuBar();
+  wxMenu* MenuFile();
+  wxMenu* MenuHelp();
 };
 
-class Frame :
-    public wxFrame
-{
-    public :
-        Frame(const wxString& title, const wxPoint& pos, const wxSize& size,long style);
-        
-        Panel* m_panel = NULL; 
-        wxBoxSizer* sizer;
-
-    private:
-        void BindEvent();
-        void SetPanel();
-
-        //event
-        void OnHello(wxCommandEvent& event);
-        void OnExit(wxCommandEvent& event);
-        void OnAbout(wxCommandEvent& event);
-
-        void OnClose( wxCloseEvent &event );
-        void OpenFile(wxCommandEvent& event);
-
-        wxStatusBar* StatusBar();
-
-        wxMenuBar* MenuBar();
-        wxMenu* MenuFile();
-        wxMenu* MenuHelp();
-
-};
-
-}; // namespace fmr
+};  // namespace fmr
 
 #endif

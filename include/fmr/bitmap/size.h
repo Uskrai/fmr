@@ -1,16 +1,16 @@
 /*
- *  Copyright (c) 2020 Uskrai
- *  
+ *  Copyright (c) 2020-2021 Uskrai
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
@@ -20,25 +20,21 @@
 #include <fmr/bitmap/bmp.h>
 #include <wx/window.h>
 
-namespace fmr
-{
+namespace fmr {
 
-#define SizeFlagFilter( flag, func )    \
-    if ( flag & flags )                   \
-        return roundf(func( img, flags, parent, scale ) * 100) / 100;
+#define SizeFlagFilter(flag, func) \
+  if (flag & flags) return roundf(func(img, flags, parent, scale) * 100) / 100;
 
-#define SizeFunc( name )                \
-    float name( wxImage &img, int flags, wxWindow *parent, int scale )
+#define SizeFunc(name) \
+  float name(wxImage &img, int flags, wxWindow *parent, int scale)
 
-namespace Size
-{
-    inline SizeFunc( Original ) { return 1;};
-    SizeFunc( FitAll );
-    SizeFunc( FitWidth );
-    SizeFunc( FitHeight );
+namespace Size {
+inline SizeFunc(Original) { return 1; };
+SizeFunc(FitAll);
+SizeFunc(FitWidth);
+SizeFunc(FitHeight);
+SizeFunc(Prepare);
+};  // namespace Size
 
-    SizeFunc ( Prepare );
-};
-
-}; // namespace fmr
+};  // namespace fmr
 #endif

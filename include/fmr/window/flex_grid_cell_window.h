@@ -18,72 +18,54 @@
 #ifndef FMR_GRID_CELL_WINDOW
 #define FMR_GRID_CELL_WINDOW
 
-#include <wx/window.h>
 #include <wx/dcclient.h>
 #include <wx/sizer.h>
+#include <wx/window.h>
 
-namespace fmr
-{
+namespace fmr {
 
-class FlexGridCellWindow
-    : public wxWindow
-{
-    protected:
-        wxWindow *cell_window_ = NULL;
-        wxSizer *sizer_ = NULL;
-        bool is_selected_ = false;
-        int border_width_ = 0, highlight_width_ = 0;
+class FlexGridCellWindow : public wxWindow {
+ protected:
+  wxWindow *cell_window_ = NULL;
+  wxSizer *sizer_ = NULL;
+  bool is_selected_ = false;
+  int border_width_ = 0, highlight_width_ = 0;
 
-    public:
-        FlexGridCellWindow(
-            wxWindow *parent,
-            wxWindowID id
-        );
+ public:
+  FlexGridCellWindow(wxWindow *parent, wxWindowID id);
 
-        bool Create(
-            wxWindow *parent,
-            wxWindowID id
-        );
+  bool Create(wxWindow *parent, wxWindowID id);
 
-        wxSize GetMinSize() const override;
+  wxSize GetMinSize() const override;
 
-        void SetSelected( bool is_selected = true )
-        { is_selected_ = is_selected; }
+  void SetSelected(bool is_selected = true) { is_selected_ = is_selected; }
 
-        bool IsSelected() const
-        { return is_selected_; }
+  bool IsSelected() const { return is_selected_; }
 
-        bool AcceptsFocus() const override
-        { return false; }
+  bool AcceptsFocus() const override { return false; }
 
-        void SetCellWindow( wxWindow *cell_window );
+  void SetCellWindow(wxWindow *cell_window);
 
-        wxWindow *GetCellWindow()
-        { return cell_window_; }
+  wxWindow *GetCellWindow() { return cell_window_; }
 
-        void SetBorderWidth( int border )
-        { border_width_ = border; }
+  void SetBorderWidth(int border) { border_width_ = border; }
 
-        int GetBorderWidth() const
-        { return border_width_; }
+  int GetBorderWidth() const { return border_width_; }
 
-        void SetHighlightPenWidth( int width )
-        { highlight_width_ = width; }
+  void SetHighlightPenWidth(int width) { highlight_width_ = width; }
 
-        int GetHighlightPenWidth() const
-        { return highlight_width_; }
+  int GetHighlightPenWidth() const { return highlight_width_; }
 
-        wxRect GetCellRect() const;
+  wxRect GetCellRect() const;
 
-    private:
-        void BindEvent();
+ private:
+  void BindEvent();
 
-        void OnPaint( wxPaintEvent &event );
-        void OnSize( wxSizeEvent &event );
-        void DrawBorder( wxDC &dc );
+  void OnPaint(wxPaintEvent &event);
+  void OnSize(wxSizeEvent &event);
+  void DrawBorder(wxDC &dc);
 };
 
-} // namespace fmr end
+}  // namespace fmr
 
-#endif // FMR_GRID_CELL_WINDOW end
-
+#endif  // FMR_GRID_CELL_WINDOW end

@@ -1,16 +1,16 @@
 /*
- *  Copyright (c) 2020 Uskrai
- *  
+ *  Copyright (c) 2020-2021 Uskrai
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
@@ -19,43 +19,39 @@
 #define FMR_EXPLORER_LOAD_THREAD
 
 #include <fmr/explorer/common.h>
-#include <fmr/thread/thread.h>
-#include <fmr/handler/struct_stream.h>
 #include <fmr/handler/abstract_handler.h>
 #include <fmr/handler/handler_factory.h>
+#include <fmr/handler/struct_stream.h>
+#include <fmr/thread/thread.h>
 
-namespace fmr
-{
+namespace fmr {
 
-namespace explorer
-{
+namespace explorer {
 
-wxDECLARE_EVENT( EVT_STREAM_FOUND, StreamBitmapEvent );
+wxDECLARE_EVENT(EVT_STREAM_FOUND, StreamBitmapEvent);
 
-class FindThread
-    : public BaseThread
-{
-    public:
-        FindThread( ThreadController *parent, wxThreadKind type, int id )
-            : BaseThread( parent, type, id ){};
-        void SetParameter( std::vector<StreamBitmap> &list_stream );
+class FindThread : public BaseThread {
+ public:
+  FindThread(ThreadController *parent, wxThreadKind type, int id)
+      : BaseThread(parent, type, id){};
+  void SetParameter(std::vector<StreamBitmap> &list_stream);
 
-        bool Find( StreamBitmap &item );
-        bool Find( AbstractOpenableHandler *handler, StreamBitmap &item );
-        bool Find( AbstractHandler *handler, StreamBitmap &item );
-    private:
-        void StreamFound( StreamBitmap &item );
-        template<typename T>
-        bool TraverseHandler( T *handler, StreamBitmap &item );
+  bool Find(StreamBitmap &item);
+  bool Find(AbstractOpenableHandler *handler, StreamBitmap &item);
+  bool Find(AbstractHandler *handler, StreamBitmap &item);
 
-        std::vector<StreamBitmap> list_stream_;
+ private:
+  void StreamFound(StreamBitmap &item);
+  template <typename T>
+  bool TraverseHandler(T *handler, StreamBitmap &item);
 
-        ExitCode Entry();
+  std::vector<StreamBitmap> list_stream_;
+
+  ExitCode Entry();
 };
 
+};  // namespace explorer
 
-}; // end of namespace Explorer
-
-}; // namespace fmr
+};  // namespace fmr
 
 #endif

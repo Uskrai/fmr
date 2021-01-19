@@ -1,96 +1,84 @@
 /*
- *  Copyright (c) 2020 Uskrai
- *  
+ *  Copyright (c) 2020-2021 Uskrai
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/thread/thread.h>
 #include <fmr/bitmap/bitmap.h>
 #include <fmr/handler/abstract_handler.h>
 #include <fmr/reader/load_reader.h>
 #include <fmr/reader/zoom_reader.h>
-
+#include <fmr/thread/thread.h>
 #include <wx/window.h>
 
 #include <memory>
 
+namespace fmr {
 
-namespace fmr
-{
+namespace reader {
 
-namespace reader
-{
-
-enum ControllerExit
-{
-    kControllerPathEmpty,
-    kControllerBitmapEmpty,
-    kControllerHandlerNotFound,
-    kControllerFolderEmpty,
-    kControllerCantRunThread,
-    kControllerSuccess
+enum ControllerExit {
+  kControllerPathEmpty,
+  kControllerBitmapEmpty,
+  kControllerHandlerNotFound,
+  kControllerFolderEmpty,
+  kControllerCantRunThread,
+  kControllerSuccess
 };
 
-enum ControllerZoom
-{
-    kControllerZoomPointed,
-    kControllerZoomPage,
-    kControllerZoomAll
+enum ControllerZoom {
+  kControllerZoomPointed,
+  kControllerZoomPage,
+  kControllerZoomAll
 };
 
-enum ReaderThreadID
-{
-    kLoadThreadID = wxID_HIGHEST + + 30,
-    kZoomThreadID
-};
+enum ReaderThreadID { kLoadThreadID = wxID_HIGHEST + +30, kZoomThreadID };
 
-class Controller
-    : public ThreadController
-{
-    public:
-        Controller( wxWindow *parent );
-        ~Controller();
+class Controller : public ThreadController {
+ public:
+  Controller(wxWindow *parent);
+  ~Controller();
 
-        ControllerExit Open( const std::string &path );
+  ControllerExit Open(const std::string &path);
 
-        void Zoom( const wxPoint &area, const wxPoint &pos, const ControllerZoom &flags );
+  void Zoom(const wxPoint &area, const wxPoint &pos,
+            const ControllerZoom &flags);
 
-        void SetBitmap( std::shared_ptr<Bitmap> bitmap );
-        void SetHandler( std::shared_ptr<AbstractHandler> handler );
+  void SetBitmap(std::shared_ptr<Bitmap> bitmap);
+  void SetHandler(std::shared_ptr<AbstractHandler> handler);
 
+  std::shared_ptr<Bitmap> GetBitmap() { return bitmap_; }
+  std::shared_ptr<AbstractHandler> GetHandler() { return handler_; }
 
-        std::shared_ptr<Bitmap> GetBitmap() { return bitmap_; }
-        std::shared_ptr<AbstractHandler> GetHandler() { return handler_; }
+  std::shared_ptr<const Bitmap> GetBitmap() const { return bitmap_; }
+  std::shared_ptr<const AbstractHandler> GetHandler() const { return handler_; }
 
-        std::shared_ptr<const Bitmap> GetBitmap() const { return bitmap_; }
-        std::shared_ptr<const AbstractHandler> GetHandler() const { return handler_; }
+  wxEvtHandler *GetParent() { return parent_; }
+  wxThread *GetThread(int id);
+  void DoSetNull(int id);
+  void Clear();
 
-        wxEvtHandler *GetParent(){ return parent_; }
-        wxThread *GetThread( int id );
-        void DoSetNull( int id );
-        void Clear();
-    
-    protected:
-        wxWindow *parent_ = NULL;
-        std::shared_ptr<AbstractHandler> handler_ = NULL;
-        std::shared_ptr<Bitmap> bitmap_ = NULL;
+ protected:
+  wxWindow *parent_ = NULL;
+  std::shared_ptr<AbstractHandler> handler_ = NULL;
+  std::shared_ptr<Bitmap> bitmap_ = NULL;
 
-        LoadThread *load_thread_ = NULL;
-        ZoomThread *zoom_thread_ = NULL;
+  LoadThread *load_thread_ = NULL;
+  ZoomThread *zoom_thread_ = NULL;
 
-}; // class Controller
+};  // class Controller
 
-}; // nmamespace reader
+};  // namespace reader
 
-}; // namespace fmr
+};  // namespace fmr

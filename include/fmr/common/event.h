@@ -19,17 +19,16 @@
 #define FMR_COMMON_EVENT
 
 #include <wx/event.h>
+
 #include <vector>
 
-namespace event
-{
-    template<typename EventType, typename Class, typename EventArg, typename EventHandler>
-    void Bind( std::vector<EventType> type, void (Class::*fp)(EventArg&), EventHandler *handler, int id = wxID_ANY, int lastId = wxID_ANY )
-    {
-        for ( auto &it : type )
-            handler->Bind( it, fp, handler, id, lastId );
-    }
-} // namespace window end
+namespace event {
+template <typename EventType, typename Class, typename EventArg,
+          typename EventHandler>
+void Bind(std::vector<EventType> type, void (Class::*fp)(EventArg &),
+          EventHandler *handler, int id = wxID_ANY, int lastId = wxID_ANY) {
+  for (auto &it : type) handler->Bind(it, fp, handler, id, lastId);
+}
+}  // namespace event
 
-#endif // FMR_COMMON_WINDOW end
-
+#endif  // FMR_COMMON_WINDOW end

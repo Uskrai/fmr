@@ -1,152 +1,123 @@
-/* 
- *  Copyright (c) 2020 Uskrai
- *  
+/*
+ *  Copyright (c) 2020-2021 Uskrai
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/gui/panel.h>
-#include <fmr/common/path.h>
 #include <fmr/common/config.h>
+#include <fmr/common/path.h>
+#include <fmr/gui/panel.h>
 #include <fmr/handler/abstract_handler.h>
-
 #include <wx/sizer.h>
 
-namespace fmr
-{
+namespace fmr {
 
-Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
-    wxPanel( parent, id, position, size )
-{
-    sizer_ = new wxBoxSizer( wxHORIZONTAL );
-    reader_ = new reader::Window( this, ReaderWindow, wxDefaultPosition, GetClientSize(), 0, "Reader" );    
-    if ( ! reader_->IsTransparentBackgroundSupported() )
-        reader_->SetBackgroundColour( *wxBLACK );
-    sizer_->Add( reader_, 1, wxALL | wxEXPAND );
+Panel::Panel(wxWindow *parent, wxWindowID id, wxPoint position, wxSize size)
+    : wxPanel(parent, id, position, size) {
+  sizer_ = new wxBoxSizer(wxHORIZONTAL);
+  reader_ = new reader::Window(this, ReaderWindow, wxDefaultPosition,
+                               GetClientSize(), 0, "Reader");
+  if (!reader_->IsTransparentBackgroundSupported())
+    reader_->SetBackgroundColour(*wxBLACK);
+  sizer_->Add(reader_, 1, wxALL | wxEXPAND);
 
-    explorer_ = new explorer::Window(
-        this,
-        ExplorerWindow,
-        wxDefaultPosition,
-        GetClientSize(),
-        0,
-        "Explorer"
-    );
-    explorer_->SetBackgroundColour( *wxBLACK );
-    explorer_->Hide();
-    sizer_->Add( explorer_, 1, wxALL | wxEXPAND );
+  explorer_ = new explorer::Window(this, ExplorerWindow, wxDefaultPosition,
+                                   GetClientSize(), 0, "Explorer");
+  explorer_->SetBackgroundColour(*wxBLACK);
+  explorer_->Hide();
+  sizer_->Add(explorer_, 1, wxALL | wxEXPAND);
 
-    SetSizer( sizer_ );
-    BindEvent();
+  SetSizer(sizer_);
+  BindEvent();
 };
 
-void Panel::BindEvent()
-{
-    reader_->Bind( wxEVT_KEY_DOWN, &Panel::OnKeyDown, this );
-    Bind( EVT_OPEN_FILE, &Panel::OnExplorerOpenFile, this );
-
+void Panel::BindEvent() {
+  reader_->Bind(wxEVT_KEY_DOWN, &Panel::OnKeyDown, this);
+  Bind(EVT_OPEN_FILE, &Panel::OnExplorerOpenFile, this);
 }
 
-bool Panel::LoadFile( std::string path )
-{
-    bool ret = reader_->Open( path );
-    reader_->Show();
-    if ( ret )
-        reader_->SetFocus();
+bool Panel::LoadFile(std::string path) {
+  bool ret = reader_->Open(path);
+  reader_->Show();
+  if (ret) reader_->SetFocus();
 
-    if ( ret && explorer_ )
-    {
-        explorer_->Hide();
-        explorer_->Clear();
-    }
-
-
-    return ret;
-}
-
-bool Panel::OpenExplorer()
-{
-    std::string path, select_path;
-
-    if ( reader_ )
-    {
-        auto handler = reader_->GetHandler();
-        if ( handler )
-        {
-            select_path = handler->GetName();
-
-            if ( handler->GetParent() )
-                path = handler->GetParent()->GetName();
-            else
-                path = select_path;
-        }
-    }
-
-    if ( path == "" )
-    {
-        select_path = Config::Get()->Read("RecentlyOpened", wxString() );
-        path = Path::GetParent( select_path );
-    }
-
-    if ( ! explorer_ )
-        return false;
-
-    if ( explorer_->Open( path ) )
-    {
-        explorer_->Show();
-        explorer_->SetFocus();
-        explorer_->Select( select_path );
-
-        if ( reader_ )
-        {
-            reader_->Clear();
-            reader_->Hide();
-        }
-
-        sizer_->Layout();
-
-        return true;
-    }
-
-    return false;
-}
-
-void Panel::OnKeyDown( wxKeyEvent &event )
-{
-    if ( event.GetKeyCode() == WXK_BACK )
-        return void( OpenExplorer() );
-    event.DoAllowNextEvent();
-    event.Skip();
-}
-
-void Panel::OnExplorerOpenFile( wxCommandEvent &event )
-{
+  if (ret && explorer_) {
     explorer_->Hide();
-    if ( LoadFile( String::ToString( event.GetString() ) ) )
-    {
-        explorer_->Clear();
+    explorer_->Clear();
+  }
+
+  return ret;
+}
+
+bool Panel::OpenExplorer() {
+  std::string path, select_path;
+
+  if (reader_) {
+    auto handler = reader_->GetHandler();
+    if (handler) {
+      select_path = handler->GetName();
+
+      if (handler->GetParent())
+        path = handler->GetParent()->GetName();
+      else
+        path = select_path;
     }
-    else
-        explorer_->Show();
+  }
+
+  if (path == "") {
+    select_path = Config::Get()->Read("RecentlyOpened", wxString());
+    path = Path::GetParent(select_path);
+  }
+
+  if (!explorer_) return false;
+
+  if (explorer_->Open(path)) {
+    explorer_->Show();
+    explorer_->SetFocus();
+    explorer_->Select(select_path);
+
+    if (reader_) {
+      reader_->Clear();
+      reader_->Hide();
+    }
+
+    sizer_->Layout();
+
+    return true;
+  }
+
+  return false;
 }
 
-bool Panel::Destroy()
-{
-    if ( reader_ )
-        reader_->Destroy();
-    if ( explorer_ )
-        explorer_->Destroy();
-    return wxWindow::Destroy();
+void Panel::OnKeyDown(wxKeyEvent &event) {
+  if (event.GetKeyCode() == WXK_BACK) return void(OpenExplorer());
+  event.DoAllowNextEvent();
+  event.Skip();
 }
 
-}; // namespace fmr
+void Panel::OnExplorerOpenFile(wxCommandEvent &event) {
+  explorer_->Hide();
+  if (LoadFile(String::ToString(event.GetString()))) {
+    explorer_->Clear();
+  } else
+    explorer_->Show();
+}
+
+bool Panel::Destroy() {
+  if (reader_) reader_->Destroy();
+  if (explorer_) explorer_->Destroy();
+  return wxWindow::Destroy();
+}
+
+};  // namespace fmr

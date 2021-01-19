@@ -1,16 +1,16 @@
 /*
- *  Copyright (c) 2020 Uskrai
- *  
+ *  Copyright (c) 2020-2021 Uskrai
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
@@ -18,48 +18,45 @@
 #ifndef FMR_EXPLORER_LOAD_EXPLORER
 #define FMR_EXPLORER_LOAD_EXPLORER
 
-#include <fmr/thread/thread.h>
 #include <fmr/explorer/common.h>
+#include <fmr/thread/thread.h>
 
 #include <queue>
 
-namespace fmr
-{
+namespace fmr {
 
-namespace explorer
-{
+namespace explorer {
 
-wxDECLARE_EVENT( EVT_BITMAP_LOADED, StreamBitmapEvent );
-class LoadThread
-    : public BaseThread
-{
-    public:
-        LoadThread( ThreadController *parent, wxThreadKind kind = wxTHREAD_DETACHED, int id = wxID_ANY )
-        : BaseThread( parent, kind, id ) {};
+wxDECLARE_EVENT(EVT_BITMAP_LOADED, StreamBitmapEvent);
+class LoadThread : public BaseThread {
+ public:
+  LoadThread(ThreadController *parent, wxThreadKind kind = wxTHREAD_DETACHED,
+             int id = wxID_ANY)
+      : BaseThread(parent, kind, id){};
 
-        ExitCode Entry();
-        void Load( StreamBitmap &item );
+  ExitCode Entry();
+  void Load(StreamBitmap &item);
 
-        void SetSize( const wxSize &size );
-        void SetImageQuality( wxImageResizeQuality quality );
-        void Clear();
+  void SetSize(const wxSize &size);
+  void SetImageQuality(wxImageResizeQuality quality);
+  void Clear();
 
-        void DeleteOnEmptyQueue( bool condition = true );
+  void DeleteOnEmptyQueue(bool condition = true);
 
-        void Push( StreamBitmap &stream_bitmap );
+  void Push(StreamBitmap &stream_bitmap);
 
-    protected:
-        void Update( StreamBitmap &stream_bitmap );
-        std::queue<StreamBitmap> load_queue_;
+ protected:
+  void Update(StreamBitmap &stream_bitmap);
+  std::queue<StreamBitmap> load_queue_;
 
-        bool is_delete_on_empty_;
+  bool is_delete_on_empty_;
 
-        wxSize image_size_;
-        wxImageResizeQuality image_quality_ = wxIMAGE_QUALITY_NORMAL;
+  wxSize image_size_;
+  wxImageResizeQuality image_quality_ = wxIMAGE_QUALITY_NORMAL;
 };
 
-}; // namespace explorer
+};  // namespace explorer
 
-}; // namespace fmr
+};  // namespace fmr
 
 #endif

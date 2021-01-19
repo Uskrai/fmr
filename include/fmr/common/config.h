@@ -1,16 +1,16 @@
-/* 
- *  Copyright (c) 2020 Uskrai
- *  
+/*
+ *  Copyright (c) 2020-2021 Uskrai
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
@@ -20,47 +20,39 @@
 
 #include <wx/fileconf.h>
 
-namespace fmr
-{
+namespace fmr {
 
-class Config :
-    private wxFileConfig
-{
-    private:
-        inline static Config* global = NULL;
-    public:
-        using wxFileConfig::wxFileConfig;
-        using wxFileConfig::GetPath;
+class Config : private wxFileConfig {
+ private:
+  inline static Config* global = NULL;
 
-        
-        wxString Read( wxString name, const char* defaultValue )
-        {
-            wxString string = wxString(defaultValue);
-            return this->Read( name, string );
-        }
+ public:
+  using wxFileConfig::GetPath;
+  using wxFileConfig::wxFileConfig;
 
-        template<typename T>
-        T Read( wxString name, T defaultValue )
-        {
-            if ( wxFileConfig::Read( name, &defaultValue ) )
-            {
-                return defaultValue;
-            }
-            else
-            {
-                this->Write(name, defaultValue);
-                return defaultValue;
-            }
-        }
+  wxString Read(wxString name, const char* defaultValue) {
+    wxString string = wxString(defaultValue);
+    return this->Read(name, string);
+  }
 
-        using wxFileConfig::Write;
-        using wxFileConfig::Flush;
+  template <typename T>
+  T Read(wxString name, T defaultValue) {
+    if (wxFileConfig::Read(name, &defaultValue)) {
+      return defaultValue;
+    } else {
+      this->Write(name, defaultValue);
+      return defaultValue;
+    }
+  }
 
-        static Config* Get() { return Config::global; }
+  using wxFileConfig::Flush;
+  using wxFileConfig::Write;
 
-        static void Set( Config* pConfig ) { Config::global = pConfig; }
+  static Config* Get() { return Config::global; }
+
+  static void Set(Config* pConfig) { Config::global = pConfig; }
 };
 
-};
+};  // namespace fmr
 
 #endif

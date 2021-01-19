@@ -17,107 +17,87 @@
 
 #include <fmr/window/flex_grid_cell_window.h>
 
-namespace fmr
-{
+namespace fmr {
 
-FlexGridCellWindow::FlexGridCellWindow( wxWindow *parent, wxWindowID id )
-{
-    Create( parent, id );
+FlexGridCellWindow::FlexGridCellWindow(wxWindow *parent, wxWindowID id) {
+  Create(parent, id);
 }
 
-bool FlexGridCellWindow::Create(
-            wxWindow *parent,
-            wxWindowID id
-        )
-{
-    bool ret = wxWindow::Create( parent, id );
-    sizer_ = new wxBoxSizer( wxVERTICAL );
-    SetSizer( sizer_ );
-    BindEvent();
-    return ret;
+bool FlexGridCellWindow::Create(wxWindow *parent, wxWindowID id) {
+  bool ret = wxWindow::Create(parent, id);
+  sizer_ = new wxBoxSizer(wxVERTICAL);
+  SetSizer(sizer_);
+  BindEvent();
+  return ret;
 }
 
-void FlexGridCellWindow::BindEvent()
-{
-    Bind( wxEVT_PAINT, &FlexGridCellWindow::OnPaint, this );
-    Bind( wxEVT_SIZE, &FlexGridCellWindow::OnSize, this );
+void FlexGridCellWindow::BindEvent() {
+  Bind(wxEVT_PAINT, &FlexGridCellWindow::OnPaint, this);
+  Bind(wxEVT_SIZE, &FlexGridCellWindow::OnSize, this);
 }
 
-void FlexGridCellWindow::OnPaint( wxPaintEvent &event )
-{
-    wxPaintDC dc( this );
-    DrawBorder( dc );
-    event.Skip();
+void FlexGridCellWindow::OnPaint(wxPaintEvent &event) {
+  wxPaintDC dc(this);
+  DrawBorder(dc);
+  event.Skip();
 }
 
-void FlexGridCellWindow::OnSize( wxSizeEvent &event )
-{
-    wxRect rect = wxRect( wxPoint(0,0), event.GetSize() );
+void FlexGridCellWindow::OnSize(wxSizeEvent &event) {
+  wxRect rect = wxRect(wxPoint(0, 0), event.GetSize());
 
-    if ( ! cell_window_ )
-        return;
+  if (!cell_window_) return;
 
-    rect = cell_window_->GetRect().CenterIn( rect, wxBOTH );
-    cell_window_->SetPosition( rect.GetPosition() );
+  rect = cell_window_->GetRect().CenterIn(rect, wxBOTH);
+  cell_window_->SetPosition(rect.GetPosition());
 }
 
-wxSize FlexGridCellWindow::GetMinSize() const
-{
-    if ( !cell_window_ )
-        return wxWindow::GetMinSize();
+wxSize FlexGridCellWindow::GetMinSize() const {
+  if (!cell_window_) return wxWindow::GetMinSize();
 
-
-    return cell_window_->GetSize() + wxSize( GetBorderWidth() * 2, GetBorderWidth() * 2 );
+  return cell_window_->GetSize() +
+         wxSize(GetBorderWidth() * 2, GetBorderWidth() * 2);
 }
 
-void FlexGridCellWindow::SetCellWindow( wxWindow *cell_window )
-{
-    cell_window_ = cell_window;
+void FlexGridCellWindow::SetCellWindow(wxWindow *cell_window) {
+  cell_window_ = cell_window;
 
-    if ( !cell_window )
-        return;
+  if (!cell_window) return;
 
-    cell_window->Reparent( this );
-    SetBackgroundColour( cell_window->GetBackgroundColour() );
-    SetBackgroundStyle( cell_window->GetBackgroundStyle() );
-    SetFont( cell_window->GetFont() );
-    SendSizeEvent();
+  cell_window->Reparent(this);
+  SetBackgroundColour(cell_window->GetBackgroundColour());
+  SetBackgroundStyle(cell_window->GetBackgroundStyle());
+  SetFont(cell_window->GetFont());
+  SendSizeEvent();
 }
 
-wxRect FlexGridCellWindow::GetCellRect() const
-{
-    wxRect rect;
+wxRect FlexGridCellWindow::GetCellRect() const {
+  wxRect rect;
 
-    if ( !cell_window_ )
-        return rect;
+  if (!cell_window_) return rect;
 
-    rect.SetPosition( cell_window_->GetPosition() );
-    rect.SetSize( cell_window_->GetSize() );
-    return rect;
+  rect.SetPosition(cell_window_->GetPosition());
+  rect.SetSize(cell_window_->GetSize());
+  return rect;
 }
 
-void FlexGridCellWindow::DrawBorder( wxDC &dc )
-{
-    if ( !is_selected_ )
-        return;
+void FlexGridCellWindow::DrawBorder(wxDC &dc) {
+  if (!is_selected_) return;
 
-    dc.SetBrush( *wxWHITE_BRUSH );
-    dc.SetPen( *wxWHITE_PEN );
+  dc.SetBrush(*wxWHITE_BRUSH);
+  dc.SetPen(*wxWHITE_PEN);
 
-    wxRect rect( wxPoint(0,0), GetSize() );
-    for ( int i = 0; i < GetHighlightPenWidth() && i < GetBorderWidth(); i++ )
-    {
-        dc.DrawLine( rect.GetTopLeft(), rect.GetTopRight() );
-        dc.DrawLine( rect.GetTopLeft(), rect.GetBottomLeft() );
-        dc.DrawLine( rect.GetBottomLeft(), rect.GetBottomRight() );
-        dc.DrawLine( rect.GetTopRight(), rect.GetBottomRight() );
+  wxRect rect(wxPoint(0, 0), GetSize());
+  for (int i = 0; i < GetHighlightPenWidth() && i < GetBorderWidth(); i++) {
+    dc.DrawLine(rect.GetTopLeft(), rect.GetTopRight());
+    dc.DrawLine(rect.GetTopLeft(), rect.GetBottomLeft());
+    dc.DrawLine(rect.GetBottomLeft(), rect.GetBottomRight());
+    dc.DrawLine(rect.GetTopRight(), rect.GetBottomRight());
 
-        rect.SetTop( rect.GetTop() + 1 );
-        rect.SetBottom( rect.GetBottom() - 2 );
-        rect.SetLeft( rect.GetLeft() + 1 );
-        rect.SetRight( rect.GetRight() - 2 );
-    }
+    rect.SetTop(rect.GetTop() + 1);
+    rect.SetBottom(rect.GetBottom() - 2);
+    rect.SetLeft(rect.GetLeft() + 1);
+    rect.SetRight(rect.GetRight() - 2);
+  }
 }
 
-} // namespace fmr end
-
+}  // namespace fmr
