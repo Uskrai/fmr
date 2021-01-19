@@ -239,38 +239,25 @@ void ScrolledWindow::OnScrollLine( wxScrollWinEvent &event )
 
 void ScrolledWindow::OnKey( wxKeyEvent &event )
 {
-    bool isUp = event.GetKeyCode() == WXK_UP;
-    bool isDown = event.GetKeyCode() == WXK_DOWN;
-    bool isLeft = event.GetKeyCode() == WXK_LEFT;
-    bool isRight = event.GetKeyCode() == WXK_RIGHT;
+    wxDirection direction = dimension::GetDirection( event.GetKeyCode() );
 
     // only scroll for default if there is
     // no modifier ( ctrl,alt,shift, etc )
     // is pressed
     if ( ! event.HasAnyModifiers() )
     {
-        if ( isUp || isDown || isLeft || isRight )
+        if ( direction != wxALL )
         {
-            wxOrientation orient;
-
-            // set orientation to vertical
-            // if key is up or down
-            if ( isUp || isDown )
-                orient = wxVERTICAL;
-
-            // set orientation to horizontal
-            // if key is left or right
-            if ( isLeft || isRight )
-                orient = wxHORIZONTAL;
+            wxOrientation orient = dimension::GetOrient( direction );
 
             // if key is up or left
             // then lineup
-            if ( isUp || isLeft )
+            if ( direction == wxUP || direction == wxLEFT )
                 LineUp( orient, m_stepPerKey );
 
             // if key is down or right
             // then linedown
-            if ( isDown || isRight )
+            if ( direction == wxDOWN || direction == wxRIGHT )
                 LineDown( orient, m_stepPerKey );
 
             return;
