@@ -265,7 +265,7 @@ void Window::Select( std::string name )
             continue;
 
         if ( it.stream->GetName() == name )
-            return GoToCell( idx );
+            GoToCell( idx );
     }
 }
 
