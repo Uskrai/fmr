@@ -1,11 +1,21 @@
 # fmr
-Free Manga Reader
+Free Manga Reader<br>
+a simple manga reader.
+
+<h2>Feature</h2>
+<ul>
+  <li>Custom Image per page</li>
+  <li>Webtoon mode</li>
+  <li>built-in file explorer</li>
+</ul>
 
 <h2><b>Requirement</b></h2>
-<ul>
-  <li>wxWidgets >= 3.0.4</li>
-  <li>c++17</li>
-</ul>
+  <ul>
+    <li>wxWidgets >= 3.0.4</li>
+    <li>c++17</li>
+  </ul>
+  
+
 <h2><b>How to build</b></h2>
 <ol>
   <li>cd /path/to/sources</li>
@@ -13,6 +23,7 @@ Free Manga Reader
   <li>../configure</li>
   <li>make -j3</li>
 </ol>
+
 <h2><b>Option</b></h2>
 <span>--with-wx-config=/path/to/wx-config     // specify wx-config path</span><br>
 <span>--disable-shared or --enable-shared=no  // make static link</span><br>
