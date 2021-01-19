@@ -45,7 +45,7 @@ bool ImageWindow::Create( wxWindow *parent, wxWindowID id, const wxPoint &pos, c
 {
     BindEvent();
     bool ret = wxWindow::Create( parent, id, pos, size, style, name );
-    window_text_ = new wxStaticText( this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_MIDDLE | wxST_NO_AUTORESIZE | wxALIGN_CENTER_HORIZONTAL );
+    window_text_ = new wxStaticText( this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE | wxALIGN_CENTER_HORIZONTAL );
 
     sizer_ = new wxBoxSizer( wxVERTICAL );
     sizer_->AddSpacer( GetBestBitmapSize( GetSize() ).GetHeight()  );
@@ -78,7 +78,9 @@ void ImageWindow::SetStream( std::shared_ptr<SStream> stream )
 
     if ( window_text_ )
     {
-        window_text_->SetLabelText( string );
+        window_text_->SetLabel( string );
+        //TODO: this should have separate member
+        window_text_->SetForegroundColour( GetForegroundColour() );
         window_text_->Wrap( GetClientSize().GetWidth() - 20 );
     }
 }
