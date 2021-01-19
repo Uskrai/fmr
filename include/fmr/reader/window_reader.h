@@ -74,6 +74,7 @@ class Window :
     protected:
         void AdjustBitmap();
     private:
+        void BindEvent();
         Controller controller_ = Controller( this );
         // pointer to handler
         std::shared_ptr<AbstractHandler> file_handler_ = NULL;
@@ -95,14 +96,13 @@ class Window :
 
         void Error( wxSize size ); 
         void OnDraw( wxDC& dc );
-        wxDECLARE_EVENT_TABLE();
 
         void OnSize( wxSizeEvent &event );
         void OnMouseMotion( wxMouseEvent &event );
         void OnEdge( wxDirection direction );
 
-        void OnThreadUpdate( wxCommandEvent &event );
-        void OnZoomThreadCompleted( wxCommandEvent &event ) { AdjustScrollBar(); };
+        void OnThreadUpdate( wxThreadEvent &event );
+        void OnZoomThreadCompleted( wxThreadEvent &event ) { AdjustScrollBar(); };
         
 };
 

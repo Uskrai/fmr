@@ -28,7 +28,6 @@ Controller::Controller( wxWindow *parent )
 {
     parent_ = parent;
 }
-
 Controller::~Controller()
 {
     DeleteThread( kLoadThreadID, g_sLock );

@@ -76,7 +76,7 @@ class FlexGridCellWindow
         wxRect GetCellRect() const;
 
     private:
-        wxDECLARE_EVENT_TABLE();
+        void BindEvent();
 
         void OnPaint( wxPaintEvent &event );
         void OnSize( wxSizeEvent &event );

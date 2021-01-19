@@ -20,11 +20,6 @@
 namespace fmr
 {
 
-wxBEGIN_EVENT_TABLE( FlexGridCellWindow, wxWindow )
-    EVT_PAINT( FlexGridCellWindow::OnPaint )
-    EVT_SIZE( FlexGridCellWindow::OnSize )
-wxEND_EVENT_TABLE()
-
 FlexGridCellWindow::FlexGridCellWindow( wxWindow *parent, wxWindowID id )
 {
     Create( parent, id );
@@ -38,7 +33,14 @@ bool FlexGridCellWindow::Create(
     bool ret = wxWindow::Create( parent, id );
     sizer_ = new wxBoxSizer( wxVERTICAL );
     SetSizer( sizer_ );
+    BindEvent();
     return ret;
+}
+
+void FlexGridCellWindow::BindEvent()
+{
+    Bind( wxEVT_PAINT, &FlexGridCellWindow::OnPaint, this );
+    Bind( wxEVT_SIZE, &FlexGridCellWindow::OnSize, this );
 }
 
 void FlexGridCellWindow::OnPaint( wxPaintEvent &event )

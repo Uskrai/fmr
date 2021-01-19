@@ -33,6 +33,7 @@ class ThreadController
     : public wxEvtHandler
 {
     public:
+        ThreadController();
         ~ThreadController(){}
         virtual wxEvtHandler *GetParent() = 0;
         virtual void DoSetNull( int id ) = 0;
@@ -45,11 +46,11 @@ class ThreadController
         void Update( int id );
         void Completed( int id );
 
-        void OnUpdate( wxCommandEvent &event );
-        void OnCompleted( wxCommandEvent &event );
+        void OnUpdate( wxThreadEvent &event );
+        void OnCompleted( wxThreadEvent &event );
     
     protected:
-        wxDECLARE_EVENT_TABLE();
+        void BindEvent();
 }; 
 
 class BaseThread :

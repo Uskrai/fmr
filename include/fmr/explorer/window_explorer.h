@@ -78,16 +78,16 @@ class Window
         void Clear();
         bool Destroy();
     protected:
+        void BindEvent();
         // wxGridTableBase *grid_table_;
 
         // std::vector<wxGridCellCoords> list_cell_pos_;
 
-        void OnThreadUpdate( wxCommandEvent &event );
-        void OnGridEnter( wxKeyEvent &event );
+        void OnThreadUpdate( wxThreadEvent &event );
+        void OnKeyDown( wxKeyEvent &event );
         // void OnGridSelect( wxGridEvent &event );
 
         // wxGridCellCoords selected_cell_;
-        wxDECLARE_EVENT_TABLE();
 };
 
 

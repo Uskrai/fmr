@@ -66,10 +66,9 @@ class Controller
 
         void OnFound( StreamBitmapEvent &event );
         void OnLoaded( StreamBitmapEvent &event );
-        void OnUpdate( wxCommandEvent &event );
-        void OnFindCompleted( wxCommandEvent &event );
-        void OnLoadCompleted( wxCommandEvent &event );
-        wxDECLARE_EVENT_TABLE();
+        void OnUpdate( wxThreadEvent  &event );
+        void OnFindCompleted( wxThreadEvent  &event );
+        void OnLoadCompleted( wxThreadEvent  &event );
 };
 
 }; // namespace explorer

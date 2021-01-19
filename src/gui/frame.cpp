@@ -32,14 +32,6 @@ enum {
     PANEL = wxID_HIGHEST + 2001,
 };
 
-wxBEGIN_EVENT_TABLE(Frame, wxFrame)
-    EVT_MENU(ID_Hello,      Frame::OnHello)
-    EVT_MENU(wxID_ABOUT,    Frame::OnAbout)
-    EVT_MENU(6001,          Frame::OpenFile)
-    EVT_CLOSE( Frame::OnClose )
-wxEND_EVENT_TABLE()
-
-
 Frame::Frame(const wxString& title, const wxPoint& pos, const wxSize& size,long style) : 
     wxFrame(NULL, wxID_ANY, title, pos, size, style)
 {
@@ -50,6 +42,14 @@ Frame::Frame(const wxString& title, const wxPoint& pos, const wxSize& size,long 
     this->sizer = new wxBoxSizer(wxHORIZONTAL);
     SetPanel();
     SetSizer( this->sizer );
+    BindEvent();
+}
+
+void Frame::BindEvent()
+{
+    Bind( wxEVT_MENU, &Frame::OnAbout, this, wxID_ABOUT );
+    Bind( wxEVT_MENU, &Frame::OpenFile, this, kFrameOpenFile );
+    Bind( wxEVT_CLOSE_WINDOW, &Frame::OnClose, this );
 }
 
 void Frame::OnClose( wxCloseEvent &event )
@@ -76,10 +76,7 @@ wxMenuBar* Frame::MenuBar()
 wxMenu* Frame::MenuFile()
 {
     wxMenu *menuFile = new wxMenu;
-    menuFile->Append(6001,"&Open File \tCtrl+O");
-    menuFile->Append(ID_Hello, 
-                    "&Hello...\tCtrl+H",
-                    "Help string shown in status bar for this menu item");
+    menuFile->Append( kFrameOpenFile, "&Open File \tCtrl+O");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
 

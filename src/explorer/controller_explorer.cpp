@@ -26,17 +26,14 @@ namespace fmr
 namespace explorer
 {
 
-wxBEGIN_EVENT_TABLE( Controller, ThreadController )
-    EVT_STREAM_BITMAP( kFindThreadID, EVT_STREAM_FOUND, Controller::OnFound )
-    EVT_STREAM_BITMAP( kLoadThreadID, EVT_BITMAP_LOADED, Controller::OnLoaded )
-    EVT_COMMAND( kLoadThreadID, EVT_COMMAND_THREAD_UPDATE, Controller::OnUpdate )
-    EVT_COMMAND( kFindThreadID, EVT_COMMAND_THREAD_COMPLETED, Controller::OnFindCompleted )
-wxEND_EVENT_TABLE()
-
 Controller::Controller( wxWindow *parent )
 {
     parent_ = parent;
 
+    Bind( EVT_STREAM_FOUND, &Controller::OnFound, this, kFindThreadID );
+    Bind( EVT_BITMAP_LOADED, &Controller::OnLoaded, this, kLoadThreadID );
+    Bind( EVT_COMMAND_THREAD_UPDATE, &Controller::OnUpdate, this, kLoadThreadID );
+    Bind( EVT_COMMAND_THREAD_COMPLETED, &Controller::OnFindCompleted, this, kFindThreadID );
 }
 
 Controller::~Controller()
@@ -91,12 +88,12 @@ void Controller::OnLoaded( StreamBitmapEvent &event )
 {
 }
 
-void Controller::OnUpdate( wxCommandEvent &event )
+void Controller::OnUpdate( wxThreadEvent  &event )
 {
     Update( event.GetId() );
 }
 
-void Controller::OnFindCompleted( wxCommandEvent &event )
+void Controller::OnFindCompleted( wxThreadEvent  &event )
 {
     if ( load_thread_ )
         load_thread_->DeleteOnEmptyQueue();

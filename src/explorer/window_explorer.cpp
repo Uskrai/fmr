@@ -27,12 +27,6 @@ namespace explorer
 {
 
 
-wxBEGIN_EVENT_TABLE( Window, FlexGridWindow )
-        EVT_COMMAND( kLoadThreadID, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
-        EVT_COMMAND( kLoadThreadID, EVT_COMMAND_THREAD_COMPLETED, Window::OnThreadUpdate )
-        EVT_CHAR_HOOK( Window::OnGridEnter )
-wxEND_EVENT_TABLE()
-
 Window::Window(
         wxWindow *parent,
         const wxWindowID &id,
@@ -51,6 +45,14 @@ Window::Window(
     CreateGrid( 0, 0 );
     // grid_table_ = new wxGridStringTable();
     // SetTable( grid_table_, true );
+    BindEvent();
+}
+
+void Window::BindEvent()
+{
+    Bind( EVT_COMMAND_THREAD_UPDATE, &Window::OnThreadUpdate, this );
+    Bind( EVT_COMMAND_THREAD_COMPLETED, &Window::OnThreadUpdate, this );
+    Bind( wxEVT_KEY_DOWN, &Window::OnKeyDown, this );
 }
 
 bool Window::Destroy()
@@ -231,12 +233,12 @@ void Window::Clear()
     handler_.reset();
 }
 
-void Window::OnThreadUpdate( wxCommandEvent &event )
+void Window::OnThreadUpdate( wxThreadEvent &event )
 {
     Refresh();
 }
 
-void Window::OnGridEnter( wxKeyEvent &event )
+void Window::OnKeyDown( wxKeyEvent &event )
 {
     int key_code = event.GetKeyCode();
 

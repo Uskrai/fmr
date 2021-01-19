@@ -45,14 +45,14 @@ class Panel :
         bool OpenExplorer();
         bool Destroy();
     private:
+        void BindEvent();
+
         void OnKeyDown( wxKeyEvent &event );
         void OnCharHook( wxKeyEvent &event );
         void OnExplorerOpenFile( wxCommandEvent &event );
         reader::Window* reader_ = NULL;
         explorer::Window *explorer_ = NULL;
         wxBoxSizer* sizer_;
-
-        wxDECLARE_EVENT_TABLE();
 
 };
 

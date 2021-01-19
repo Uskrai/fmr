@@ -44,14 +44,6 @@ enum ThreadID : int
         var = NULL;         \
     }
 
-wxBEGIN_EVENT_TABLE( Window, ScrolledWindow )
-    EVT_SIZE( Window::OnSize )
-    EVT_MOTION( Window::OnMouseMotion )
-    EVT_COMMAND( LoadThreadID, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
-    EVT_COMMAND( ZoomThreadID, EVT_COMMAND_THREAD_UPDATE, Window::OnThreadUpdate )
-    EVT_COMMAND( ZoomThreadID, EVT_COMMAND_THREAD_COMPLETED, Window::OnZoomThreadCompleted )
-wxEND_EVENT_TABLE()
-
 Window::Window( wxWindow* parent, wxWindowID id, const wxPoint & pos, 
                 const wxSize &size, long style, const wxString &name ) :
     ScrolledWindow( parent, id, wxDefaultPosition, size, style, name )
@@ -60,7 +52,16 @@ Window::Window( wxWindow* parent, wxWindowID id, const wxPoint & pos,
     CalcScrollStep( 
         static_cast<ScrollingType>(ConfRead("ScrollType", int(SCROLL_BY_WINDOW) ) ) 
     );
+    BindEvent();
 };
+
+void Window::BindEvent()
+{
+    Bind( wxEVT_SIZE, &Window::OnSize, this );
+    Bind( wxEVT_MOTION, &Window::OnMouseMotion, this );
+    Bind( EVT_COMMAND_THREAD_UPDATE, &Window::OnThreadUpdate, this, LoadThreadID, ZoomThreadID );
+    Bind( EVT_COMMAND_THREAD_COMPLETED, &Window::OnZoomThreadCompleted, this, ZoomThreadID );
+}
 
 Window::~Window()
 {
@@ -138,7 +139,7 @@ void Window::CalcScrollStep( ScrollingType type )
 
 }
 
-void Window::OnThreadUpdate( wxCommandEvent &event )
+void Window::OnThreadUpdate( wxThreadEvent &event )
 {
     AdjustBitmap();
     Refresh();

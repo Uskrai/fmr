@@ -25,11 +25,6 @@
 namespace fmr
 {
 
-wxBEGIN_EVENT_TABLE( Panel, wxPanel )
-    EVT_CHAR_HOOK( Panel::OnCharHook )
-    EVT_COMMAND( wxID_ANY, EVT_OPEN_FILE, Panel::OnExplorerOpenFile )
-wxEND_EVENT_TABLE()
-
 Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
     wxPanel( parent, id, position, size )
 {
@@ -52,7 +47,15 @@ Panel::Panel( wxWindow* parent, wxWindowID id, wxPoint position, wxSize size ) :
     sizer_->Add( explorer_, 1, wxALL | wxEXPAND );
 
     SetSizer( sizer_ );
+    BindEvent();
 };
+
+void Panel::BindEvent()
+{
+    reader_->Bind( wxEVT_KEY_DOWN, &Panel::OnKeyDown, this );
+    Bind( EVT_OPEN_FILE, &Panel::OnExplorerOpenFile, this );
+
+}
 
 bool Panel::LoadFile( std::string path )
 {
@@ -118,7 +121,7 @@ bool Panel::OpenExplorer()
     return false;
 }
 
-void Panel::OnCharHook( wxKeyEvent &event )
+void Panel::OnKeyDown( wxKeyEvent &event )
 {
     if ( event.GetKeyCode() == WXK_BACK )
         return void( OpenExplorer() );

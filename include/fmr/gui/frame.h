@@ -31,7 +31,8 @@ namespace fmr
 
 enum
 {
-    ID_Hello = 1
+    kPanel = wxID_HIGHEST + 2001,
+    kFrameOpenFile
 };
 
 class Frame :
@@ -44,6 +45,7 @@ class Frame :
         wxBoxSizer* sizer;
 
     private:
+        void BindEvent();
         void SetPanel();
 
         //event
@@ -59,8 +61,6 @@ class Frame :
         wxMenuBar* MenuBar();
         wxMenu* MenuFile();
         wxMenu* MenuHelp();
-
-        wxDECLARE_EVENT_TABLE();
 
 };
 

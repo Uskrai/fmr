@@ -45,10 +45,16 @@ void ThreadCompleted( wxEvtHandler *dest, int thread_id )
     );
 }
 
-wxBEGIN_EVENT_TABLE( ThreadController, wxEvtHandler )
-    EVT_COMMAND( wxID_ANY, EVT_COMMAND_THREAD_UPDATE, ThreadController::OnUpdate )
-    EVT_COMMAND( wxID_ANY, EVT_COMMAND_THREAD_COMPLETED, ThreadController::OnCompleted )
-wxEND_EVENT_TABLE()
+ThreadController::ThreadController()
+{
+    BindEvent();
+}
+
+void ThreadController::BindEvent()
+{
+    Bind( EVT_COMMAND_THREAD_UPDATE, &ThreadController::OnUpdate, this );
+    Bind( EVT_COMMAND_THREAD_COMPLETED, &ThreadController::OnCompleted, this );
+}
 
 bool ThreadController::Delete( int thread_id, wxCriticalSection &lock )
 {
@@ -98,12 +104,12 @@ void ThreadController::Completed( int id )
     );
 }
 
-void ThreadController::OnUpdate( wxCommandEvent &event )
+void ThreadController::OnUpdate( wxThreadEvent &event )
 {
     Update( event.GetId() );
 }
 
-void ThreadController::OnCompleted( wxCommandEvent &event )
+void ThreadController::OnCompleted( wxThreadEvent &event )
 {
     Completed( event.GetId() );
 }
