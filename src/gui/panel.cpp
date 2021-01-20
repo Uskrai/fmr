@@ -33,7 +33,7 @@ Panel::Panel(wxWindow *parent, wxWindowID id, wxPoint position, wxSize size)
   sizer_->Add(reader_, 1, wxALL | wxEXPAND);
 
   explorer_ = new explorer::Window(this, ExplorerWindow, wxDefaultPosition,
-                                   GetClientSize(), 0, "Explorer");
+                                   GetClientSize(), wxWANTS_CHARS, "Explorer");
   explorer_->SetBackgroundColour(*wxBLACK);
   explorer_->Hide();
   sizer_->Add(explorer_, 1, wxALL | wxEXPAND);
