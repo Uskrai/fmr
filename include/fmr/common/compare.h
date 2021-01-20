@@ -41,6 +41,8 @@ class Sortable {
   virtual String GetString() const = 0;
 };
 
+char ToLower(char ch);
+
 bool NotEnd(const wxString &str, size_t idx);
 String GetNonZero(const String &str, size_t &idx, Char &chr);
 DeclareStringCompareFunction(Natural);
