@@ -88,6 +88,8 @@ bool STDHandler::IsExist(size_t idx) const {
   return Vector::IsExist(list_stream_, idx);
 }
 
+bool STDHandler::CanHandle(const std::string &path) { return true; }
+
 bool STDHandler::GetStream(SStream &stream) {
   if (stream.GetHandlerPath() != GetName()) return false;
 
