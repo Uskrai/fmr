@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <fmr/common/string.h>
 #include <fmr/handler/abstract_handler.h>
 #include <fmr/handler/struct_stream.h>
 #include <wx/filename.h>
@@ -95,7 +96,7 @@ void SStream::Open(wxMemoryOutputStream *stream) {
   if (stream) Open(*stream);
 }
 
-void SStream::SetName(const wxString &name) { m_name = name; }
+void SStream::SetName(const wxString &name) { m_name = String::ToString(name); }
 
 void SStream::SetName(const std::wstring &name) { SetName(wxString(name)); }
 
