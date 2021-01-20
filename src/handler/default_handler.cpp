@@ -151,7 +151,9 @@ bool DefaultHandler::GetFirst(SStream &stream, DirGetFlags flags,
                               bool is_get_stream) {
   if (GetName() == L"") return false;
 
-  opened_directory_.Open(GetName());
+  wxString name;
+  String::FromUTF8(GetName(), name);
+  opened_directory_.Open(name);
 
   if (!opened_directory_.IsOpened()) return false;
 
