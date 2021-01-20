@@ -38,6 +38,9 @@ bool App::OnInit() {
   wxLocale locale;
   locale.Init();
 
+  std::setlocale(LC_ALL, "");
+  std::locale::global(std::locale(std::locale::classic()));
+
   wxRect screen = wxDisplay().GetClientArea();
   App::frame = new Frame(PACKAGE_NAME, wxPoint(0, 0),
                          wxSize(screen.GetWidth(), screen.GetHeight()),
