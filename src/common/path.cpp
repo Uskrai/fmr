@@ -104,12 +104,14 @@ std::string MakeString(const wxString &path) {
   return std::string(path.ToUTF8());
 }
 
+fs::path MakePath(const std::string &path) { return fs::u8path(path); }
+
 std::string GetSeparator() { return std::string(1, Separator); }
 
 std::string GetParent(std::string path) {
   if (!IsRoot(path)) RemoveDirSep(path);
 
-  fs::path temp(path);
+  fs::path temp = MakePath(path);
   fs::path temp_parent = temp.parent_path();
 
   return GetDirName(MakeString(temp_parent));
@@ -128,7 +130,7 @@ std::string GetRootPath(const std::string &path) {
 }
 
 std::string GetDirName(const std::string &path) {
-  fs::path temp(path);
+  fs::path temp = MakePath(path);
 
   if (fs::is_directory(temp)) return MakeString(temp);
 
@@ -144,7 +146,7 @@ void RemoveDirSep(std::string &path) {
 }
 
 bool HasRootPath(const std::string &path) {
-  return fs::path(path).has_root_path();
+  return MakePath(path).has_root_path();
 }
 
 bool IsRoot(const std::string &path) { return GetRootPath(path) == path; }
@@ -168,15 +170,15 @@ bool IsChild(const std::string &parent, std::string target) {
 }
 
 bool IsAbsolute(const std::string &path) {
-  return fs::path(path).is_absolute();
+  return MakePath(path).is_absolute();
 }
 
 bool IsRelative(const std::string &path) {
-  return fs::path(path).is_relative();
+  return MakePath(path).is_relative();
 }
 
 std::string Append(const std::string &parent, const std::string &target) {
-  fs::path path(parent);
+  fs::path path = MakePath(parent);
   return MakeString(path / target);
 }
 
