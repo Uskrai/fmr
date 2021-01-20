@@ -21,7 +21,7 @@
 
 namespace fmr {
 namespace Compare {
-bool NotEnd(const wxString& str, size_t idx) { return idx < str.size(); }
+bool NotEnd(const std::string& str, size_t idx) { return idx < str.size(); }
 
 char ToLower(char ch) {
   return static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
@@ -75,14 +75,17 @@ DefineStringCompareFunction(Natural) {
         i++;
       }
     }
-    if (fst != scnd) {
+    if (fst != scnd || first[idx] != second[pos]) {
       if (idx != pos) return idx < pos;
+      if (first[idx] != second[pos]) return first[idx] < second[pos];
       return fst < scnd;
     }
 
     idx++;
     pos++;
   }
+
+  printf("%s %s\n", first.c_str(), second.c_str());
 
   return first.size() < second.size();
 }
