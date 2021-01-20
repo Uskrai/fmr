@@ -60,48 +60,42 @@ bool Panel::LoadFile(std::string path) {
 }
 
 bool Panel::OpenExplorer() {
-  std::string path, select_path;
+  std::string select_path;
 
   if (reader_) {
     auto handler = reader_->GetHandler();
     if (handler) {
       select_path = handler->GetName();
-
-      if (handler->GetParent())
-        path = handler->GetParent()->GetName();
-      else
-        path = select_path;
     }
   }
 
-  if (path == "") {
+  if (select_path == "") {
     select_path = Config::Get()->Read("RecentlyOpened", wxString());
-    path = Path::GetParent(select_path);
   }
 
   if (!explorer_) return false;
 
-  if (explorer_->Open(path)) {
-    explorer_->Show();
+  if (explorer_->HasFocus()) {
+    return explorer_->OpenParent();
+  } else {
     explorer_->SetFocus();
-    explorer_->Select(select_path);
-
-    if (reader_) {
-      reader_->Clear();
-      reader_->Hide();
+    explorer_->Show();
+    if (explorer_->OpenParent(select_path)) {
+      explorer_->Show();
+      if (reader_) {
+        reader_->Clear();
+        reader_->Hide();
+      }
+      explorer_->SetFocus();
+      return true;
     }
-
-    sizer_->Layout();
-
-    return true;
   }
-
   return false;
 }
 
 void Panel::OnKeyDown(wxKeyEvent &event) {
-  if (event.GetKeyCode() == WXK_BACK) return void(OpenExplorer());
-  event.DoAllowNextEvent();
+  if (event.GetKeyCode() == WXK_BACK)
+    if (OpenExplorer()) return;
   event.Skip();
 }
 
