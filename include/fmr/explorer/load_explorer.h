@@ -49,7 +49,7 @@ class LoadThread : public BaseThread {
   void Update(StreamBitmap &stream_bitmap);
   std::queue<StreamBitmap> load_queue_;
 
-  bool is_delete_on_empty_;
+  bool is_delete_on_empty_ = false;
 
   wxSize image_size_;
   wxImageResizeQuality image_quality_ = wxIMAGE_QUALITY_NORMAL;
