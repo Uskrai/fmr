@@ -18,6 +18,7 @@
 #include <fmr/bitmap/image_util.h>
 #include <fmr/explorer/load_explorer.h>
 #include <fmr/handler/handler_factory.h>
+#include <wx/log.h>
 
 namespace fmr {
 
@@ -51,6 +52,8 @@ void LoadThread::Load(StreamBitmap &item) {
 
   TEST_RETURN();
 
+  wxLogMessage("Loading image in %s/%s", item.stream->GetHandlerPath(),
+               item.stream->GetName());
   image_util::Load(image, *stream);
 
   TEST_RETURN();
@@ -59,6 +62,8 @@ void LoadThread::Load(StreamBitmap &item) {
 
   TEST_RETURN();
 
+  wxLogMessage("Setting Bitmap in %s/%s", item.stream->GetHandlerPath(),
+               item.stream->GetName());
   if (image.IsOk()) item.bitmap->SetBitmap(image);
 }
 
@@ -92,6 +97,8 @@ wxThread::ExitCode LoadThread::Entry() {
         std::unique_ptr<AbstractHandler> handler(
             HandlerFactory::NewHandler(item.stream->GetHandlerPath()));
         TEST_BREAK();
+        wxLogMessage("Loading Stream in %s/%s", item.stream->GetHandlerPath(),
+                     item.stream->GetName());
         handler->GetStream(*item.stream);
       }
 
@@ -106,6 +113,7 @@ wxThread::ExitCode LoadThread::Entry() {
     TEST_BREAK();
   }
 
+  wxLogMessage("Load thread completed");
   Completed();
 
   return (wxThread::ExitCode)0;
