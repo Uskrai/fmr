@@ -150,7 +150,7 @@ bool Window::OpenParent(const std::string &path) {
 
   if (!child_handler) return false;
 
-  std::string parent_path = handler_->GetParent()->GetName();
+  std::string parent_path = child_handler->GetParent()->GetName();
 
   if (!Open(parent_path)) return false;
 
