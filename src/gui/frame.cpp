@@ -41,6 +41,7 @@ Frame::Frame(const wxString& title, const wxPoint& pos, const wxSize& size,
   SetPanel();
   SetSizer(this->sizer);
   BindEvent();
+  SetAccelerator();
 }
 
 void Frame::BindEvent() {
@@ -48,6 +49,25 @@ void Frame::BindEvent() {
   Bind(wxEVT_MENU, &Frame::OpenFile, this, kFrameOpenFile);
   Bind(wxEVT_CLOSE_WINDOW, &Frame::OnClose, this);
   Bind(wxEVT_MENU, &Frame::OnOpenExplorer, this, kFrameOpenExplorer);
+}
+
+void Frame::SetAccelerator() {
+  constexpr int entry_count = 2;
+  wxAcceleratorEntry entry[entry_count];
+
+  wxMenuBar* bar = GetMenuBar();
+  wxMenu* menu = bar->GetMenu(bar->FindMenu("File"));
+  wxMenuItem* item = menu->FindItem(kFrameOpenFile);
+
+  entry[0].Set(wxACCEL_CTRL, int('O'), kFrameOpenFile, item);
+  if (item) item->SetAccel(&entry[0]);
+
+  item = menu->FindItem(kFrameOpenExplorer);
+  entry[1].Set(wxACCEL_NORMAL, WXK_BACK, kFrameOpenExplorer, item);
+  if (item) item->SetAccel(&entry[1]);
+
+  wxAcceleratorTable table(entry_count, entry);
+  SetAcceleratorTable(table);
 }
 
 void Frame::OnClose(wxCloseEvent& event) {
@@ -69,12 +89,10 @@ wxMenuBar* Frame::MenuBar() {
 }
 
 wxMenu* Frame::MenuFile() {
-  wxMenu* menuFile = new wxMenu;
-  menuFile->Append(kFrameOpenFile, "&Open File \tCtrl+O");
-  menuFile->Append(kFrameOpenExplorer, "&Open Explorer \tBACK");
-  menuFile->AppendSeparator();
-  menuFile->Append(wxID_EXIT);
+  wxMenu* menuFile = new wxMenu();
 
+  menuFile->Append(kFrameOpenFile, "&Open File");
+  menuFile->Append(kFrameOpenExplorer, "&Open Explorer\tBACK");
   return menuFile;
 }
 
@@ -99,11 +117,14 @@ void Frame::OpenFile(wxCommandEvent& event) {
   openDialog->Destroy();
 }
 
-void Frame::OnOpenExplorer(wxCommandEvent& event) { m_panel->OpenExplorer(); }
+void Frame::OnOpenExplorer(wxCommandEvent& event) {
+  m_panel->OpenExplorer();
+  event.Skip();
+}
 
 void Frame::SetPanel() {
-  m_panel = new Panel(this, PANEL, wxPoint(-1, -1), GetSize());
-  this->sizer->Add(m_panel, 1, wxALL);
+  m_panel = new Panel(this, kPanel, wxDefaultPosition, GetSize());
+  sizer->Add(m_panel, wxSizerFlags().Expand().Align(wxALL));
 }
 
 void Frame::OnExit(wxCommandEvent& event) { Close(true); }

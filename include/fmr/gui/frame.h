@@ -28,7 +28,11 @@ class wxStatusBar;
 
 namespace fmr {
 
-enum { kPanel = wxID_HIGHEST + 2001, kFrameOpenFile, kFrameOpenExplorer };
+enum {
+  kPanel = wxID_HIGHEST + 2001,
+  kFrameOpenFile,
+  kFrameOpenExplorer,
+};
 
 class Frame : public wxFrame {
  public:
@@ -41,6 +45,7 @@ class Frame : public wxFrame {
  private:
   void BindEvent();
   void SetPanel();
+  void SetAccelerator();
 
   // event
   void OnHello(wxCommandEvent& event);
