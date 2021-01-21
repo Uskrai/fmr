@@ -94,16 +94,28 @@ bool Panel::OpenExplorer() {
 }
 
 void Panel::OnKeyDown(wxKeyEvent &event) {
-  if (event.GetKeyCode() == WXK_BACK)
-    if (OpenExplorer()) return;
+  // if (event.GetKeyCode() == WXK_BACK)
+  // if (OpenExplorer()) return;
   event.Skip();
 }
 
-void Panel::OnExplorerOpenFile(wxCommandEvent &event) {
+void Panel::OnExplorerOpenFile(StreamEvent &event) {
   explorer_->Hide();
-  if (LoadFile(String::ToString(event.GetString()))) {
+
+  if (!event.GetStream()) return;
+
+  auto stream = event.GetStream();
+
+  auto handler = std::unique_ptr<AbstractOpenableHandler>(
+      HandlerFactory::NewOpenableHandler(stream->GetHandlerPath()));
+
+  if (!handler) return;
+
+  std::string path = handler->GetItemPath(*stream);
+
+  if (LoadFile(path))
     explorer_->Clear();
-  } else
+  else
     explorer_->Show();
 }
 
@@ -112,5 +124,4 @@ bool Panel::Destroy() {
   if (explorer_) explorer_->Destroy();
   return wxWindow::Destroy();
 }
-
 };  // namespace fmr

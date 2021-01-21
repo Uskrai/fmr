@@ -18,6 +18,8 @@
 #ifndef FMR_COMMON_STRING
 #define FMR_COMMON_STRING
 
+#include <wx/string.h>
+
 #include <string>
 
 namespace fmr {
@@ -34,8 +36,12 @@ T FromUTF8(const std::string &source, T &dest) {
   return dest;
 }
 
-};  // namespace String
+template <class T>
+T FromString(const std::string &source) {
+  return T::FromUTF8(source.c_str());
+}
 
+};  // namespace String
 };  // namespace fmr
 
 #endif

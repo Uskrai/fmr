@@ -47,7 +47,9 @@ DEFINE_BITMASK_TYPE(StreamActionType)
 
 struct SStream : public Compare::Sortable {
   SStream(void *data = NULL, size_t length = 0);
-  SStream(const wxString &name);
+  SStream(const wxString &name) = delete;
+  SStream(const char *name) { Open(std::string(name)); }
+  SStream(const std::string &name) { Open(name); }
   SStream(wxInputStream *stream);
   SStream(const wxOutputStream &stream);
   SStream(wxOutputStream *stream);
@@ -57,17 +59,19 @@ struct SStream : public Compare::Sortable {
   SStream &operator=(const SStream &copy);
 
   void Open(void *data = NULL, size_t length = 0);
-  void Open(const wxString &name);
+  void Open(const wxString &name) = delete;
+  void Open(const std::string &name);
   void Open(wxInputStream *stream);
   void Open(const wxMemoryOutputStream &stream);
   void Open(wxMemoryOutputStream *stream);
   void Open(std::shared_ptr<wxMemoryOutputStream> stream);
 
-  void SetName(const wxString &name);
-  void SetName(const std::wstring &name);
+  void SetName(const wxString &name) = delete;
+  void SetName(const std::wstring &name) = delete;
   void SetName(const std::string &name);
 
-  void SetHandlerPath(const wxString &path);
+  void SetHandlerPath(wxString) = delete;
+  void SetHandlerPath(const std::string &path);
   void SetDir(bool is_dir = true);
   void SetType(StreamActionType flags);
 

@@ -42,7 +42,7 @@ class Panel : public wxPanel {
 
   void OnKeyDown(wxKeyEvent &event);
   void OnCharHook(wxKeyEvent &event);
-  void OnExplorerOpenFile(wxCommandEvent &event);
+  void OnExplorerOpenFile(StreamEvent &event);
   reader::Window *reader_ = NULL;
   explorer::Window *explorer_ = NULL;
   wxBoxSizer *sizer_;

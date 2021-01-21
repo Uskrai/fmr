@@ -27,7 +27,7 @@
 
 namespace fmr {
 
-SStream GetStream(std::wstring name) {
+SStream GetStream(std::string name) {
   SStream stream;
   stream.SetName(name);
   return stream;
@@ -56,7 +56,7 @@ TEST(SortTest, NaturalTest) {
 
   for (size_t i = 0; i < 100; i++) {
     SStream stream;
-    stream.SetName(std::wstring(L"testing"));
+    stream.SetName(std::string("testing"));
     vec_string.push_back(stream);
   }
 

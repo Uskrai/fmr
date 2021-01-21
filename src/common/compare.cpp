@@ -85,8 +85,6 @@ DefineStringCompareFunction(Natural) {
     pos++;
   }
 
-  printf("%s %s\n", first.c_str(), second.c_str());
-
   return first.size() < second.size();
 }
 

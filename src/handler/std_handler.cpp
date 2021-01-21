@@ -17,9 +17,12 @@
 
 #include <fmr/common/compare.h>
 #include <fmr/common/path.h>
+#include <fmr/common/string.h>
 #include <fmr/handler/std_handler.h>
 
 namespace fs = std::filesystem;
+
+#include <wx/log.h>
 
 #include <algorithm>
 #include <fstream>
@@ -90,11 +93,22 @@ bool STDHandler::IsExist(size_t idx) const {
 
 bool STDHandler::CanHandle(const std::string &path) { return true; }
 
+std::streampos fileSize(const char *filePath) {
+  std::streampos fsize = 0;
+  std::ifstream file(filePath, std::ios::binary);
+
+  fsize = file.tellg();
+  file.seekg(0, std::ios::end);
+  fsize = file.tellg() - fsize;
+  file.close();
+
+  return fsize;
+}
+
 bool STDHandler::GetStream(SStream &stream) {
   if (stream.GetHandlerPath() != GetName()) return false;
 
-  std::string path = Path::Append(GetName(), stream.GetString());
-  stream.Open(path);
+  stream.Open(GetItemPath(stream));
   return true;
 }
 
@@ -133,7 +147,7 @@ bool STDHandler::GetNextStream(SStream &stream, bool is_get_stream) {
 
   fs::path path = iterator_->path();
 
-  OpenStream(path.string(), stream, is_get_stream);
+  OpenStream(path.u8string(), stream, is_get_stream);
   stream.SetDir(fs::is_directory(path));
 
   iterator_++;

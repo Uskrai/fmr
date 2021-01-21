@@ -23,6 +23,8 @@
 #include <wx/wfstream.h>
 #include <wx/wxcrtvararg.h>
 
+#include <fstream>
+
 namespace fmr {
 
 char DUMMY_BUFFER;
@@ -34,7 +36,7 @@ void SStream::Open(void *data, size_t length) {
 
 SStream::SStream(void *data, size_t length) { Open(data, length); }
 
-SStream::SStream(const wxString &name) : SStream() { Open(name); }
+// SStream::SStream(const wxString &name) : SStream() { Open(name); }
 
 SStream::SStream(wxInputStream *stream) : SStream() { Open(stream); }
 
@@ -63,12 +65,32 @@ SStream &SStream::operator=(const SStream &copy) {
   return *this;
 }
 
-void SStream::Open(const wxString &name) {
+// void SStream::Open(const wxString &name) {
+// Open();
+//
+// if (wxFileName::FileExists(name)) {
+// wxFileInputStream stream(name);
+// m_stream->Write(stream);
+// }
+// }
+
+void SStream::Open(const std::string &name) {
   Open();
 
-  if (wxFileName::FileExists(name)) {
-    wxFileInputStream stream(name);
-    m_stream->Write(stream);
+  if (std::filesystem::exists(name)) {
+    std::streampos fsize = 0;
+    std::ifstream file(name.c_str(), std::ios::binary);
+    fsize = file.tellg();
+    file.seekg(0, std::ios::end);
+    fsize = file.tellg() - fsize;
+    file.seekg(0, std::ios::beg);
+
+    file = std::ifstream(name.c_str(), std::ios::binary);
+
+    char *buffer = new char[fsize];
+    file.read(buffer, fsize);
+    m_stream->Write(buffer, fsize);
+    delete[] buffer;
   }
 }
 
@@ -96,13 +118,9 @@ void SStream::Open(wxMemoryOutputStream *stream) {
   if (stream) Open(*stream);
 }
 
-void SStream::SetName(const wxString &name) { m_name = String::ToString(name); }
-
-void SStream::SetName(const std::wstring &name) { SetName(wxString(name)); }
-
 void SStream::SetName(const std::string &name) { m_name = name; }
 
-void SStream::SetHandlerPath(const wxString &path) { handler_path_ = path; }
+void SStream::SetHandlerPath(const std::string &path) { handler_path_ = path; }
 
 void SStream::SetDir(bool is_dir) { is_dir_ = is_dir; }
 

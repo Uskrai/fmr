@@ -20,7 +20,7 @@
 
 namespace fmr {
 
-wxDEFINE_EVENT(EVT_OPEN_FILE, wxCommandEvent);
+wxDEFINE_EVENT(EVT_OPEN_FILE, StreamEvent);
 
 namespace explorer {
 
@@ -140,7 +140,8 @@ bool Window::OpenCell(int index) {
         if (child_handler->GetName() == child_path) return Open(path);
     }
 
-    wxCommandEvent *event = new wxCommandEvent(EVT_OPEN_FILE, GetId());
+    StreamEvent *event = new StreamEvent(EVT_OPEN_FILE, GetId());
+    event->SetStream(item.stream);
 
     event->SetString(path);
 
@@ -197,9 +198,9 @@ void Window::OnKeyDown(wxKeyEvent &event) {
 
   if (key_code == WXK_RETURN || key_code == WXK_NUMPAD_ENTER)
     if (OpenCell(selected_index_)) return;
-
-  if (key_code == WXK_BACK)
-    if (OpenParent()) return;
+  //
+  // if (key_code == WXK_BACK)
+  // if (OpenParent()) return;
 
   event.Skip();
 }

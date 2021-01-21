@@ -33,7 +33,7 @@ class wxPanel;
 
 namespace fmr {
 
-wxDECLARE_EVENT(EVT_OPEN_FILE, wxCommandEvent);
+wxDECLARE_EVENT(EVT_OPEN_FILE, StreamEvent);
 
 namespace explorer {
 

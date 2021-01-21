@@ -18,85 +18,13 @@
 #include <fmr/common/path.h>
 
 #include <filesystem>
+#include <iostream>
 
 namespace fs = std::filesystem;
 
 namespace fmr {
 
 namespace Path {
-// wxString GetFullPath( wxString path )
-// {
-//     wxFileName name(path);
-//     if ( path.StartsWith('.') )
-//         path = wxFileName::GetCwd() + Separator + path.AfterFirst( Separator
-//         );
-
-//     RemoveDirSep(path);
-//     if ( name.DirExists(path) )
-//         name.AssignDir(path);
-//     else if ( name.FileExists(path) )
-//         name.Assign(path);
-
-//     return name.GetFullPath();
-// }
-
-// wxString GetDirName( wxString path )
-// {
-//     path = GetFullPath(path);
-//     if ( path.EndsWith(Separator) )
-//         return path;
-
-//     size_t idx = path.rfind( Separator );
-//     return path.SubString( 0, idx );
-// }
-
-// // return parent's path
-// wxString GetParent( const wxString& path )
-// {
-//     wxString name(GetFullPath(path));
-
-//     RemoveDirSep(name);
-
-//     if ( name.empty() )
-//         return wxFileName::GetCwd();
-
-//     return name.SubString(0,name.rfind(Separator));
-// }
-
-// // strip last Separatorarator
-// void RemoveDirSep( wxString& path )
-// {
-//     if ( path.EndsWith(Separator) )
-//         path.RemoveLast();
-// }
-
-// void RemoveDirSep( String &string )
-// {
-//     if ( string.back() == Separator )
-//         string.pop_back();
-// }
-
-// // return Name without Separatorarator
-// wxString GetName( wxString path )
-// {
-//     RemoveDirSep(path);
-
-//     wxString name = path.SubString( path.rfind(Separator) + 1, -1 );
-
-//     return name;
-// }
-
-// // return name with Separatorarator if directory
-// wxString GetNameWithSep( wxString path )
-// {
-//     bool isDir = path.EndsWith(Separator);
-//     if( isDir )
-//         path.RemoveLast();
-
-//     wxString name = GetName(path);
-//     name = isDir ? name + Separator : name;
-//     return name;
-// }
 
 std::string MakeString(const fs::path &path) { return path.u8string(); }
 
@@ -183,15 +111,17 @@ std::string Append(const std::string &parent, const std::string &target) {
 }
 
 std::string MakeRelative(const std::string &parent, const std::string &target) {
-  return MakeString(fs::relative(target, parent));
+  return MakeString(fs::relative(MakePath(target), MakePath(parent)));
 }
 
 std::string MakeAbsolute(const std::string &path) {
-  return MakeString(fs::absolute(path));
+  return MakeString(fs::absolute(MakePath(path)));
 }
 
 std::string MakeDirectory(const std::string &path) {
-  if (fs::is_directory(path)) return path;
+  fs::path temp = MakePath(path);
+
+  if (fs::is_directory(temp)) return path;
 
   return Append(path, GetSeparator());
 }

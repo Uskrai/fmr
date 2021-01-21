@@ -40,35 +40,53 @@ const char Separator = std::filesystem::path::preferred_separator;
 // wxString GetName( wxString path );
 // // return name with separator if directory
 // wxString GetNameWithSep( wxString path );
+//
+#define DECLARE_PATH_FUNCTION(Name, ret, args) \
+  ret Name(wxString) = delete;                 \
+  ret Name(args)
 
 std::string GetSeparator();
 
+wxString GetName(wxString) = delete;
 std::string GetName(std::string path);
 
+wxString GetParent(wxString) = delete;
 std::string GetParent(std::string path);
 
+wxString GetRootPath(wxString) = delete;
 std::string GetRootPath(const std::string &path);
 
+bool HasRootPath(wxString) = delete;
 bool HasRootPath(const std::string &path);
 
+wxString GetDirName(wxString);
 std::string GetDirName(const std::string &path);
 
+void RemoveDirSep(wxString) = delete;
 void RemoveDirSep(std::string &path);
 
+bool IsRoot(wxString) = delete;
 bool IsRoot(const std::string &path);
 
+bool IsChild(wxString, wxString) = delete;
 bool IsChild(const std::string &parent, std::string target);
 
+bool IsAbsolute(wxString) = delete;
 bool IsAbsolute(const std::string &path);
 
+bool IsRelative(wxString) = delete;
 bool IsRelative(const std::string &path);
 
+wxString Append(wxString, wxString) = delete;
 std::string Append(const std::string &parent, const std::string &target);
 
+wxString MakeRelative(wxString, wxString) = delete;
 std::string MakeRelative(const std::string &parent, const std::string &target);
 
+wxString MakeAbsolute(wxString) = delete;
 std::string MakeAbsolute(const std::string &path);
 
+wxString MakeDirectory(wxString) = delete;
 std::string MakeDirectory(const std::string &path);
 
 }  // namespace Path

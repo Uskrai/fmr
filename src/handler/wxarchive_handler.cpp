@@ -20,6 +20,7 @@
 #include <fmr/handler/wxarchive_handler.h>
 
 #include <algorithm>
+#include <iostream>
 
 namespace fmr {
 
@@ -96,10 +97,11 @@ std::string WxArchiveHandler::GetFromCurrent(int step) const {
 
 bool WxArchiveHandler::GetFirst(SStream &stream, DirGetFlags flags,
                                 bool is_get_stream) {
-  std::string path = GetName();
+  wxString path;
+  String::FromUTF8(GetName(), path);
   const wxArchiveClassFactory *factory;
 
-  if (!Find(path, factory)) return false;
+  if (!Find(GetName(), factory)) return false;
 
   auto instream =
       std::unique_ptr<wxFileInputStream>(new wxFileInputStream(path));
@@ -127,7 +129,7 @@ bool WxArchiveHandler::GetNextStream(SStream &stream, bool is_get_stream) {
   else if (!(iterator_flags_ & kDirFile))
     return GetNextStream(stream, is_get_stream);
 
-  stream.SetName(entry->GetName());
+  stream.SetName(String::ToString(entry->GetName()));
   stream.SetDir(entry->IsDir());
   stream.SetHandlerPath(GetName());
 
@@ -172,8 +174,11 @@ void WxArchiveHandler::Traverse(bool GetStream, DirGetFlags flags) {
   m_all = std::move(vec_stream);
 }
 
-bool WxArchiveHandler::Find(std::string path,
+bool WxArchiveHandler::Find(std::string name,
                             const wxArchiveClassFactory *&factory) {
+  wxString path;
+  String::FromUTF8(name, path);
+
   factory = wxArchiveClassFactory::Find(path, wxSTREAM_FILEEXT);
   if (factory) return true;
 
