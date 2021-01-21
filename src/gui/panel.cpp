@@ -70,7 +70,8 @@ bool Panel::OpenExplorer() {
   }
 
   if (select_path == "") {
-    select_path = Config::Get()->Read("RecentlyOpened", wxString());
+    select_path =
+        String::ToString(Config::Get()->Read("RecentlyOpened", wxString()));
   }
 
   if (!explorer_) return false;

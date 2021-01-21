@@ -16,6 +16,7 @@
  */
 
 #include <fmr/bitmap/bitmap.h>
+#include <fmr/common/string.h>
 #include <fmr/handler/handler_factory.h>
 #include <fmr/reader/window_reader.h>
 #include <wx/dcclient.h>
@@ -134,8 +135,10 @@ bool Window::Open(const std::string &path) {
     Refresh();
 
     AdjustScrollBar();
-    if (file_handler_)
-      config_->Write("RecentlyOpened", wxString(file_handler_->GetName()));
+    if (file_handler_) {
+      wxString string = String::FromString<wxString>(file_handler_->GetName());
+      config_->Write("RecentlyOpened", string);
+    }
     config_->Flush();
     is_opened_ = true;
     return true;
