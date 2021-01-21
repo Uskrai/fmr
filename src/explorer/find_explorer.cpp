@@ -38,6 +38,7 @@ void FindThread::SetParameter(std::vector<StreamBitmap> &list_stream) {
   if (TestDestroy()) return false
 
 wxThread::ExitCode FindThread::Entry() {
+  wxLogMessage("Starting Find thread");
   for (auto &it : list_stream_) {
     if (!TestDestroy()) {
       std::unique_ptr<AbstractOpenableHandler> handler(

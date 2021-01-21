@@ -84,6 +84,8 @@ wxThread::ExitCode LoadThread::Entry() {
 #define TEST_BREAK() \
   if (TestDestroy()) break
 
+  wxLogMessage("Starting load thread");
+
   while (!TestDestroy() && !(is_delete_on_empty_ && load_queue_.empty())) {
     if (load_queue_.size() > 0 && !TestDestroy()) {
       TEST_BREAK();
