@@ -3,7 +3,8 @@ sample
 test/ignore
 .cache
 libtool
-/autom4te.cache
+autom4te*
+autom4te.cache
 .ccls*
 config.log
 config.status
