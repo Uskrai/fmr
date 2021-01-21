@@ -68,7 +68,7 @@ AbstractHandler* HandlerFactory::NewHandler(const std::string& path) {
   HandlerType type;
   if (Find(path, type)) {
     handler = NewHandler(type);
-    handler->Open(path);
+    if (handler) handler->Open(path);
   }
   return handler;
 }
@@ -88,7 +88,7 @@ AbstractOpenableHandler* HandlerFactory::NewOpenableHandler(
   AbstractOpenableHandler* handler = nullptr;
   if (Find(path, type)) {
     handler = NewOpenableHandler(type);
-    handler->Open(path);
+    if (handler) handler->Open(path);
   }
 
   return handler;
