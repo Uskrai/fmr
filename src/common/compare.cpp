@@ -75,9 +75,8 @@ DefineStringCompareFunction(Natural) {
         i++;
       }
     }
-    if (fst != scnd || first[idx] != second[pos]) {
+    if (fst != scnd) {
       if (idx != pos) return idx < pos;
-      if (first[idx] != second[pos]) return first[idx] < second[pos];
       return fst < scnd;
     }
 
