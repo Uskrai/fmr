@@ -21,7 +21,10 @@
 #include <wx/display.h>
 #include <wx/image.h>
 #include <wx/intl.h>
+#include <wx/log.h>
 #include <wx/stdpaths.h>
+
+#include <fstream>
 
 wxIMPLEMENT_APP(fmr::App);
 
@@ -36,7 +39,20 @@ bool App::OnInit() {
   Config::Set(this->config);
 
   wxLocale locale;
-  locale.Init();
+  locale.Init(wxLANGUAGE_ENGLISH);
+
+  log_stream =
+      new std::fstream("log.txt", log_stream->binary | log_stream->app);
+  wxLog::SetActiveTarget(new wxLogStream(log_stream));
+  //
+  try {
+    std::locale::global(std::locale("en_US.UTF-8"));
+  } catch (std::runtime_error &error) {
+    wxLogMessage("Can't find user-preferred locale, defaulting to %s",
+                 std::locale::classic().name());
+    std::locale::global(std::locale::classic());
+  }
+  wxLogMessage("Opening program with %s locale", std::locale().name());
 
   std::setlocale(LC_ALL, "");
   std::locale::global(std::locale(std::locale::classic()));
@@ -52,6 +68,9 @@ bool App::OnInit() {
 
 int App::OnExit() {
   delete this->config;
+  log_stream->close();
+  delete log_stream;
+
   return 0;
 }
 

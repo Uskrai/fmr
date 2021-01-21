@@ -17,6 +17,7 @@
 
 #include <fmr/handler/default_handler.h>
 #include <fmr/handler/handler_factory.h>
+#include <fmr/handler/std_handler.h>
 #include <fmr/handler/wxarchive_handler.h>
 
 namespace fmr {
@@ -51,11 +52,14 @@ bool HandlerFactory::FindOpenable(const std::string& path) {
 }
 
 bool HandlerFactory::FindOpenable(const std::string& path, HandlerType& type) {
-  if (DefaultHandler::CanHandle(path)) {
+  if (STDHandler::CanHandle(path)) {
+    type = kHandlerStd;
+    return true;
+  } else if (DefaultHandler::CanHandle(path)) {
     type = kHandlerDefault;
     return true;
   }
-
+  type = kHandlerNotFound;
   return false;
 }
 
@@ -93,9 +97,10 @@ AbstractOpenableHandler* HandlerFactory::NewOpenableHandler(
 AbstractOpenableHandler* HandlerFactory::NewOpenableHandler(
     const HandlerType& type) {
   switch (type) {
+    case kHandlerStd:
+      return new STDHandler();
     case kHandlerDefault:
       return new DefaultHandler();
-
     default:
       return nullptr;
   }

@@ -67,7 +67,7 @@ class STDHandler : public AbstractOpenableHandler {
   void Reset();
   void Close();
 
-  static bool CanHandle(std::string path);
+  static bool CanHandle(const std::string &path);
   static bool StreamOpenable();
   bool IsStreamOpenable() const;
 

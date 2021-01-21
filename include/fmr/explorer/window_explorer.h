@@ -49,8 +49,7 @@ class Window : public FlexGridWindow {
  public:
   Window(wxWindow *parent, const wxWindowID &id = wxID_ANY,
          const wxPoint &pos = wxDefaultPosition,
-         const wxSize &size = wxDefaultSize,
-         const long &style = wxTAB_TRAVERSAL,
+         const wxSize &size = wxDefaultSize, const long &style = wxWANTS_CHARS,
          const wxString &name = wxPanelNameStr);
 
   bool Open(std::shared_ptr<AbstractOpenableHandler> handler);

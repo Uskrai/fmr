@@ -23,7 +23,12 @@
 
 namespace fmr {
 
-enum HandlerType { kHandlerWxArchive, kHandlerDefault, kHandlerNotFound };
+enum HandlerType {
+  kHandlerWxArchive,
+  kHandlerDefault,
+  kHandlerStd,
+  kHandlerNotFound
+};
 
 class HandlerFactory {
  public:

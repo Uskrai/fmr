@@ -129,9 +129,15 @@ bool Window::OpenCell(int index) {
 
   if (handler) {
     handler->Traverse();
-    for (auto &it : handler->GetChild()) {
-      handler->GetStream(it);
-      if (!wxImage::CanRead(*it.GetStream())) return Open(path);
+
+    for (const auto &it : handler->GetChild()) {
+      auto child_path = handler->GetItemPath(it);
+
+      auto child_handler = std::unique_ptr<AbstractOpenableHandler>(
+          HandlerFactory::NewOpenableHandler(child_path));
+
+      if (child_handler)
+        if (child_handler->GetName() == child_path) return Open(path);
     }
 
     wxCommandEvent *event = new wxCommandEvent(EVT_OPEN_FILE, GetId());
@@ -150,7 +156,7 @@ bool Window::OpenParent(const std::string &path) {
 
   if (!child_handler) return false;
 
-  std::string parent_path = handler_->GetParent()->GetName();
+  std::string parent_path = child_handler->GetParent()->GetName();
 
   if (!Open(parent_path)) return false;
 

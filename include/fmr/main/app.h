@@ -17,6 +17,8 @@
 
 #include <wx/app.h>
 
+#include <fstream>
+
 class wxFrame;
 
 namespace fmr {
@@ -26,6 +28,7 @@ class Config;
 class App : public wxApp {
   wxFrame* frame;
   Config* config;
+  std::fstream* log_stream;
   bool OnInit();
   int OnExit();
 

@@ -20,6 +20,7 @@
 #include <fmr/handler/handler_factory.h>
 #include <wx/filename.h>
 #include <wx/image.h>
+#include <wx/log.h>
 
 #include <memory>
 
@@ -37,17 +38,21 @@ void FindThread::SetParameter(std::vector<StreamBitmap> &list_stream) {
   if (TestDestroy()) return false
 
 wxThread::ExitCode FindThread::Entry() {
+  wxLogMessage("Starting Find thread");
   for (auto &it : list_stream_) {
     if (!TestDestroy()) {
       std::unique_ptr<AbstractOpenableHandler> handler(
           HandlerFactory::NewOpenableHandler(it.stream->GetHandlerPath()));
 
+      wxLogMessage("Starting to search for %s/%s", handler->GetName(),
+                   it.stream->GetName());
       Find(handler.get(), it);
     }
 
     Update();
     if (TestDestroy()) break;
   }
+  wxLogMessage("Find thread completed");
   Completed();
   return (wxThread::ExitCode)0;
 }
@@ -67,6 +72,7 @@ void FindThread::StreamFound(StreamBitmap &item) {
 
 template <typename T>
 bool FindThread::TraverseHandler(T *handler, StreamBitmap &item) {
+  wxLogMessage("Traversing %s", handler->GetName());
   handler->Traverse(false);
 
   for (const auto &it : handler->GetChild()) {
@@ -80,10 +86,16 @@ bool FindThread::TraverseHandler(T *handler, StreamBitmap &item) {
 
 bool FindThread::Find(StreamBitmap &item) {
   TEST_RETURN();
-  if (!wxImage::CanRead(*item.stream->GetStream())) return false;
+  if (!wxImage::CanRead(*item.stream->GetStream())) {
+    wxLogMessage("Can't Read %s/%s", item.stream->GetHandlerPath(),
+                 item.stream->GetName());
+    return false;
+  }
 
   TEST_RETURN();
   StreamFound(item);
+  wxLogMessage("Item found in handler %s/%s\n", item.stream->GetHandlerPath(),
+               item.stream->GetName());
   return true;
 }
 
