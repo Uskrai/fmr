@@ -48,6 +48,9 @@ ControllerExit Controller::Open(const std::string &path) {
   bitmap_->GetAll().assign(size, SBitmap());
 
   size_t idx = opened_handler->Index(path);
+  if (!opened_handler->IsExist(idx) && opened_handler->Size() != 0) {
+    idx = 0;
+  }
   LoadThread::LoadImage(bitmap_, opened_handler, idx, g_sLock);
   Update(kLoadThreadID);
 
