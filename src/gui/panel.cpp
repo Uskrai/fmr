@@ -47,15 +47,32 @@ void Panel::BindEvent() {
 }
 
 bool Panel::LoadFile(std::string path) {
-  bool ret = reader_->Open(path);
-  reader_->Show();
-  if (ret) reader_->SetFocus();
+  bool ret = false;
+  if (reader_) {
+    bool is_reader_shown = reader_->IsShown();
+    bool is_reader_focus = reader_->HasFocus();
+    bool is_explorer_shown = explorer_->IsShown();
+    bool is_explorer_focus = explorer_->HasFocus();
 
-  if (ret && explorer_) {
     explorer_->Hide();
-    explorer_->Clear();
-  }
+    reader_->Show();
+    reader_->SetFocus();
+    Layout();
+    ret = reader_->Open(path);
 
+    if (ret)
+      return ret;
+    else {
+      reader_->Show(is_reader_shown);
+      explorer_->Show(is_explorer_shown);
+
+      if (is_reader_focus) {
+        reader_->SetFocus();
+      } else if (is_explorer_focus) {
+        explorer_->SetFocus();
+      }
+    }
+  }
   return ret;
 }
 
