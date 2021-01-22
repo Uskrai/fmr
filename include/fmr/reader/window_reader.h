@@ -33,6 +33,8 @@ namespace fmr {
 
 namespace reader {
 
+wxDECLARE_EVENT(EvtChangePage, wxCommandEvent);
+
 enum ScrollingType : int { SCROLL_BY_WINDOW, SCROLL_BY_IMAGE, SCROLL_BY_PIXEL };
 
 class LoadThread;
@@ -59,6 +61,9 @@ class Window : public ScrolledWindow {
 
   std::shared_ptr<AbstractHandler> GetHandler() { return file_handler_; }
 
+  BitmapPageChangeStatus ChangePage(wxDirection direction);
+  BitmapPageChangeStatus ChangePage(int step);
+
  protected:
   void AdjustBitmap();
 
@@ -82,6 +87,9 @@ class Window : public ScrolledWindow {
 
   std::shared_ptr<AbstractHandler> NewHandler(const std::string &path);
   std::shared_ptr<Bitmap> NewBitmap();
+
+  BitmapPageChangeStatus DoChangePage(int step);
+  BitmapPageChangeStatus DoChangePage(wxDirection direction);
 
   void Error(wxSize size);
   void OnDraw(wxDC &dc);

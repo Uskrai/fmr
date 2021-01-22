@@ -50,7 +50,7 @@ class Bitmap {
   void RefreshPosition(wxSize size);
   wxSize GetSize(wxSize min);
 
-  BITMAP_PAGES ChangePage(int step);
+  BitmapPageChangeStatus ChangePage(int step);
   bool IsImageOk(int pos);
   void MarkLoaded(size_t idx);
   bool NextPage();

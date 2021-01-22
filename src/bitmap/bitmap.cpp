@@ -20,6 +20,8 @@
 #include <fmr/bitmap/size.h>
 #include <wx/window.h>
 
+#include "fmr/bitmap/bmp.h"
+
 namespace fmr {
 
 SBitmap LOADED_BITMAP(true);
@@ -55,10 +57,10 @@ void Bitmap::Refresh() {
   m_posLast = pos;
 }
 
-BITMAP_PAGES Bitmap::ChangePage(int step) {
+BitmapPageChangeStatus Bitmap::ChangePage(int step) {
   // wont change image if there is an image that is not loaded
   for (const auto& it : Get())
-    if (!it->IsLoaded()) return BITMAP_NOTLOADED;
+    if (!it->IsLoaded()) return kBitmapPageNotLoaded;
 
   size_t& pos = m_posFirst;
 
@@ -78,9 +80,9 @@ BITMAP_PAGES Bitmap::ChangePage(int step) {
   pos = isChanged ? pos : temp;
 
   Refresh();
-  if (isChanged) return BITMAP_CHANGEPAGE;
+  if (isChanged) return kBitmapPageChanged;
 
-  return BITMAP_ENDOFPAGE;
+  return kBitmapEndOfPage;
 }
 
 void Bitmap::Resize(size_t limit) {

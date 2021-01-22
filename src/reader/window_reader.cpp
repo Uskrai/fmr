@@ -16,6 +16,8 @@
  */
 
 #include <fmr/bitmap/bitmap.h>
+#include <fmr/bitmap/bmp.h>
+#include <fmr/common/dimension.h>
 #include <fmr/common/string.h>
 #include <fmr/handler/handler_factory.h>
 #include <fmr/reader/window_reader.h>
@@ -23,6 +25,7 @@
 #include <wx/log.h>
 #include <wx/scrolbar.h>
 #include <wx/sizer.h>
+
 // TODO : Make separate thread controller
 
 namespace fmr {
@@ -30,6 +33,8 @@ namespace fmr {
 namespace reader {
 
 enum ThreadID : int { LoadThreadID = wxID_HIGHEST + 30, ZoomThreadID };
+
+wxDEFINE_EVENT(EvtChangePage, wxCommandEvent);
 
 #define Free(var) \
   if (var) {      \
@@ -271,37 +276,84 @@ void Window::OnMouseMotion(wxMouseEvent &event) {
   event.Skip();
 }
 
+int GetStepFromDirection(wxDirection direction) {
+  if (direction == wxUP || direction == wxLEFT)
+    return -1;
+  else if (direction == wxDOWN || direction == wxRIGHT)
+    return 1;
+  return 0;
+}
+
 void Window::OnEdge(wxDirection direction) {
   if (bitmap_ && is_opened_) {
-    int step = 0;
-    if (direction == wxUP || direction == wxLEFT) step = -1;
+    auto status = ChangePage(direction);
+    if (status == kBitmapEndOfPage) {
+      int step = GetStepFromDirection(direction);
+      printf("%d %d %d\n", direction, status, step);
+      ChangeFolder(step);
+    }
+  }
+}
 
-    if (direction == wxDOWN || direction == wxRIGHT) step = 1;
+BitmapPageChangeStatus Window::ChangePage(wxDirection direction) {
+  int step = 0;
+  wxOrientation orient = dimension::GetOrient(direction);
 
-    BITMAP_PAGES status = bitmap_->ChangePage(step);
-    if (status == BITMAP_ENDOFPAGE)
-      if (ChangeFolder(step)) status = BITMAP_CHANGEPAGE;
+  if (direction == wxUP || direction == wxLEFT)
+    step = -1;
+  else if (direction == wxDOWN || direction == wxRIGHT)
+    step = 1;
 
+  if (orient == wxHORIZONTAL)
+    if (m_isFromRight) step *= -1;
+
+  if (step == 0) return kBitmapPageNotChanged;
+
+  BitmapPageChangeStatus status = ChangePage(step);
+
+  if (status == kBitmapPageChanged) {
+    int x = (m_isFromRight) ? GetVirtualSize().GetWidth() : 0;
+
+    switch (direction) {
+      case wxUP:
+        Scroll(0, GetVirtualSize().GetHeight());
+        break;
+      case wxDOWN:
+        Scroll(x, 0);
+        break;
+      case wxLEFT:
+        Scroll(x, 0);
+        break;
+      case wxRIGHT:
+        Scroll(x, 0);
+        break;
+      default:
+        break;
+    }
+    Refresh();
+  }
+
+  return status;
+}
+
+BitmapPageChangeStatus Window::ChangePage(int step) {
+  BitmapPageChangeStatus status = DoChangePage(step);
+
+  if (status == kBitmapPageChanged) {
     AdjustBitmap();
     AdjustScrollBar();
 
-    int x = (m_isFromRight) ? GetVirtualSize().GetWidth() : 0;
-    if (status == BITMAP_CHANGEPAGE) {
-      if (direction == wxUP)
-        Scroll(0, GetVirtualSize().GetHeight());
+    auto event = std::unique_ptr<wxCommandEvent>(
+        new wxCommandEvent(EvtChangePage, GetId()));
 
-      else if (direction == wxDOWN)
-        Scroll(x, 0);
-
-      else if (direction == wxLEFT)
-        Scroll(x, 0);
-
-      else if (direction == wxRIGHT)
-        Scroll(x, 0);
-    }
-
-    Refresh();
+    wxQueueEvent(GetParent(), event.release());
   }
+  return status;
+}
+
+BitmapPageChangeStatus Window::DoChangePage(int step) {
+  if (bitmap_ && is_opened_) return bitmap_->ChangePage(step);
+  return kBitmapPageNotChanged;
 }
 
 }  // namespace reader

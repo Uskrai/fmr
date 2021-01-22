@@ -43,11 +43,11 @@ enum BITMAP_SIZE : int {
                         BITMAP_FITALL | BITMAP_MANUAL | BITMAP_ALLOWENLARGE
 };
 
-enum BITMAP_PAGES : int {
-  BITMAP_CHANGEPAGE,
-  BITMAP_ENDOFPAGE,
-  BITMAP_NOTLOADED,
-  BITMAP_NOTCHANGED
+enum BitmapPageChangeStatus : int {
+  kBitmapPageChanged,
+  kBitmapEndOfPage,
+  kBitmapPageNotLoaded,
+  kBitmapPageNotChanged
 };
 
 struct SBitmap {
