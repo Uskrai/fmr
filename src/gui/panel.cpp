@@ -16,34 +16,58 @@
  */
 
 #include <fmr/common/config.h>
+#include <fmr/common/dimension.h>
 #include <fmr/common/path.h>
 #include <fmr/gui/panel.h>
 #include <fmr/handler/abstract_handler.h>
+#include <wx/popupwin.h>
 #include <wx/sizer.h>
+
+#include <iostream>
+
+#include "wx/window.h"
 
 namespace fmr {
 
 Panel::Panel(wxWindow *parent, wxWindowID id, wxPoint position, wxSize size)
     : wxPanel(parent, id, position, size) {
   sizer_ = new wxBoxSizer(wxHORIZONTAL);
-  reader_ = new reader::Window(this, ReaderWindow, wxDefaultPosition,
-                               GetClientSize(), 0, "Reader");
-  if (!reader_->IsTransparentBackgroundSupported())
-    reader_->SetBackgroundColour(*wxBLACK);
-  sizer_->Add(reader_, 1, wxALL | wxEXPAND);
 
-  explorer_ = new explorer::Window(this, ExplorerWindow, wxDefaultPosition,
-                                   GetClientSize(), wxWANTS_CHARS, "Explorer");
-  explorer_->SetBackgroundColour(*wxBLACK);
-  explorer_->Hide();
-  sizer_->Add(explorer_, 1, wxALL | wxEXPAND);
-
+  PrepareReader();
+  PrepareExplorer();
   SetSizer(sizer_);
+  Layout();
   BindEvent();
 };
 
 void Panel::BindEvent() {
   Bind(EVT_OPEN_FILE, &Panel::OnExplorerOpenFile, this);
+  Bind(reader::EvtChangePage, &Panel::OnReaderChangePage, this);
+  Bind(wxEVT_TIMER, &Panel::OnReaderInfoTimer, this, kReaderInfoTimer);
+}
+
+void Panel::PrepareReader() {
+  reader_ = new reader::Window(this, ReaderWindow, wxDefaultPosition,
+                               GetClientSize(), 1, "Reader");
+
+  if (!reader_->IsTransparentBackgroundSupported())
+    reader_->SetBackgroundColour(*wxBLACK);
+
+  reader_info_ = new wxStaticText(this, kReaderInfoWindow, wxEmptyString);
+  reader_info_timer_.SetOwner(this, kReaderInfoTimer);
+  reader_info_->SetBackgroundColour(*wxBLACK);
+
+  sizer_->Add(reader_, 1, wxALL | wxEXPAND);
+}
+
+void Panel::PrepareExplorer() {
+  explorer_ = new explorer::Window(this, ExplorerWindow, wxDefaultPosition,
+                                   GetClientSize(), wxWANTS_CHARS, "Explorer");
+
+  explorer_->SetBackgroundColour(*wxBLACK);
+  explorer_->Hide();
+
+  sizer_->Add(explorer_, 1, wxALL | wxEXPAND);
 }
 
 bool Panel::LoadFile(std::string path) {
@@ -140,6 +164,25 @@ void Panel::OnExplorerOpenFile(StreamEvent &event) {
     explorer_->Open(path);
   }
 }
+
+void Panel::OnReaderChangePage(wxCommandEvent &event) {
+  // TODO: Make this work
+  wxString text = wxString::Format("%d/%d", event.GetSelection(), 23);
+  reader_info_->SetLabelText(text);
+  wxRect rect(reader_->GetPosition(), reader_->GetClientSize());
+  wxPoint pos = dimension::AlignPosition(
+      reader_->GetClientRect(), reader_info_->GetSize(),
+      wxALIGN_TOP | wxALIGN_CENTER_HORIZONTAL);
+
+  reader_info_->SetWindowStyleFlag(wxALIGN_CENTER_HORIZONTAL |
+                                   wxST_NO_AUTORESIZE);
+
+  reader_info_->SetPosition(pos);
+  reader_info_->Show();
+  reader_info_timer_.Start(1000, wxTIMER_ONE_SHOT);
+}
+
+void Panel::OnReaderInfoTimer(wxTimerEvent &event) { reader_info_->Hide(); }
 
 bool Panel::Destroy() {
   if (reader_) reader_->Destroy();

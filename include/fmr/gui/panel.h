@@ -27,9 +27,18 @@ class wxBoxSizer;
 
 namespace fmr {
 
-enum WindowID { ReaderWindow = wxID_HIGHEST + 1, ExplorerWindow };
+enum WindowID {
+  ReaderWindow = wxID_HIGHEST + 1,
+  kReaderInfoWindow,
+  kReaderInfoTimer,
+  ExplorerWindow
+};
 
 class Panel : public wxPanel {
+ protected:
+  wxStaticText *reader_info_ = NULL;
+  wxTimer reader_info_timer_;
+
  public:
   Panel(wxWindow *parent, wxWindowID id, wxPoint position, wxSize size);
 
@@ -40,9 +49,14 @@ class Panel : public wxPanel {
  private:
   void BindEvent();
 
+  void PrepareReader();
+  void PrepareExplorer();
+
   void OnKeyDown(wxKeyEvent &event);
   void OnCharHook(wxKeyEvent &event);
   void OnExplorerOpenFile(StreamEvent &event);
+  void OnReaderChangePage(wxCommandEvent &event);
+  void OnReaderInfoTimer(wxTimerEvent &event);
   reader::Window *reader_ = NULL;
   explorer::Window *explorer_ = NULL;
   wxBoxSizer *sizer_;
