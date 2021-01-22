@@ -133,22 +133,22 @@ bool Window::OpenCell(int index) {
     for (const auto &it : handler->GetChild()) {
       auto child_path = handler->GetItemPath(it);
 
-      auto child_handler = std::unique_ptr<AbstractOpenableHandler>(
-          HandlerFactory::NewOpenableHandler(child_path));
+      auto child_handler = std::unique_ptr<AbstractHandler>(
+          HandlerFactory::NewHandler(child_path));
 
       if (child_handler)
         if (child_handler->GetName() == child_path) return Open(path);
     }
-
-    StreamEvent *event = new StreamEvent(EVT_OPEN_FILE, GetId());
-    event->SetStream(item.stream);
-
-    event->SetString(path);
-
-    wxQueueEvent(GetParent(), event);
-    return true;
   }
-  return false;
+
+  StreamEvent *event = new StreamEvent(EVT_OPEN_FILE, GetId());
+  event->SetStream(item.stream);
+
+  event->SetString(path);
+
+  wxQueueEvent(GetParent(), event);
+
+  return true;
 }
 
 bool Window::OpenParent(const std::string &path) {

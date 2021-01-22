@@ -134,8 +134,11 @@ void Panel::OnExplorerOpenFile(StreamEvent &event) {
 
   if (LoadFile(path))
     explorer_->Clear();
-  else
+  else {
     explorer_->Show();
+    explorer_->SetFocus();
+    explorer_->Open(path);
+  }
 }
 
 bool Panel::Destroy() {
