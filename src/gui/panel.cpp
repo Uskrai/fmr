@@ -105,6 +105,7 @@ bool Panel::OpenExplorer() {
         reader_->Hide();
       }
       explorer_->SetFocus();
+      Layout();
       return true;
     }
   }
