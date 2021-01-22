@@ -68,7 +68,6 @@ void ImageWindow::SetStream(std::shared_ptr<SStream> stream) {
     window_text_->SetLabel(string);
     // TODO: this should have separate member
     window_text_->SetForegroundColour(GetForegroundColour());
-    window_text_->Wrap(GetClientSize().GetWidth() - 20);
   }
 }
 

@@ -194,7 +194,7 @@ void Window::ReloadConfig() { config_->Flush(); }
 bool Window::ChangeFolder(int step) {
   std::string path = file_handler_->GetFromCurrent(step);
 
-  if (path == wxEmptyString) return false;
+  if (path == "") return false;
 
   if (Open(path)) return true;
 
