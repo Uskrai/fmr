@@ -54,34 +54,30 @@ void ImageWindow::BindEvent() {
   Bind(wxEVT_SIZE, &ImageWindow::OnSize, this);
 }
 
-void ImageWindow::SetBitmap(std::shared_ptr<SBitmap> bmp) {
+void ImageWindow::SetBitmap(SBitmap *bmp) {
   bitmap_ = bmp;
   refresh_scheduled_ = true;
 }
 
-void ImageWindow::SetStream(std::shared_ptr<SStream> stream) {
+void ImageWindow::SetStream(SStream *stream) {
   stream_ = stream;
   wxString string;
   if (stream) String::FromUTF8(stream->GetName(), string);
 
   if (window_text_) {
     window_text_->SetLabel(string);
-    // TODO: this should have separate member
+    // TODO: this should have separate method
     window_text_->SetForegroundColour(GetForegroundColour());
   }
 }
 
-const std::shared_ptr<SStream> ImageWindow::GetStream() const {
-  return stream_;
-}
+const SStream *ImageWindow::GetStream() const { return stream_; }
 
-std::shared_ptr<SStream> ImageWindow::GetStream() { return stream_; }
+SStream *ImageWindow::GetStream() { return stream_; }
 
-const std::shared_ptr<SBitmap> ImageWindow::GetBitmap() const {
-  return bitmap_;
-}
+const SBitmap *ImageWindow::GetBitmap() const { return bitmap_; }
 
-std::shared_ptr<SBitmap> ImageWindow::GetBitmap() { return bitmap_; }
+SBitmap *ImageWindow::GetBitmap() { return bitmap_; }
 
 wxSize ImageWindow::GetBestBitmapSize(const wxSize &size) {
   wxSize best_size = size;

@@ -38,8 +38,8 @@ class ImageWindow : public wxWindow {
   wxSize bitmap_size_;
   std::vector<StringDraw> vec_string_draw_;
   std::string string_name_;
-  std::shared_ptr<SStream> stream_ = NULL;
-  std::shared_ptr<SBitmap> bitmap_ = NULL;
+  SStream *stream_ = nullptr;
+  SBitmap *bitmap_ = nullptr;
 
   bool refresh_scheduled_ = false;
 
@@ -58,13 +58,13 @@ class ImageWindow : public wxWindow {
               const wxSize &size = wxDefaultSize, long style = 0,
               const wxString &name = wxPanelNameStr);
 
-  void SetBitmap(std::shared_ptr<SBitmap> bmp);
-  void SetStream(std::shared_ptr<SStream> stream);
+  void SetBitmap(SBitmap *bmp);
+  void SetStream(SStream *stream);
 
-  const std::shared_ptr<SStream> GetStream() const;
-  std::shared_ptr<SStream> GetStream();
-  const std::shared_ptr<SBitmap> GetBitmap() const;
-  std::shared_ptr<SBitmap> GetBitmap();
+  const SStream *GetStream() const;
+  SStream *GetStream();
+  const SBitmap *GetBitmap() const;
+  SBitmap *GetBitmap();
 
   static wxSize GetBestBitmapSize(const wxSize &size);
 

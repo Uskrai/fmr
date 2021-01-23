@@ -25,6 +25,7 @@
 #include <fmr/thread/thread.h>
 #include <fmr/window/scrolledwindow.h>
 
+#include <map>
 #include <memory>
 
 namespace fmr {
@@ -34,6 +35,9 @@ namespace explorer {
 enum ThreadID { kFindThreadID = wxID_HIGHEST + 40, kLoadThreadID };
 
 class Controller : public ThreadController {
+ protected:
+  std::map<SStream *, SBitmap *> map_item_;
+
  public:
   Controller(wxWindow *parent);
   ~Controller();
@@ -55,7 +59,7 @@ class Controller : public ThreadController {
   LoadThread *load_thread_ = NULL;
   wxSize thumb_size_;
 
-  void OnFound(StreamBitmapEvent &event);
+  void OnFound(FoundEvent &event);
   void OnLoaded(StreamBitmapEvent &event);
   void OnUpdate(wxThreadEvent &event);
   void OnFindCompleted(wxThreadEvent &event);

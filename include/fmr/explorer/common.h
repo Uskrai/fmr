@@ -28,8 +28,8 @@ namespace fmr {
 namespace explorer {
 
 struct StreamBitmap {
-  std::shared_ptr<SBitmap> bitmap = NULL;
-  std::shared_ptr<SStream> stream = NULL;
+  SBitmap *bitmap = nullptr;
+  SStream *stream = nullptr;
 };
 
 struct StringDraw {

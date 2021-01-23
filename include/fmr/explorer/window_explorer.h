@@ -42,7 +42,8 @@ class Window : public FlexGridWindow {
   Controller controller_ = Controller(this);
   std::map<wxWindow *, StreamBitmap> map_window_;
   std::shared_ptr<AbstractOpenableHandler> handler_;
-  std::vector<SBitmap> list_bitmap_;
+  std::vector<std::unique_ptr<SBitmap>> list_bitmap_;
+  std::vector<std::unique_ptr<SStream>> list_stream_;
   std::vector<StreamBitmap> list_item_;
   std::vector<ImageWindow *> list_renderer_;
 

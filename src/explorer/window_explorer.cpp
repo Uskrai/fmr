@@ -73,22 +73,27 @@ bool Window::Open(std::shared_ptr<AbstractOpenableHandler> handler) {
 
   size_t idx = 0;
   for (auto &it : handler->GetChild()) {
+    auto stream = std::unique_ptr<SStream>(new SStream(it));
+    auto bitmap = std::unique_ptr<SBitmap>(new SBitmap());
+
     auto &item = list_item.at(idx);
-    item.stream = std::shared_ptr<SStream>(new SStream(it));
-    item.bitmap = std::shared_ptr<SBitmap>(new SBitmap());
+    item.stream = stream.get();
+    item.bitmap = bitmap.get();
 
     ImageWindow *image_cell_window =
         new ImageWindow(this, wxID_ANY, wxDefaultPosition, child_size);
 
     image_cell_window->SetBackgroundColour(*wxBLACK);
     image_cell_window->SetForegroundColour(*wxWHITE);
-    image_cell_window->SetBitmap(item.bitmap);
-    image_cell_window->SetStream(item.stream);
+    image_cell_window->SetBitmap(bitmap.get());
+    image_cell_window->SetStream(stream.get());
 
     Add(image_cell_window);
 
     map_window_.insert(std::make_pair(image_cell_window, item));
 
+    list_stream_.push_back(std::move(stream));
+    list_bitmap_.push_back(std::move(bitmap));
     idx++;
   }
 
@@ -141,8 +146,10 @@ bool Window::OpenCell(int index) {
     }
   }
 
+  std::shared_ptr<SStream> stream =
+      std::shared_ptr<SStream>(new SStream(*item.stream));
   StreamEvent *event = new StreamEvent(EVT_OPEN_FILE, GetId());
-  event->SetStream(item.stream);
+  event->SetStream(stream);
 
   event->SetString(path);
 

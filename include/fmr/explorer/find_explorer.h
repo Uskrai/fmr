@@ -18,7 +18,7 @@
 #ifndef FMR_EXPLORER_LOAD_THREAD
 #define FMR_EXPLORER_LOAD_THREAD
 
-#include <fmr/explorer/common.h>
+#include <fmr/common/bitmask.h>
 #include <fmr/handler/abstract_handler.h>
 #include <fmr/handler/handler_factory.h>
 #include <fmr/handler/struct_stream.h>
@@ -28,24 +28,84 @@ namespace fmr {
 
 namespace explorer {
 
-wxDECLARE_EVENT(EVT_STREAM_FOUND, StreamBitmapEvent);
+/// flags used by FindThread
+enum FindThreadFlags {
+  kFindThreadDefault = 0x00,
+  kFindThreadRecursive = 0x01,
+  kFindThreadCheckHandler = 0x02,
+  kFindThreadOnlyFirstItem = 0x08,
+  kFindThreadDontRecursiveNonOpenable = 0x10
+};
+DEFINE_BITMASK_TYPE(FindThreadFlags);
+
+class FoundEvent : public wxCommandEvent {
+ protected:
+  SStream *source_stream_ = nullptr;
+  std::unique_ptr<SStream> found_stream_;
+
+ public:
+  FoundEvent(wxEventType type, int id) : wxCommandEvent(type, id) {}
+
+  // Copy Construct will copy the whole found stream so be careful using this
+  // event with wxPostEvent
+  FoundEvent(const FoundEvent &event);
+  wxEvent *Clone() const override { return new FoundEvent(*this); }
+
+  std::unique_ptr<SStream> GetFoundStreamOwnerShip() {
+    return std::move(found_stream_);
+  }
+
+  SStream *GetFoundStream() { return found_stream_.get(); }
+  SStream *GetSourceStream() { return source_stream_; }
+
+  void SetSourceStream(SStream *stream) { source_stream_ = stream; }
+  void SetFoundStream(std::unique_ptr<SStream> &&stream) {
+    found_stream_ = std::move(stream);
+  }
+};
+
+wxDECLARE_EVENT(kEventStreamFound, FoundEvent);
+typedef void (wxEvtHandler::*FoundEventFunction)(FoundEvent &);
+#define FoundEventHandler(func) wxEVENT_HANDLER_CAST(FoundEventFunction, func);
 
 class FindThread : public BaseThread {
+ private:
+  bool (*check_func_)(const SStream &stream);  // function to check if the
+                                               // thread should send FoundEvent
+
+  std::vector<SStream *> list_stream_;
+  FindThreadFlags flags_;
+
  public:
   FindThread(ThreadController *parent, wxThreadKind type, int id)
       : BaseThread(parent, type, id){};
-  void SetParameter(std::vector<StreamBitmap> &list_stream);
+  void SetParameter(std::vector<SStream *> &list_stream);
 
-  bool Find(StreamBitmap &item);
-  bool Find(AbstractOpenableHandler *handler, StreamBitmap &item);
-  bool Find(AbstractHandler *handler, StreamBitmap &item);
+  bool Find(FoundEvent *stream);
+  bool Find(AbstractOpenableHandler *handler, FoundEvent *stream);
+  bool Find(AbstractHandler *handler, FoundEvent *stream);
+
+  void SetChecker(bool (*check_func)(const SStream &stream)) {
+    check_func_ = check_func;
+  }
+  bool CheckStream(const SStream &stream) { return check_func_(stream); }
+
+  /**
+   * @brief: flags for the thread
+   * kFindThreadOnlyFirstItem will only send the first item found with
+   * CheckStream. kFindThreadCheckHandler will check the handler stream, use
+   * this for searching handler like archive or directory,. kFindThreadRecursive
+   * will check the handler recursively, if the first level contain Non openable
+   * handler, it will be checked too.
+   */
+  void SetFlags(FindThreadFlags flags) { flags_ = flags; }
 
  private:
-  void StreamFound(StreamBitmap &item);
-  template <typename T>
-  bool TraverseHandler(T *handler, StreamBitmap &item);
+  bool Is(FindThreadFlags flags) { return flags_ & flags; }
 
-  std::vector<StreamBitmap> list_stream_;
+  void StreamFound(FoundEvent *stream);
+  template <typename T>
+  bool TraverseHandler(T *handler, FoundEvent *stream);
 
   ExitCode Entry();
 };

@@ -29,9 +29,16 @@ namespace fmr {
 
 namespace explorer {
 
-wxDEFINE_EVENT(EVT_STREAM_FOUND, StreamBitmapEvent);
+wxDEFINE_EVENT(kEventStreamFound, FoundEvent);
 
-void FindThread::SetParameter(std::vector<StreamBitmap> &list_stream) {
+FoundEvent::FoundEvent(const FoundEvent &event) : wxCommandEvent(event) {
+  source_stream_ = event.source_stream_;
+
+  if (event.found_stream_)
+    found_stream_ = std::unique_ptr<SStream>(new SStream(*event.found_stream_));
+}
+
+void FindThread::SetParameter(std::vector<SStream *> &list_stream) {
   list_stream_ = list_stream;
 }
 
@@ -43,11 +50,20 @@ wxThread::ExitCode FindThread::Entry() {
   for (auto &it : list_stream_) {
     if (!TestDestroy()) {
       std::unique_ptr<AbstractOpenableHandler> handler(
-          HandlerFactory::NewOpenableHandler(it.stream->GetHandlerPath()));
+          HandlerFactory::NewOpenableHandler(it->GetHandlerPath()));
+
+      auto event = std::make_unique<FoundEvent>(
+          FoundEvent(kEventStreamFound, GetEventId()));
+
+      event->SetSourceStream(it);
+      event->SetFoundStream(std::make_unique<SStream>(*it));
 
       wxLogMessage("Starting to search for %s/%s", handler->GetName(),
-                   it.stream->GetName());
-      Find(handler.get(), it);
+                   it->GetName());
+      if (Find(handler.get(), event.get())) {
+        // release pointer ownership because event is used by wxQueueEvent
+        event.release();
+      }
     }
 
     Update();
@@ -58,83 +74,98 @@ wxThread::ExitCode FindThread::Entry() {
   return (wxThread::ExitCode)0;
 }
 
-void FindThread::StreamFound(StreamBitmap &item) {
+void FindThread::StreamFound(FoundEvent *event) {
   if (TestDestroy()) return;
-
-  std::unique_ptr<StreamBitmapEvent> event(
-      new StreamBitmapEvent(EVT_STREAM_FOUND, m_id));
-
-  if (TestDestroy()) return;
-
-  event->SetStreamBitmap(item);
-
-  QueueEventParent(event.release());
+  wxLogMessage("Sending FoundEvent to %p", GetParent());
+  QueueEventParent(event);
 }
 
 template <typename T>
-bool FindThread::TraverseHandler(T *handler, StreamBitmap &item) {
+bool FindThread::TraverseHandler(T *handler, FoundEvent *event) {
   wxLogMessage("Traversing %s", handler->GetName());
   handler->Traverse(false);
 
+  bool is_found = false;
   for (const auto &it : handler->GetChild()) {
     TEST_RETURN();
-    item.stream = std::shared_ptr<SStream>(new SStream(it));
+
+    event->SetFoundStream(std::make_unique<SStream>(SStream(it)));
     TEST_RETURN();
-    if (Find(handler, item)) return true;
+    if (Find(handler, event)) {
+      if (Is(kFindThreadOnlyFirstItem))
+        return true;
+      else
+        is_found = true;
+    }
   }
-  return false;
+  return is_found;
 }
 
-bool FindThread::Find(StreamBitmap &item) {
+bool FindThread::Find(FoundEvent *event) {
   TEST_RETURN();
-  if (!wxImage::CanRead(*item.stream->GetStream())) {
-    wxLogMessage("Can't Read %s/%s", item.stream->GetHandlerPath(),
-                 item.stream->GetName());
+
+  auto search_stream = event->GetFoundStream();
+
+  if (!CheckStream(*search_stream)) {
+    wxLogMessage("Can't Read %s/%s", search_stream->GetHandlerPath(),
+                 search_stream->GetName());
     return false;
   }
 
   TEST_RETURN();
-  StreamFound(item);
-  wxLogMessage("Item found in handler %s/%s\n", item.stream->GetHandlerPath(),
-               item.stream->GetName());
+  StreamFound(event);
+  wxLogMessage("Item found in handler %s/%s\n", search_stream->GetHandlerPath(),
+               search_stream->GetName());
   return true;
 }
 
-bool FindThread::Find(AbstractOpenableHandler *handler, StreamBitmap &item) {
-  std::string path = handler->GetItemPath(*item.stream);
+bool FindThread::Find(AbstractOpenableHandler *handler, FoundEvent *event) {
+  auto search_stream = event->GetFoundStream();
+  std::string path = handler->GetItemPath(*search_stream);
 
-  if (HandlerFactory::IsOpenable(path)) {
-    std::unique_ptr<AbstractOpenableHandler> stream_handler(
-        HandlerFactory::NewOpenableHandler(path));
+  std::unique_ptr<AbstractOpenableHandler> stream_handler(
+      HandlerFactory::NewOpenableHandler(path));
 
-    TEST_RETURN();
+  TEST_RETURN();
 
-    handler->GetStream(*item.stream);
+  // Get Stream from handler if openable or is check handler
+  if (HandlerFactory::IsOpenable(path) || Is(kFindThreadCheckHandler)) {
+    handler->GetStream(*search_stream);
+  }
 
-    TEST_RETURN();
+  TEST_RETURN();
 
-    if (Find(item)) return true;
-
-    if (path != stream_handler->GetName()) return false;
-
-    TEST_RETURN();
-
-    return TraverseHandler(stream_handler.get(), item);
-  } else {
-    std::unique_ptr<AbstractHandler> stream_handler(
+  // if not openable
+  if (!HandlerFactory::IsOpenable(path)) {
+    std::unique_ptr<AbstractHandler> non_openable_handler(
         HandlerFactory::NewHandler(path));
 
-    TEST_RETURN();
-
-    return TraverseHandler(stream_handler.get(), item);
+    // traverse non-openable handler and if item found and with flags Only first
+    // item, return
+    if (TraverseHandler(non_openable_handler.get(), event) &&
+        Is(kFindThreadOnlyFirstItem)) {
+      return true;
+    }
   }
+
+  if (Find(event)) return true;
+
+  if (path != stream_handler->GetName()) return false;
+
+  TEST_RETURN();
+
+  if (Is(kFindThreadRecursive))
+    return TraverseHandler(stream_handler.get(), event);
+
   return false;
 }
 
-bool FindThread::Find(AbstractHandler *handler, StreamBitmap &item) {
-  handler->GetStream(*item.stream);
+bool FindThread::Find(AbstractHandler *handler, FoundEvent *event) {
+  auto search_stream = event->GetFoundStream();
 
-  return Find(item);
+  handler->GetStream(*search_stream);
+
+  return Find(event);
 };
 
 };  // namespace explorer
