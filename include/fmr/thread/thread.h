@@ -56,7 +56,10 @@ class BaseThread : public wxThread, public wxObject {
              const wxThreadKind type = wxTHREAD_DETACHED, int id = -1);
   ~BaseThread();
 
-  void SetId(int id);
+  [[deprecated("Replaced by SetEventId")]] void SetId(int id);
+  void SetEventId(int id);
+  int GetEventId() { return m_id; }
+
   ThreadController *GetParent() { return parent_; }
   void QueueEventParent(wxEvent *event);
 
