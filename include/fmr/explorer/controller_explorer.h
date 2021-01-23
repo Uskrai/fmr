@@ -19,9 +19,9 @@
 #define FMR_EXPLORER_CONTROLLER_EXPLORER
 
 #include <fmr/explorer/common.h>
-#include <fmr/explorer/find_explorer.h>
 #include <fmr/explorer/load_explorer.h>
 #include <fmr/handler/struct_stream.h>
+#include <fmr/thread/find_handler.h>
 #include <fmr/thread/thread.h>
 #include <fmr/window/scrolledwindow.h>
 
@@ -55,11 +55,11 @@ class Controller : public ThreadController {
  private:
   wxWindow *parent_;
   std::vector<StreamBitmap> list_stream_;
-  FindThread *find_thread_ = NULL;
+  thread::FindHandler *find_thread_ = NULL;
   LoadThread *load_thread_ = NULL;
   wxSize thumb_size_;
 
-  void OnFound(FoundEvent &event);
+  void OnFound(thread::FoundEvent &event);
   void OnLoaded(StreamBitmapEvent &event);
   void OnUpdate(wxThreadEvent &event);
   void OnFindCompleted(wxThreadEvent &event);

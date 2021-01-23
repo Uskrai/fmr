@@ -27,7 +27,7 @@ namespace explorer {
 Controller::Controller(wxWindow *parent) {
   parent_ = parent;
 
-  Bind(kEventStreamFound, &Controller::OnFound, this);
+  Bind(thread::kEventStreamFound, &Controller::OnFound, this);
   Bind(EVT_BITMAP_LOADED, &Controller::OnLoaded, this, kLoadThreadID);
   Bind(EVT_COMMAND_THREAD_UPDATE, &Controller::OnUpdate, this, kLoadThreadID);
   Bind(EVT_COMMAND_THREAD_COMPLETED, &Controller::OnFindCompleted, this,
@@ -69,7 +69,7 @@ void Controller::SetParameter(std::vector<StreamBitmap> &list_stream) {
   list_stream_ = list_stream;
 }
 
-void Controller::OnFound(FoundEvent &event) {
+void Controller::OnFound(thread::FoundEvent &event) {
   auto item = map_item_.find(event.GetSourceStream());
   if (item != map_item_.end()) {
     StreamBitmap stream_bitmap;
@@ -107,11 +107,14 @@ void Controller::Load() {
     map_item_.insert(std::make_pair(it.stream, it.bitmap));
   }
 
-  find_thread_ = new FindThread(this, wxTHREAD_DETACHED, kFindThreadID);
+  find_thread_ =
+      new thread::FindHandler(this, wxTHREAD_DETACHED, kFindThreadID);
   find_thread_->DisableEventOnDestroy();
   find_thread_->SetParameter(vec_stream);
   find_thread_->SetChecker(&image_util::CanRead);
-  find_thread_->SetFlags(kFindThreadRecursive | kFindThreadOnlyFirstItem);
+
+  find_thread_->SetFlags(thread::kFindHandlerRecursive |
+                         thread::kFindHandlerOnlyFirstItem);
 
   load_thread_ = new LoadThread(this, wxTHREAD_DETACHED, kLoadThreadID);
   load_thread_->SetSize(thumb_size_);

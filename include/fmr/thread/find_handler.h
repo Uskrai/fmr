@@ -26,17 +26,17 @@
 
 namespace fmr {
 
-namespace explorer {
+namespace thread {
 
-/// flags used by FindThread
-enum FindThreadFlags {
-  kFindThreadDefault = 0x00,
-  kFindThreadRecursive = 0x01,
-  kFindThreadCheckHandler = 0x02,
-  kFindThreadOnlyFirstItem = 0x08,
-  kFindThreadDontRecursiveNonOpenable = 0x10
+/// flags used by FindHandler
+enum FindHandlerFlags {
+  kFindHandlerDefault = 0x00,
+  kFindHandlerRecursive = 0x01,
+  kFindHandlerCheckHandler = 0x02,
+  kFindHandlerOnlyFirstItem = 0x08,
+  kFindHandlerDontRecursiveNonOpenable = 0x10
 };
-DEFINE_BITMASK_TYPE(FindThreadFlags);
+DEFINE_BITMASK_TYPE(FindHandlerFlags);
 
 class FoundEvent : public wxCommandEvent {
  protected:
@@ -68,16 +68,16 @@ wxDECLARE_EVENT(kEventStreamFound, FoundEvent);
 typedef void (wxEvtHandler::*FoundEventFunction)(FoundEvent &);
 #define FoundEventHandler(func) wxEVENT_HANDLER_CAST(FoundEventFunction, func);
 
-class FindThread : public BaseThread {
+class FindHandler : public BaseThread {
  private:
   bool (*check_func_)(const SStream &stream);  // function to check if the
                                                // thread should send FoundEvent
 
   std::vector<SStream *> list_stream_;
-  FindThreadFlags flags_;
+  FindHandlerFlags flags_;
 
  public:
-  FindThread(ThreadController *parent, wxThreadKind type, int id)
+  FindHandler(ThreadController *parent, wxThreadKind type, int id)
       : BaseThread(parent, type, id){};
   void SetParameter(std::vector<SStream *> &list_stream);
 
@@ -92,16 +92,24 @@ class FindThread : public BaseThread {
 
   /**
    * @brief: flags for the thread
-   * kFindThreadOnlyFirstItem will only send the first item found with
-   * CheckStream. kFindThreadCheckHandler will check the handler stream, use
-   * this for searching handler like archive or directory,. kFindThreadRecursive
-   * will check the handler recursively, if the first level contain Non openable
-   * handler, it will be checked too.
+   * kFindHandlerOnlyFirstItem will only send the first item found with
+   * CheckStream. kFindHandlerCheckHandler will check the handler stream, use
+   * this for searching handler like archive or directory,.
+   * kFindHandlerRecursive will check the handler recursively, if the first
+   * level contain Non openable handler, it will be checked too.
    */
-  void SetFlags(FindThreadFlags flags) { flags_ = flags; }
+  void SetFlags(FindHandlerFlags flags) { flags_ = flags; }
 
  private:
-  bool Is(FindThreadFlags flags) { return flags_ & flags; }
+  std::unique_ptr<FoundEvent> MakeEvent(
+      wxEventType type, int id, SStream *source,
+      std::unique_ptr<SStream> &&found_stream) {
+    auto ret = std::make_unique<FoundEvent>(type, id);
+    ret->SetSourceStream(source);
+    ret->SetFoundStream(std::move(found_stream));
+    return ret;
+  }
+  bool Is(FindHandlerFlags flags) { return flags_ & flags; }
 
   void StreamFound(FoundEvent *stream);
   template <typename T>
@@ -110,7 +118,7 @@ class FindThread : public BaseThread {
   ExitCode Entry();
 };
 
-};  // namespace explorer
+};  // namespace thread
 
 };  // namespace fmr
 
