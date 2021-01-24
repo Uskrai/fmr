@@ -50,6 +50,8 @@ void LoadImage::Load(SStream *stream) {
       std::make_unique<LoadImageEvent>(kEventImageLoaded, GetEventId());
   event->SetStream(stream);
 
+  TEST_RETURN();
+
   auto input_stream = stream->GetStream();
   if (!wxImage::CanRead(*input_stream)) return;
 
@@ -60,6 +62,7 @@ void LoadImage::Load(SStream *stream) {
                String::FromString<wxString>(stream->GetName()));
   image_util::Load(event->GetImage(), *stream);
 
+  TEST_RETURN();
   wxLogMessage("Sending Image Loaded Event to %p", GetParent());
   wxQueueEvent(GetParent(), event.release());
 }
@@ -86,6 +89,7 @@ wxThread::ExitCode LoadImage::Entry() {
         wxLogMessage("Loading Stream in %s/%s",
                      String::FromString<wxString>(stream->GetHandlerPath())),
             String::FromString<wxString>(stream->GetName());
+        TEST_BREAK();
         handler->GetStream(*stream);
       }
 

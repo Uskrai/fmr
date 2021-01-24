@@ -123,6 +123,8 @@ bool FindHandler::Find(FoundEvent *event) {
 
   auto search_stream = event->GetFoundStream();
 
+  TEST_RETURN();
+
   if (!CheckStream(*search_stream)) {
     wxLogMessage("Can't Read %s/%s", search_stream->GetHandlerPath(),
                  search_stream->GetName());
@@ -136,6 +138,8 @@ bool FindHandler::Find(FoundEvent *event) {
 
   send_event->SetSourceStream(event->GetSourceStream());
   send_event->SetFoundStream(event->GetFoundStreamOwnerShip());
+
+  TEST_RETURN();
 
   wxLogMessage("Item found in handler %s/%s\n", search_stream->GetHandlerPath(),
                search_stream->GetName());
@@ -164,14 +168,18 @@ bool FindHandler::Find(AbstractOpenableHandler *handler, FoundEvent *event) {
     std::unique_ptr<AbstractHandler> non_openable_handler(
         HandlerFactory::NewHandler(path));
 
+    TEST_RETURN();
     // traverse non-openable handler and if item found and with flags Only first
     // item, return
     if (TraverseHandler(non_openable_handler.get(), event) &&
         Is(kFindHandlerOnlyFirstItem)) {
       return true;
+    } else if (!Is(kFindHandlerCheckHandler)) {
+      return false;
     }
   }
 
+  TEST_RETURN();
   if (Find(event)) return true;
 
   if (path != stream_handler->GetName()) return false;
@@ -187,8 +195,10 @@ bool FindHandler::Find(AbstractOpenableHandler *handler, FoundEvent *event) {
 bool FindHandler::Find(AbstractHandler *handler, FoundEvent *event) {
   auto search_stream = event->GetFoundStream();
 
+  TEST_RETURN();
   handler->GetStream(*search_stream);
 
+  TEST_RETURN();
   return Find(event);
 };
 
