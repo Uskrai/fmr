@@ -42,29 +42,47 @@ void FindHandler::SetParameter(std::vector<SStream *> &list_stream) {
   list_stream_ = list_stream;
 }
 
+bool FindHandler::Push(const SStream *stream) {
+  std::pair<const SStream *, SStream> item;
+  item.first = stream;
+
+  if (stream) {
+    item.second = *stream;
+    find_queue_.push(item);
+    return true;
+  }
+  return false;
+}
 #define TEST_RETURN() \
   if (TestDestroy()) return false
 
 wxThread::ExitCode FindHandler::Entry() {
   wxLogMessage("Starting Find thread");
-  for (auto &it : list_stream_) {
-    if (!TestDestroy()) {
-      std::unique_ptr<AbstractOpenableHandler> handler(
-          HandlerFactory::NewOpenableHandler(it->GetHandlerPath()));
 
-      auto event = MakeEvent(kEventStreamFound, GetEventId(), it,
-                             std::make_unique<SStream>(*it));
+  while (!TestDestroy()) {
+    while (!find_queue_.empty()) {
+      auto item = find_queue_.front();
+      auto handler = std::unique_ptr<AbstractOpenableHandler>(
+          HandlerFactory::NewOpenableHandler(item.second.GetHandlerPath()));
 
-      wxLogMessage("Starting to search for %s/%s", handler->GetName(),
-                   it->GetName());
-      if (!Find(handler.get(), event.get())) {
-        // TODO:Sent Not Found event
+      if (handler) {
+        auto event = MakeEvent(kEventStreamFound, GetEventId(), item.first,
+                               std::make_unique<SStream>(item.second));
+        wxLogMessage("Starting to search for %s/%s", handler->GetName(),
+                     item.second.GetName());
+
+        if (!TestDestroy()) {
+          if (!Find(handler.get(), event.get())) {
+            // TODO:Sent Not Fonud event
+          }
+        }
+
+        find_queue_.pop();
+        Update();
+        if (TestDestroy()) break;
       }
     }
-
-    Update();
-    if (TestDestroy()) break;
-  }
+  };
   wxLogMessage("Find thread completed");
   Completed();
   return (wxThread::ExitCode)0;
@@ -119,9 +137,9 @@ bool FindHandler::Find(FoundEvent *event) {
   send_event->SetSourceStream(event->GetSourceStream());
   send_event->SetFoundStream(event->GetFoundStreamOwnerShip());
 
-  StreamFound(send_event.release());
   wxLogMessage("Item found in handler %s/%s\n", search_stream->GetHandlerPath(),
                search_stream->GetName());
+  StreamFound(send_event.release());
   return true;
 }
 

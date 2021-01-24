@@ -27,6 +27,7 @@
 
 #include <map>
 #include <memory>
+#include <unordered_map>
 
 namespace fmr {
 
@@ -36,7 +37,7 @@ enum ThreadID { kFindThreadID = wxID_HIGHEST + 40, kLoadThreadID };
 
 class Controller : public ThreadController {
  protected:
-  std::map<SStream *, SBitmap *> map_item_;
+  std::unordered_map<const SStream *, SBitmap *> map_item_;
 
  public:
   Controller(wxWindow *parent);

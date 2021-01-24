@@ -115,6 +115,12 @@ void Controller::Load() {
 
   find_thread_->SetFlags(thread::kFindHandlerRecursive |
                          thread::kFindHandlerOnlyFirstItem);
+  map_item_.clear();
+  for (auto &it : list_stream_) {
+    find_thread_->Push(it.stream);
+
+    map_item_.insert(std::make_pair(it.stream, it.bitmap));
+  }
 
   load_thread_ = new LoadThread(this, wxTHREAD_DETACHED, kLoadThreadID);
   load_thread_->SetSize(thumb_size_);

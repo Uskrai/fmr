@@ -15,14 +15,16 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_EXPLORER_LOAD_THREAD
-#define FMR_EXPLORER_LOAD_THREAD
+#ifndef FMR_THREAD_FIND_HANDLER
+#define FMR_THREAD_FIND_HANDLER
 
 #include <fmr/common/bitmask.h>
 #include <fmr/handler/abstract_handler.h>
 #include <fmr/handler/handler_factory.h>
 #include <fmr/handler/struct_stream.h>
 #include <fmr/thread/thread.h>
+
+#include <queue>
 
 namespace fmr {
 
@@ -40,7 +42,7 @@ DEFINE_BITMASK_TYPE(FindHandlerFlags);
 
 class FoundEvent : public wxCommandEvent {
  protected:
-  SStream *source_stream_ = nullptr;
+  const SStream *source_stream_ = nullptr;
   std::unique_ptr<SStream> found_stream_;
 
  public:
@@ -56,9 +58,9 @@ class FoundEvent : public wxCommandEvent {
   }
 
   SStream *GetFoundStream() { return found_stream_.get(); }
-  SStream *GetSourceStream() { return source_stream_; }
+  const SStream *GetSourceStream() { return source_stream_; }
 
-  void SetSourceStream(SStream *stream) { source_stream_ = stream; }
+  void SetSourceStream(const SStream *stream) { source_stream_ = stream; }
   void SetFoundStream(std::unique_ptr<SStream> &&stream) {
     found_stream_ = std::move(stream);
   }
@@ -74,6 +76,7 @@ class FindHandler : public BaseThread {
                                                // thread should send FoundEvent
 
   std::vector<SStream *> list_stream_;
+  std::queue<std::pair<const SStream *, SStream>> find_queue_;
   FindHandlerFlags flags_;
 
  public:
@@ -100,9 +103,11 @@ class FindHandler : public BaseThread {
    */
   void SetFlags(FindHandlerFlags flags) { flags_ = flags; }
 
+  bool Push(const SStream *stream);
+
  private:
   std::unique_ptr<FoundEvent> MakeEvent(
-      wxEventType type, int id, SStream *source,
+      wxEventType type, int id, const SStream *source,
       std::unique_ptr<SStream> &&found_stream) {
     auto ret = std::make_unique<FoundEvent>(type, id);
     ret->SetSourceStream(source);
