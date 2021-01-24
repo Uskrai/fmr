@@ -196,6 +196,8 @@ void Window::Clear() {
   list_renderer_.clear();
   controller_.Clear();
   handler_.reset();
+  list_bitmap_.clear();
+  list_stream_.clear();
 }
 
 void Window::OnThreadUpdate(wxThreadEvent &event) { Refresh(); }
