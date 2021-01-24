@@ -16,9 +16,12 @@
  */
 
 #include <fmr/bitmap/image_util.h>
+#include <fmr/bitmap/rescaler.h>
 #include <fmr/common/vector.h>
 #include <fmr/explorer/controller_explorer.h>
 #include <wx/log.h>
+
+#include <functional>
 
 namespace fmr {
 
@@ -99,18 +102,9 @@ void Controller::Load() {
   DeleteThread(kFindThreadID, g_sLock);
   DeleteThread(kLoadThreadID, g_sLock);
 
-  map_item_.clear();
-  std::vector<SStream *> vec_stream;
-  for (auto &it : list_stream_) {
-    vec_stream.push_back(it.stream);
-
-    map_item_.insert(std::make_pair(it.stream, it.bitmap));
-  }
-
   find_thread_ =
       new thread::FindHandler(this, wxTHREAD_DETACHED, kFindThreadID);
   find_thread_->DisableEventOnDestroy();
-  find_thread_->SetParameter(vec_stream);
   find_thread_->SetChecker(&image_util::CanRead);
 
   find_thread_->SetFlags(thread::kFindHandlerRecursive |
@@ -122,8 +116,11 @@ void Controller::Load() {
     map_item_.insert(std::make_pair(it.stream, it.bitmap));
   }
 
+  bitmap::Rescaler rescaler(bitmap::kRescaleFitAll);
+  rescaler.SetMaximumSize(thumb_size_);
   load_thread_ = new LoadThread(this, wxTHREAD_DETACHED, kLoadThreadID);
   load_thread_->SetSize(thumb_size_);
+  load_thread_->SetRescaller(rescaler);
 
   load_thread_->Run();
   find_thread_->Run();

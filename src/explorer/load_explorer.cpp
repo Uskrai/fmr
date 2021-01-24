@@ -60,7 +60,7 @@ void LoadThread::Load(StreamBitmap &item) {
 
   TEST_RETURN();
 
-  if (image.IsOk()) image_util::Rescale(image, image_size_, image_quality_);
+  if (image.IsOk()) RescaleImage(image);
 
   TEST_RETURN();
 

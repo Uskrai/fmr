@@ -25,7 +25,6 @@
 #include <fmr/thread/thread.h>
 #include <fmr/window/scrolledwindow.h>
 
-#include <map>
 #include <memory>
 #include <unordered_map>
 

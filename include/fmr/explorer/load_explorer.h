@@ -18,6 +18,7 @@
 #ifndef FMR_EXPLORER_LOAD_EXPLORER
 #define FMR_EXPLORER_LOAD_EXPLORER
 
+#include <fmr/bitmap/rescaler.h>
 #include <fmr/explorer/common.h>
 #include <fmr/thread/thread.h>
 
@@ -45,18 +46,22 @@ class LoadThread : public BaseThread {
 
   void Push(StreamBitmap &stream_bitmap);
 
+  void SetRescaller(bitmap::Rescaler rescaler) { image_rescaler_ = rescaler; }
+
+  void RescaleImage(wxImage &image) { image_rescaler_.DoRescale(image); }
+
  protected:
   void Update(StreamBitmap &stream_bitmap);
   std::queue<StreamBitmap> load_queue_;
 
   bool is_delete_on_empty_ = false;
 
+  bitmap::Rescaler image_rescaler_;
   wxSize image_size_;
   wxImageResizeQuality image_quality_ = wxIMAGE_QUALITY_NORMAL;
 };
 
 };  // namespace explorer
-
 };  // namespace fmr
 
 #endif
