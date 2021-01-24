@@ -29,18 +29,17 @@ namespace explorer {
 
 Controller::Controller(wxWindow *parent) {
   parent_ = parent;
+  rescaler_ = bitmap::Rescaler(bitmap::kRescaleFitAll);
 
   Bind(thread::kEventStreamFound, &Controller::OnFound, this);
-  Bind(EVT_BITMAP_LOADED, &Controller::OnLoaded, this, kLoadThreadID);
+  Bind(thread::kEventImageLoaded, &Controller::OnImageLoaded, this,
+       kLoadThreadID);
   Bind(EVT_COMMAND_THREAD_UPDATE, &Controller::OnUpdate, this, kLoadThreadID);
   Bind(EVT_COMMAND_THREAD_COMPLETED, &Controller::OnFindCompleted, this,
        kFindThreadID);
 }
 
-Controller::~Controller() {
-  DeleteThread(kLoadThreadID, g_sLock);
-  DeleteThread(kFindThreadID, g_sLock);
-}
+Controller::~Controller() { Clear(); }
 
 void Controller::DoSetNull(int id) {
   switch (id) {
@@ -64,8 +63,11 @@ wxThread *Controller::GetThread(int id) {
 }
 
 void Controller::Clear() {
-  Delete(kLoadThreadID, g_sLock);
-  Delete(kFindThreadID, g_sLock);
+  map_find_.clear();
+  map_loading_.clear();
+  DeleteThread(kFindThreadID, g_sLock);
+  DeleteThread(kLoadThreadID, g_sLock);
+  list_found_stream_.clear();
 }
 
 void Controller::SetParameter(std::vector<StreamBitmap> &list_stream) {
@@ -73,34 +75,43 @@ void Controller::SetParameter(std::vector<StreamBitmap> &list_stream) {
 }
 
 void Controller::OnFound(thread::FoundEvent &event) {
-  auto item = map_item_.find(event.GetSourceStream());
-  if (item != map_item_.end()) {
-    StreamBitmap stream_bitmap;
-    stream_bitmap.bitmap = map_item_[event.GetSourceStream()];
-
+  auto item = map_find_.find(event.GetSourceStream());
+  if (item != map_find_.end()) {
     auto stream = event.GetFoundStreamOwnerShip();
-
-    stream_bitmap.stream = stream.release();
+    map_loading_.insert(
+        std::make_pair(stream.get(), map_find_[event.GetSourceStream()]));
 
     if (load_thread_) {
-      load_thread_->Push(stream_bitmap);
+      load_thread_->Push(stream.get());
     }
+    list_found_stream_.push_back(std::move(stream));
   }
 }
 
-void Controller::OnLoaded(StreamBitmapEvent &event) {}
+void Controller::OnImageLoaded(thread::LoadImageEvent &event) {
+  auto stream = event.GetStream();
+  auto iterator = map_loading_.find(stream);
 
-void Controller::OnUpdate(wxThreadEvent &event) { Update(event.GetId()); }
+  if (iterator != map_loading_.end()) {
+    rescaler_.DoRescale(event.GetImage());
+    iterator->second->SetBitmap(event.GetImage());
+    Update(event.GetId());
+  }
+}
+
+void Controller::OnUpdate(wxThreadEvent &event) {}
 
 void Controller::OnFindCompleted(wxThreadEvent &event) {
   if (load_thread_) load_thread_->DeleteOnEmptyQueue();
 }
 
-void Controller::SetThumbSize(const wxSize &size) { thumb_size_ = size; }
+void Controller::SetThumbSize(const wxSize &size) {
+  thumb_size_ = size;
+  rescaler_.SetMaximumSize(size);
+}
 
 void Controller::Load() {
-  DeleteThread(kFindThreadID, g_sLock);
-  DeleteThread(kLoadThreadID, g_sLock);
+  Clear();
 
   find_thread_ =
       new thread::FindHandler(this, wxTHREAD_DETACHED, kFindThreadID);
@@ -109,16 +120,15 @@ void Controller::Load() {
 
   find_thread_->SetFlags(thread::kFindHandlerRecursive |
                          thread::kFindHandlerOnlyFirstItem);
-  map_item_.clear();
+
   for (auto &it : list_stream_) {
     find_thread_->Push(it.stream);
-
-    map_item_.insert(std::make_pair(it.stream, it.bitmap));
+    map_find_.insert(std::make_pair(it.stream, it.bitmap));
   }
 
   bitmap::Rescaler rescaler(bitmap::kRescaleFitAll);
   rescaler.SetMaximumSize(thumb_size_);
-  load_thread_ = new LoadThread(this, wxTHREAD_DETACHED, kLoadThreadID);
+  load_thread_ = new thread::LoadImage(this, wxTHREAD_DETACHED, kLoadThreadID);
   load_thread_->SetSize(thumb_size_);
   load_thread_->SetRescaller(rescaler);
 

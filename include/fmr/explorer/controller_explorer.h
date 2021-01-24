@@ -18,10 +18,11 @@
 #ifndef FMR_EXPLORER_CONTROLLER_EXPLORER
 #define FMR_EXPLORER_CONTROLLER_EXPLORER
 
+#include <fmr/bitmap/rescaler.h>
 #include <fmr/explorer/common.h>
-#include <fmr/explorer/load_explorer.h>
 #include <fmr/handler/struct_stream.h>
 #include <fmr/thread/find_handler.h>
+#include <fmr/thread/load_image.h>
 #include <fmr/thread/thread.h>
 #include <fmr/window/scrolledwindow.h>
 
@@ -36,7 +37,9 @@ enum ThreadID { kFindThreadID = wxID_HIGHEST + 40, kLoadThreadID };
 
 class Controller : public ThreadController {
  protected:
-  std::unordered_map<const SStream *, SBitmap *> map_item_;
+  std::unordered_map<const SStream *, SBitmap *> map_find_, map_loading_;
+  std::vector<std::unique_ptr<SStream>> list_found_stream_;
+  bitmap::Rescaler rescaler_;
 
  public:
   Controller(wxWindow *parent);
@@ -56,10 +59,11 @@ class Controller : public ThreadController {
   wxWindow *parent_;
   std::vector<StreamBitmap> list_stream_;
   thread::FindHandler *find_thread_ = NULL;
-  LoadThread *load_thread_ = NULL;
+  thread::LoadImage *load_thread_ = NULL;
   wxSize thumb_size_;
 
   void OnFound(thread::FoundEvent &event);
+  void OnImageLoaded(thread::LoadImageEvent &event);
   void OnLoaded(StreamBitmapEvent &event);
   void OnUpdate(wxThreadEvent &event);
   void OnFindCompleted(wxThreadEvent &event);

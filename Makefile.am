@@ -51,8 +51,7 @@ explorerdir = @abs_builddir@/explorer
 explorer_LTLIBRARIES = lib_explorer.la
 lib_explorer_la_SOURCES = $(explorer)/window_explorer.cpp \
 						  $(explorer)/controller_explorer.cpp \
-						  $(explorer)/image_window_explorer.cpp \
-						  $(explorer)/load_explorer.cpp
+						  $(explorer)/image_window_explorer.cpp
 
 lib_explorer_la_LIBADD = lib_handler.la \
 						 lib_thread.la \
@@ -80,6 +79,7 @@ thread = src/thread
 threaddir = @abs_builddir@/thread
 thread_LTLIBRARIES = lib_thread.la
 lib_thread_la_SOURCES = $(thread)/thread.cpp \
+												$(thread)/load_image.cpp \
 												$(thread)/find_handler.cpp
 
 fmr = src/main

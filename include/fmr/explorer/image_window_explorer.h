@@ -20,12 +20,12 @@
 
 #include <fmr/common/string.h>
 #include <fmr/explorer/common.h>
-#include <fmr/explorer/load_explorer.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/window.h>
 
 #include <memory>
+#include <vector>
 
 namespace fmr {
 

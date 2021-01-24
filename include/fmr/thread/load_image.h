@@ -19,24 +19,45 @@
 #define FMR_EXPLORER_LOAD_EXPLORER
 
 #include <fmr/bitmap/rescaler.h>
-#include <fmr/explorer/common.h>
+#include <fmr/handler/struct_stream.h>
 #include <fmr/thread/thread.h>
+#include <wx/event.h>
 
 #include <queue>
 
 namespace fmr {
 
-namespace explorer {
+namespace thread {
 
-wxDECLARE_EVENT(EVT_BITMAP_LOADED, StreamBitmapEvent);
-class LoadThread : public BaseThread {
+class LoadImageEvent : public wxCommandEvent {
+ protected:
+  wxImage image_;
+  const SStream *stream_;
+
  public:
-  LoadThread(ThreadController *parent, wxThreadKind kind = wxTHREAD_DETACHED,
-             int id = wxID_ANY)
+  LoadImageEvent(wxEventType type, int id) : wxCommandEvent(type, id){};
+  LoadImageEvent(const LoadImageEvent &event) : wxCommandEvent(event) {
+    image_ = event.image_;
+    stream_ = event.stream_;
+  }
+
+  void SetImage(const wxImage &image) { image_ = image; }
+  void SetStream(const SStream *stream) { stream_ = stream; }
+
+  wxImage &GetImage() { return image_; }
+  const SStream *GetStream() { return stream_; }
+};
+
+wxDECLARE_EVENT(kEventImageLoaded, LoadImageEvent);
+
+class LoadImage : public BaseThread {
+ public:
+  LoadImage(ThreadController *parent, wxThreadKind kind = wxTHREAD_DETACHED,
+            int id = wxID_ANY)
       : BaseThread(parent, kind, id){};
 
   ExitCode Entry();
-  void Load(StreamBitmap &item);
+  void Load(SStream *stream);
 
   void SetSize(const wxSize &size);
   void SetImageQuality(wxImageResizeQuality quality);
@@ -44,15 +65,14 @@ class LoadThread : public BaseThread {
 
   void DeleteOnEmptyQueue(bool condition = true);
 
-  void Push(StreamBitmap &stream_bitmap);
+  void Push(SStream *stream);
 
   void SetRescaller(bitmap::Rescaler rescaler) { image_rescaler_ = rescaler; }
 
   void RescaleImage(wxImage &image) { image_rescaler_.DoRescale(image); }
 
  protected:
-  void Update(StreamBitmap &stream_bitmap);
-  std::queue<StreamBitmap> load_queue_;
+  std::queue<SStream *> load_queue_;
 
   bool is_delete_on_empty_ = false;
 
@@ -61,7 +81,7 @@ class LoadThread : public BaseThread {
   wxImageResizeQuality image_quality_ = wxIMAGE_QUALITY_NORMAL;
 };
 
-};  // namespace explorer
+};  // namespace thread
 };  // namespace fmr
 
 #endif
