@@ -31,7 +31,8 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/bitmap.cpp \
 						$(bitmap)/size.cpp \
 						$(bitmap)/image_util.cpp \
-						$(bitmap)/position.cpp
+						$(bitmap)/position.cpp \
+						$(bitmap)/loader.cpp
 
 reader = src/reader
 readerdir = @abs_builddir@/reader
