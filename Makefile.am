@@ -80,6 +80,7 @@ threaddir = @abs_builddir@/thread
 thread_LTLIBRARIES = lib_thread.la
 lib_thread_la_SOURCES = $(thread)/thread.cpp \
 												$(thread)/load_image.cpp \
+												$(thread)/load_image_controller.cpp \
 												$(thread)/find_handler.cpp \
 												$(thread)/find_handler_controller.cpp
 
