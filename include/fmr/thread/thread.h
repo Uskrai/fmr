@@ -54,7 +54,7 @@ class BaseThread : public wxThread, public wxObject {
  public:
   BaseThread(ThreadController *parent,
              const wxThreadKind type = wxTHREAD_DETACHED, int id = -1);
-  ~BaseThread();
+  virtual ~BaseThread();
 
   [[deprecated("Replaced by SetEventId")]] void SetId(int id);
   void SetEventId(int id);
