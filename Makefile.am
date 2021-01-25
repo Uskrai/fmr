@@ -51,8 +51,7 @@ explorer = src/explorer
 explorerdir = @abs_builddir@/explorer
 explorer_LTLIBRARIES = lib_explorer.la
 lib_explorer_la_SOURCES = $(explorer)/window_explorer.cpp \
-						  $(explorer)/controller_explorer.cpp \
-						  $(explorer)/image_window_explorer.cpp
+													$(explorer)/image_window_explorer.cpp
 
 lib_explorer_la_LIBADD = lib_handler.la \
 						 lib_thread.la \

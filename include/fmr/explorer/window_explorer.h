@@ -21,7 +21,6 @@
 #include <fmr/bitmap/loader.h>
 #include <fmr/common/path.h>
 #include <fmr/explorer/common.h>
-#include <fmr/explorer/controller_explorer.h>
 #include <fmr/explorer/image_window_explorer.h>
 #include <fmr/handler/abstract_handler.h>
 #include <fmr/handler/struct_stream.h>
