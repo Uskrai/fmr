@@ -54,7 +54,7 @@ void ImageWindow::BindEvent() {
   Bind(wxEVT_SIZE, &ImageWindow::OnSize, this);
 }
 
-void ImageWindow::SetBitmap(SBitmap *bmp) {
+void ImageWindow::SetBitmap(const SBitmap &bmp) {
   bitmap_ = bmp;
   refresh_scheduled_ = true;
 }
@@ -75,9 +75,9 @@ const SStream *ImageWindow::GetStream() const { return stream_; }
 
 SStream *ImageWindow::GetStream() { return stream_; }
 
-const SBitmap *ImageWindow::GetBitmap() const { return bitmap_; }
+const SBitmap &ImageWindow::GetBitmap() const { return bitmap_; }
 
-SBitmap *ImageWindow::GetBitmap() { return bitmap_; }
+SBitmap &ImageWindow::GetBitmap() { return bitmap_; }
 
 wxSize ImageWindow::GetBestBitmapSize(const wxSize &size) {
   wxSize best_size = size;
@@ -134,12 +134,12 @@ void ImageWindow::PrepareRect(const wxRect &rect) {
   text_rect_.SetSize(txt_size);
   text_rect_.SetTop(bitmap_rect_.GetBottom() + 5);
 
-  if (bitmap_ && bitmap_->IsOk()) {
-    wxRect bmp_rect = wxRect(bitmap_->GetPosition(), bitmap_->GetSize());
+  if (bitmap_.IsOk()) {
+    wxRect bmp_rect = wxRect(bitmap_.GetPosition(), bitmap_.GetSize());
     bmp_rect = bmp_rect.CenterIn(bitmap_rect_);
     bitmap_position_ = bmp_rect.GetPosition();
 
-    bitmap_size_ = bitmap_->GetSize();
+    bitmap_size_ = bitmap_.GetSize();
   }
 
   this_rect_ = rect;
@@ -172,17 +172,20 @@ void ImageWindow::OnPaint(wxPaintEvent &event) {
   wxPaintDC dc(this);
   wxRect rect(wxPoint(0, 0), GetSize());
 
-  if (stream_ && string_name_ != stream_->GetName()) refresh_scheduled_ = true;
+  if (stream_) {
+    if (stream_ && string_name_ != stream_->GetName())
+      refresh_scheduled_ = true;
 
-  if (bitmap_ && bitmap_size_ != bitmap_->GetSize()) refresh_scheduled_ = true;
+    if (bitmap_size_ != bitmap_.GetSize()) refresh_scheduled_ = true;
 
-  if (this_rect_ != rect || refresh_scheduled_) {
-    PrepareRect(rect);
-    PrepareStringPos(dc, text_rect_);
-    refresh_scheduled_ = false;
+    if (this_rect_ != rect || refresh_scheduled_) {
+      PrepareRect(rect);
+      PrepareStringPos(dc, text_rect_);
+      refresh_scheduled_ = false;
+    }
+
+    if (bitmap_.IsOk()) dc.DrawBitmap(bitmap_.GetBitmap(), bitmap_position_);
   }
-
-  if (bitmap_->IsOk()) dc.DrawBitmap(bitmap_->GetBitmap(), bitmap_position_);
 
   // for ( const auto & it : vec_string_draw_ )
   // {

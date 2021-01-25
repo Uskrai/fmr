@@ -18,6 +18,7 @@
 #ifndef FMR_EXPLORER_WINDOW
 #define FMR_EXPLORER_WINDOW
 
+#include <fmr/bitmap/loader.h>
 #include <fmr/common/path.h>
 #include <fmr/explorer/common.h>
 #include <fmr/explorer/controller_explorer.h>
@@ -39,19 +40,18 @@ namespace explorer {
 
 class Window : public FlexGridWindow {
  protected:
-  Controller controller_ = Controller(this);
-  std::map<wxWindow *, StreamBitmap> map_window_;
+  bitmap::Loader loader_ = bitmap::Loader(this);
+  std::unordered_map<const SStream *, ImageWindow *> map_window_;
   std::shared_ptr<AbstractOpenableHandler> handler_;
-  std::vector<std::unique_ptr<SBitmap>> list_bitmap_;
   std::vector<std::unique_ptr<SStream>> list_stream_;
-  std::vector<StreamBitmap> list_item_;
-  std::vector<ImageWindow *> list_renderer_;
+  std::unique_ptr<bitmap::Rescaler> rescaler_ = nullptr;
 
  public:
   Window(wxWindow *parent, const wxWindowID &id = wxID_ANY,
          const wxPoint &pos = wxDefaultPosition,
          const wxSize &size = wxDefaultSize, const long &style = wxWANTS_CHARS,
          const wxString &name = wxPanelNameStr);
+  ~Window() { Clear(); }
 
   bool Open(std::shared_ptr<AbstractOpenableHandler> handler);
   bool Open(const std::string &name);
@@ -72,15 +72,10 @@ class Window : public FlexGridWindow {
 
  protected:
   void BindEvent();
-  // wxGridTableBase *grid_table_;
-
-  // std::vector<wxGridCellCoords> list_cell_pos_;
 
   void OnThreadUpdate(wxThreadEvent &event);
   void OnKeyDown(wxKeyEvent &event);
-  // void OnGridSelect( wxGridEvent &event );
-
-  // wxGridCellCoords selected_cell_;
+  void OnImageLoaded(thread::LoadImageEvent &event);
 };
 
 };  // namespace explorer
