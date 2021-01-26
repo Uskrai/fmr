@@ -79,6 +79,9 @@ class RescaleController : public ThreadController {
   wxEvtHandler *GetParent() { return parent_; }
 
   void Clear() { DeleteThread(GetThreadId(), lock_); }
+  void DisableOnEmptyQueue(bool disable = true) {
+    if (thread_) thread_->DisableOnEmptyQueue(disable);
+  }
 };
 
 }  // namespace thread

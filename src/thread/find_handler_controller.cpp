@@ -103,6 +103,12 @@ bool FindHandlerController::Run() {
   return thread_->Run() == wxTHREAD_NO_ERROR;
 }
 
+void FindHandlerController::DisableOnEmptyQueue(bool disable) {
+  if (thread_) {
+    thread_->DisableOnEmptyQueue(disable);
+  }
+}
+
 BaseThread *FindHandlerController::GetThread(int id) {
   if (id == GetThreadId()) return thread_;
   return nullptr;

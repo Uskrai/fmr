@@ -53,6 +53,10 @@ bool LoadImageController::Run() {
 
 void LoadImageController::Clear() { DeleteThread(GetThreadId(), lock_); }
 
+void LoadImageController::DisableOnEmptyQueue(bool disable) {
+  if (thread_) thread_->DisableOnEmptyQueue(disable);
+}
+
 void LoadImageController::DoSetNull(int id) {
   if (id == GetThreadId()) thread_ = nullptr;
 }

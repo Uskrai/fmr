@@ -51,6 +51,7 @@ class LoadImageController : public ThreadController {
   int GetThreadId() const { return thread_id_; }
 
   void Clear();
+  void DisableOnEmptyQueue(bool disable = true);
 
  private:
   void OnImageLoaded(LoadImageEvent &event);
