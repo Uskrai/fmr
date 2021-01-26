@@ -44,7 +44,6 @@ Loader::Loader(wxEvtHandler *parent)
 }
 
 void Loader::OnThreadCompleted(wxThreadEvent &event) {
-  printf("owo\n");
   //
 }
 
