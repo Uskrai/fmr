@@ -29,12 +29,13 @@ class RescaleController : public ThreadController {
   Rescale *thread_ = nullptr;
   int thread_id_;
   bitmap::Rescaler *rescaler_ = nullptr;
-  wxEvtHandler *parent_;
+  wxEvtHandler *parent_ = nullptr;
   wxCriticalSection lock_;
 
  public:
   RescaleController(wxEvtHandler *parent, int id) : ThreadController() {
     thread_id_ = id;
+    parent_ = parent;
   }
 
   virtual ~RescaleController() { Clear(); }
