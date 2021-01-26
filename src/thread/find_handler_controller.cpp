@@ -103,7 +103,7 @@ bool FindHandlerController::Run() {
   return thread_->Run() == wxTHREAD_NO_ERROR;
 }
 
-wxThread *FindHandlerController::GetThread(int id) {
+BaseThread *FindHandlerController::GetThread(int id) {
   if (id == GetThreadId()) return thread_;
   return nullptr;
 }

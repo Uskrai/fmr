@@ -65,7 +65,7 @@ class Controller : public ThreadController {
   std::shared_ptr<const AbstractHandler> GetHandler() const { return handler_; }
 
   wxEvtHandler *GetParent() { return parent_; }
-  wxThread *GetThread(int id);
+  BaseThread *GetThread(int id);
   void DoSetNull(int id);
   void Clear();
 

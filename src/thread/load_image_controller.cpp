@@ -57,7 +57,7 @@ void LoadImageController::DoSetNull(int id) {
   if (id == GetThreadId()) thread_ = nullptr;
 }
 
-wxThread *LoadImageController::GetThread(int id) {
+BaseThread *LoadImageController::GetThread(int id) {
   if (id == GetThreadId()) return thread_;
   return nullptr;
 }

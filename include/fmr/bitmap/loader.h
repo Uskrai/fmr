@@ -67,7 +67,7 @@ class Loader : public ThreadController {
   };
 
   wxEvtHandler *GetParent() { return parent_; }
-  wxThread *GetThread(int id);
+  BaseThread *GetThread(int id);
   void DoSetNull(int id);
   bool Run();
   void Clear();

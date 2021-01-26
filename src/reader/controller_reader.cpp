@@ -80,7 +80,7 @@ void Controller::SetHandler(std::shared_ptr<AbstractHandler> handler) {
   handler_ = handler;
 }
 
-wxThread *Controller::GetThread(int id) {
+BaseThread *Controller::GetThread(int id) {
   switch (id) {
     case kLoadThreadID:
       return load_thread_;

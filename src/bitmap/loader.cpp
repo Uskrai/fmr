@@ -102,7 +102,7 @@ void Loader::Clear() {
   find_controller_.Clear();
 }
 
-wxThread *Loader::GetThread(int id) {
+BaseThread *Loader::GetThread(int id) {
   switch (id) {
     case kLoadImageThreadID:
       return load_image_thread_;

@@ -70,7 +70,7 @@ class RescaleController : public ThreadController {
     if (id == GetThreadId()) thread_ = nullptr;
   }
 
-  wxThread *GetThread(int id) {
+  BaseThread *GetThread(int id) {
     if (id == GetThreadId()) return thread_;
     return nullptr;
   }
