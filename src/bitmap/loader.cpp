@@ -36,15 +36,22 @@ Loader::Loader(wxEvtHandler *parent)
   load_controller_.Bind(thread::kEventImageLoaded, &Loader::OnImageLoaded, this,
                         kLoadImageThreadID);
 
-  Bind(EVT_COMMAND_THREAD_COMPLETED, &Loader::OnThreadCompleted, this);
-
   rescale_controller_.Bind(thread::kEventImageRescaled,
                            &Loader::OnImageRescaled, this,
                            kRescaleImageThreadID);
+
+  Bind(EVT_COMMAND_THREAD_COMPLETED, &Loader::OnThreadCompleted, this);
 }
 
 void Loader::OnThreadCompleted(wxThreadEvent &event) {
-  //
+  switch (event.GetId()) {
+    case kFindImageHandlerThreadID:
+      load_controller_.DisableOnEmptyQueue(true);
+      break;
+    case kLoadImageThreadID:
+      rescale_controller_.DisableOnEmptyQueue(true);
+  }
+  event.Skip();
 }
 
 bool Loader::Open(const std::string &path) {
@@ -93,7 +100,9 @@ void Loader::OnImageRescaled(thread::RescaledEvent &event) {
 
 bool Loader::Run() {
   Clear();
-  return find_controller_.Run();
+  bool ret = find_controller_.Run();
+  if (ret) find_controller_.DisableOnEmptyQueue(true);
+  return ret;
 }
 
 void Loader::Clear() {
