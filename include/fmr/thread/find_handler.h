@@ -26,6 +26,8 @@
 
 #include <queue>
 
+#include "fmr/thread/queue.h"
+
 namespace fmr {
 
 namespace thread {
@@ -70,19 +72,15 @@ wxDECLARE_EVENT(kEventStreamFound, FoundEvent);
 typedef void (wxEvtHandler::*FoundEventFunction)(FoundEvent &);
 #define FoundEventHandler(func) wxEVENT_HANDLER_CAST(FoundEventFunction, func);
 
-class FindHandler : public BaseThread {
+class FindHandler : public Queue<std::pair<const SStream *, SStream>> {
  private:
   bool (*check_func_)(const SStream &stream);  // function to check if the
                                                // thread should send FoundEvent
-
-  std::vector<SStream *> list_stream_;
-  std::queue<std::pair<const SStream *, SStream>> find_queue_;
   FindHandlerFlags flags_;
 
  public:
   FindHandler(ThreadController *parent, wxThreadKind type, int id)
-      : BaseThread(parent, type, id){};
-  void SetParameter(std::vector<SStream *> &list_stream);
+      : Queue(parent, type, id){};
 
   bool Find(FoundEvent *stream);
   bool Find(AbstractOpenableHandler *handler, FoundEvent *stream);
@@ -103,6 +101,7 @@ class FindHandler : public BaseThread {
    */
   void SetFlags(FindHandlerFlags flags) { flags_ = flags; }
 
+  using Queue::Push;
   bool Push(const SStream *stream);
 
  private:

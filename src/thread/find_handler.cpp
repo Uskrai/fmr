@@ -38,17 +38,13 @@ FoundEvent::FoundEvent(const FoundEvent &event) : wxCommandEvent(event) {
     found_stream_ = std::unique_ptr<SStream>(new SStream(*event.found_stream_));
 }
 
-void FindHandler::SetParameter(std::vector<SStream *> &list_stream) {
-  list_stream_ = list_stream;
-}
-
 bool FindHandler::Push(const SStream *stream) {
   std::pair<const SStream *, SStream> item;
   item.first = stream;
 
   if (stream) {
     item.second = *stream;
-    find_queue_.push(item);
+    Push(std::move(item));
     return true;
   }
   return false;
@@ -60,8 +56,8 @@ wxThread::ExitCode FindHandler::Entry() {
   wxLogMessage("Starting Find thread");
 
   while (!TestDestroy()) {
-    while (!find_queue_.empty()) {
-      auto item = find_queue_.front();
+    if (!QueueEmpty()) {
+      auto item = FrontAndPop();
       auto handler = std::unique_ptr<AbstractOpenableHandler>(
           HandlerFactory::NewOpenableHandler(item.second.GetHandlerPath()));
 
@@ -76,8 +72,6 @@ wxThread::ExitCode FindHandler::Entry() {
             // TODO:Sent Not Fonud event
           }
         }
-
-        find_queue_.pop();
         Update();
         if (TestDestroy()) break;
       }
