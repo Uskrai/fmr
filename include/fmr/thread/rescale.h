@@ -21,6 +21,7 @@
 #include <queue>
 
 #include "fmr/bitmap/rescaler.h"
+#include "fmr/thread/queue.h"
 #include "fmr/thread/thread.h"
 
 namespace fmr {
@@ -44,18 +45,16 @@ class RescaledEvent : public wxCommandEvent {
 
 wxDECLARE_EVENT(kEventImageRescaled, RescaledEvent);
 
-class Rescale : public BaseThread {
+class Rescale : public Queue<wxImage *> {
  private:
-  std::queue<wxImage *> queue_image_;
   bitmap::Rescaler *rescaler_ = nullptr;
 
  public:
   Rescale(ThreadController *parent, wxThreadKind type = wxTHREAD_DETACHED,
           int id = wxID_ANY)
-      : BaseThread(parent, type, id){};
+      : Queue(parent, type, id){};
 
   void SetRescaler(bitmap::Rescaler *rescaler) { rescaler_ = rescaler; }
-  void Push(wxImage *image) { queue_image_.push(image); };
 
   ExitCode Entry();
 
