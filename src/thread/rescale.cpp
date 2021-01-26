@@ -35,10 +35,11 @@ void Rescale::SendEvent(wxImage *image) {
 wxThread::ExitCode Rescale::Entry() {
   while (!TestDestroy()) {
     if (!QueueEmpty()) {
-      auto item = FrontAndPop();
+      auto item = Front();
       rescaler_->DoRescale(*item);
 
       SendEvent(item);
+      Pop();
     }
   }
   Completed();

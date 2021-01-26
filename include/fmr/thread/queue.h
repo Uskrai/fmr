@@ -41,12 +41,6 @@ class Queue : public BaseThread {
 
   T &Front() { return queue_item_.front(); }
 
-  T FrontAndPop() {
-    T item = Front();
-    Pop();
-    return item;
-  }
-
   void Pop() { queue_item_.pop(); }
 
   void DisableOnEmptyQueue(bool disable = true) {

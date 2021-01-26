@@ -57,7 +57,7 @@ wxThread::ExitCode FindHandler::Entry() {
 
   while (!TestDestroy()) {
     if (!QueueEmpty()) {
-      auto item = FrontAndPop();
+      auto &item = Front();
       auto handler = std::unique_ptr<AbstractOpenableHandler>(
           HandlerFactory::NewOpenableHandler(item.second.GetHandlerPath()));
 
@@ -75,6 +75,7 @@ wxThread::ExitCode FindHandler::Entry() {
         Update();
         if (TestDestroy()) break;
       }
+      Pop();
     }
   };
   wxLogMessage("Find thread completed");

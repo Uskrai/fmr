@@ -74,7 +74,7 @@ wxThread::ExitCode LoadImage::Entry() {
   while (!TestDestroy()) {
     if (!QueueEmpty()) {
       TEST_BREAK();
-      SStream *stream = FrontAndPop();
+      SStream *&stream = Front();
       std::shared_ptr<wxInputStream> input_stream = stream->GetStream();
 
       TEST_BREAK();
@@ -92,6 +92,7 @@ wxThread::ExitCode LoadImage::Entry() {
       }
       TEST_BREAK();
       Load(stream);
+      Pop();
     }
 
     TEST_BREAK();
