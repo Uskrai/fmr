@@ -25,6 +25,8 @@
 
 #include <queue>
 
+#include "fmr/thread/queue.h"
+
 namespace fmr {
 
 namespace thread {
@@ -50,11 +52,11 @@ class LoadImageEvent : public wxCommandEvent {
 
 wxDECLARE_EVENT(kEventImageLoaded, LoadImageEvent);
 
-class LoadImage : public BaseThread {
+class LoadImage : public Queue<SStream *> {
  public:
   LoadImage(ThreadController *parent, wxThreadKind kind = wxTHREAD_DETACHED,
             int id = wxID_ANY)
-      : BaseThread(parent, kind, id){};
+      : Queue(parent, kind, id){};
 
   ExitCode Entry();
   void Load(SStream *stream);
@@ -64,8 +66,6 @@ class LoadImage : public BaseThread {
   void Clear();
 
   void DeleteOnEmptyQueue(bool condition = true);
-
-  void Push(SStream *stream);
 
   void SetRescaller(bitmap::Rescaler rescaler) { image_rescaler_ = rescaler; }
 

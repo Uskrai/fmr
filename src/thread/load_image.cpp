@@ -34,8 +34,6 @@ void LoadImage::SetImageQuality(wxImageResizeQuality quality) {
   image_quality_ = quality;
 }
 
-void LoadImage::Push(SStream *stream) { load_queue_.push(stream); }
-
 void LoadImage::Clear() { load_queue_ = std::queue<SStream *>(); }
 
 void LoadImage::DeleteOnEmptyQueue(bool condition) {
@@ -73,10 +71,10 @@ wxThread::ExitCode LoadImage::Entry() {
 
   wxLogMessage("Starting load thread");
 
-  while (!TestDestroy() && !(is_delete_on_empty_ && load_queue_.empty())) {
-    if (load_queue_.size() > 0 && !TestDestroy()) {
+  while (!TestDestroy()) {
+    if (!QueueEmpty()) {
       TEST_BREAK();
-      SStream *stream = load_queue_.front();
+      SStream *stream = FrontAndPop();
       std::shared_ptr<wxInputStream> input_stream = stream->GetStream();
 
       TEST_BREAK();
@@ -92,10 +90,8 @@ wxThread::ExitCode LoadImage::Entry() {
         TEST_BREAK();
         handler->GetStream(*stream);
       }
-
       TEST_BREAK();
       Load(stream);
-      load_queue_.pop();
     }
 
     TEST_BREAK();
