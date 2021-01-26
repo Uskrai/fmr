@@ -25,7 +25,8 @@ namespace bitmap {
 Loader::Loader(wxEvtHandler *parent)
     : ThreadController(),
       find_controller_(this, kFindImageHandlerThreadID),
-      load_controller_(this, kLoadImageThreadID) {
+      load_controller_(this, kLoadImageThreadID),
+      rescale_controller_(this, kRescaleImageThreadID) {
   parent_ = parent;
   find_controller_.SetChecker(&image_util::CanRead);
 
@@ -34,6 +35,17 @@ Loader::Loader(wxEvtHandler *parent)
 
   load_controller_.Bind(thread::kEventImageLoaded, &Loader::OnImageLoaded, this,
                         kLoadImageThreadID);
+
+  Bind(EVT_COMMAND_THREAD_COMPLETED, &Loader::OnThreadCompleted, this);
+
+  rescale_controller_.Bind(thread::kEventImageRescaled,
+                           &Loader::OnImageRescaled, this,
+                           kRescaleImageThreadID);
+}
+
+void Loader::OnThreadCompleted(wxThreadEvent &event) {
+  printf("owo\n");
+  //
 }
 
 bool Loader::Open(const std::string &path) {
@@ -53,22 +65,40 @@ void Loader::OnImageLoaded(thread::LoadImageEvent &event) {
   auto source_stream = find_controller_.GetSourceStream(event.GetStream());
 
   if (source_stream) {
-    if (rescaler_) rescaler_->DoRescale(event.GetImage());
+    queue_in_rescale_.push(event.GetImage());
+    auto &image = queue_in_rescale_.back();
+    map_loaded_to_source_.insert(std::make_pair(&image, event.GetStream()));
+    rescale_controller_.Push(&image);
+  }
+}
+
+void Loader::OnImageRescaled(thread::RescaledEvent &event) {
+  auto item = map_loaded_to_source_.find(event.GetImage());
+
+  if (item != map_loaded_to_source_.end()) {
+    auto source_stream = find_controller_.GetSourceStream(item->second);
+
     auto send_event = std::make_unique<thread::LoadImageEvent>(
-        event.GetEventType(), event.GetId());
+        thread::kEventImageLoaded, load_controller_.GetThreadId());
 
     send_event->SetStream(source_stream);
-    send_event->SetImage(event.GetImage());
+    send_event->SetImage(*event.GetImage());
     wxQueueEvent(GetParent(), send_event.release());
+
+    auto &img = queue_in_rescale_.front();
+    if (&img == event.GetImage()) {
+      queue_in_rescale_.pop();
+    }
   }
 }
 
 bool Loader::Run() {
   Clear();
-  return find_controller_.Run() && load_controller_.Run();
+  return find_controller_.Run();
 }
 
 void Loader::Clear() {
+  rescale_controller_.Clear();
   load_controller_.Clear();
   find_controller_.Clear();
 }

@@ -30,6 +30,7 @@
 
 #include "fmr/thread/find_handler_controller.h"
 #include "fmr/thread/load_image_controller.h"
+#include "fmr/thread/rescale_controller.h"
 
 namespace fmr {
 
@@ -37,7 +38,8 @@ namespace bitmap {
 
 enum ThreadLoaderID {
   kFindImageHandlerThreadID = wxID_HIGHEST + 3000,
-  kLoadImageThreadID
+  kLoadImageThreadID,
+  kRescaleImageThreadID
 };
 
 class Loader : public ThreadController {
@@ -45,12 +47,16 @@ class Loader : public ThreadController {
   thread::FindHandler *find_thread_ = nullptr;
   thread::FindHandlerFlags find_flags_ = thread::kFindHandlerDefault;
   thread::LoadImage *load_image_thread_ = nullptr;
+  std::queue<wxImage> queue_in_rescale_;
+  std::unordered_map<wxImage *, const SStream *> map_loaded_to_source_;
+
   Rescaler *rescaler_ = nullptr;
 
   wxEvtHandler *parent_ = nullptr;
 
   thread::FindHandlerController find_controller_;
   thread::LoadImageController load_controller_;
+  thread::RescaleController rescale_controller_;
 
  public:
   Loader(wxEvtHandler *parent);
@@ -66,7 +72,10 @@ class Loader : public ThreadController {
   bool Run();
   void Clear();
 
-  void SetRescaler(Rescaler *rescaler) { rescaler_ = rescaler; }
+  void SetRescaler(Rescaler *rescaler) {
+    rescale_controller_.SetRescaller(rescaler);
+  }
+
   void SetFindFlags(const thread::FindHandlerFlags &flags) {
     find_controller_.SetFlags(flags);
   };
@@ -74,6 +83,9 @@ class Loader : public ThreadController {
  private:
   void OnStreamFound(thread::FoundEvent &event);
   void OnImageLoaded(thread::LoadImageEvent &event);
+  void OnImageRescaled(thread::RescaledEvent &event);
+
+  void OnThreadCompleted(wxThreadEvent &event);
 };
 
 }  // namespace bitmap
