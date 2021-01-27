@@ -69,6 +69,9 @@ class FindHandlerController : public ThreadController {
 
   const SStream *GetSourceStream(const SStream *source_stream);
 
+  void AddFoundStream(const SStream *source,
+                      std::unique_ptr<SStream> &&found_stream);
+
   bool IsInQueue(const SStream *stream) const;
   void DisableOnEmptyQueue(bool disable = true);
 

@@ -55,11 +55,15 @@ void FindHandlerController::SetThreadId(int id) {
        thread_id_);
 }
 
-void FindHandlerController::OnStreamFound(FoundEvent &event) {
-  found_source_map_.insert(
-      std::make_pair(event.GetFoundStream(), event.GetSourceStream()));
+void FindHandlerController::AddFoundStream(
+    const SStream *source, std::unique_ptr<SStream> &&found_stream) {
+  found_source_map_.insert(std::make_pair(found_stream.get(), source));
 
-  loaded_stream_.push_back(event.GetFoundStreamOwnerShip());
+  loaded_stream_.push_back(std::move(found_stream));
+}
+
+void FindHandlerController::OnStreamFound(FoundEvent &event) {
+  AddFoundStream(event.GetSourceStream(), event.GetFoundStreamOwnerShip());
 }
 
 const SStream *FindHandlerController ::GetSourceStream(const SStream *stream) {
