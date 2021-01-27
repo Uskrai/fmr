@@ -28,17 +28,18 @@ Loader::Loader(wxEvtHandler *parent)
       load_controller_(this, kLoadImageThreadID),
       rescale_controller_(this, kRescaleImageThreadID) {
   parent_ = parent;
-  find_controller_.SetChecker(&image_util::CanRead);
+  GetFindController()->SetChecker(&image_util::CanRead);
 
-  find_controller_.Bind(thread::kEventStreamFound, &Loader::OnStreamFound, this,
-                        kFindImageHandlerThreadID);
+  GetFindController()->Bind(thread::kEventStreamFound, &Loader::OnStreamFound,
+                            this, kFindImageHandlerThreadID);
 
-  load_controller_.Bind(thread::kEventImageLoaded, &Loader::OnImageLoaded, this,
-                        kLoadImageThreadID);
+  GetLoadImageController()->Bind(thread::kEventImageLoaded,
+                                 &Loader::OnImageLoaded, this,
+                                 kLoadImageThreadID);
 
-  rescale_controller_.Bind(thread::kEventImageRescaled,
-                           &Loader::OnImageRescaled, this,
-                           kRescaleImageThreadID);
+  GetRescaleController()->Bind(thread::kEventImageRescaled,
+                               &Loader::OnImageRescaled, this,
+                               kRescaleImageThreadID);
 
   Bind(EVT_COMMAND_THREAD_COMPLETED, &Loader::OnThreadCompleted, this);
 }
@@ -46,24 +47,26 @@ Loader::Loader(wxEvtHandler *parent)
 void Loader::OnThreadCompleted(wxThreadEvent &event) {
   switch (event.GetId()) {
     case kFindImageHandlerThreadID:
-      load_controller_.DisableOnEmptyQueue(true);
+      GetLoadImageController()->DisableOnEmptyQueue(true);
       break;
     case kLoadImageThreadID:
-      rescale_controller_.DisableOnEmptyQueue(true);
+      GetRescaleController()->DisableOnEmptyQueue(true);
   }
   event.Skip();
 }
 
 bool Loader::Open(const std::string &path) {
-  return find_controller_.Open(path);
+  return GetFindController()->Open(path);
 }
 
 void Loader::OnStreamFound(thread::FoundEvent &event) {
   auto item = event.GetSourceStream();
 
-  if (find_controller_.IsInQueue(item)) {
-    load_controller_.Push(event.GetFoundStream());
-    event.Skip();
+  if (GetFindController()->IsInQueue(item)) {
+    GetLoadImageController()->Push(event.GetFoundStream());
+
+    GetFindController()->AddFoundStream(event.GetSourceStream(),
+                                        event.GetFoundStreamOwnerShip());
   }
 }
 
@@ -71,10 +74,13 @@ void Loader::OnImageLoaded(thread::LoadImageEvent &event) {
   auto source_stream = find_controller_.GetSourceStream(event.GetStream());
 
   if (source_stream) {
+    auto send_event = std::make_unique<thread::LoadImageEvent>(
+        thread::kEventImageLoaded, GetLoadImageController()->GetThreadId());
+
     queue_in_rescale_.push(event.GetImage());
     auto &image = queue_in_rescale_.back();
     map_loaded_to_source_.insert(std::make_pair(&image, event.GetStream()));
-    rescale_controller_.Push(&image);
+    GetRescaleController()->Push(&image);
   }
 }
 
@@ -82,10 +88,10 @@ void Loader::OnImageRescaled(thread::RescaledEvent &event) {
   auto item = map_loaded_to_source_.find(event.GetImage());
 
   if (item != map_loaded_to_source_.end()) {
-    auto source_stream = find_controller_.GetSourceStream(item->second);
+    auto source_stream = GetFindController()->GetSourceStream(item->second);
 
     auto send_event = std::make_unique<thread::LoadImageEvent>(
-        thread::kEventImageLoaded, load_controller_.GetThreadId());
+        thread::kEventImageLoaded, GetLoadImageController()->GetThreadId());
 
     send_event->SetStream(source_stream);
     send_event->SetImage(*event.GetImage());
@@ -100,30 +106,15 @@ void Loader::OnImageRescaled(thread::RescaledEvent &event) {
 
 bool Loader::Run() {
   Clear();
-  bool ret = find_controller_.Run();
-  if (ret) find_controller_.DisableOnEmptyQueue(true);
+  bool ret = GetFindController()->Run();
+  if (ret) GetFindController()->DisableOnEmptyQueue(true);
   return ret;
 }
 
 void Loader::Clear() {
-  rescale_controller_.Clear();
-  load_controller_.Clear();
-  find_controller_.Clear();
-}
-
-BaseThread *Loader::GetThread(int id) {
-  switch (id) {
-    case kLoadImageThreadID:
-      return load_image_thread_;
-  }
-  return nullptr;
-}
-
-void Loader::DoSetNull(int id) {
-  switch (id) {
-    case kLoadImageThreadID:
-      load_image_thread_ = nullptr;
-  }
+  GetRescaleController()->Clear();
+  GetLoadImageController()->Clear();
+  GetFindController()->Clear();
 }
 
 }  // namespace bitmap

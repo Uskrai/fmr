@@ -63,22 +63,34 @@ class Loader : public ThreadController {
   virtual ~Loader() { Clear(); }
   virtual bool Open(const std::string &name);
   virtual void PushFind(const SStream *stream) {
-    find_controller_.Push(stream);
+    GetFindController()->Push(stream);
   };
 
   wxEvtHandler *GetParent() { return parent_; }
-  BaseThread *GetThread(int id);
-  void DoSetNull(int id);
+  BaseThread *GetThread(int id) { return nullptr; };
+  void DoSetNull(int id){};
   bool Run();
   void Clear();
 
   void SetRescaler(Rescaler *rescaler) {
-    rescale_controller_.SetRescaller(rescaler);
+    GetRescaleController()->SetRescaller(rescaler);
   }
 
   void SetFindFlags(const thread::FindHandlerFlags &flags) {
-    find_controller_.SetFlags(flags);
+    GetFindController()->SetFlags(flags);
   };
+
+  thread::FindHandlerController *GetFindController() {
+    return &find_controller_;
+  }
+
+  thread::LoadImageController *GetLoadImageController() {
+    return &load_controller_;
+  }
+
+  thread::RescaleController *GetRescaleController() {
+    return &rescale_controller_;
+  }
 
  private:
   void OnStreamFound(thread::FoundEvent &event);
