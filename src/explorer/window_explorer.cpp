@@ -70,7 +70,6 @@ bool Window::Open(std::shared_ptr<AbstractOpenableHandler> handler) {
 
   rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleFitAll);
   rescaler_->SetMaximumSize(best_bitmap_size);
-  loader_.SetRescaler(rescaler_.get());
 
   CreateGrid(row, column, wxSize(1, 1));
 
@@ -217,7 +216,12 @@ void Window::OnKeyDown(wxKeyEvent &event) {
 void Window::OnImageLoaded(thread::LoadImageEvent &event) {
   auto item = map_window_.find(event.GetStream());
   if (item != map_window_.end()) {
-    item->second->GetBitmap().SetBitmap(event.GetImage());
+    SBitmap &bitmap = item->second->GetBitmap();
+
+    double x, y;
+    rescaler_->GetScale(event.GetImage(), x, y);
+    bitmap.SetScale(x, y);
+    bitmap.SetBitmap(event.GetImage());
     Refresh();
   }
 }

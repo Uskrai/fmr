@@ -71,7 +71,6 @@ class ImageWindow : public wxWindow {
   void Draw(wxDC &dc);
 
   void PrepareRect(const wxRect &rect);
-  void PrepareStringPos(wxDC &dc, const wxRect &rect);
 
  private:
   void BindEvent();

@@ -85,44 +85,6 @@ wxSize ImageWindow::GetBestBitmapSize(const wxSize &size) {
   return best_size;
 }
 
-std::vector<StringDraw> SplitString(std::string string, const wxSize &size,
-                                    wxDC &dc) {
-  std::vector<StringDraw> list_string;
-
-  StringDraw string_draw;
-
-  std::string per_space_string, per_char_string;
-
-  for (const auto &it : string) {
-    per_char_string += it;
-
-    wxString string_to_check;
-    String::FromUTF8(per_space_string + per_char_string, string_to_check);
-
-    wxSize text_extent = dc.GetTextExtent(string_to_check);
-
-    if (text_extent.GetWidth() > size.GetWidth()) {
-      string_draw.filename = per_space_string;
-
-      list_string.push_back(string_draw);
-
-      per_space_string = "";
-    }
-
-    if (it != ' ') continue;
-
-    per_space_string += per_char_string;
-    per_char_string = "";
-  }
-
-  per_space_string += per_char_string;
-  string_draw.filename = per_space_string;
-
-  list_string.push_back(string_draw);
-
-  return list_string;
-}
-
 void ImageWindow::PrepareRect(const wxRect &rect) {
   bitmap_rect_ = rect;
   text_rect_ = rect;
@@ -136,63 +98,31 @@ void ImageWindow::PrepareRect(const wxRect &rect) {
 
   if (bitmap_.IsOk()) {
     wxRect bmp_rect = wxRect(bitmap_.GetPosition(), bitmap_.GetSize());
+
     bmp_rect = bmp_rect.CenterIn(bitmap_rect_);
     bitmap_position_ = bmp_rect.GetPosition();
 
     bitmap_size_ = bitmap_.GetSize();
+
+    bitmap_.SetPosition(bitmap_position_);
   }
 
   this_rect_ = rect;
-}
-
-void ImageWindow::PrepareStringPos(wxDC &dc, const wxRect &rect) {
-  if (!stream_) return;
-
-  vec_string_draw_ =
-      SplitString(Path::GetName(stream_->GetName()), text_rect_.GetSize(), dc);
-
-  wxPoint text_pos = text_rect_.GetTopLeft();
-  wxRect string_rect;
-
-  for (auto &it : vec_string_draw_) {
-    wxString string;
-    String::FromUTF8(it.filename, string);
-
-    it.rect.SetSize(dc.GetTextExtent(string));
-    it.rect = it.rect.CenterIn(text_rect_);
-    it.rect.SetTop(text_pos.y);
-
-    text_pos = it.rect.GetBottomLeft();
-  }
-
-  string_name_ = stream_->GetName();
 }
 
 void ImageWindow::OnPaint(wxPaintEvent &event) {
   wxPaintDC dc(this);
   wxRect rect(wxPoint(0, 0), GetSize());
 
-  if (stream_) {
-    if (stream_ && string_name_ != stream_->GetName())
-      refresh_scheduled_ = true;
+  if (bitmap_size_ != bitmap_.GetSize()) refresh_scheduled_ = true;
 
-    if (bitmap_size_ != bitmap_.GetSize()) refresh_scheduled_ = true;
-
-    if (this_rect_ != rect || refresh_scheduled_) {
-      PrepareRect(rect);
-      PrepareStringPos(dc, text_rect_);
-      refresh_scheduled_ = false;
-    }
-
-    if (bitmap_.IsOk()) dc.DrawBitmap(bitmap_.GetBitmap(), bitmap_position_);
+  if (this_rect_ != rect || refresh_scheduled_) {
+    PrepareRect(rect);
+    refresh_scheduled_ = false;
   }
 
-  // for ( const auto & it : vec_string_draw_ )
-  // {
-  // wxString string;
-  // String::FromUTF8( it.filename, string );
-  // dc.DrawText( string , it.rect.GetPosition() );
-  // }
+  if (bitmap_.IsOk()) bitmap_.Draw(dc, wxPoint(0, 0), GetSize());
+  // if (bitmap_.IsOk()) dc.DrawBitmap(bitmap_.GetBitmap(), bitmap_position_);
 }
 
 void ImageWindow::OnSize(wxSizeEvent &event) { refresh_scheduled_ = true; }

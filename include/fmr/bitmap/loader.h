@@ -56,7 +56,6 @@ class Loader : public ThreadController {
 
   thread::FindHandlerController find_controller_;
   thread::LoadImageController load_controller_;
-  thread::RescaleController rescale_controller_;
 
  public:
   Loader(wxEvtHandler *parent);
@@ -72,10 +71,6 @@ class Loader : public ThreadController {
   bool Run();
   void Clear();
 
-  void SetRescaler(Rescaler *rescaler) {
-    GetRescaleController()->SetRescaller(rescaler);
-  }
-
   void SetFindFlags(const thread::FindHandlerFlags &flags) {
     GetFindController()->SetFlags(flags);
   };
@@ -88,14 +83,9 @@ class Loader : public ThreadController {
     return &load_controller_;
   }
 
-  thread::RescaleController *GetRescaleController() {
-    return &rescale_controller_;
-  }
-
  private:
   void OnStreamFound(thread::FoundEvent &event);
   void OnImageLoaded(thread::LoadImageEvent &event);
-  void OnImageRescaled(thread::RescaledEvent &event);
 
   void OnThreadCompleted(wxThreadEvent &event);
 };
