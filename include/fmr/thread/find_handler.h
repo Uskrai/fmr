@@ -69,6 +69,7 @@ class FoundEvent : public wxCommandEvent {
 };
 
 wxDECLARE_EVENT(kEventStreamFound, FoundEvent);
+wxDECLARE_EVENT(kEventStreamNotFound, FoundEvent);
 typedef void (wxEvtHandler::*FoundEventFunction)(FoundEvent &);
 #define FoundEventHandler(func) wxEVENT_HANDLER_CAST(FoundEventFunction, func);
 

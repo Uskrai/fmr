@@ -30,6 +30,7 @@ namespace fmr {
 namespace thread {
 
 wxDEFINE_EVENT(kEventStreamFound, FoundEvent);
+wxDEFINE_EVENT(kEventStreamNotFound, FoundEvent);
 
 FoundEvent::FoundEvent(const FoundEvent &event) : wxCommandEvent(event) {
   source_stream_ = event.source_stream_;
@@ -69,7 +70,8 @@ wxThread::ExitCode FindHandler::Entry() {
 
         if (!TestDestroy()) {
           if (!Find(handler.get(), event.get())) {
-            // TODO:Sent Not Fonud event
+            event->SetEventType(kEventStreamNotFound);
+            QueueEventParent(event.release());
           }
         }
         Update();
