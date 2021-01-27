@@ -40,6 +40,7 @@ class FindHandlerController : public ThreadController {
   FindHandler *thread_ = nullptr;
   FindHandlerFlags thread_flags_ = kFindHandlerDefault;
 
+  // map to found (first) and source (second) stream
   std::unordered_map<const SStream *, const SStream *> found_source_map_;
   std::vector<std::unique_ptr<SStream>> loaded_stream_;
 
@@ -67,7 +68,7 @@ class FindHandlerController : public ThreadController {
   void SetThreadId(int thread_id);
   int GetThreadId() const { return thread_id_; }
 
-  const SStream *GetSourceStream(const SStream *source_stream);
+  const SStream *GetSourceStream(const SStream *found_stream);
 
   void AddFoundStream(const SStream *source,
                       std::unique_ptr<SStream> &&found_stream);
