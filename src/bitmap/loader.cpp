@@ -52,6 +52,10 @@ bool Loader::Open(const std::string &path) {
   return GetFindController()->Open(path);
 }
 
+const SStream *Loader::GetSourceStream(const SStream *found_stream) {
+  return GetFindController()->GetSourceStream(found_stream);
+}
+
 void Loader::OnStreamFound(thread::FoundEvent &event) {
   auto item = event.GetSourceStream();
 
@@ -70,7 +74,7 @@ void Loader::OnImageLoaded(thread::LoadImageEvent &event) {
     auto send_event = std::make_unique<thread::LoadImageEvent>(
         thread::kEventImageLoaded, GetLoadImageController()->GetThreadId());
 
-    send_event->SetStream(source_stream);
+    send_event->SetStream(event.GetStream());
     send_event->SetImage(event.GetImage());
     wxQueueEvent(GetParent(), send_event.release());
   }

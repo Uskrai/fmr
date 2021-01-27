@@ -65,6 +65,8 @@ class Loader : public ThreadController {
     GetFindController()->Push(stream);
   };
 
+  const SStream *GetSourceStream(const SStream *found_stream);
+
   wxEvtHandler *GetParent() { return parent_; }
   BaseThread *GetThread(int id) { return nullptr; };
   void DoSetNull(int id){};

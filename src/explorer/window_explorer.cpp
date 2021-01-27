@@ -214,7 +214,7 @@ void Window::OnKeyDown(wxKeyEvent &event) {
 }
 
 void Window::OnImageLoaded(thread::LoadImageEvent &event) {
-  auto item = map_window_.find(event.GetStream());
+  auto item = map_window_.find(loader_.GetSourceStream(event.GetStream()));
   if (item != map_window_.end()) {
     SBitmap &bitmap = item->second->GetBitmap();
 
