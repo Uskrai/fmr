@@ -37,12 +37,14 @@ class HandlerFactory {
   static bool Find(const std::string& path, HandlerType& type);
   static bool FindOpenable(const std::string& path);
   static bool FindOpenable(const std::string& path, HandlerType& type);
-  static AbstractHandler* NewHandler(const std::string& path);
-  static AbstractHandler* NewHandler(const HandlerType& type);
-  static AbstractOpenableHandler* NewOpenableHandler(const std::string& path);
-  static AbstractOpenableHandler* NewOpenableHandler(const HandlerType& type);
+  static std::unique_ptr<AbstractHandler> NewHandler(const std::string& path);
+  static std::unique_ptr<AbstractHandler> NewHandler(const HandlerType& type);
+  static std::unique_ptr<AbstractOpenableHandler> NewOpenableHandler(
+      const std::string& path);
+  static std::unique_ptr<AbstractOpenableHandler> NewOpenableHandler(
+      const HandlerType& type);
   static bool IsOpenable(const std::string& path);
-  AbstractHandler* NewHandler();
+  std::unique_ptr<AbstractHandler> NewHandler();
   HandlerType GetType();
 
  private:
