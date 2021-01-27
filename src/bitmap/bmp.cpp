@@ -16,6 +16,7 @@
  */
 
 #include <fmr/bitmap/bmp.h>
+#include <wx/dc.h>
 
 namespace fmr {
 
@@ -50,11 +51,38 @@ bool SBitmap::IsShown(const wxPoint& area, const wxSize& size) const {
 wxPoint SBitmap::GetPosition() const { return m_pos; }
 wxSize SBitmap::GetSize() const { return wxSize(GetWidth(), GetHeight()); }
 
+void SBitmap::Draw(wxDC& dc, const wxPoint& view_start, const wxSize& area) {
+  Draw(dc, wxRect(view_start, area));
+}
+
+void SBitmap::Draw(wxDC& dc, const wxRect& rect) {
+  // store user scale
+  double x, y;
+  dc.GetUserScale(&x, &y);
+
+  // set bitmap scaling
+  dc.SetUserScale(scale_x_, scale_y_);
+
+  // getting position to follow the scaling
+  auto pos = GetPosition();
+  pos.x /= scale_x_;
+  pos.y /= scale_y_;
+  // drawing
+  dc.DrawBitmap(GetBitmap(), pos);
+
+  // resetting user scale to previous state
+  dc.SetUserScale(x, y);
+}
+
 wxString SBitmap::GetName() { return m_name; }
 size_t SBitmap::GetIndex() { return m_index; }
-float SBitmap::GetScale() { return m_scale; }
-int SBitmap::GetWidth() const { return m_item.GetWidth(); }
-int SBitmap::GetHeight() const { return m_item.GetHeight(); }
+void SBitmap::GetScale(double& x, double& y) {
+  x = scale_x_;
+  y = scale_y_;
+}
+double SBitmap::GetScale() { return scale_x_; }
+int SBitmap::GetWidth() const { return m_item.GetWidth() * scale_x_; }
+int SBitmap::GetHeight() const { return m_item.GetHeight() * scale_y_; }
 int SBitmap::GetY() const { return m_pos.y; }
 int SBitmap::GetX() const { return m_pos.x; }
 
@@ -66,7 +94,14 @@ void SBitmap::SetBitmap(const wxBitmap& bmp) {
 void SBitmap::SetLoaded(bool stat) { m_isLoaded = stat; }
 void SBitmap::SetName(const wxString& name) { m_name = name; }
 void SBitmap::SetIndex(size_t idx) { m_index = idx; }
-void SBitmap::SetScale(float scale) { m_scale = scale; }
+void SBitmap::SetScale(double scale) {
+  scale_x_ = scale;
+  scale_y_ = scale;
+}
+void SBitmap::SetScale(double x, double y) {
+  scale_x_ = x;
+  scale_y_ = y;
+}
 void SBitmap::SetPosition(const wxPoint& pos) { m_pos = pos; }
 void SBitmap::SetY(int PosY) { m_pos.y = PosY; }
 void SBitmap::SetX(int PosX) { m_pos.x = PosX; }
