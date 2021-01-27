@@ -18,8 +18,7 @@
 #ifndef FMR_BITMAP_RESCALER
 #define FMR_BITMAP_RESCALER
 
-#include <wx/gdicmn.h>
-#include <wx/image.h>
+#include "fmr/bitmap/bmp.h"
 
 namespace fmr {
 
@@ -51,25 +50,34 @@ class Rescaler {
     return float(after) / float(before);
   }
 
-  void DoRescale(wxImage &image) {
-    double scale_x = 1, scale_y;
-
-    GetScale(image, scale_x, scale_y);
-
-    wxSize size = image.GetSize();
-
+  void DoRescale(wxSize &size) {
+    double scale_x = 1, scale_y = 1;
+    GetScale(size, scale_x, scale_y);
     size.Scale(scale_x, scale_y);
-    image.Rescale(size.GetWidth(), size.GetHeight());
+  }
+
+  void DoRescale(SBitmap &bitmap) {
+    double scale_x = 1, scale_y;
+    GetScale(bitmap, scale_x, scale_y);
+    bitmap.SetScale(scale_x, scale_y);
   };
 
-  void GetScale(const wxImage &image, double &x, double &y) {
+  void DoRescale(wxImage &image) {
+    double x = 1, y = 1;
+    GetScale(image, x, y);
+    wxSize size = image.GetSize();
+    size.Scale(x, y);
+    image.Rescale(size.GetWidth(), size.GetHeight());
+  }
+
+  void GetScale(const wxSize &size, double &x, double &y) {
     if (Is(kRescaleFitWidth)) {
-      x = CalcScale(image.GetWidth(), max_size_.GetWidth());
+      x = CalcScale(size.GetWidth(), max_size_.GetWidth());
       if (!Is(kRescaleFitHeight)) y = x;
     }
 
     if (Is(kRescaleFitHeight)) {
-      y = CalcScale(image.GetHeight(), max_size_.GetHeight());
+      y = CalcScale(size.GetHeight(), max_size_.GetHeight());
       if (!Is(kRescaleFitWidth)) x = y;
     }
 
@@ -80,6 +88,14 @@ class Rescaler {
         x = y;
       }
     }
+  }
+
+  void GetScale(const SBitmap &bitmap, double &x, double &y) {
+    GetScale(bitmap.GetBitmap().GetSize(), x, y);
+  }
+
+  void GetScale(const wxImage &image, double &x, double &y) {
+    GetScale(image.GetSize(), x, y);
   }
 
   void SetMaximumSize(const wxSize &size) { max_size_ = size; }

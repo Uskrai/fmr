@@ -58,7 +58,10 @@ void LoadImage::Load(SStream *stream) {
   wxLogMessage("Loading image in %s/%s",
                String::FromString<wxString>(stream->GetHandlerPath()),
                String::FromString<wxString>(stream->GetName()));
-  image_util::Load(event->GetImage(), *stream);
+  wxImage image;
+  image_util::Load(image, *stream);
+
+  event->GetBitmap().SetBitmap(image);
 
   TEST_RETURN();
   wxLogMessage("Sending Image Loaded Event to %p", GetParent());

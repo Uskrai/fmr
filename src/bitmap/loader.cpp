@@ -75,7 +75,7 @@ void Loader::OnImageLoaded(thread::LoadImageEvent &event) {
         thread::kEventImageLoaded, GetLoadImageController()->GetThreadId());
 
     send_event->SetStream(event.GetStream());
-    send_event->SetImage(event.GetImage());
+    send_event->SetBitmap(event.GetBitmap());
     wxQueueEvent(GetParent(), send_event.release());
   }
 }

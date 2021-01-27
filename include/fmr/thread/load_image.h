@@ -25,6 +25,7 @@
 
 #include <queue>
 
+#include "fmr/bitmap/bmp.h"
 #include "fmr/thread/queue.h"
 
 namespace fmr {
@@ -33,20 +34,20 @@ namespace thread {
 
 class LoadImageEvent : public wxCommandEvent {
  protected:
-  wxImage image_;
+  SBitmap bitmap_;
   const SStream *stream_;
 
  public:
   LoadImageEvent(wxEventType type, int id) : wxCommandEvent(type, id){};
   LoadImageEvent(const LoadImageEvent &event) : wxCommandEvent(event) {
-    image_ = event.image_;
+    bitmap_ = event.bitmap_;
     stream_ = event.stream_;
   }
 
-  void SetImage(const wxImage &image) { image_ = image; }
+  void SetBitmap(const SBitmap &bitmap) { bitmap_ = bitmap; }
   void SetStream(const SStream *stream) { stream_ = stream; }
 
-  wxImage &GetImage() { return image_; }
+  SBitmap &GetBitmap() { return bitmap_; }
   const SStream *GetStream() { return stream_; }
 };
 
@@ -66,10 +67,6 @@ class LoadImage : public Queue<SStream *> {
   void Clear();
 
   void DeleteOnEmptyQueue(bool condition = true);
-
-  void SetRescaller(bitmap::Rescaler rescaler) { image_rescaler_ = rescaler; }
-
-  void RescaleImage(wxImage &image) { image_rescaler_.DoRescale(image); }
 
  protected:
   std::queue<SStream *> load_queue_;

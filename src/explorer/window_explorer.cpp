@@ -217,11 +217,8 @@ void Window::OnImageLoaded(thread::LoadImageEvent &event) {
   auto item = map_window_.find(loader_.GetSourceStream(event.GetStream()));
   if (item != map_window_.end()) {
     SBitmap &bitmap = item->second->GetBitmap();
-
-    double x, y;
-    rescaler_->GetScale(event.GetImage(), x, y);
-    bitmap.SetScale(x, y);
-    bitmap.SetBitmap(event.GetImage());
+    bitmap = event.GetBitmap();
+    rescaler_->DoRescale(bitmap);
     Refresh();
   }
 }
