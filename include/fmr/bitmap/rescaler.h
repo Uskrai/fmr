@@ -47,33 +47,40 @@ class Rescaler {
 
   bool Is(RescalerFlags flags) { return flags_ & flags; }
 
-  float GetScale(int before, int after) { return float(after) / float(before); }
+  float CalcScale(int before, int after) {
+    return float(after) / float(before);
+  }
 
   void DoRescale(wxImage &image) {
-    float scale_x = 1, scale_y;
+    double scale_x = 1, scale_y;
 
-    if (Is(kRescaleFitWidth)) {
-      scale_x = GetScale(image.GetWidth(), max_size_.GetWidth());
-      if (!Is(kRescaleFitHeight)) scale_y = scale_x;
-    }
-    if (Is(kRescaleFitHeight)) {
-      scale_y = GetScale(image.GetHeight(), max_size_.GetHeight());
-      if (!Is(kRescaleFitWidth)) scale_x = scale_y;
-    }
-
-    if (Is(kRescaleFitAll)) {
-      if (scale_x < scale_y) {
-        scale_y = scale_x;
-      } else {
-        scale_x = scale_y;
-      }
-    }
+    GetScale(image, scale_x, scale_y);
 
     wxSize size = image.GetSize();
 
     size.Scale(scale_x, scale_y);
     image.Rescale(size.GetWidth(), size.GetHeight());
   };
+
+  void GetScale(const wxImage &image, double &x, double &y) {
+    if (Is(kRescaleFitWidth)) {
+      x = CalcScale(image.GetWidth(), max_size_.GetWidth());
+      if (!Is(kRescaleFitHeight)) y = x;
+    }
+
+    if (Is(kRescaleFitHeight)) {
+      y = CalcScale(image.GetHeight(), max_size_.GetHeight());
+      if (!Is(kRescaleFitWidth)) x = y;
+    }
+
+    if (Is(kRescaleFitAll)) {
+      if (x < y) {
+        y = x;
+      } else {
+        x = y;
+      }
+    }
+  }
 
   void SetMaximumSize(const wxSize &size) { max_size_ = size; }
 
