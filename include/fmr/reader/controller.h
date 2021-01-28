@@ -18,7 +18,7 @@
 #ifndef FMR_READER_CONTROLLER
 #define FMR_READER_CONTROLLER
 
-#include "fmr/bitmap/page_bitmap_ctrl.h"
+#include "fmr/bitmap/bitmap_page_ctrl.h"
 #include "fmr/bitmap/page_loader.h"
 #include "fmr/bitmap/position_ctrl.h"
 #include "fmr/window/scrolled_image.h"
@@ -37,7 +37,7 @@ class Controller : public wxEvtHandler {
   std::unique_ptr<bitmap::PageLoader> loader_;
   std::unique_ptr<AbstractHandler> handler_;
   std::unique_ptr<bitmap::PositionCtrl> position_ctrl_;
-  std::unique_ptr<bitmap::PageBitmapCtrl> page_bitmap_ctrl_;
+  std::unique_ptr<bitmap::BitmapPageCtrl> bitmap_ctrl_;
   std::unique_ptr<bitmap::Rescaler> rescaler_;
   bool is_read_from_right_ = false;
   ScrolledImageWindow *window_ = nullptr;
@@ -73,6 +73,11 @@ class Controller : public wxEvtHandler {
   void SetPositionFlags(bitmap::PositionFlags flags);
   void SetScaleFlags(bitmap::RescalerFlags flags);
   void SetReadFromRight(bool cond = true) { is_read_from_right_ = cond; }
+
+  bitmap::BitmapPageCtrl *GetBitmapCtrl() { return bitmap_ctrl_.get(); }
+  const bitmap::BitmapPageCtrl *GetBitmapCtrl() const {
+    return bitmap_ctrl_.get();
+  }
 
   int GetStartX(wxDirection direction);
   int GetStartY(wxDirection direction);

@@ -27,13 +27,13 @@ namespace bitmap {
 
 std::vector<SBitmap *> BitmapPageToBitmapPtr(BitmapPage *page);
 
-class PageBitmapCtrl : public BitmapCtrl {
+class BitmapPageCtrl : public BitmapCtrl {
   std::vector<BitmapPage> vec_page_;
   size_t bitmap_per_page_ = -1;
   size_t curr_page_ = -1;
 
  public:
-  PageBitmapCtrl(PositionCtrl *pos_ctrl, Rescaler *rescaler,
+  BitmapPageCtrl(PositionCtrl *pos_ctrl, Rescaler *rescaler,
                  size_t bitmap_per_page = -1);
 
   void SetBitmapPerPage(size_t size) { bitmap_per_page_ = size; };

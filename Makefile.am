@@ -35,7 +35,7 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/loader.cpp \
 						$(bitmap)/bitmap_ctrl.cpp \
 						$(bitmap)/position_ctrl.cpp \
-						$(bitmap)/page_bitmap_ctrl.cpp \
+						$(bitmap)/bitmap_page_ctrl.cpp \
 						$(bitmap)/page_loader.cpp
 
 reader = src/reader

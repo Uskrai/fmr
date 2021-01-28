@@ -22,8 +22,8 @@
 
 #include <stack>
 
+#include "fmr/bitmap/bitmap_page_ctrl.h"
 #include "fmr/bitmap/loader.h"
-#include "fmr/bitmap/page_bitmap_ctrl.h"
 
 namespace fmr {
 

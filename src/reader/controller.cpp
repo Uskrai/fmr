@@ -36,8 +36,8 @@ Controller::Controller() {
 
   rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleNone);
 
-  page_bitmap_ctrl_ = std::make_unique<bitmap::PageBitmapCtrl>(
-      position_ctrl_.get(), rescaler_.get());
+  bitmap_ctrl_ = std::make_unique<bitmap::BitmapPageCtrl>(position_ctrl_.get(),
+                                                          rescaler_.get());
 
   Bind(thread::kEventImageLoaded, &Controller::OnLoadedImage, this, kLoaderId);
 
@@ -96,7 +96,7 @@ void Controller::SetScaleFlags(bitmap::RescalerFlags flags) {
 }
 
 void Controller::AdjustBitmap() {
-  bitmap::BitmapPage *page = page_bitmap_ctrl_->GetBitmapPage();
+  bitmap::BitmapPage *page = GetBitmapCtrl()->GetBitmapPage();
   if (page) {
     wxPoint first_shown_pos;
     const SBitmap *first_shown = nullptr;
@@ -110,13 +110,13 @@ void Controller::AdjustBitmap() {
 
     position_ctrl_->SetMinimumSize(window_->GetClientSize());
     rescaler_->SetMaximumSize(window_->GetClientSize());
-    page_bitmap_ctrl_->AdjustBitmap();
+    GetBitmapCtrl()->AdjustBitmap();
 
-    wxSize size = page_bitmap_ctrl_->GetSize(page);
+    wxSize size = GetBitmapCtrl()->GetSize(page);
 
     window_->SetVirtualSize(size);
     position_ctrl_->SetWindowSize(size);
-    page_bitmap_ctrl_->RecalcPosition(page);
+    GetBitmapCtrl()->RecalcPosition(page);
 
     if (window_->GetVirtualSize().GetHeight() >
             window_->GetClientSize().GetHeight() &&
@@ -138,7 +138,7 @@ void Controller::AdjustBitmap() {
     }
     window_->Refresh();
   }
-  window_->SetBitmapPage(page_bitmap_ctrl_->GetBitmapPage());
+  window_->SetBitmapPage(GetBitmapCtrl()->GetBitmapPage());
 }
 
 bool Controller::IsOnEdge(const wxOrientation &orient, int pos) const {
@@ -158,15 +158,15 @@ bool Controller::IsOnEdge(const wxOrientation &orient, int pos) const {
 }
 
 void Controller::OnLoadedImage(thread::LoadImageEvent &event) {
-  page_bitmap_ctrl_->AddBitmap(event.GetBitmap(),
-                               loader_->GetStreamPage(event.GetStream()),
-                               loader_->GetStreamPosInPage(event.GetStream()));
+  GetBitmapCtrl()->AddBitmap(event.GetBitmap(),
+                             loader_->GetStreamPage(event.GetStream()),
+                             loader_->GetStreamPosInPage(event.GetStream()));
   AdjustBitmap();
   event.Skip();
 }
 
 void Controller::OnOpenedStreamFound(wxCommandEvent &event) {
-  page_bitmap_ctrl_->SetBitmapPage(loader_->GetOpenedPagePos());
+  GetBitmapCtrl()->SetBitmapPage(loader_->GetOpenedPagePos());
   AdjustBitmap();
 }
 
@@ -187,7 +187,7 @@ int Controller::GetStep(wxDirection direction) {
 }
 
 int Controller::GetStartX(wxDirection direction) {
-  auto vec_bitmap = page_bitmap_ctrl_->GetBitmap();
+  auto vec_bitmap = GetBitmapCtrl()->GetBitmap();
 
   if (vec_bitmap.empty()) return 0;
 
@@ -197,16 +197,16 @@ int Controller::GetStartX(wxDirection direction) {
     direction = wxRIGHT;
   }
 
+  auto get_center = [](const SBitmap *bitmap, const wxSize &size) -> int {
+    return (size.GetWidth() / 2 - bitmap->GetWidth() / 2) / 2;
+  };
+
   if (direction == wxUP || direction == wxLEFT) {
     auto bitmap = vec_bitmap.back();
     if (bitmap) {
       if (is_read_from_right_) {
         if (bitmap->GetWidth() < window_->GetVirtualSize().GetWidth()) {
-          return (window_->GetVirtualSize().GetWidth() / 2 -
-                  bitmap->GetWidth() / 2) /
-                 2;
-        } else {
-          return window_->GetViewStart().x;
+          return get_center(bitmap, window_->GetVirtualSize());
         }
       } else {
         return bitmap->GetX() + bitmap->GetWidth() -
@@ -221,20 +221,18 @@ int Controller::GetStartX(wxDirection direction) {
                window_->GetClientSize().GetWidth();
       } else {
         if (bitmap->GetWidth() < window_->GetVirtualSize().GetWidth()) {
-          return (window_->GetVirtualSize().GetWidth() / 2 -
-                  bitmap->GetWidth() / 2) /
-                 2;
-        } else {
-          return window_->GetViewStart().x;
+          return get_center(bitmap, window_->GetVirtualSize());
         }
       }
     }
   }
 
+  return window_->GetViewStart().x;
+
   return 0;
 }
 int Controller::GetStartY(wxDirection direction) {
-  auto vec_bitmap = page_bitmap_ctrl_->GetBitmap();
+  auto vec_bitmap = GetBitmapCtrl()->GetBitmap();
   if (vec_bitmap.empty()) return 0;
 
   if (direction == wxRIGHT && is_read_from_right_) {
@@ -267,10 +265,14 @@ void Controller::ResetScroll(wxDirection direction) {
 bool Controller::ChangePage(wxDirection direction) {
   int step = GetStep(direction);
 
-  size_t idx = page_bitmap_ctrl_->GetPagePos() + step;
+  size_t idx = GetBitmapCtrl()->GetPagePos() + step;
 
-  if (page_bitmap_ctrl_->IsPageExist(idx)) {
-    page_bitmap_ctrl_->SetBitmapPage(idx);
+  for (const auto &it : GetBitmapCtrl()->GetBitmap()) {
+    if (!it->IsLoaded()) return true;
+  }
+
+  if (GetBitmapCtrl()->IsPageExist(idx)) {
+    GetBitmapCtrl()->SetBitmapPage(idx);
     AdjustBitmap();
     window_->AdjustScrollBar();
     ResetScroll(direction);
@@ -315,7 +317,7 @@ void Controller::OnWindowScroll(wxScrollWinEvent &event) {
 }
 
 void Controller::Clear() {
-  page_bitmap_ctrl_->Clear();
+  GetBitmapCtrl()->Clear();
   loader_->Clear();
 }
 

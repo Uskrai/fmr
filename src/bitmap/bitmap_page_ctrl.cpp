@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmr/bitmap/page_bitmap_ctrl.h"
+#include "fmr/bitmap/bitmap_page_ctrl.h"
 
 namespace fmr {
 
@@ -32,13 +32,13 @@ std::vector<SBitmap *> BitmapPageToBitmapPtr(BitmapPage *page) {
   return vec_ptr;
 }
 
-PageBitmapCtrl::PageBitmapCtrl(PositionCtrl *pos_ctrl, Rescaler *rescaler,
+BitmapPageCtrl::BitmapPageCtrl(PositionCtrl *pos_ctrl, Rescaler *rescaler,
                                size_t bitmap_per_page)
     : BitmapCtrl(pos_ctrl, rescaler) {
   SetBitmapPerPage(bitmap_per_page);
 }
 
-void PageBitmapCtrl::AddBitmap(const SBitmap &bitmap, size_t page_pos,
+void BitmapPageCtrl::AddBitmap(const SBitmap &bitmap, size_t page_pos,
                                size_t bitmap_pos) {
   if (page_pos == size_t(-1) || bitmap_pos == size_t(-1)) {
     return;
@@ -67,7 +67,7 @@ void PageBitmapCtrl::AddBitmap(const SBitmap &bitmap, size_t page_pos,
   }
 }
 
-void PageBitmapCtrl::SetBitmapPage(size_t page) {
+void BitmapPageCtrl::SetBitmapPage(size_t page) {
   curr_page_ = page;
 
   if (size_t(page) < vec_page_.size()) {
@@ -78,22 +78,22 @@ void PageBitmapCtrl::SetBitmapPage(size_t page) {
   }
 }
 
-BitmapPage *PageBitmapCtrl::GetBitmapPage() {
+BitmapPage *BitmapPageCtrl::GetBitmapPage() {
   if (curr_page_ < vec_page_.size()) {
     return &vec_page_.at(curr_page_);
   }
   return nullptr;
 }
 
-void PageBitmapCtrl::RecalcPosition(BitmapPage *page) {
+void BitmapPageCtrl::RecalcPosition(BitmapPage *page) {
   return RecalcPosition(BitmapPageToBitmapPtr(page));
 }
 
-wxSize PageBitmapCtrl::GetSize(BitmapPage *page) {
+wxSize BitmapPageCtrl::GetSize(BitmapPage *page) {
   return GetSize(BitmapPageToBitmapPtr(page));
 }
 
-void PageBitmapCtrl::Clear() {
+void BitmapPageCtrl::Clear() {
   BitmapCtrl::Clear();
   vec_page_.clear();
 }
