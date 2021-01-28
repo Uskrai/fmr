@@ -44,15 +44,7 @@ bool ScrolledWindow::Create(wxWindow *parent, wxWindowID id, const wxPoint &pos,
 }
 
 void ScrolledWindow::BindEvent() {
-  std::vector<wxEventTypeTag<wxScrollWinEvent>> scroll_win_event = {
-      wxEVT_SCROLLWIN_TOP,        wxEVT_SCROLLWIN_BOTTOM,
-      wxEVT_SCROLLWIN_LINEUP,     wxEVT_SCROLLWIN_LINEDOWN,
-      wxEVT_SCROLLWIN_PAGEUP,     wxEVT_SCROLLWIN_PAGEDOWN,
-      wxEVT_SCROLLWIN_THUMBTRACK, wxEVT_SCROLLWIN_THUMBRELEASE};
-
-  // bind the scroll_event first, i don't know why
-  // the event order is descending
-  event::Bind(scroll_win_event, &ScrolledWindow::OnScroll, this);
+  fmr::event::Bind(kScrollWinEventAll, &ScrolledWindow::OnScroll, this);
 
   Bind(wxEVT_SIZE, &ScrolledWindow::OnSize, this);
   Bind(wxEVT_PAINT, &ScrolledWindow::OnPaint, this);
