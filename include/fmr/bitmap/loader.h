@@ -65,6 +65,8 @@ class Loader : public ThreadController {
     GetFindController()->Push(stream);
   };
 
+  virtual void SetControllerId(int find_controller_id, int load_controller);
+
   const SStream *GetSourceStream(const SStream *found_stream);
 
   wxEvtHandler *GetParent() { return parent_; }

@@ -29,12 +29,7 @@ Loader::Loader(wxEvtHandler *parent)
   parent_ = parent;
   GetFindController()->SetChecker(&image_util::CanRead);
 
-  GetFindController()->Bind(thread::kEventStreamFound, &Loader::OnStreamFound,
-                            this, kFindImageHandlerThreadID);
-
-  GetLoadImageController()->Bind(thread::kEventImageLoaded,
-                                 &Loader::OnImageLoaded, this,
-                                 kLoadImageThreadID);
+  SetControllerId(kFindImageHandlerThreadID, kLoadImageThreadID);
 
   Bind(EVT_COMMAND_THREAD_COMPLETED, &Loader::OnThreadCompleted, this);
 }
@@ -46,6 +41,26 @@ void Loader::OnThreadCompleted(wxThreadEvent &event) {
       break;
   }
   event.Skip();
+}
+
+void Loader::SetControllerId(int find_controller_id,
+                             int load_image_controller_id) {
+  GetFindController()->Unbind(thread::kEventStreamFound, &Loader::OnStreamFound,
+                              this, GetFindController()->GetThreadId());
+
+  GetLoadImageController()->Unbind(thread::kEventImageLoaded,
+                                   &Loader::OnImageLoaded, this,
+                                   GetLoadImageController()->GetThreadId());
+
+  GetFindController()->SetThreadId(find_controller_id);
+  GetLoadImageController()->SetThreadId(load_image_controller_id);
+
+  GetFindController()->Bind(thread::kEventStreamFound, &Loader::OnStreamFound,
+                            this, GetFindController()->GetThreadId());
+
+  GetLoadImageController()->Bind(thread::kEventImageLoaded,
+                                 &Loader::OnImageLoaded, this,
+                                 GetLoadImageController()->GetThreadId());
 }
 
 bool Loader::Open(const std::string &path) {
