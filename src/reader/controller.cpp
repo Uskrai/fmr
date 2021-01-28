@@ -30,9 +30,7 @@ wxDEFINE_EVENT(kEventOpenFile, wxCommandEvent);
 Controller::Controller() {
   window_ = new ScrolledImageWindow();
   loader_ = std::make_unique<bitmap::PageLoader>(this, kLoaderId);
-  loader_->SetImagePerPage(1);
 
-  is_read_from_right_ = true;
   position_ctrl_ = std::make_unique<bitmap::PositionCtrl>(
       bitmap::kPositionAlignCenter | bitmap::kPositionVertical);
 
@@ -85,6 +83,16 @@ void Controller::SetWindow(ScrolledImageWindow *window) {
 
   if (window_) {
   }
+}
+
+void Controller::SetPositionFlags(bitmap::PositionFlags flags) {
+  position_ctrl_->SetFlags(flags);
+  AdjustBitmap();
+}
+
+void Controller::SetScaleFlags(bitmap::RescalerFlags flags) {
+  rescaler_->SetFlags(flags);
+  AdjustBitmap();
 }
 
 void Controller::AdjustBitmap() {

@@ -45,6 +45,7 @@ class PositionCtrl {
  public:
   PositionCtrl(PositionFlags flags);
 
+  void SetFlags(PositionFlags flags) { flags_ = flags; }
   PositionFlags GetFlags() const { return flags_; }
 
   void SetMinimumSize(const wxSize &size) { minimum_size_ = size; }

@@ -48,6 +48,7 @@ class Rescaler {
     max_size_ = other.max_size_;
   }
 
+  void SetFlags(RescalerFlags flags) { flags_ = flags; }
   bool Is(RescalerFlags flags) { return flags_ & flags; }
 
   float CalcScale(int before, int after) {

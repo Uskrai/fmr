@@ -69,6 +69,11 @@ class Controller : public wxEvtHandler {
 
   bool IsOnEdge(const wxOrientation &orient, int pos) const;
 
+  void SetImagePerPage(size_t size) { loader_->SetImagePerPage(size); }
+  void SetPositionFlags(bitmap::PositionFlags flags);
+  void SetScaleFlags(bitmap::RescalerFlags flags);
+  void SetReadFromRight(bool cond = true) { is_read_from_right_ = cond; }
+
   int GetStartX(wxDirection direction);
   int GetStartY(wxDirection direction);
   wxPoint GetStartPosition(wxDirection direction);

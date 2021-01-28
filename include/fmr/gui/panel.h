@@ -51,6 +51,7 @@ class Panel : public wxPanel {
   void BindEvent();
 
   void PrepareReader();
+  void SettingReader();
   void PrepareExplorer();
 
   void OnKeyDown(wxKeyEvent &event);
