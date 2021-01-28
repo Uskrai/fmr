@@ -27,6 +27,8 @@ namespace fmr {
 
 namespace reader {
 
+wxDECLARE_EVENT(kEventOpenFile, wxCommandEvent);
+
 enum ControllerId {
   kLoaderId = wxID_HIGHEST + 1500,
 };
@@ -39,6 +41,7 @@ class Controller : public wxEvtHandler {
   std::unique_ptr<bitmap::Rescaler> rescaler_;
   bool is_read_from_right_ = false;
   ScrolledImageWindow *window_ = nullptr;
+  wxWindow *parent_ = nullptr;
 
  public:
   Controller();
@@ -73,6 +76,8 @@ class Controller : public wxEvtHandler {
   bool Change(wxDirection direction);
   bool ChangePage(wxDirection direction);
   bool ChangeFolder(wxDirection direction);
+
+  wxWindow *GetParent() { return parent_; }
 
  private:
   int GetStep(wxDirection direction);

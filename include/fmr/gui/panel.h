@@ -57,6 +57,7 @@ class Panel : public wxPanel {
   void OnCharHook(wxKeyEvent &event);
   void OnExplorerOpenFile(StreamEvent &event);
   void OnReaderChangePage(wxCommandEvent &event);
+  void OnReaderOpenFile(wxCommandEvent &event);
   void OnReaderInfoTimer(wxTimerEvent &event);
   // reader::Window *reader_ = NULL;
   std::unique_ptr<reader::Controller> reader_;

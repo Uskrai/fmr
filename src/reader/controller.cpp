@@ -19,15 +19,18 @@
 
 #include "fmr/common/dimension.h"
 #include "fmr/common/event.h"
+#include "fmr/common/string.h"
 
 namespace fmr {
 
 namespace reader {
 
+wxDEFINE_EVENT(kEventOpenFile, wxCommandEvent);
+
 Controller::Controller() {
   window_ = new ScrolledImageWindow();
   loader_ = std::make_unique<bitmap::PageLoader>(this, kLoaderId);
-  loader_->SetImagePerPage(2);
+  loader_->SetImagePerPage(1);
 
   is_read_from_right_ = true;
   position_ctrl_ = std::make_unique<bitmap::PositionCtrl>(
@@ -47,6 +50,7 @@ Controller::Controller() {
 Controller::Controller(wxWindow *parent, wxWindowID id, const wxPoint &pos,
                        const wxSize &size, long style, const wxString &name)
     : Controller() {
+  parent_ = parent;
   CreateWindow(parent, id, pos, size, style, name);
 }
 
@@ -62,7 +66,12 @@ bool Controller::CreateWindow(wxWindow *parent, wxWindowID id,
 bool Controller::Open(const std::string &path) {
   if (loader_->Open(path)) {
     window_->Scroll(0, 0);
-    return loader_->Run();
+    if (loader_->Run()) {
+      auto event = wxCommandEvent(kEventOpenFile, window_->GetId());
+      event.SetString(String::FromString<wxString>(path).c_str());
+      wxPostEvent(GetParent(), event);
+      return true;
+    }
   }
 
   return false;

@@ -43,6 +43,7 @@ Panel::Panel(wxWindow *parent, wxWindowID id, wxPoint position, wxSize size)
 void Panel::BindEvent() {
   Bind(EVT_OPEN_FILE, &Panel::OnExplorerOpenFile, this);
   Bind(wxEVT_TIMER, &Panel::OnReaderInfoTimer, this, kReaderInfoTimer);
+  Bind(reader::kEventOpenFile, &Panel::OnReaderOpenFile, this, ReaderWindow);
 }
 
 void Panel::PrepareReader() {
@@ -178,6 +179,10 @@ void Panel::OnReaderChangePage(wxCommandEvent &event) {
   reader_info_->SetPosition(pos);
   reader_info_->Show();
   reader_info_timer_.Start(1000, wxTIMER_ONE_SHOT);
+}
+
+void Panel::OnReaderOpenFile(wxCommandEvent &event) {
+  Config::Get()->Write("RecentlyOpened", event.GetString());
 }
 
 void Panel::OnReaderInfoTimer(wxTimerEvent &event) { reader_info_->Hide(); }
