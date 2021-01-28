@@ -53,12 +53,13 @@ class Loader : public ThreadController {
   Rescaler *rescaler_ = nullptr;
 
   wxEvtHandler *parent_ = nullptr;
+  int event_id_;
 
   thread::FindHandlerController find_controller_;
   thread::LoadImageController load_controller_;
 
  public:
-  Loader(wxEvtHandler *parent);
+  Loader(wxEvtHandler *parent, int id);
   virtual ~Loader() { Clear(); }
   virtual bool Open(const std::string &name);
   virtual void PushFind(const SStream *stream) {
@@ -66,6 +67,9 @@ class Loader : public ThreadController {
   };
 
   virtual void SetControllerId(int find_controller_id, int load_controller);
+
+  int GetEventId() { return event_id_; }
+  void SetEventId(int id) { event_id_ = id; }
 
   const SStream *GetSourceStream(const SStream *found_stream);
 

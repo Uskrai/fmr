@@ -37,9 +37,14 @@ wxDECLARE_EVENT(EVT_OPEN_FILE, StreamEvent);
 
 namespace explorer {
 
+enum ControllerId {
+  kLoaderId = wxID_HIGHEST + 1600
+  //
+};
+
 class Window : public FlexGridWindow {
  protected:
-  bitmap::Loader loader_ = bitmap::Loader(this);
+  bitmap::Loader loader_ = bitmap::Loader(this, kLoaderId);
   std::unordered_map<const SStream *, ImageWindow *> map_window_;
   std::shared_ptr<AbstractOpenableHandler> handler_;
   std::vector<std::unique_ptr<SStream>> list_stream_;

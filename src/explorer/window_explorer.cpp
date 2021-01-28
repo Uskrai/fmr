@@ -45,8 +45,7 @@ void Window::BindEvent() {
   Bind(EVT_COMMAND_THREAD_UPDATE, &Window::OnThreadUpdate, this);
   Bind(EVT_COMMAND_THREAD_COMPLETED, &Window::OnThreadUpdate, this);
   Bind(wxEVT_KEY_DOWN, &Window::OnKeyDown, this);
-  Bind(thread::kEventImageLoaded, &Window::OnImageLoaded, this,
-       bitmap::kLoadImageThreadID);
+  Bind(thread::kEventImageLoaded, &Window::OnImageLoaded, this, kLoaderId);
 }
 
 bool Window::Destroy() { return wxWindow::Destroy(); }

@@ -22,15 +22,16 @@ namespace fmr {
 
 namespace bitmap {
 
-Loader::Loader(wxEvtHandler *parent)
+Loader::Loader(wxEvtHandler *parent, int id)
     : ThreadController(),
       find_controller_(this, kFindImageHandlerThreadID),
       load_controller_(this, kLoadImageThreadID) {
   parent_ = parent;
+
+  SetEventId(id);
   GetFindController()->SetChecker(&image_util::CanRead);
 
   SetControllerId(kFindImageHandlerThreadID, kLoadImageThreadID);
-
   Bind(EVT_COMMAND_THREAD_COMPLETED, &Loader::OnThreadCompleted, this);
 }
 
@@ -87,7 +88,7 @@ void Loader::OnImageLoaded(thread::LoadImageEvent &event) {
 
   if (source_stream) {
     auto send_event = std::make_unique<thread::LoadImageEvent>(
-        thread::kEventImageLoaded, GetLoadImageController()->GetThreadId());
+        thread::kEventImageLoaded, GetEventId());
 
     send_event->SetStream(event.GetStream());
     send_event->SetBitmap(event.GetBitmap());
