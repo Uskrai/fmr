@@ -57,6 +57,8 @@ class PageBitmapCtrl : public BitmapCtrl {
 
   void AddBitmap(const SBitmap &bitmap, size_t page_pos, size_t bitmap_pos);
 
+  void Clear();
+
  private:
   void OnImageLoaded(thread::LoadImageEvent &event);
 };

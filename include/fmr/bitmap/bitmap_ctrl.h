@@ -49,6 +49,8 @@ class BitmapCtrl {
   wxSize GetSize() const;
   wxSize GetSize(const std::vector<SBitmap *> &bitmap) const;
 
+  void Clear();
+
  private:
   void OnWindowSize(wxSizeEvent &event);
   void OnImageLoaded(thread::LoadImageEvent &event);

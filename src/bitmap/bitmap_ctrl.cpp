@@ -45,6 +45,8 @@ void BitmapCtrl::AdjustBitmap() {
   }
 }
 
+void BitmapCtrl::Clear() { GetBitmap().clear(); }
+
 }  // namespace bitmap
 
 }  // namespace fmr

@@ -64,6 +64,7 @@ bool Controller::CreateWindow(wxWindow *parent, wxWindowID id,
 }
 
 bool Controller::Open(const std::string &path) {
+  Clear();
   if (loader_->Open(path)) {
     window_->Scroll(0, 0);
     if (loader_->Run()) {
@@ -305,7 +306,10 @@ void Controller::OnWindowScroll(wxScrollWinEvent &event) {
   event.Skip();
 }
 
-void Controller::Clear() { loader_->Clear(); }
+void Controller::Clear() {
+  page_bitmap_ctrl_->Clear();
+  loader_->Clear();
+}
 
 }  // namespace reader
 

@@ -93,6 +93,11 @@ wxSize PageBitmapCtrl::GetSize(BitmapPage *page) {
   return GetSize(BitmapPageToBitmapPtr(page));
 }
 
+void PageBitmapCtrl::Clear() {
+  BitmapCtrl::Clear();
+  vec_page_.clear();
+}
+
 }  // namespace bitmap
 
 }  // namespace fmr
