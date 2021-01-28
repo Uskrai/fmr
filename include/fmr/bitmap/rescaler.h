@@ -19,6 +19,7 @@
 #define FMR_BITMAP_RESCALER
 
 #include "fmr/bitmap/bmp.h"
+#include "fmr/common/bitmask.h"
 
 namespace fmr {
 
@@ -29,7 +30,10 @@ enum RescalerFlags {
   kRescaleFitWidth = 0x01,
   kRescaleFitHeight = 0x02,
   kRescaleFitAll = kRescaleFitWidth | kRescaleFitHeight,
+  kRescaleEnlarge = 0x04
 };
+
+DEFINE_BITMASK_TYPE(RescalerFlags);
 
 class Rescaler {
  protected:
@@ -57,7 +61,7 @@ class Rescaler {
   }
 
   void DoRescale(SBitmap &bitmap) {
-    double scale_x = 1, scale_y;
+    double scale_x = 1, scale_y = 1;
     GetScale(bitmap, scale_x, scale_y);
     bitmap.SetScale(scale_x, scale_y);
   };
@@ -72,13 +76,17 @@ class Rescaler {
 
   void GetScale(const wxSize &size, double &x, double &y) {
     if (Is(kRescaleFitWidth)) {
-      x = CalcScale(size.GetWidth(), max_size_.GetWidth());
-      if (!Is(kRescaleFitHeight)) y = x;
+      if (size.GetWidth() > max_size_.GetWidth() || Is(kRescaleEnlarge)) {
+        x = CalcScale(size.GetWidth(), max_size_.GetWidth());
+        if (!Is(kRescaleFitHeight)) y = x;
+      }
     }
 
     if (Is(kRescaleFitHeight)) {
-      y = CalcScale(size.GetHeight(), max_size_.GetHeight());
-      if (!Is(kRescaleFitWidth)) x = y;
+      if (size.GetHeight() > max_size_.GetHeight() || Is(kRescaleEnlarge)) {
+        y = CalcScale(size.GetHeight(), max_size_.GetHeight());
+        if (!Is(kRescaleFitWidth)) x = y;
+      }
     }
 
     if (Is(kRescaleFitAll)) {
