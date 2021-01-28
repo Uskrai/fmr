@@ -29,8 +29,7 @@ FindHandlerController::FindHandlerController(wxEvtHandler *parent, int id) {
 }
 
 bool FindHandlerController::Open(const std::string &path) {
-  auto handler =
-      std::unique_ptr<AbstractHandler>(HandlerFactory::NewHandler(path));
+  auto handler = HandlerFactory::NewHandler(path);
 
   if (handler) {
     handler->Traverse();
@@ -86,7 +85,6 @@ void FindHandlerController::Clear() {
   DeleteThread(GetThreadId(), lock_);
   found_source_map_.clear();
   loaded_stream_.clear();
-  handler_.reset();
 }
 
 bool FindHandlerController::Run() {
