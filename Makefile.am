@@ -32,15 +32,19 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/size.cpp \
 						$(bitmap)/image_util.cpp \
 						$(bitmap)/position.cpp \
-						$(bitmap)/loader.cpp
+						$(bitmap)/loader.cpp \
+						$(bitmap)/bitmap_ctrl.cpp \
+						$(bitmap)/position_ctrl.cpp \
+						$(bitmap)/page_bitmap_ctrl.cpp \
+						$(bitmap)/page_loader.cpp
 
 reader = src/reader
 readerdir = @abs_builddir@/reader
 reader_LTLIBRARIES =  lib_reader.la
 lib_reader_la_SOURCES = $(reader)/window_reader.cpp \
-						$(reader)/controller_reader.cpp \
-						$(reader)/load_reader.cpp \
-						$(reader)/zoom_reader.cpp
+												$(reader)/controller.cpp \
+												$(reader)/load_reader.cpp \
+												$(reader)/zoom_reader.cpp 
 
 lib_reader_la_LIBADD = lib_bitmap.la \
 					   lib_handler.la \
@@ -72,8 +76,10 @@ window = src/window
 windowdir = @abs_builddir@/window
 window_LTLIBRARIES = lib_window.la
 lib_window_la_SOURCES = $(window)/scrolledwindow.cpp \
-						$(window)/flex_grid_window.cpp \
-						$(window)/flex_grid_cell_window.cpp
+												$(window)/flex_grid_window.cpp \
+												$(window)/flex_grid_cell_window.cpp \
+												$(window)/scrolled_image.cpp \
+												$(window)/decorator.cpp
 
 thread = src/thread
 threaddir = @abs_builddir@/thread

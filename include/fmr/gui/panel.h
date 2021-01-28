@@ -20,8 +20,9 @@
 
 #include <fmr/common/string.h>
 #include <fmr/explorer/window_explorer.h>
-#include <fmr/reader/window_reader.h>
 #include <wx/panel.h>
+
+#include "fmr/reader/controller.h"
 
 class wxBoxSizer;
 
@@ -57,7 +58,8 @@ class Panel : public wxPanel {
   void OnExplorerOpenFile(StreamEvent &event);
   void OnReaderChangePage(wxCommandEvent &event);
   void OnReaderInfoTimer(wxTimerEvent &event);
-  reader::Window *reader_ = NULL;
+  // reader::Window *reader_ = NULL;
+  std::unique_ptr<reader::Controller> reader_;
   explorer::Window *explorer_ = NULL;
   wxBoxSizer *sizer_;
 };

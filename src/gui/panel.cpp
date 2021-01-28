@@ -42,22 +42,19 @@ Panel::Panel(wxWindow *parent, wxWindowID id, wxPoint position, wxSize size)
 
 void Panel::BindEvent() {
   Bind(EVT_OPEN_FILE, &Panel::OnExplorerOpenFile, this);
-  Bind(reader::EvtChangePage, &Panel::OnReaderChangePage, this);
   Bind(wxEVT_TIMER, &Panel::OnReaderInfoTimer, this, kReaderInfoTimer);
 }
 
 void Panel::PrepareReader() {
-  reader_ = new reader::Window(this, ReaderWindow, wxDefaultPosition,
-                               GetClientSize(), 1, "Reader");
+  reader_ = std::make_unique<reader::Controller>(
+      this, ReaderWindow, wxDefaultPosition, GetClientSize(), 0, "Reader");
 
-  if (!reader_->IsTransparentBackgroundSupported())
-    reader_->SetBackgroundColour(*wxBLACK);
+  auto window = reader_->GetWindow();
 
-  reader_info_ = new wxStaticText(this, kReaderInfoWindow, wxEmptyString);
-  reader_info_timer_.SetOwner(this, kReaderInfoTimer);
-  reader_info_->SetBackgroundColour(*wxBLACK);
+  if (!window->IsTransparentBackgroundSupported())
+    window->SetBackgroundColour(*wxBLACK);
 
-  sizer_->Add(reader_, 1, wxALL | wxEXPAND);
+  sizer_->Add(window, 1, wxALL | wxEXPAND);
 }
 
 void Panel::PrepareExplorer() {
@@ -73,25 +70,25 @@ void Panel::PrepareExplorer() {
 bool Panel::LoadFile(std::string path) {
   bool ret = false;
   if (reader_) {
-    bool is_reader_shown = reader_->IsShown();
-    bool is_reader_focus = reader_->HasFocus();
+    bool is_reader_shown = reader_->GetWindow()->IsShown();
+    bool is_reader_focus = reader_->GetWindow()->HasFocus();
     bool is_explorer_shown = explorer_->IsShown();
     bool is_explorer_focus = explorer_->HasFocus();
 
     explorer_->Hide();
-    reader_->Show();
-    reader_->SetFocus();
+    reader_->GetWindow()->Show();
+    reader_->GetWindow()->SetFocus();
     Layout();
     ret = reader_->Open(path);
 
     if (ret)
       return ret;
     else {
-      reader_->Show(is_reader_shown);
+      reader_->GetWindow()->Show(is_reader_shown);
       explorer_->Show(is_explorer_shown);
 
       if (is_reader_focus) {
-        reader_->SetFocus();
+        reader_->GetWindow()->SetFocus();
       } else if (is_explorer_focus) {
         explorer_->SetFocus();
       }
@@ -126,7 +123,7 @@ bool Panel::OpenExplorer() {
       explorer_->Show();
       if (reader_) {
         reader_->Clear();
-        reader_->Hide();
+        reader_->GetWindow()->Hide();
       }
       explorer_->SetFocus();
       Layout();
@@ -169,9 +166,10 @@ void Panel::OnReaderChangePage(wxCommandEvent &event) {
   // TODO: Make this work
   wxString text = wxString::Format("%d/%d", event.GetSelection(), 23);
   reader_info_->SetLabelText(text);
-  wxRect rect(reader_->GetPosition(), reader_->GetClientSize());
+  wxRect rect(reader_->GetWindow()->GetPosition(),
+              reader_->GetWindow()->GetClientSize());
   wxPoint pos = dimension::AlignPosition(
-      reader_->GetClientRect(), reader_info_->GetSize(),
+      reader_->GetWindow()->GetClientRect(), reader_info_->GetSize(),
       wxALIGN_TOP | wxALIGN_CENTER_HORIZONTAL);
 
   reader_info_->SetWindowStyleFlag(wxALIGN_CENTER_HORIZONTAL |
@@ -185,7 +183,7 @@ void Panel::OnReaderChangePage(wxCommandEvent &event) {
 void Panel::OnReaderInfoTimer(wxTimerEvent &event) { reader_info_->Hide(); }
 
 bool Panel::Destroy() {
-  if (reader_) reader_->Destroy();
+  if (reader_) reader_->GetWindow()->Destroy();
   if (explorer_) explorer_->Destroy();
   return wxWindow::Destroy();
 }
