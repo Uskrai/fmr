@@ -44,7 +44,8 @@ bool ScrolledWindow::Create(wxWindow *parent, wxWindowID id, const wxPoint &pos,
 }
 
 void ScrolledWindow::BindEvent() {
-  fmr::event::Bind(kScrollWinEventAll, &ScrolledWindow::OnScroll, this);
+  Bind(wxEVT_SCROLLWIN_LINEDOWN, &ScrolledWindow::OnScroll, this);
+  Bind(wxEVT_SCROLLWIN_LINEUP, &ScrolledWindow::OnScroll, this);
 
   Bind(wxEVT_SIZE, &ScrolledWindow::OnSize, this);
   Bind(wxEVT_PAINT, &ScrolledWindow::OnPaint, this);
