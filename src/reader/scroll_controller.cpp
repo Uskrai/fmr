@@ -48,8 +48,8 @@ wxPoint ScrollController::GetPosition(const SBitmap *bitmap,
 
   if (flags == kScrollToBitmapLeftBottom ||
       flags == kScrollToBitmapRightBottom) {
-    pos.y = bitmap->GetY() + bitmap->GetWidth() -
-            window_->GetClientSize().GetWidth();
+    pos.y = bitmap->GetY() + bitmap->GetHeight() -
+            window_->GetClientSize().GetHeight();
   }
 
   return pos;
