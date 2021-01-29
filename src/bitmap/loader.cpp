@@ -36,10 +36,8 @@ Loader::Loader(wxEvtHandler *parent, int id)
 }
 
 void Loader::OnThreadCompleted(wxThreadEvent &event) {
-  switch (event.GetId()) {
-    case kFindImageHandlerThreadID:
-      GetLoadImageController()->DisableOnEmptyQueue(true);
-      break;
+  if (event.GetId() == find_controller_.GetThreadId()) {
+    GetLoadImageController()->DisableOnEmptyQueue(true);
   }
   event.Skip();
 }

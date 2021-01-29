@@ -23,9 +23,11 @@ namespace bitmap {
 
 wxDEFINE_EVENT(kEventOpenedStreamFound, wxCommandEvent);
 
-PageLoader::PageLoader(wxEvtHandler *parent, int id) : Loader(parent, id) {
+PageLoader::PageLoader(wxEvtHandler *parent, BitmapPageCtrl *bmp_ctrl, int id)
+    : Loader(parent, id) {
   SetControllerId(GetFindController()->GetThreadId(),
                   GetLoadImageController()->GetThreadId());
+  bmp_ctrl_ = bmp_ctrl;
   Bind(EVT_COMMAND_THREAD_COMPLETED, &PageLoader::OnCompleted, this);
 }
 
@@ -43,7 +45,6 @@ bool PageLoader::Open(const std::string &path) {
 
     if (!handler->IsExist(opened_index_)) opened_index_ = 0;
 
-    opened_index_ = 0;
     opened_stream_ = &handler->Item(opened_index_);
 
     if (opened_index_ < GetImagePerPage()) {
@@ -125,6 +126,16 @@ bool PageLoader::IsFoundStreamInBack(const SStream *found_stream) {
 void PageLoader::OnStreamFound(thread::FoundEvent &event) {
   if (per_page_stream_.empty() ||
       per_page_stream_.back().size() >= GetImagePerPage()) {
+    auto &all_page = GetBitmapCtrl()->GetAllPage();
+    if (!per_page_stream_.empty()) {
+      while (all_page.size() < per_page_stream_.size())
+        all_page.push_back(BitmapPage());
+
+      while (all_page.at(per_page_stream_.size() - 1).Size() <
+             per_page_stream_.back().size()) {
+        all_page.back().PushBack(SBitmap());
+      }
+    }
     per_page_stream_.push_back(std::vector<SStream *>());
   }
 

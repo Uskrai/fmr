@@ -29,7 +29,6 @@ wxDEFINE_EVENT(kEventOpenFile, wxCommandEvent);
 
 Controller::Controller() {
   window_ = new ScrolledImageWindow();
-  loader_ = std::make_unique<bitmap::PageLoader>(this, kLoaderId);
 
   position_ctrl_ = std::make_unique<bitmap::PositionCtrl>(
       bitmap::kPositionAlignCenter | bitmap::kPositionVertical);
@@ -38,6 +37,9 @@ Controller::Controller() {
 
   bitmap_ctrl_ = std::make_unique<bitmap::BitmapPageCtrl>(position_ctrl_.get(),
                                                           rescaler_.get());
+
+  loader_ =
+      std::make_unique<bitmap::PageLoader>(this, GetBitmapCtrl(), kLoaderId);
 
   Bind(thread::kEventImageLoaded, &Controller::OnLoadedImage, this, kLoaderId);
 
@@ -65,6 +67,7 @@ bool Controller::Open(const std::string &path) {
   Clear();
   if (loader_->Open(path)) {
     window_->Scroll(0, 0);
+    window_->SetVirtualSize(window_->GetClientSize());
     if (loader_->Run()) {
       auto event = wxCommandEvent(kEventOpenFile, window_->GetId());
       event.SetString(String::FromString<wxString>(path).c_str());
@@ -306,6 +309,7 @@ bool Controller::Change(wxDirection direction) {
 void Controller::OnWindowScroll(wxScrollWinEvent &event) {
   if (event.GetEventType() == wxEVT_SCROLLWIN_LINEUP ||
       event.GetEventType() == wxEVT_SCROLLWIN_LINEDOWN) {
+    window_->AdjustScrollBar();
     wxOrientation orient = dimension::GetOrient(event.GetOrientation());
     if (IsOnEdge(orient, event.GetPosition())) {
       wxDirection direction =
@@ -317,8 +321,9 @@ void Controller::OnWindowScroll(wxScrollWinEvent &event) {
 }
 
 void Controller::Clear() {
-  GetBitmapCtrl()->Clear();
+  window_->ClearBitmap();
   loader_->Clear();
+  GetBitmapCtrl()->Clear();
 }
 
 }  // namespace reader

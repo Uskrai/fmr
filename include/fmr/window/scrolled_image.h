@@ -66,6 +66,8 @@ class ScrolledImageWindow : public ScrolledWindow {
   std::vector<SBitmap> &GetBitmap() { return bitmap_->GetBitmap(); };
   const std::vector<SBitmap> &GetBitmap() const { return bitmap_->GetBitmap(); }
 
+  void ClearBitmap() { bitmap_ = nullptr; }
+
   /**
    * @brief: Draw Bitmap
    * use this if you override OnDraw

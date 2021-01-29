@@ -36,13 +36,14 @@ class PageLoader : public Loader {
                                                 // found before the opened path
   std::unique_ptr<AbstractHandler> handler_;
   std::vector<std::vector<SStream *>> per_page_stream_;
+  BitmapPageCtrl *bmp_ctrl_ = nullptr;
 
   size_t opened_index_ = -1, opened_page_ = -1;
   const SStream *opened_stream_ = nullptr;
   size_t image_per_page_ = -1;
 
  public:
-  PageLoader(wxEvtHandler *handler, int id);
+  PageLoader(wxEvtHandler *handler, BitmapPageCtrl *bmp_ctrl, int id);
   virtual ~PageLoader() { Clear(); }
 
   bool Open(const std::string &path);
@@ -54,6 +55,8 @@ class PageLoader : public Loader {
   size_t GetStreamPosInPage(const SStream *stream);
 
   size_t GetOpenedPagePos() const { return opened_page_; }
+
+  BitmapPageCtrl *GetBitmapCtrl() { return bmp_ctrl_; }
 
   virtual void Clear();
 
