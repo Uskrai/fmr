@@ -36,10 +36,10 @@ class BitmapPage {
   BitmapPage(std::vector<SBitmap> vec_bitmap) { SetBitmap(vec_bitmap_); }
 
   void SetBitmap(std::vector<SBitmap> vec_bitmap) { vec_bitmap_ = vec_bitmap; }
-  void PushBack(SBitmap *bitmap) { vec_bitmap_.push_back(bitmap); }
-  void PushFront(SBitmap *bitmap) { InsertBitmap(0, bitmap); }
+  void PushBack(const SBitmap &bitmap) { vec_bitmap_.push_back(bitmap); }
+  void PushFront(const SBitmap &bitmap) { InsertBitmap(0, bitmap); }
 
-  void InsertBitmap(size_t idx, SBitmap *bitmap) {
+  void InsertBitmap(size_t idx, const SBitmap &bitmap) {
     size_t i = 0;
     for (auto it = vec_bitmap_.begin(); it != vec_bitmap_.end(); ++it, ++i)
       if (idx == i) vec_bitmap_.insert(it, bitmap);
