@@ -68,7 +68,6 @@ class Controller : public ScrollController {
   void SetImagePerPage(size_t size) { loader_->SetImagePerPage(size); }
   void SetPositionFlags(bitmap::PositionFlags flags);
   void SetScaleFlags(bitmap::RescalerFlags flags);
-  void SetReadFromRight(bool cond = true) { is_read_from_right_ = cond; }
 
   bitmap::BitmapPageCtrl *GetBitmapCtrl() { return bitmap_ctrl_.get(); }
   const bitmap::BitmapPageCtrl *GetBitmapCtrl() const {

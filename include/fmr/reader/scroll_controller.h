@@ -63,7 +63,7 @@ class ScrollController : public wxEvtHandler {
   wxPoint GetStartPosition(wxDirection direciion) const;
 
   bool IsReadFromRight() const { return is_read_from_right_; }
-  void SetReadFromRight(bool cond) { is_read_from_right_ = cond; }
+  void SetReadFromRight(bool cond = true) { is_read_from_right_ = cond; }
 
   void GetFirstShown(const SBitmap *&bitmap, wxPoint *pos = nullptr) const;
   void SetFirstShown(const SBitmap *bitmap, const wxPoint *pos = nullptr);
