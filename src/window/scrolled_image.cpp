@@ -20,6 +20,8 @@
 
 namespace fmr {
 
+wxDEFINE_EVENT(kEventPageChanged, wxCommandEvent);
+
 bool ScrolledImageWindow::Create(wxWindow *parent, wxWindowID id,
                                  const wxPoint &pos, const wxSize &size,
                                  long style, const wxString &name) {
@@ -28,14 +30,21 @@ bool ScrolledImageWindow::Create(wxWindow *parent, wxWindowID id,
 }
 
 void ScrolledImageWindow::DrawBitmap(wxDC &dc) {
-  if (GetBitmapPage()) {
-    GetBitmapPage()->Draw(dc, GetViewStart(), GetClientSize());
+  if (GetPage()) {
+    GetPage()->Draw(dc, GetViewStart(), GetClientSize());
   }
 }
 
 void ScrolledImageWindow::OnDraw(wxDC &dc) {
   DrawBitmap(dc);
   if (decorator_) decorator_->DrawDecorator(dc);
+}
+
+void ScrolledImageWindow::SetBitmapPage(bitmap::BitmapPage *page) {
+  page_ = page;
+  if (!IsBeingDeleted()) {
+    QueueEvent(new wxCommandEvent(kEventPageChanged, GetId()));
+  }
 }
 
 }  // namespace fmr

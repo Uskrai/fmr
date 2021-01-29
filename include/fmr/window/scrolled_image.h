@@ -27,9 +27,11 @@
 
 namespace fmr {
 
+wxDECLARE_EVENT(kEventPageChanged, wxCommandEvent);
+
 class ScrolledImageWindow : public ScrolledWindow {
  private:
-  bitmap::BitmapPage *bitmap_ = nullptr;
+  bitmap::BitmapPage *page_ = nullptr;
   WindowDecoratorList *decorator_ = nullptr;
 
  public:
@@ -46,7 +48,7 @@ class ScrolledImageWindow : public ScrolledWindow {
     Create(parent, id, pos, size, style, name);
   }
 
-  virtual ~ScrolledImageWindow(){};
+  virtual ~ScrolledImageWindow() { ClearBitmap(); };
 
   /**
    * @brief: Create Window
@@ -60,13 +62,15 @@ class ScrolledImageWindow : public ScrolledWindow {
   /**
    * @brief: Set Bitmap to draw in this window
    */
-  void SetBitmapPage(bitmap::BitmapPage *bitmap) { bitmap_ = bitmap; }
-  bitmap::BitmapPage *GetBitmapPage() { return bitmap_; }
+  void SetBitmapPage(bitmap::BitmapPage *bitmap);
+  bitmap::BitmapPage *GetPage() { return page_; }
+  const bitmap::BitmapPage *GetPage() const { return page_; }
 
-  std::vector<SBitmap> &GetBitmap() { return bitmap_->GetBitmap(); };
-  const std::vector<SBitmap> &GetBitmap() const { return bitmap_->GetBitmap(); }
+  [[deprecated("Changed to GetPage()")]] bitmap::BitmapPage *GetBitmapPage() {
+    return page_;
+  }
 
-  void ClearBitmap() { bitmap_ = nullptr; }
+  void ClearBitmap() { SetBitmapPage(nullptr); }
 
   /**
    * @brief: Draw Bitmap
