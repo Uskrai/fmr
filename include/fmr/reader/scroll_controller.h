@@ -34,15 +34,15 @@ enum ScrollBitmapFlags {
 
 };
 
-class ScrollController {
+class ScrollController : public wxEvtHandler {
   ScrolledImageWindow *window_ = nullptr;
   bool is_read_from_right_ = false;
 
  public:
   ScrollController(){};
-  ScrollController(ScrolledImageWindow *window) { Create(window); };
+  ScrollController(ScrolledImageWindow *window) { SetWindow(window); };
 
-  void Create(ScrolledImageWindow *window);
+  void SetWindow(ScrolledImageWindow *window);
   ScrolledImageWindow *GetWindow() { return window_; }
   const ScrolledImageWindow *GetWindow() const { return window_; }
 
@@ -69,6 +69,8 @@ class ScrollController {
   void SetFirstShown(const SBitmap *bitmap, const wxPoint *pos = nullptr);
 
   int GetStep(wxDirection direction) const;
+
+  bool IsOnEdge(wxOrientation &orient, int position) const;
 
  private:
   void OnPageChanged(wxCommandEvent &event){};

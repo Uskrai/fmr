@@ -126,21 +126,14 @@ bool PageLoader::IsFoundStreamInBack(const SStream *found_stream) {
 void PageLoader::OnStreamFound(thread::FoundEvent &event) {
   if (per_page_stream_.empty() ||
       per_page_stream_.back().size() >= GetImagePerPage()) {
-    auto &all_page = GetBitmapCtrl()->GetAllPage();
-    if (!per_page_stream_.empty()) {
-      while (all_page.size() < per_page_stream_.size())
-        all_page.push_back(BitmapPage());
-
-      while (all_page.at(per_page_stream_.size() - 1).Size() <
-             per_page_stream_.back().size()) {
-        all_page.back().PushBack(SBitmap());
-      }
-    }
     per_page_stream_.push_back(std::vector<SStream *>());
   }
 
   per_page_stream_.back().push_back(event.GetFoundStream());
   size_t event_source_stream_idx = SourceStreamToIndex(event.GetSourceStream());
+
+  GetBitmapCtrl()->EnlargeBitmapPage(per_page_stream_.size() - 1,
+                                     per_page_stream_.back().size());
 
   if (opened_index_ < GetImagePerPage()) {
     GetLoadImageController()->Push(event.GetFoundStream());

@@ -23,9 +23,12 @@ namespace fmr {
 
 namespace reader {
 
-void ScrollController::Create(ScrolledImageWindow *window) {
+void ScrollController::SetWindow(ScrolledImageWindow *window) {
+  if (window_) {
+    window_->Unbind(kEventPageChanged, &ScrollController::OnPageChanged, this);
+  }
   window_ = window;
-  window_->Bind(kEventPageChanged, &ScrollController::OnPageChanged, this);
+  GetWindow()->Bind(kEventPageChanged, &ScrollController::OnPageChanged, this);
 }
 
 void ScrollController::Scroll(const wxPoint &pos) { window_->Scroll(pos); }
@@ -54,35 +57,40 @@ wxPoint ScrollController::GetPosition(const SBitmap *bitmap,
 
 void ScrollController::GetFirstShown(const SBitmap *&bitmap,
                                      wxPoint *pos) const {
-  if (window_->GetPage()) {
-    for (const auto &it : window_->GetPage()->GetBitmap()) {
-      if (it.IsShown(window_->GetViewStart(), window_->GetClientSize())) {
+  if (GetWindow()->GetPage()) {
+    auto vec = window_->GetPage()->GetBitmap();
+    for (const auto &it : vec) {
+      if (it.IsShown(GetWindow()->GetViewStart(),
+                     GetWindow()->GetClientSize())) {
         bitmap = &it;
         if (pos) *pos = it.GetPosition();
-        break;
+        return;
       }
     }
   }
+  bitmap = nullptr;
 }
 
 void ScrollController::SetFirstShown(const SBitmap *bitmap,
                                      const wxPoint *pos) {
-  wxPoint scroll_pos = bitmap->GetPosition();
+  if (bitmap) {
+    wxPoint scroll_pos = bitmap->GetPosition();
 
-  if (pos) {
-    for (const auto &it : window_->GetPage()->GetBitmap()) {
-      if (&it == bitmap) {
-        if (it.GetPosition() != *pos) {
-          scroll_pos.x -= pos->x;
-          scroll_pos.y -= pos->y;
-          break;
+    if (pos) {
+      for (const auto &it : window_->GetPage()->GetBitmap()) {
+        if (&it == bitmap) {
+          if (it.GetPosition() != *pos) {
+            scroll_pos.x -= pos->x;
+            scroll_pos.y -= pos->y;
+            break;
+          }
         }
       }
     }
-  }
 
-  window_->AdjustScrollbars();
-  window_->Scroll(scroll_pos);
+    window_->AdjustScrollbars();
+    window_->Scroll(scroll_pos);
+  }
 }
 
 int ScrollController::GetStep(wxDirection direction) const {
@@ -137,6 +145,23 @@ wxPoint ScrollController::GetStartPosition(wxDirection direction) const {
 
 void ScrollController::ResetScroll(wxDirection direction) {
   Scroll(GetStartPosition(direction));
+}
+
+bool ScrollController::IsOnEdge(wxOrientation &orient, int position) const {
+  int bottom_edge = GetWindow()->GetScrollRangeLimit(orient);
+  int scroll_pos = GetWindow()->GetScrollPos(orient);
+  bool is_top = scroll_pos == 0;
+
+  bool is_bottom = scroll_pos == bottom_edge;
+  is_bottom =
+      is_bottom || GetWindow()->GetScrollRange(orient) <
+                       dimension::Get(GetWindow()->GetClientSize(), orient);
+
+  bool is_below_bottom = is_bottom && position >= bottom_edge;
+  bool is_over_top = is_top && position <= 0;
+  bool is_edge = (is_top && is_over_top) || (is_bottom && is_below_bottom);
+
+  return is_edge;
 }
 
 }  // namespace reader

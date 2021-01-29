@@ -28,7 +28,7 @@ namespace bitmap {
 std::vector<SBitmap *> BitmapPageToBitmapPtr(BitmapPage *page);
 
 class BitmapPageCtrl : public BitmapCtrl {
-  std::vector<BitmapPage> vec_page_;
+  std::vector<std::unique_ptr<BitmapPage>> vec_page_;
   size_t bitmap_per_page_ = -1;
   size_t curr_page_ = -1;
 
@@ -47,8 +47,10 @@ class BitmapPageCtrl : public BitmapCtrl {
   using BitmapCtrl::GetSize;
   wxSize GetSize(BitmapPage *page);
 
-  std::vector<BitmapPage> &GetAllPage() { return vec_page_; }
-  const std::vector<BitmapPage> &GetAllPage() const { return vec_page_; }
+  std::vector<std::unique_ptr<BitmapPage>> &GetAllPage() { return vec_page_; }
+  const std::vector<std::unique_ptr<BitmapPage>> &GetAllPage() const {
+    return vec_page_;
+  }
 
   size_t CountPage() const { return vec_page_.size(); }
   size_t GetPagePos() const { return curr_page_; }
@@ -56,6 +58,9 @@ class BitmapPageCtrl : public BitmapCtrl {
   bool IsPageExist(size_t idx) { return idx < CountPage(); }
 
   void AddBitmap(const SBitmap &bitmap, size_t page_pos, size_t bitmap_pos);
+
+  void EnlargePage(size_t size);
+  void EnlargeBitmapPage(size_t page_pos, size_t size);
 
   void Clear();
 

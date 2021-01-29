@@ -41,7 +41,8 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 reader = src/reader
 readerdir = @abs_builddir@/reader
 reader_LTLIBRARIES =  lib_reader.la
-lib_reader_la_SOURCES = $(reader)/controller.cpp
+lib_reader_la_SOURCES = $(reader)/controller.cpp \
+												$(reader)/scroll_controller.cpp
 
 lib_reader_la_LIBADD = lib_bitmap.la \
 					   lib_handler.la \

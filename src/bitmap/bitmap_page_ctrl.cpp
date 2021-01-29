@@ -44,20 +44,15 @@ void BitmapPageCtrl::AddBitmap(const SBitmap &bitmap, size_t page_pos,
     return;
   }
 
-  while (vec_page_.size() <= page_pos) {
-    vec_page_.push_back(BitmapPage());
-  }
+  EnlargePage(page_pos + 1);
+  EnlargeBitmapPage(page_pos, bitmap_pos + 1);
 
-  BitmapPage &page = vec_page_.at(page_pos);
+  auto page = vec_page_.at(page_pos).get();
 
-  while (page.Size() <= bitmap_pos) {
-    page.GetBitmap().push_back(SBitmap());
-  }
-
-  page.GetBitmap().at(bitmap_pos) = bitmap;
+  page->GetBitmap().at(bitmap_pos) = bitmap;
 
   std::vector<SBitmap *> page_ptr;
-  for (auto &it : page.GetBitmap()) {
+  for (auto &it : page->GetBitmap()) {
     page_ptr.push_back(&it);
   }
   RecalcPosition(page_ptr);
@@ -72,7 +67,7 @@ void BitmapPageCtrl::SetBitmapPage(size_t page) {
 
   if (size_t(page) < vec_page_.size()) {
     std::vector<SBitmap *> page_ptr;
-    for (auto &it : vec_page_.at(page).GetBitmap()) page_ptr.push_back(&it);
+    for (auto &it : vec_page_.at(page)->GetBitmap()) page_ptr.push_back(&it);
     RecalcPosition(page_ptr);
     SetBitmap(page_ptr);
   }
@@ -80,13 +75,27 @@ void BitmapPageCtrl::SetBitmapPage(size_t page) {
 
 BitmapPage *BitmapPageCtrl::GetBitmapPage() {
   if (curr_page_ < vec_page_.size()) {
-    return &vec_page_.at(curr_page_);
+    return vec_page_.at(curr_page_).get();
   }
   return nullptr;
 }
 
 void BitmapPageCtrl::RecalcPosition(BitmapPage *page) {
   return RecalcPosition(BitmapPageToBitmapPtr(page));
+}
+
+void BitmapPageCtrl::EnlargePage(size_t size) {
+  while (GetAllPage().size() < size) {
+    GetAllPage().push_back(std::make_unique<BitmapPage>());
+  }
+}
+
+void BitmapPageCtrl::EnlargeBitmapPage(size_t page_pos, size_t size) {
+  EnlargePage(page_pos + 1);
+
+  auto page = GetAllPage().at(page_pos).get();
+
+  if (page->GetBitmap().size() < size) page->GetBitmap().resize(size);
 }
 
 wxSize BitmapPageCtrl::GetSize(BitmapPage *page) {

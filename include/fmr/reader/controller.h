@@ -21,6 +21,7 @@
 #include "fmr/bitmap/bitmap_page_ctrl.h"
 #include "fmr/bitmap/page_loader.h"
 #include "fmr/bitmap/position_ctrl.h"
+#include "fmr/reader/scroll_controller.h"
 #include "fmr/window/scrolled_image.h"
 
 namespace fmr {
@@ -33,14 +34,13 @@ enum ControllerId {
   kLoaderId = wxID_HIGHEST + 1500,
 };
 
-class Controller : public wxEvtHandler {
+class Controller : public ScrollController {
   std::unique_ptr<bitmap::PageLoader> loader_;
   std::unique_ptr<AbstractHandler> handler_;
   std::unique_ptr<bitmap::PositionCtrl> position_ctrl_;
   std::unique_ptr<bitmap::BitmapPageCtrl> bitmap_ctrl_;
   std::unique_ptr<bitmap::Rescaler> rescaler_;
   bool is_read_from_right_ = false;
-  ScrolledImageWindow *window_ = nullptr;
   wxWindow *parent_ = nullptr;
 
  public:
@@ -62,12 +62,8 @@ class Controller : public wxEvtHandler {
   bool Open(const std::string &path);
   void AdjustBitmap();
 
-  ScrolledImageWindow *GetWindow() { return window_; }
-
   AbstractHandler *GetHandler() { return handler_.get(); }
   virtual void Clear();
-
-  bool IsOnEdge(const wxOrientation &orient, int pos) const;
 
   void SetImagePerPage(size_t size) { loader_->SetImagePerPage(size); }
   void SetPositionFlags(bitmap::PositionFlags flags);
@@ -79,10 +75,6 @@ class Controller : public wxEvtHandler {
     return bitmap_ctrl_.get();
   }
 
-  int GetStartX(wxDirection direction);
-  int GetStartY(wxDirection direction);
-  wxPoint GetStartPosition(wxDirection direction);
-  void ResetScroll(wxDirection direction);
   bool Change(wxDirection direction);
   bool ChangePage(wxDirection direction);
   bool ChangeFolder(wxDirection direction);
@@ -90,8 +82,6 @@ class Controller : public wxEvtHandler {
   wxWindow *GetParent() { return parent_; }
 
  private:
-  int GetStep(wxDirection direction);
-
   void OnLoadedImage(thread::LoadImageEvent &event);
   void OnOpenedStreamFound(wxCommandEvent &event);
   void OnWindowScroll(wxScrollWinEvent &event);
