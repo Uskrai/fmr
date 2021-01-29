@@ -85,6 +85,51 @@ wxThread::ExitCode FindHandler::Entry() {
   return (wxThread::ExitCode)0;
 }
 
+bool FindHandler::Find(AbstractOpenableHandler *handler, FoundEvent *event) {
+  auto search_stream = event->GetFoundStream();
+  std::string path = handler->GetItemPath(*search_stream);
+
+  std::unique_ptr<AbstractOpenableHandler> stream_handler(
+      HandlerFactory::NewOpenableHandler(path));
+
+  TEST_RETURN();
+
+  // Get Stream from handler if openable or is check handler
+  if (HandlerFactory::IsOpenable(path) || Is(kFindHandlerCheckHandler)) {
+    handler->GetStream(*search_stream);
+  }
+
+  TEST_RETURN();
+
+  // if not openable
+  if (!HandlerFactory::IsOpenable(path)) {
+    std::unique_ptr<AbstractHandler> non_openable_handler(
+        HandlerFactory::NewHandler(path));
+
+    TEST_RETURN();
+    // traverse non-openable handler and if item found and with flags Only first
+    // item, return
+    if (TraverseHandler(non_openable_handler.get(), event) &&
+        Is(kFindHandlerOnlyFirstItem)) {
+      return true;
+    } else if (!Is(kFindHandlerCheckHandler)) {
+      return false;
+    }
+  }
+
+  TEST_RETURN();
+  if (Find(event)) return true;
+
+  if (path != stream_handler->GetName()) return false;
+
+  TEST_RETURN();
+
+  if (Is(kFindHandlerRecursive))
+    return TraverseHandler(stream_handler.get(), event);
+
+  return false;
+}
+
 void FindHandler::StreamFound(FoundEvent *event) {
   if (TestDestroy()) return;
   wxLogMessage("Sending FoundEvent to %p", GetParent());
@@ -142,51 +187,6 @@ bool FindHandler::Find(FoundEvent *event) {
                search_stream->GetName());
   StreamFound(send_event.release());
   return true;
-}
-
-bool FindHandler::Find(AbstractOpenableHandler *handler, FoundEvent *event) {
-  auto search_stream = event->GetFoundStream();
-  std::string path = handler->GetItemPath(*search_stream);
-
-  std::unique_ptr<AbstractOpenableHandler> stream_handler(
-      HandlerFactory::NewOpenableHandler(path));
-
-  TEST_RETURN();
-
-  // Get Stream from handler if openable or is check handler
-  if (HandlerFactory::IsOpenable(path) || Is(kFindHandlerCheckHandler)) {
-    handler->GetStream(*search_stream);
-  }
-
-  TEST_RETURN();
-
-  // if not openable
-  if (!HandlerFactory::IsOpenable(path)) {
-    std::unique_ptr<AbstractHandler> non_openable_handler(
-        HandlerFactory::NewHandler(path));
-
-    TEST_RETURN();
-    // traverse non-openable handler and if item found and with flags Only first
-    // item, return
-    if (TraverseHandler(non_openable_handler.get(), event) &&
-        Is(kFindHandlerOnlyFirstItem)) {
-      return true;
-    } else if (!Is(kFindHandlerCheckHandler)) {
-      return false;
-    }
-  }
-
-  TEST_RETURN();
-  if (Find(event)) return true;
-
-  if (path != stream_handler->GetName()) return false;
-
-  TEST_RETURN();
-
-  if (Is(kFindHandlerRecursive))
-    return TraverseHandler(stream_handler.get(), event);
-
-  return false;
 }
 
 bool FindHandler::Find(AbstractHandler *handler, FoundEvent *event) {
