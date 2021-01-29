@@ -83,13 +83,15 @@ class FindHandler : public Queue<std::pair<const SStream *, SStream>> {
   FindHandler(ThreadController *parent, wxThreadKind type, int id)
       : Queue(parent, type, id){};
 
-  bool Find(FoundEvent *stream);
-  bool Find(AbstractOpenableHandler *handler, FoundEvent *stream);
-  bool Find(AbstractHandler *handler, FoundEvent *stream);
+  bool Find(FoundEvent *event);
+  bool Find(AbstractOpenableHandler *handler, FoundEvent *event);
+  bool Find(AbstractHandler *handler, FoundEvent *event);
 
   void SetChecker(bool (*check_func)(const SStream &stream)) {
     check_func_ = check_func;
   }
+
+  bool SendIfFound(FoundEvent *event);
   bool CheckStream(const SStream &stream) { return check_func_(stream); }
 
   /**

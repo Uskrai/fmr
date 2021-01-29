@@ -59,20 +59,17 @@ wxThread::ExitCode FindHandler::Entry() {
   while (!TestDestroy()) {
     if (!QueueEmpty()) {
       auto &item = Front();
-      auto handler = std::unique_ptr<AbstractOpenableHandler>(
-          HandlerFactory::NewOpenableHandler(item.second.GetHandlerPath()));
 
-      if (handler) {
-        auto event = MakeEvent(kEventStreamFound, GetEventId(), item.first,
-                               std::make_unique<SStream>(item.second));
-        wxLogMessage("Starting to search for %s/%s", handler->GetName(),
-                     item.second.GetName());
+      auto event = MakeEvent(kEventStreamFound, GetEventId(), item.first,
+                             std::make_unique<SStream>(item.second));
 
-        if (!TestDestroy()) {
-          if (!Find(handler.get(), event.get())) {
-            event->SetEventType(kEventStreamNotFound);
-            QueueEventParent(event.release());
-          }
+      wxLogMessage("Starting to search for %s/%s", item.second.GetHandlerPath(),
+                   item.second.GetName());
+
+      if (!TestDestroy()) {
+        if (!Find(event.get())) {
+          event->SetEventType(kEventStreamNotFound);
+          QueueEventParent(event.release());
         }
         Update();
         if (TestDestroy()) break;
@@ -83,6 +80,26 @@ wxThread::ExitCode FindHandler::Entry() {
   wxLogMessage("Find thread completed");
   Completed();
   return (wxThread::ExitCode)0;
+}
+
+bool FindHandler::Find(FoundEvent *event) {
+  auto search_stream = event->GetFoundStream();
+  std::string handler_path = search_stream->GetHandlerPath();
+
+  if (HandlerFactory::IsOpenable(handler_path)) {
+    auto handler = HandlerFactory::NewOpenableHandler(handler_path);
+
+    TEST_RETURN();
+
+    return Find(handler.get(), event);
+  } else {
+    auto handler = HandlerFactory::NewHandler(handler_path);
+
+    if (handler) {
+      return Find(handler.get(), event);
+    }
+  }
+  return false;
 }
 
 bool FindHandler::Find(AbstractOpenableHandler *handler, FoundEvent *event) {
@@ -118,7 +135,7 @@ bool FindHandler::Find(AbstractOpenableHandler *handler, FoundEvent *event) {
   }
 
   TEST_RETURN();
-  if (Find(event)) return true;
+  if (SendIfFound(event)) return true;
 
   if (path != stream_handler->GetName()) return false;
 
@@ -160,7 +177,17 @@ bool FindHandler::TraverseHandler(T *handler, FoundEvent *event) {
   return is_found;
 }
 
-bool FindHandler::Find(FoundEvent *event) {
+bool FindHandler::Find(AbstractHandler *handler, FoundEvent *event) {
+  auto search_stream = event->GetFoundStream();
+
+  TEST_RETURN();
+  handler->GetStream(*search_stream);
+
+  TEST_RETURN();
+  return SendIfFound(event);
+};
+
+bool FindHandler::SendIfFound(FoundEvent *event) {
   TEST_RETURN();
 
   auto search_stream = event->GetFoundStream();
@@ -188,16 +215,6 @@ bool FindHandler::Find(FoundEvent *event) {
   StreamFound(send_event.release());
   return true;
 }
-
-bool FindHandler::Find(AbstractHandler *handler, FoundEvent *event) {
-  auto search_stream = event->GetFoundStream();
-
-  TEST_RETURN();
-  handler->GetStream(*search_stream);
-
-  TEST_RETURN();
-  return Find(event);
-};
 
 };  // namespace thread
 
