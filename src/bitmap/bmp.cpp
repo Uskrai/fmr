@@ -55,7 +55,69 @@ void SBitmap::Draw(wxDC& dc, const wxPoint& view_start, const wxSize& area) {
   Draw(dc, wxRect(view_start, area));
 }
 
+wxRect SBitmap::CalcMinimumRect(const wxRect& rect, wxPoint* pos_start) const {
+  wxRect ret_rect;
+  if (!IsShown(rect.GetPosition(), rect.GetSize())) return ret_rect;
+
+  double scale_x, scale_y;
+  GetScale(scale_x, scale_y);
+
+  if (pos_start) {
+    pos_start->x = GetPosition().x / scale_x;
+    pos_start->y = GetPosition().y / scale_y;
+  }
+
+  ret_rect.SetSize(GetSize());
+  wxRect bmp_rect(GetPosition(), GetSize());
+
+  auto get_limit = [](int size, int pos, int view_start) {
+    int limit = size + (view_start > pos ? pos - view_start : 0);
+    return limit;
+  };
+
+  auto get_size = [&](int size, int pos, int view_start, int max_size) {
+    int limit = get_limit(size, pos, view_start);
+    int ret = max_size - (pos > view_start ? pos - view_start : 0);
+    return ret < limit ? ret : limit;
+  };
+
+  auto get_bitmap_position = [](int bmp_pos, int view_start, double scale) {
+    int ret = (bmp_pos < view_start) ? view_start : bmp_pos;
+    return ret / scale;
+  };
+
+  auto get_bitmap_pos_start = [](int bmp_pos, int view_start) {
+    int ret = view_start - bmp_pos;
+    return (ret > 0) ? ret : 0;
+  };
+
+  if (rect.GetWidth() < bmp_rect.GetWidth()) {
+    ret_rect.SetWidth(get_size(bmp_rect.GetWidth(), bmp_rect.GetX(),
+                               rect.GetX(), rect.GetWidth()));
+    ret_rect.SetX(get_bitmap_pos_start(bmp_rect.GetX(), rect.GetX()));
+    if (pos_start)
+      pos_start->x = get_bitmap_position(bmp_rect.GetX(), rect.GetX(), scale_x);
+  }
+
+  if (rect.GetHeight() < bmp_rect.GetHeight()) {
+    ret_rect.SetHeight(get_size(bmp_rect.GetHeight(), bmp_rect.GetY(),
+                                rect.GetY(), rect.GetHeight()));
+    ret_rect.SetY(get_bitmap_pos_start(bmp_rect.GetY(), rect.GetY()));
+
+    if (pos_start)
+      pos_start->y = get_bitmap_position(bmp_rect.GetY(), rect.GetY(), scale_y);
+  };
+
+  ret_rect.width /= scale_x;
+  ret_rect.x /= scale_x;
+  ret_rect.height /= scale_y;
+  ret_rect.y /= scale_y;
+
+  return ret_rect;
+}
+
 void SBitmap::Draw(wxDC& dc, const wxRect& rect) {
+  if (!IsOk() || !IsShown(rect.GetPosition(), rect.GetSize())) return;
   // store user scale
   double x, y;
   dc.GetUserScale(&x, &y);
@@ -67,8 +129,14 @@ void SBitmap::Draw(wxDC& dc, const wxRect& rect) {
   auto pos = GetPosition();
   pos.x /= scale_x_;
   pos.y /= scale_y_;
-  // drawing
-  dc.DrawBitmap(GetBitmap(), pos);
+
+  wxPoint temp_pos;
+  wxRect bmp_rect = CalcMinimumRect(rect, &temp_pos);
+  if (bmp_rect.GetHeight() > 0 && bmp_rect.GetWidth() > 0) {
+    wxBitmap bitmap = GetBitmap().GetSubBitmap(bmp_rect);
+    // drawing
+    dc.DrawBitmap(bitmap, temp_pos);
+  }
 
   // resetting user scale to previous state
   dc.SetUserScale(x, y);
@@ -76,7 +144,7 @@ void SBitmap::Draw(wxDC& dc, const wxRect& rect) {
 
 wxString SBitmap::GetName() { return m_name; }
 size_t SBitmap::GetIndex() { return m_index; }
-void SBitmap::GetScale(double& x, double& y) {
+void SBitmap::GetScale(double& x, double& y) const {
   x = scale_x_;
   y = scale_y_;
 }

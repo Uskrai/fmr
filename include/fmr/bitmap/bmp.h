@@ -66,6 +66,8 @@ struct SBitmap {
   bool IsOk() const;
   bool IsLoaded() const;
 
+  wxRect CalcMinimumRect(const wxRect& rect, wxPoint* pos = nullptr) const;
+
   void Draw(wxDC& dc, const wxPoint& view_start, const wxSize& area);
   void Draw(wxDC& dc, const wxRect& rect);
 
@@ -78,7 +80,7 @@ struct SBitmap {
   wxString GetName();
   size_t GetIndex();
   [[deprecated]] double GetScale();
-  void GetScale(double& x, double& y);
+  void GetScale(double& x, double& y) const;
   int GetWidth() const;
   int GetHeight() const;
   int GetY() const;
