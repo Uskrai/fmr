@@ -101,10 +101,13 @@ int FlexGridWindow::CellToIndex(int row, int col, bool no_continous) const {
 void FlexGridWindow::SelectGridCursor(size_t index) {
   if (!IsExist(index)) return;
 
-  if (IsExist(selected_index_))
+  if (IsExist(selected_index_)) {
     vec_cells_.at(selected_index_)->SetSelected(false);
+    vec_cells_.at(selected_index_)->Refresh();
+  }
 
   vec_cells_.at(index)->SetSelected();
+  vec_cells_.at(index)->Refresh();
   selected_index_ = index;
 }
 
@@ -183,7 +186,6 @@ void FlexGridWindow::OnKeyDown(wxKeyEvent &event) {
 
   if (direction != wxALL && IsExist(cell)) {
     GoToCell(cell);
-    Refresh();
     return;
   }
   event.Skip();
