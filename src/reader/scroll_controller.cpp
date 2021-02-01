@@ -58,8 +58,7 @@ wxPoint ScrollController::GetPosition(const SBitmap *bitmap,
 void ScrollController::GetFirstShown(const SBitmap *&bitmap,
                                      wxPoint *pos) const {
   if (GetWindow()->GetPage()) {
-    auto vec = window_->GetPage()->GetBitmap();
-    for (const auto &it : vec) {
+    for (const auto &it : GetWindow()->GetPage()->GetBitmap()) {
       if (it.IsShown(GetWindow()->GetViewStart(),
                      GetWindow()->GetClientSize())) {
         bitmap = &it;
@@ -73,23 +72,20 @@ void ScrollController::GetFirstShown(const SBitmap *&bitmap,
 
 void ScrollController::SetFirstShown(const SBitmap *bitmap,
                                      const wxPoint *pos) {
-  if (bitmap) {
-    wxPoint scroll_pos = bitmap->GetPosition();
+  if (!bitmap) return;
 
-    if (pos) {
-      for (const auto &it : window_->GetPage()->GetBitmap()) {
-        if (&it == bitmap) {
-          if (it.GetPosition() != *pos) {
-            scroll_pos.x -= pos->x;
-            scroll_pos.y -= pos->y;
-            break;
-          }
-        }
-      }
+  if (!pos) GetWindow()->Scroll(bitmap->GetPosition());
+
+  for (const auto &it : window_->GetPage()->GetBitmap()) {
+    if (&it != bitmap) continue;
+    if (it.GetPosition() != *pos) {
+      wxPoint scroll_pos = window_->GetViewStart();
+      scroll_pos.x += it.GetX() - pos->x;
+      scroll_pos.y += it.GetY() - pos->y;
+      GetWindow()->AdjustScrollBar();
+      GetWindow()->Scroll(scroll_pos);
+      break;
     }
-
-    window_->AdjustScrollbars();
-    window_->Scroll(scroll_pos);
   }
 }
 
