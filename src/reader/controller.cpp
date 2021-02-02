@@ -107,16 +107,21 @@ void Controller::AdjustBitmap() {
     GetFirstShown(first_shown, &first_shown_pos);
 
     position_ctrl_->SetMinimumSize(GetWindow()->GetClientSize());
-    rescaler_->SetMaximumSize(GetWindow()->GetClientSize());
+    rescaler_->SetFitSize(GetWindow()->GetClientSize());
     GetBitmapCtrl()->AdjustBitmap();
 
     wxSize size = GetBitmapCtrl()->GetSize(page);
 
     GetWindow()->SetVirtualSize(size);
+    GetWindow()->AdjustScrollbars();
     position_ctrl_->SetWindowSize(size);
     GetBitmapCtrl()->RecalcPosition(page);
 
     SetFirstShown(first_shown, &first_shown_pos);
+
+    // to make sure the bitmap is really fit
+    if (rescaler_->GetFitSise() != GetWindow()->GetClientSize())
+      return AdjustBitmap();
 
     GetWindow()->Refresh();
   }

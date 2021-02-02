@@ -37,7 +37,7 @@ DEFINE_BITMASK_TYPE(RescalerFlags);
 
 class Rescaler {
  protected:
-  wxSize max_size_, min_size_;
+  wxSize fit_size_, min_size_;
   RescalerFlags flags_;
 
  public:
@@ -45,7 +45,7 @@ class Rescaler {
   Rescaler(RescalerFlags flags) { flags_ = flags; };
   Rescaler(const Rescaler &other) {
     flags_ = other.flags_;
-    max_size_ = other.max_size_;
+    fit_size_ = other.fit_size_;
   }
 
   void SetFlags(RescalerFlags flags) { flags_ = flags; }
@@ -77,15 +77,15 @@ class Rescaler {
 
   void GetScale(const wxSize &size, double &x, double &y) {
     if (Is(kRescaleFitWidth)) {
-      if (size.GetWidth() > max_size_.GetWidth() || Is(kRescaleEnlarge)) {
-        x = CalcScale(size.GetWidth(), max_size_.GetWidth());
+      if (size.GetWidth() > fit_size_.GetWidth() || Is(kRescaleEnlarge)) {
+        x = CalcScale(size.GetWidth(), fit_size_.GetWidth());
         if (!Is(kRescaleFitHeight)) y = x;
       }
     }
 
     if (Is(kRescaleFitHeight)) {
-      if (size.GetHeight() > max_size_.GetHeight() || Is(kRescaleEnlarge)) {
-        y = CalcScale(size.GetHeight(), max_size_.GetHeight());
+      if (size.GetHeight() > fit_size_.GetHeight() || Is(kRescaleEnlarge)) {
+        y = CalcScale(size.GetHeight(), fit_size_.GetHeight());
         if (!Is(kRescaleFitWidth)) x = y;
       }
     }
@@ -107,7 +107,12 @@ class Rescaler {
     GetScale(image.GetSize(), x, y);
   }
 
-  void SetMaximumSize(const wxSize &size) { max_size_ = size; }
+  [[deprecated("Use SetFitSize instead")]] void SetMaximumSize(
+      const wxSize &size) {
+    fit_size_ = size;
+  }
+  void SetFitSize(const wxSize &size) { fit_size_ = size; }
+  wxSize GetFitSise() const { return fit_size_; }
 
   virtual ~Rescaler(){};
 };
