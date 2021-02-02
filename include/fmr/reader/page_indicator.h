@@ -28,10 +28,10 @@ class PageIndicator : public WindowDecorator {
   size_t page_pos_ = 0, page_limit_ = 0;
   wxRect rect_;
 
+  virtual void OnDraw(wxDC &dc);
+
  public:
   PageIndicator(){};
-
-  virtual void Draw(wxDC &dc);
 
   void SetPage(int pos) { page_pos_ = pos; };
   void SetPageLimit(int size) { page_limit_ = size; }

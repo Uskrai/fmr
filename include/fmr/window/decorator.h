@@ -44,18 +44,23 @@ class WindowDecoratorList {
 class WindowDecorator : public wxEvtHandler {
  protected:
   WindowDecoratorList *parent_ = nullptr;
+  bool is_shown_ = false;
   wxTimer hide_timer_ = wxTimer(this);
 
+  virtual void OnDraw(wxDC &dc) = 0;
+
  public:
-  WindowDecorator() {}
-  WindowDecorator(WindowDecoratorList *window);
+  WindowDecorator();
   virtual ~WindowDecorator() {}
 
   void SetParent(WindowDecoratorList *window);
   WindowDecoratorList *GetParent();
 
-  virtual void Draw(wxDC &dc) = 0;
+  virtual void Draw(wxDC &dc) final;
 
+  bool IsShown() const { return is_shown_; }
+  void Show(int miliseconds = -1, bool oneShot = wxTIMER_CONTINUOUS);
+  void ShowOnce(const int miliseconds);
   void OnHideTimer(wxTimerEvent &event);
 };
 

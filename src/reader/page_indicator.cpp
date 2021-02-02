@@ -25,7 +25,7 @@ namespace fmr {
 
 namespace reader {
 
-void PageIndicator::Draw(wxDC &dc) {
+void PageIndicator::OnDraw(wxDC &dc) {
   dc.SetTextForeground(*wxBLACK);
   wxString draw_text = wxString::Format("%ld/%ld", page_pos_, page_limit_);
 
