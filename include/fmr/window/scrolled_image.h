@@ -70,6 +70,8 @@ class ScrolledImageWindow : public ScrolledWindow {
     return page_;
   }
 
+  void SetDecorator(WindowDecoratorList *decorator) { decorator_ = decorator; }
+
   void ClearBitmap() { SetBitmapPage(nullptr); }
 
   /**

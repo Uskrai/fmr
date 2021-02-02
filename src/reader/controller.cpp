@@ -36,6 +36,8 @@ Controller::Controller() {
 
   rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleNone);
 
+  decorator_ = std::make_unique<DecoratorList>();
+
   bitmap_ctrl_ = std::make_unique<bitmap::BitmapPageCtrl>(position_ctrl_.get(),
                                                           rescaler_.get());
 
@@ -81,6 +83,7 @@ bool Controller::Open(const std::string &path) {
 
 void Controller::SetWindow(ScrolledImageWindow *window) {
   ScrollController::SetWindow(window);
+  window->SetDecorator(decorator_.get());
   event::Bind(GetWindow(), kScrollWinEventAll, &Controller::OnWindowScroll,
               this);
 }
@@ -129,8 +132,25 @@ void Controller::OnLoadedImage(thread::LoadImageEvent &event) {
 }
 
 void Controller::OnOpenedStreamFound(wxCommandEvent &event) {
-  GetBitmapCtrl()->SetBitmapPage(loader_->GetOpenedPagePos());
+  GetBitmapCtrl()->EnlargePage(loader_->GetOpenedPagePos() + 1);
+  GoToPage(loader_->GetOpenedPagePos());
   AdjustBitmap();
+}
+
+bool Controller::GoToPage(size_t idx, wxDirection direction) {
+  if (!GetBitmapCtrl()->IsPageExist(idx)) return false;
+
+  GetBitmapCtrl()->SetBitmapPage(idx);
+  AdjustBitmap();
+  GetWindow()->AdjustScrollBar();
+  ResetScroll(direction);
+  decorator_->GetPageIndicator()->SetPage(idx);
+  decorator_->GetPageIndicator()->SetPageLimit(
+      GetBitmapCtrl()->GetAllPage().size());
+
+  decorator_->GetPageIndicator()->SetRect(wxPoint(0, 0),
+                                          GetWindow()->GetClientSize());
+  return true;
 }
 
 bool Controller::ChangePage(wxDirection direction) {
@@ -142,14 +162,7 @@ bool Controller::ChangePage(wxDirection direction) {
     if (!it->IsLoaded()) return true;
   }
 
-  if (GetBitmapCtrl()->IsPageExist(idx)) {
-    GetBitmapCtrl()->SetBitmapPage(idx);
-    AdjustBitmap();
-    GetWindow()->AdjustScrollBar();
-    ResetScroll(direction);
-    return true;
-  }
-  return false;
+  return GoToPage(idx, direction);
 }
 
 bool Controller::ChangeFolder(wxDirection direction) {
@@ -185,6 +198,7 @@ void Controller::OnWindowScroll(wxScrollWinEvent &event) {
       if (Change(direction)) return;
     }
   }
+  GetWindow()->Refresh();
   event.Skip();
 }
 

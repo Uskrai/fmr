@@ -15,32 +15,16 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/window/decorator.h>
-#include <wx/dc.h>
+#include "fmr/reader/decorator.h"
 
 namespace fmr {
 
-void WindowDecoratorList::AddDecorator(WindowDecorator *decorator) {
-  list_decorator_.push_back(decorator);
+namespace reader {
+void DecoratorList::Create() {
+  page_indicator_ = std::make_unique<PageIndicator>();
+  AddDecorator(page_indicator_.get());
 }
 
-void WindowDecoratorList::DrawDecorator(wxDC &dc) {
-  wxPoint device_origin = dc.GetDeviceOrigin();
-  dc.SetDeviceOrigin(0, 0);
-  for (auto &it : list_decorator_) {
-    it->Draw(dc);
-  }
-  dc.SetDeviceOrigin(device_origin.x, device_origin.y);
-}
-
-WindowDecorator::WindowDecorator(WindowDecoratorList *window) {
-  SetParent(window);
-}
-void WindowDecorator::SetParent(WindowDecoratorList *window) {
-  parent_ = window;
-  window->AddDecorator(this);
-}
-
-WindowDecoratorList *WindowDecorator::GetParent() { return parent_; }
+}  // namespace reader
 
 }  // namespace fmr

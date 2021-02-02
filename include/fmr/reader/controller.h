@@ -21,6 +21,7 @@
 #include "fmr/bitmap/bitmap_page_ctrl.h"
 #include "fmr/bitmap/page_loader.h"
 #include "fmr/bitmap/position_ctrl.h"
+#include "fmr/reader/decorator.h"
 #include "fmr/reader/scroll_controller.h"
 #include "fmr/window/scrolled_image.h"
 
@@ -36,10 +37,10 @@ enum ControllerId {
 
 class Controller : public ScrollController {
   std::unique_ptr<bitmap::PageLoader> loader_;
-  std::unique_ptr<AbstractHandler> handler_;
   std::unique_ptr<bitmap::PositionCtrl> position_ctrl_;
   std::unique_ptr<bitmap::BitmapPageCtrl> bitmap_ctrl_;
   std::unique_ptr<bitmap::Rescaler> rescaler_;
+  std::unique_ptr<DecoratorList> decorator_;
   bool is_read_from_right_ = false;
   wxWindow *parent_ = nullptr;
 
@@ -62,7 +63,7 @@ class Controller : public ScrollController {
   bool Open(const std::string &path);
   void AdjustBitmap();
 
-  AbstractHandler *GetHandler() { return handler_.get(); }
+  AbstractHandler *GetHandler() { return loader_->GetHandler(); }
   virtual void Clear();
 
   void SetImagePerPage(size_t size) { loader_->SetImagePerPage(size); }
@@ -74,6 +75,7 @@ class Controller : public ScrollController {
     return bitmap_ctrl_.get();
   }
 
+  bool GoToPage(size_t idx, wxDirection direction = wxDOWN);
   bool Change(wxDirection direction);
   bool ChangePage(wxDirection direction);
   bool ChangeFolder(wxDirection direction);

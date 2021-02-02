@@ -15,32 +15,33 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/window/decorator.h>
+#include "fmr/reader/page_indicator.h"
+
 #include <wx/dc.h>
+
+#include "fmr/common/dimension.h"
 
 namespace fmr {
 
-void WindowDecoratorList::AddDecorator(WindowDecorator *decorator) {
-  list_decorator_.push_back(decorator);
+namespace reader {
+
+void PageIndicator::Draw(wxDC &dc) {
+  dc.SetTextForeground(*wxBLACK);
+  wxString draw_text = wxString::Format("%ld/%ld", page_pos_, page_limit_);
+
+  wxFont font = *wxNORMAL_FONT;
+  font.MakeLarger().MakeLarger();
+  dc.SetFont(font);
+
+  wxSize text_size = dc.GetTextExtent(draw_text);
+  wxPoint pos = dimension::AlignPosition(
+      rect_, text_size, wxALIGN_BOTTOM | wxALIGN_CENTER_HORIZONTAL);
+
+  dc.DrawRectangle(pos, text_size);
+  dc.DrawText(draw_text, pos);
+  // dc.DrawEllipse(wxPoint(100 + pos.x, 300 + pos.y), wxSize(1000, 1000));
 }
 
-void WindowDecoratorList::DrawDecorator(wxDC &dc) {
-  wxPoint device_origin = dc.GetDeviceOrigin();
-  dc.SetDeviceOrigin(0, 0);
-  for (auto &it : list_decorator_) {
-    it->Draw(dc);
-  }
-  dc.SetDeviceOrigin(device_origin.x, device_origin.y);
-}
-
-WindowDecorator::WindowDecorator(WindowDecoratorList *window) {
-  SetParent(window);
-}
-void WindowDecorator::SetParent(WindowDecoratorList *window) {
-  parent_ = window;
-  window->AddDecorator(this);
-}
-
-WindowDecoratorList *WindowDecorator::GetParent() { return parent_; }
+}  // namespace reader
 
 }  // namespace fmr

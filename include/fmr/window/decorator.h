@@ -18,6 +18,7 @@
 #ifndef FMR_WINDOW_DECORATOR
 #define FMR_WINDOW_DECORATOR
 
+#include <wx/timer.h>
 #include <wx/window.h>
 
 #include <vector>
@@ -32,6 +33,7 @@ class WindowDecoratorList {
   wxWindow *window_ = nullptr;
 
  public:
+  WindowDecoratorList(){};
   WindowDecoratorList(wxWindow *window) { window_ = window; }
 
   wxWindow *GetWindow() { return window_; }
@@ -39,9 +41,10 @@ class WindowDecoratorList {
   void DrawDecorator(wxDC &dc);
 };
 
-class WindowDecorator {
+class WindowDecorator : public wxEvtHandler {
  protected:
   WindowDecoratorList *parent_ = nullptr;
+  wxTimer hide_timer_ = wxTimer(this);
 
  public:
   WindowDecorator() {}
@@ -52,6 +55,8 @@ class WindowDecorator {
   WindowDecoratorList *GetParent();
 
   virtual void Draw(wxDC &dc) = 0;
+
+  void OnHideTimer(wxTimerEvent &event);
 };
 
 }  // namespace fmr

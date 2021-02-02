@@ -15,32 +15,34 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/window/decorator.h>
-#include <wx/dc.h>
+#ifndef FMR_READER_PAGE_INDICATOR
+#define FMR_READER_PAGE_INDICATOR
+
+#include "fmr/window/decorator.h"
 
 namespace fmr {
 
-void WindowDecoratorList::AddDecorator(WindowDecorator *decorator) {
-  list_decorator_.push_back(decorator);
-}
+namespace reader {
 
-void WindowDecoratorList::DrawDecorator(wxDC &dc) {
-  wxPoint device_origin = dc.GetDeviceOrigin();
-  dc.SetDeviceOrigin(0, 0);
-  for (auto &it : list_decorator_) {
-    it->Draw(dc);
+class PageIndicator : public WindowDecorator {
+  size_t page_pos_ = 0, page_limit_ = 0;
+  wxRect rect_;
+
+ public:
+  PageIndicator(){};
+
+  virtual void Draw(wxDC &dc);
+
+  void SetPage(int pos) { page_pos_ = pos; };
+  void SetPageLimit(int size) { page_limit_ = size; }
+
+  void SetRect(const wxPoint &pos, const wxSize &size) {
+    rect_ = wxRect(pos, size);
   }
-  dc.SetDeviceOrigin(device_origin.x, device_origin.y);
-}
+};
 
-WindowDecorator::WindowDecorator(WindowDecoratorList *window) {
-  SetParent(window);
-}
-void WindowDecorator::SetParent(WindowDecoratorList *window) {
-  parent_ = window;
-  window->AddDecorator(this);
-}
-
-WindowDecoratorList *WindowDecorator::GetParent() { return parent_; }
+}  // namespace reader
 
 }  // namespace fmr
+
+#endif /* end of include guard: FMR_READER_PAGE_INDICATOR */
