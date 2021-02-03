@@ -34,6 +34,9 @@ class ScrolledImageWindow : public ScrolledWindow {
   bitmap::BitmapPage *page_ = nullptr;
   WindowDecoratorList *decorator_ = nullptr;
 
+ protected:
+  void DoScroll(int x, int y) override;
+
  public:
   ScrolledImageWindow() : ScrolledWindow() {}
 
@@ -81,10 +84,9 @@ class ScrolledImageWindow : public ScrolledWindow {
    */
   void DrawBitmap(wxDC &dc);
 
-  /**
-   * overriden method
-   */
   virtual void OnDraw(wxDC &dc) override;
+
+  virtual void OnScroll(wxScrollWinEvent &event);
 };
 
 }  // namespace fmr

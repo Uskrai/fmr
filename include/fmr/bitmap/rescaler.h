@@ -100,7 +100,7 @@ class Rescaler {
   }
 
   void GetScale(const SBitmap &bitmap, double &x, double &y) {
-    GetScale(bitmap.GetBitmap().GetSize(), x, y);
+    GetScale(bitmap.GetImage().GetSize(), x, y);
   }
 
   void GetScale(const wxImage &image, double &x, double &y) {

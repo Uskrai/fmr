@@ -59,6 +59,13 @@ class BitmapPage {
     }
   }
 
+  void SetVisibleArea(const wxPoint &pos, const wxSize &size) {
+    SetVisibleArea(wxRect(pos, size));
+  }
+  void SetVisibleArea(const wxRect &rect) {
+    for (auto &it : vec_bitmap_) it.SetVisibleArea(rect);
+  }
+
   void Draw(wxDC &dc, const wxPoint &view_start, const wxSize &size) {
     return Draw(dc, wxRect(view_start, size));
   }
