@@ -51,18 +51,22 @@ enum BitmapPageChangeStatus : int {
 };
 
 struct SBitmap {
-  wxBitmap m_item = wxBitmap(wxSize(1, 1));
+  wxImage image_;
+  wxBitmap visible_bitmap_;
   wxString m_name = wxEmptyString;
   size_t m_index = -1;
   double scale_x_ = 1, scale_y_ = 1;
   wxPoint m_pos = wxPoint(0, 0);
+  wxRect visible_area_;
+  wxRect visible_bitmap_rect_;
   bool m_isOk = false;  // determine bitmap status
   bool m_isLoaded = false;
 
   SBitmap() {}
   SBitmap(bool isLoaded);
-  const wxBitmap& GetBitmap() const;
-  wxBitmap& GetBitmap();
+
+  const wxImage& GetImage() const { return image_; }
+  wxImage& GetImage() { return image_; }
   bool IsOk() const;
   bool IsLoaded() const;
 
@@ -70,6 +74,8 @@ struct SBitmap {
 
   void Draw(wxDC& dc, const wxPoint& view_start, const wxSize& area);
   void Draw(wxDC& dc, const wxRect& rect);
+
+  void PrepareBitmap();
 
   bool IsPointed(const wxPoint& area, const wxPoint& position) const;
   bool IsShown(const wxPoint& area, const wxSize& size) const;
@@ -86,7 +92,13 @@ struct SBitmap {
   int GetY() const;
   int GetX() const;
 
-  void SetBitmap(const wxBitmap& bmp);
+  [[deprecated("Use SetImage instead")]] void SetBitmap(const wxBitmap& bmp);
+  void SetImage(const wxImage& image);
+
+  void SetVisibleArea(const wxPoint& pos, const wxSize& size) {
+    return SetVisibleArea(wxRect(pos, size));
+  }
+  void SetVisibleArea(const wxRect& rect);
   void SetLoaded(bool stat = true);
   void SetName(const wxString& name);
   void SetIndex(size_t idx);

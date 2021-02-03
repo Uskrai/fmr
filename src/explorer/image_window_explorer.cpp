@@ -44,6 +44,7 @@ bool ImageWindow::Create(wxWindow *parent, wxWindowID id, const wxPoint &pos,
   sizer_->AddSpacer(GetBestBitmapSize(GetSize()).GetHeight());
   sizer_->Add(window_text_, wxSizerFlags(1).Align(wxBOTTOM).Expand());
 
+  bitmap_.SetVisibleArea(GetPosition(), GetClientSize());
   SetSizer(sizer_);
   Layout();
   return ret;
@@ -56,6 +57,7 @@ void ImageWindow::BindEvent() {
 
 void ImageWindow::SetBitmap(const SBitmap &bmp) {
   bitmap_ = bmp;
+  bitmap_.SetVisibleArea(GetPosition(), GetClientSize());
   refresh_scheduled_ = true;
 }
 

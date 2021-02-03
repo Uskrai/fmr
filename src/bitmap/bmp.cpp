@@ -22,8 +22,6 @@ namespace fmr {
 
 SBitmap::SBitmap(bool isLoaded) { m_isLoaded = isLoaded; }
 
-const wxBitmap& SBitmap::GetBitmap() const { return this->m_item; }
-wxBitmap& SBitmap::GetBitmap() { return m_item; }
 bool SBitmap::IsOk() const { return m_isOk; }
 bool SBitmap::IsLoaded() const { return m_isLoaded; }
 
@@ -117,29 +115,22 @@ wxRect SBitmap::CalcMinimumRect(const wxRect& rect, wxPoint* pos_start) const {
 }
 
 void SBitmap::Draw(wxDC& dc, const wxRect& rect) {
-  if (!IsOk() || !IsShown(rect.GetPosition(), rect.GetSize())) return;
-  // store user scale
+  wxPoint pos;
+  wxRect minimum_rect = CalcMinimumRect(visible_area_, &pos);
+
   double x, y;
   dc.GetUserScale(&x, &y);
-
-  // set bitmap scaling
   dc.SetUserScale(scale_x_, scale_y_);
-
-  // getting position to follow the scaling
-  auto pos = GetPosition();
-  pos.x /= scale_x_;
-  pos.y /= scale_y_;
-
-  wxPoint temp_pos;
-  wxRect bmp_rect = CalcMinimumRect(rect, &temp_pos);
-  if (bmp_rect.GetHeight() > 0 && bmp_rect.GetWidth() > 0) {
-    wxBitmap bitmap = GetBitmap().GetSubBitmap(bmp_rect);
-    // drawing
-    dc.DrawBitmap(bitmap, temp_pos);
-  }
-
-  // resetting user scale to previous state
+  if (!minimum_rect.IsEmpty()) dc.DrawBitmap(visible_bitmap_, pos);
   dc.SetUserScale(x, y);
+}
+
+void SBitmap::PrepareBitmap() {
+  wxRect rect = CalcMinimumRect(visible_area_);
+  if (rect != visible_bitmap_rect_) {
+    visible_bitmap_ = GetImage().GetSubImage(rect);
+    visible_bitmap_rect_ = rect;
+  }
 }
 
 wxString SBitmap::GetName() { return m_name; }
@@ -149,28 +140,47 @@ void SBitmap::GetScale(double& x, double& y) const {
   y = scale_y_;
 }
 double SBitmap::GetScale() { return scale_x_; }
-int SBitmap::GetWidth() const { return m_item.GetWidth() * scale_x_; }
-int SBitmap::GetHeight() const { return m_item.GetHeight() * scale_y_; }
+int SBitmap::GetWidth() const { return GetImage().GetWidth() * scale_x_; }
+int SBitmap::GetHeight() const { return GetImage().GetHeight() * scale_y_; }
 int SBitmap::GetY() const { return m_pos.y; }
 int SBitmap::GetX() const { return m_pos.x; }
 
 void SBitmap::SetBitmap(const wxBitmap& bmp) {
-  m_item = bmp;
   m_isOk = true;
   SetLoaded();
 }
+
+void SBitmap::SetImage(const wxImage& image) {
+  image_ = image;
+  m_isOk = image_.IsOk();
+  SetLoaded();
+
+  PrepareBitmap();
+}
+
+void SBitmap::SetVisibleArea(const wxRect& rect) {
+  visible_area_ = rect;
+  PrepareBitmap();
+}
+
 void SBitmap::SetLoaded(bool stat) { m_isLoaded = stat; }
 void SBitmap::SetName(const wxString& name) { m_name = name; }
 void SBitmap::SetIndex(size_t idx) { m_index = idx; }
 void SBitmap::SetScale(double scale) {
   scale_x_ = scale;
   scale_y_ = scale;
+  PrepareBitmap();
 }
 void SBitmap::SetScale(double x, double y) {
   scale_x_ = x;
   scale_y_ = y;
+  PrepareBitmap();
 }
-void SBitmap::SetPosition(const wxPoint& pos) { m_pos = pos; }
+void SBitmap::SetPosition(const wxPoint& pos) {
+  m_pos = pos;
+  PrepareBitmap();
+}
+
 void SBitmap::SetY(int PosY) { m_pos.y = PosY; }
 void SBitmap::SetX(int PosX) { m_pos.x = PosX; }
 

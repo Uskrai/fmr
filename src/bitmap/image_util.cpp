@@ -71,7 +71,7 @@ bool Rescale(SBitmap &bmp, wxImage &img, float scale,
 
   if (img.GetSize() == bmp.GetSize()) return false;
 
-  bmp.SetBitmap(img);
+  bmp.SetImage(img);
   bmp.SetScale(scale);
 
   return true;

@@ -17,6 +17,7 @@
 
 #include <fmr/explorer/window_explorer.h>
 #include <wx/filename.h>
+#include <wx/stopwatch.h>
 
 namespace fmr {
 
@@ -68,7 +69,7 @@ bool Window::Open(std::shared_ptr<AbstractOpenableHandler> handler) {
   wxSize best_bitmap_size = ImageWindow::GetBestBitmapSize(child_size);
 
   rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleFitAll);
-  rescaler_->SetMaximumSize(best_bitmap_size);
+  rescaler_->SetFitSize(best_bitmap_size);
 
   CreateGrid(row, column, wxSize(1, 1));
 
@@ -216,8 +217,8 @@ void Window::OnKeyDown(wxKeyEvent &event) {
 void Window::OnImageLoaded(thread::LoadImageEvent &event) {
   auto item = map_window_.find(loader_.GetSourceStream(event.GetStream()));
   if (item != map_window_.end()) {
+    item->second->SetBitmap(event.GetBitmap());
     SBitmap &bitmap = item->second->GetBitmap();
-    bitmap = event.GetBitmap();
     rescaler_->DoRescale(bitmap);
     Refresh();
   }
