@@ -104,6 +104,7 @@ bool Window::Open(std::shared_ptr<AbstractOpenableHandler> handler) {
   handler_ = handler;
   Layout();
   FitInside();
+  GoToCell(0);
   return true;
 }
 
