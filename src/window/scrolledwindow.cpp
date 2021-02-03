@@ -131,8 +131,9 @@ void ScrolledWindow::Scroll(wxOrientation orient, int step) {
 
 void ScrolledWindow::DoScrollLine(wxEventType type, wxOrientation orient,
                                   int step) {
-  wxQueueEvent(this,
-               new wxScrollWinEvent(type, GetScrollPos(orient) + step, orient));
+  int scroll_pos = GetScrollPos(orient) + step;
+  scroll_pos = (scroll_pos == wxDefaultCoord) ? 0 : scroll_pos;
+  wxQueueEvent(this, new wxScrollWinEvent(type, scroll_pos, orient));
 }
 
 void ScrolledWindow::LineUp(wxOrientation orient, int step) {
