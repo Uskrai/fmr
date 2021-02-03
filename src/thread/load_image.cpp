@@ -61,7 +61,7 @@ void LoadImage::Load(SStream *stream) {
   wxImage image;
   image_util::Load(image, *stream);
 
-  event->GetBitmap().SetBitmap(image);
+  event->GetBitmap().SetImage(image);
 
   TEST_RETURN();
   wxLogMessage("Sending Image Loaded Event to %p", GetParent());

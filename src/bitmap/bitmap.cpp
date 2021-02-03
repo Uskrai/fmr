@@ -111,7 +111,7 @@ float Bitmap::Prepare(wxImage& image) {
 
 void Bitmap::Add(wxImage& image, const size_t& idx, const float& scale) {
   struct SBitmap& bmp = m_item.at(idx);
-  bmp.SetBitmap(wxBitmap(image));
+  bmp.SetImage(image);
   bmp.SetIndex(idx);
   bmp.SetScale(scale);
 
