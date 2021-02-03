@@ -178,7 +178,7 @@ size_t STDHandler::Index(const std::string &name) const {
   std::string temp = name;
   Path::RemoveDirSep(temp);
 
-  temp = Path::MakeRelative(GetName(), temp);
+  if (Path::IsAbsolute(temp)) temp = Path::MakeRelative(GetName(), temp);
   for (const auto &it : list_stream_) {
     if (temp == it.GetName()) return i;
     i++;

@@ -18,24 +18,49 @@
 #ifndef FMR_EXPLORER_LOAD_EXPLORER
 #define FMR_EXPLORER_LOAD_EXPLORER
 
-#include <fmr/explorer/common.h>
+#include <fmr/bitmap/rescaler.h>
+#include <fmr/handler/struct_stream.h>
 #include <fmr/thread/thread.h>
+#include <wx/event.h>
 
 #include <queue>
 
+#include "fmr/bitmap/bmp.h"
+#include "fmr/thread/queue.h"
+
 namespace fmr {
 
-namespace explorer {
+namespace thread {
 
-wxDECLARE_EVENT(EVT_BITMAP_LOADED, StreamBitmapEvent);
-class LoadThread : public BaseThread {
+class LoadImageEvent : public wxCommandEvent {
+ protected:
+  SBitmap bitmap_;
+  const SStream *stream_;
+
  public:
-  LoadThread(ThreadController *parent, wxThreadKind kind = wxTHREAD_DETACHED,
-             int id = wxID_ANY)
-      : BaseThread(parent, kind, id){};
+  LoadImageEvent(wxEventType type, int id) : wxCommandEvent(type, id){};
+  LoadImageEvent(const LoadImageEvent &event) : wxCommandEvent(event) {
+    bitmap_ = event.bitmap_;
+    stream_ = event.stream_;
+  }
+
+  void SetBitmap(const SBitmap &bitmap) { bitmap_ = bitmap; }
+  void SetStream(const SStream *stream) { stream_ = stream; }
+
+  SBitmap &GetBitmap() { return bitmap_; }
+  const SStream *GetStream() { return stream_; }
+};
+
+wxDECLARE_EVENT(kEventImageLoaded, LoadImageEvent);
+
+class LoadImage : public Queue<SStream *> {
+ public:
+  LoadImage(ThreadController *parent, wxThreadKind kind = wxTHREAD_DETACHED,
+            int id = wxID_ANY)
+      : Queue(parent, kind, id){};
 
   ExitCode Entry();
-  void Load(StreamBitmap &item);
+  void Load(SStream *stream);
 
   void SetSize(const wxSize &size);
   void SetImageQuality(wxImageResizeQuality quality);
@@ -43,20 +68,17 @@ class LoadThread : public BaseThread {
 
   void DeleteOnEmptyQueue(bool condition = true);
 
-  void Push(StreamBitmap &stream_bitmap);
-
  protected:
-  void Update(StreamBitmap &stream_bitmap);
-  std::queue<StreamBitmap> load_queue_;
+  std::queue<SStream *> load_queue_;
 
   bool is_delete_on_empty_ = false;
 
+  bitmap::Rescaler image_rescaler_;
   wxSize image_size_;
   wxImageResizeQuality image_quality_ = wxIMAGE_QUALITY_NORMAL;
 };
 
-};  // namespace explorer
-
+};  // namespace thread
 };  // namespace fmr
 
 #endif

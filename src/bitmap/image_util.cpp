@@ -21,6 +21,11 @@
 namespace fmr {
 
 namespace image_util {
+
+bool CanRead(const SStream &stream) {
+  return stream.IsOk() && wxImage::CanRead(*stream.GetStream());
+}
+
 bool Load(wxImage &image, wxInputStream &stream) {
   if (!stream.IsOk() && stream.GetSize() == 0) return false;
 

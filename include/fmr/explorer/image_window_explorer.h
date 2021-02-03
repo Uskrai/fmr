@@ -20,12 +20,12 @@
 
 #include <fmr/common/string.h>
 #include <fmr/explorer/common.h>
-#include <fmr/explorer/load_explorer.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/window.h>
 
 #include <memory>
+#include <vector>
 
 namespace fmr {
 
@@ -38,8 +38,8 @@ class ImageWindow : public wxWindow {
   wxSize bitmap_size_;
   std::vector<StringDraw> vec_string_draw_;
   std::string string_name_;
-  std::shared_ptr<SStream> stream_ = NULL;
-  std::shared_ptr<SBitmap> bitmap_ = NULL;
+  SStream *stream_ = nullptr;
+  SBitmap bitmap_;
 
   bool refresh_scheduled_ = false;
 
@@ -58,20 +58,19 @@ class ImageWindow : public wxWindow {
               const wxSize &size = wxDefaultSize, long style = 0,
               const wxString &name = wxPanelNameStr);
 
-  void SetBitmap(std::shared_ptr<SBitmap> bmp);
-  void SetStream(std::shared_ptr<SStream> stream);
+  void SetBitmap(const SBitmap &bmp);
+  void SetStream(SStream *stream);
 
-  const std::shared_ptr<SStream> GetStream() const;
-  std::shared_ptr<SStream> GetStream();
-  const std::shared_ptr<SBitmap> GetBitmap() const;
-  std::shared_ptr<SBitmap> GetBitmap();
+  const SStream *GetStream() const;
+  SStream *GetStream();
+  const SBitmap &GetBitmap() const;
+  SBitmap &GetBitmap();
 
   static wxSize GetBestBitmapSize(const wxSize &size);
 
   void Draw(wxDC &dc);
 
   void PrepareRect(const wxRect &rect);
-  void PrepareStringPos(wxDC &dc, const wxRect &rect);
 
  private:
   void BindEvent();

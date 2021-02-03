@@ -37,12 +37,15 @@ Window::Window(wxWindow *parent, const wxWindowID &id, const wxPoint &pos,
   // grid_table_ = new wxGridStringTable();
   // SetTable( grid_table_, true );
   BindEvent();
+  loader_.SetFindFlags(thread::kFindHandlerOnlyFirstItem |
+                       thread::kFindHandlerRecursive);
 }
 
 void Window::BindEvent() {
   Bind(EVT_COMMAND_THREAD_UPDATE, &Window::OnThreadUpdate, this);
   Bind(EVT_COMMAND_THREAD_COMPLETED, &Window::OnThreadUpdate, this);
   Bind(wxEVT_KEY_DOWN, &Window::OnKeyDown, this);
+  Bind(thread::kEventImageLoaded, &Window::OnImageLoaded, this, kLoaderId);
 }
 
 bool Window::Destroy() { return wxWindow::Destroy(); }
@@ -64,7 +67,8 @@ bool Window::Open(std::shared_ptr<AbstractOpenableHandler> handler) {
   wxSize child_size = wxSize(both_size, both_size);
   wxSize best_bitmap_size = ImageWindow::GetBestBitmapSize(child_size);
 
-  controller_.SetThumbSize(best_bitmap_size);
+  rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleFitAll);
+  rescaler_->SetMaximumSize(best_bitmap_size);
 
   CreateGrid(row, column, wxSize(1, 1));
 
@@ -73,35 +77,34 @@ bool Window::Open(std::shared_ptr<AbstractOpenableHandler> handler) {
 
   size_t idx = 0;
   for (auto &it : handler->GetChild()) {
-    auto &item = list_item.at(idx);
-    item.stream = std::shared_ptr<SStream>(new SStream(it));
-    item.bitmap = std::shared_ptr<SBitmap>(new SBitmap());
+    auto stream = std::make_unique<SStream>(it);
+    // auto bitmap = std::unique_ptr<SBitmap>(new SBitmap());
 
     ImageWindow *image_cell_window =
         new ImageWindow(this, wxID_ANY, wxDefaultPosition, child_size);
 
     image_cell_window->SetBackgroundColour(*wxBLACK);
     image_cell_window->SetForegroundColour(*wxWHITE);
-    image_cell_window->SetBitmap(item.bitmap);
-    image_cell_window->SetStream(item.stream);
+    // image_cell_window->SetBitmap(bitmap.get());
+    image_cell_window->SetStream(stream.get());
 
     Add(image_cell_window);
 
-    map_window_.insert(std::make_pair(image_cell_window, item));
-
+    loader_.PushFind(stream.get());
+    map_window_.insert(std::make_pair(stream.get(), image_cell_window));
+    list_stream_.push_back(std::move(stream));
     idx++;
   }
 
   SetCellBorderWidth(10);
   SetCellHighlightPenWidth(3);
 
-  list_item_ = list_item;
-  controller_.SetParameter(list_item);
-  controller_.Load();
+  loader_.Run();
   Refresh();
   handler_ = handler;
   Layout();
   FitInside();
+  GoToCell(0);
   return true;
 }
 
@@ -118,11 +121,15 @@ bool Window::OpenCell(int index) {
   auto opening_cell = GetCellWindow(index);
   if (!opening_cell) return false;
 
-  auto item = map_window_[opening_cell->GetCellWindow()];
+  const SStream *stream = nullptr;
+  for (const auto &it : map_window_) {
+    if (it.second == opening_cell->GetCellWindow()) {
+      stream = it.first;
+    }
+  }
+  if (!stream) return false;
 
-  if (!item.stream) return false;
-
-  std::string path = handler_->GetItemPath(*item.stream);
+  std::string path = handler_->GetItemPath(*stream);
 
   auto handler = std::shared_ptr<AbstractOpenableHandler>(
       HandlerFactory::NewOpenableHandler(path));
@@ -141,8 +148,10 @@ bool Window::OpenCell(int index) {
     }
   }
 
+  std::shared_ptr<SStream> opened_stream =
+      std::shared_ptr<SStream>(new SStream(*stream));
   StreamEvent *event = new StreamEvent(EVT_OPEN_FILE, GetId());
-  event->SetStream(item.stream);
+  event->SetStream(opened_stream);
 
   event->SetString(path);
 
@@ -184,10 +193,9 @@ bool Window::OpenParent() {
 void Window::Clear() {
   ClearCell(true);
   ResetCellPosition();
+  loader_.Clear();
   map_window_.clear();
-  list_item_.clear();
-  list_renderer_.clear();
-  controller_.Clear();
+  list_stream_.clear();
   handler_.reset();
 }
 
@@ -205,16 +213,30 @@ void Window::OnKeyDown(wxKeyEvent &event) {
   event.Skip();
 }
 
+void Window::OnImageLoaded(thread::LoadImageEvent &event) {
+  auto item = map_window_.find(loader_.GetSourceStream(event.GetStream()));
+  if (item != map_window_.end()) {
+    SBitmap &bitmap = item->second->GetBitmap();
+    bitmap = event.GetBitmap();
+    rescaler_->DoRescale(bitmap);
+    Refresh();
+  }
+}
+
 void Window::Select(std::string name) {
   if (!handler_) return;
 
   name = Path::GetName(name);
 
-  for (size_t idx = 0; idx < list_item_.size(); idx++) {
-    auto &it = list_item_.at(idx);
-    if (!it.stream) continue;
-
-    if (it.stream->GetName() == name) GoToCell(idx);
+  size_t idx = 0;
+  for (const auto &it : list_stream_) {
+    if (it) {
+      if (it->GetName() == name) {
+        GoToCell(idx);
+        break;
+      }
+    }
+    idx++;
   }
 }
 

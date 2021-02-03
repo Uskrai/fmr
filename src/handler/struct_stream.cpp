@@ -30,8 +30,7 @@ namespace fmr {
 char DUMMY_BUFFER;
 
 void SStream::Open(void *data, size_t length) {
-  m_stream = std::shared_ptr<wxMemoryOutputStream>(
-      new wxMemoryOutputStream(data, length));
+  m_stream = std::make_shared<wxMemoryOutputStream>(data, length);
 }
 
 SStream::SStream(void *data, size_t length) { Open(data, length); }
@@ -87,10 +86,9 @@ void SStream::Open(const std::string &name) {
 
     file = std::ifstream(name.c_str(), std::ios::binary);
 
-    char *buffer = new char[fsize];
-    file.read(buffer, fsize);
-    m_stream->Write(buffer, fsize);
-    delete[] buffer;
+    auto buffer = std::make_unique<char[]>(fsize);
+    file.read(buffer.get(), fsize);
+    m_stream->Write(buffer.get(), fsize);
   }
 }
 
@@ -101,7 +99,7 @@ void SStream::Open(wxInputStream *stream) {
 }
 
 void SStream::Open(const wxMemoryOutputStream &stream) {
-  auto buffer = std::shared_ptr<char[]>(new char[stream.GetSize()]);
+  auto buffer = std::make_unique<char[]>(stream.GetSize());
   size_t length;
   length = stream.CopyTo(buffer.get(), stream.GetSize());
 
@@ -140,11 +138,9 @@ std::shared_ptr<AbstractHandler> SStream::GetHandler() { return m_handler; }
 
 std::shared_ptr<wxMemoryInputStream> SStream::GetStream() const {
   if (IsOk()) {
-    return std::shared_ptr<wxMemoryInputStream>(
-        new wxMemoryInputStream(*m_stream));
+    return std::make_shared<wxMemoryInputStream>(*m_stream);
   } else {
-    return std::shared_ptr<wxMemoryInputStream>(
-        new wxMemoryInputStream(NULL, 0));
+    return std::make_shared<wxMemoryInputStream>(nullptr, 0);
   }
 }
 

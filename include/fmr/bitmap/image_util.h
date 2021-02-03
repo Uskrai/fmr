@@ -32,6 +32,8 @@ namespace fmr {
 
 namespace image_util {
 
+bool CanRead(const SStream &stream);
+
 /**
  * @brief load image from input stream
  *

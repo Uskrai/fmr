@@ -28,13 +28,15 @@ namespace fmr {
 wxDECLARE_EVENT(EVT_COMMAND_THREAD_UPDATE, wxThreadEvent);
 wxDECLARE_EVENT(EVT_COMMAND_THREAD_COMPLETED, wxThreadEvent);
 
+class BaseThread;
+
 class ThreadController : public wxEvtHandler {
  public:
   ThreadController();
   ~ThreadController() {}
   virtual wxEvtHandler *GetParent() = 0;
   virtual void DoSetNull(int id) = 0;
-  virtual wxThread *GetThread(int id) = 0;
+  virtual BaseThread *GetThread(int id) = 0;
 
   bool Delete(int thread_id, wxCriticalSection &lock);
   bool Wait(int thread_id, wxCriticalSection &lock);
@@ -54,9 +56,12 @@ class BaseThread : public wxThread, public wxObject {
  public:
   BaseThread(ThreadController *parent,
              const wxThreadKind type = wxTHREAD_DETACHED, int id = -1);
-  ~BaseThread();
+  virtual ~BaseThread();
 
-  void SetId(int id);
+  [[deprecated("Replaced by SetEventId")]] void SetId(int id);
+  void SetEventId(int id);
+  int GetEventId() { return m_id; }
+
   ThreadController *GetParent() { return parent_; }
   void QueueEventParent(wxEvent *event);
 

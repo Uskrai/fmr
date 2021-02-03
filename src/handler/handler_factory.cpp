@@ -63,8 +63,9 @@ bool HandlerFactory::FindOpenable(const std::string& path, HandlerType& type) {
   return false;
 }
 
-AbstractHandler* HandlerFactory::NewHandler(const std::string& path) {
-  AbstractHandler* handler = NULL;
+std::unique_ptr<AbstractHandler> HandlerFactory::NewHandler(
+    const std::string& path) {
+  std::unique_ptr<AbstractHandler> handler = NULL;
   HandlerType type;
   if (Find(path, type)) {
     handler = NewHandler(type);
@@ -73,19 +74,20 @@ AbstractHandler* HandlerFactory::NewHandler(const std::string& path) {
   return handler;
 }
 
-AbstractHandler* HandlerFactory::NewHandler(const HandlerType& type) {
+std::unique_ptr<AbstractHandler> HandlerFactory::NewHandler(
+    const HandlerType& type) {
   switch (type) {
     case kHandlerWxArchive:
-      return new WxArchiveHandler();
+      return std::make_unique<WxArchiveHandler>();
     default:
       return NewOpenableHandler(type);
   }
 }
 
-AbstractOpenableHandler* HandlerFactory::NewOpenableHandler(
+std::unique_ptr<AbstractOpenableHandler> HandlerFactory::NewOpenableHandler(
     const std::string& path) {
   HandlerType type;
-  AbstractOpenableHandler* handler = nullptr;
+  std::unique_ptr<AbstractOpenableHandler> handler;
   if (Find(path, type)) {
     handler = NewOpenableHandler(type);
     if (handler) handler->Open(path);
@@ -94,20 +96,22 @@ AbstractOpenableHandler* HandlerFactory::NewOpenableHandler(
   return handler;
 }
 
-AbstractOpenableHandler* HandlerFactory::NewOpenableHandler(
+std::unique_ptr<AbstractOpenableHandler> HandlerFactory::NewOpenableHandler(
     const HandlerType& type) {
   switch (type) {
     case kHandlerStd:
-      return new STDHandler();
+      return std::make_unique<STDHandler>();
     case kHandlerDefault:
-      return new DefaultHandler();
+      return std::make_unique<DefaultHandler>();
     default:
       return nullptr;
   }
   return nullptr;
 }
 
-AbstractHandler* HandlerFactory::NewHandler() { return NewHandler(m_type); }
+std::unique_ptr<AbstractHandler> HandlerFactory::NewHandler() {
+  return NewHandler(m_type);
+}
 
 bool HandlerFactory::IsOpenable(const std::string& path) {
   HandlerType type, openable_type;

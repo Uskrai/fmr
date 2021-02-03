@@ -146,7 +146,9 @@ lib_bitmap_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am_lib_bitmap_la_OBJECTS = $(bitmap)/bmp.lo $(bitmap)/bitmap.lo \
 	$(bitmap)/size.lo $(bitmap)/image_util.lo \
-	$(bitmap)/position.lo
+	$(bitmap)/position.lo $(bitmap)/loader.lo \
+	$(bitmap)/bitmap_ctrl.lo $(bitmap)/position_ctrl.lo \
+	$(bitmap)/bitmap_page_ctrl.lo $(bitmap)/page_loader.lo
 lib_bitmap_la_OBJECTS = $(am_lib_bitmap_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -158,9 +160,7 @@ lib_compare_la_OBJECTS = $(am_lib_compare_la_OBJECTS)
 lib_explorer_la_DEPENDENCIES = lib_handler.la lib_thread.la \
 	lib_window.la
 am_lib_explorer_la_OBJECTS = $(explorer)/window_explorer.lo \
-	$(explorer)/controller_explorer.lo \
-	$(explorer)/image_window_explorer.lo \
-	$(explorer)/find_explorer.lo $(explorer)/load_explorer.lo
+	$(explorer)/image_window_explorer.lo
 lib_explorer_la_OBJECTS = $(am_lib_explorer_la_OBJECTS)
 lib_frame_la_DEPENDENCIES = lib_explorer.la lib_reader.la
 am_lib_frame_la_OBJECTS = $(gui)/frame.lo $(gui)/panel.lo
@@ -175,17 +175,20 @@ am_lib_path_la_OBJECTS = $(common)/path.lo
 lib_path_la_OBJECTS = $(am_lib_path_la_OBJECTS)
 lib_reader_la_DEPENDENCIES = lib_bitmap.la lib_handler.la \
 	lib_window.la lib_thread.la
-am_lib_reader_la_OBJECTS = $(reader)/window_reader.lo \
-	$(reader)/controller_reader.lo $(reader)/load_reader.lo \
-	$(reader)/zoom_reader.lo
+am_lib_reader_la_OBJECTS = $(reader)/controller.lo \
+	$(reader)/scroll_controller.lo $(reader)/decorator.lo \
+	$(reader)/page_indicator.lo
 lib_reader_la_OBJECTS = $(am_lib_reader_la_OBJECTS)
 lib_thread_la_LIBADD =
-am_lib_thread_la_OBJECTS = $(thread)/thread.lo
+am_lib_thread_la_OBJECTS = $(thread)/thread.lo $(thread)/load_image.lo \
+	$(thread)/load_image_controller.lo $(thread)/find_handler.lo \
+	$(thread)/find_handler_controller.lo $(thread)/rescale.lo
 lib_thread_la_OBJECTS = $(am_lib_thread_la_OBJECTS)
 lib_window_la_LIBADD =
 am_lib_window_la_OBJECTS = $(window)/scrolledwindow.lo \
 	$(window)/flex_grid_window.lo \
-	$(window)/flex_grid_cell_window.lo
+	$(window)/flex_grid_cell_window.lo $(window)/scrolled_image.lo \
+	$(window)/decorator.lo
 lib_window_la_OBJECTS = $(am_lib_window_la_OBJECTS)
 am_fmr_OBJECTS = $(fmr)/app.$(OBJEXT)
 fmr_OBJECTS = $(am_fmr_OBJECTS)
@@ -206,13 +209,16 @@ DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/aux-build/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap.Plo \
+	$(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
+	$(bitmap)/$(DEPDIR)/bitmap_page_ctrl.Plo \
 	$(bitmap)/$(DEPDIR)/bmp.Plo $(bitmap)/$(DEPDIR)/image_util.Plo \
-	$(bitmap)/$(DEPDIR)/position.Plo $(bitmap)/$(DEPDIR)/size.Plo \
-	$(common)/$(DEPDIR)/compare.Plo $(common)/$(DEPDIR)/path.Plo \
-	$(explorer)/$(DEPDIR)/controller_explorer.Plo \
-	$(explorer)/$(DEPDIR)/find_explorer.Plo \
+	$(bitmap)/$(DEPDIR)/loader.Plo \
+	$(bitmap)/$(DEPDIR)/page_loader.Plo \
+	$(bitmap)/$(DEPDIR)/position.Plo \
+	$(bitmap)/$(DEPDIR)/position_ctrl.Plo \
+	$(bitmap)/$(DEPDIR)/size.Plo $(common)/$(DEPDIR)/compare.Plo \
+	$(common)/$(DEPDIR)/path.Plo \
 	$(explorer)/$(DEPDIR)/image_window_explorer.Plo \
-	$(explorer)/$(DEPDIR)/load_explorer.Plo \
 	$(explorer)/$(DEPDIR)/window_explorer.Plo \
 	$(fmr)/$(DEPDIR)/app.Po $(gui)/$(DEPDIR)/frame.Plo \
 	$(gui)/$(DEPDIR)/panel.Plo \
@@ -221,13 +227,19 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap.Plo \
 	$(handler)/$(DEPDIR)/std_handler.Plo \
 	$(handler)/$(DEPDIR)/struct_stream.Plo \
 	$(handler)/$(DEPDIR)/wxarchive_handler.Plo \
-	$(reader)/$(DEPDIR)/controller_reader.Plo \
-	$(reader)/$(DEPDIR)/load_reader.Plo \
-	$(reader)/$(DEPDIR)/window_reader.Plo \
-	$(reader)/$(DEPDIR)/zoom_reader.Plo \
-	$(thread)/$(DEPDIR)/thread.Plo \
+	$(reader)/$(DEPDIR)/controller.Plo \
+	$(reader)/$(DEPDIR)/decorator.Plo \
+	$(reader)/$(DEPDIR)/page_indicator.Plo \
+	$(reader)/$(DEPDIR)/scroll_controller.Plo \
+	$(thread)/$(DEPDIR)/find_handler.Plo \
+	$(thread)/$(DEPDIR)/find_handler_controller.Plo \
+	$(thread)/$(DEPDIR)/load_image.Plo \
+	$(thread)/$(DEPDIR)/load_image_controller.Plo \
+	$(thread)/$(DEPDIR)/rescale.Plo $(thread)/$(DEPDIR)/thread.Plo \
+	$(window)/$(DEPDIR)/decorator.Plo \
 	$(window)/$(DEPDIR)/flex_grid_cell_window.Plo \
 	$(window)/$(DEPDIR)/flex_grid_window.Plo \
+	$(window)/$(DEPDIR)/scrolled_image.Plo \
 	$(window)/$(DEPDIR)/scrolledwindow.Plo
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -516,15 +528,20 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/bitmap.cpp \
 						$(bitmap)/size.cpp \
 						$(bitmap)/image_util.cpp \
-						$(bitmap)/position.cpp
+						$(bitmap)/position.cpp \
+						$(bitmap)/loader.cpp \
+						$(bitmap)/bitmap_ctrl.cpp \
+						$(bitmap)/position_ctrl.cpp \
+						$(bitmap)/bitmap_page_ctrl.cpp \
+						$(bitmap)/page_loader.cpp
 
 reader = src/reader
 readerdir = @abs_builddir@/reader
 reader_LTLIBRARIES = lib_reader.la
-lib_reader_la_SOURCES = $(reader)/window_reader.cpp \
-						$(reader)/controller_reader.cpp \
-						$(reader)/load_reader.cpp \
-						$(reader)/zoom_reader.cpp
+lib_reader_la_SOURCES = $(reader)/controller.cpp \
+												$(reader)/scroll_controller.cpp \
+												$(reader)/decorator.cpp \
+												$(reader)/page_indicator.cpp
 
 lib_reader_la_LIBADD = lib_bitmap.la \
 					   lib_handler.la \
@@ -535,10 +552,7 @@ explorer = src/explorer
 explorerdir = @abs_builddir@/explorer
 explorer_LTLIBRARIES = lib_explorer.la
 lib_explorer_la_SOURCES = $(explorer)/window_explorer.cpp \
-						  $(explorer)/controller_explorer.cpp \
-						  $(explorer)/image_window_explorer.cpp \
-						  $(explorer)/find_explorer.cpp \
-						  $(explorer)/load_explorer.cpp
+													$(explorer)/image_window_explorer.cpp
 
 lib_explorer_la_LIBADD = lib_handler.la \
 						 lib_thread.la \
@@ -559,13 +573,21 @@ window = src/window
 windowdir = @abs_builddir@/window
 window_LTLIBRARIES = lib_window.la
 lib_window_la_SOURCES = $(window)/scrolledwindow.cpp \
-						$(window)/flex_grid_window.cpp \
-						$(window)/flex_grid_cell_window.cpp
+												$(window)/flex_grid_window.cpp \
+												$(window)/flex_grid_cell_window.cpp \
+												$(window)/scrolled_image.cpp \
+												$(window)/decorator.cpp
 
 thread = src/thread
 threaddir = @abs_builddir@/thread
 thread_LTLIBRARIES = lib_thread.la
-lib_thread_la_SOURCES = $(thread)/thread.cpp
+lib_thread_la_SOURCES = $(thread)/thread.cpp \
+												$(thread)/load_image.cpp \
+												$(thread)/load_image_controller.cpp \
+												$(thread)/find_handler.cpp \
+												$(thread)/find_handler_controller.cpp \
+												$(thread)/rescale.cpp
+
 fmr = src/main
 fmr_SOURCES = $(fmr)/app.cpp
 fmr_LDADD = lib_frame.la
@@ -951,6 +973,16 @@ $(bitmap)/image_util.lo: $(bitmap)/$(am__dirstamp) \
 	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
 $(bitmap)/position.lo: $(bitmap)/$(am__dirstamp) \
 	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
+$(bitmap)/loader.lo: $(bitmap)/$(am__dirstamp) \
+	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
+$(bitmap)/bitmap_ctrl.lo: $(bitmap)/$(am__dirstamp) \
+	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
+$(bitmap)/position_ctrl.lo: $(bitmap)/$(am__dirstamp) \
+	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
+$(bitmap)/bitmap_page_ctrl.lo: $(bitmap)/$(am__dirstamp) \
+	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
+$(bitmap)/page_loader.lo: $(bitmap)/$(am__dirstamp) \
+	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
 
 lib_bitmap.la: $(lib_bitmap_la_OBJECTS) $(lib_bitmap_la_DEPENDENCIES) $(EXTRA_lib_bitmap_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(bitmapdir) $(lib_bitmap_la_OBJECTS) $(lib_bitmap_la_LIBADD) $(LIBS)
@@ -973,13 +1005,7 @@ $(explorer)/$(DEPDIR)/$(am__dirstamp):
 	@: > $(explorer)/$(DEPDIR)/$(am__dirstamp)
 $(explorer)/window_explorer.lo: $(explorer)/$(am__dirstamp) \
 	$(explorer)/$(DEPDIR)/$(am__dirstamp)
-$(explorer)/controller_explorer.lo: $(explorer)/$(am__dirstamp) \
-	$(explorer)/$(DEPDIR)/$(am__dirstamp)
 $(explorer)/image_window_explorer.lo: $(explorer)/$(am__dirstamp) \
-	$(explorer)/$(DEPDIR)/$(am__dirstamp)
-$(explorer)/find_explorer.lo: $(explorer)/$(am__dirstamp) \
-	$(explorer)/$(DEPDIR)/$(am__dirstamp)
-$(explorer)/load_explorer.lo: $(explorer)/$(am__dirstamp) \
 	$(explorer)/$(DEPDIR)/$(am__dirstamp)
 
 lib_explorer.la: $(lib_explorer_la_OBJECTS) $(lib_explorer_la_DEPENDENCIES) $(EXTRA_lib_explorer_la_DEPENDENCIES) 
@@ -1027,13 +1053,13 @@ $(reader)/$(am__dirstamp):
 $(reader)/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) $(reader)/$(DEPDIR)
 	@: > $(reader)/$(DEPDIR)/$(am__dirstamp)
-$(reader)/window_reader.lo: $(reader)/$(am__dirstamp) \
+$(reader)/controller.lo: $(reader)/$(am__dirstamp) \
 	$(reader)/$(DEPDIR)/$(am__dirstamp)
-$(reader)/controller_reader.lo: $(reader)/$(am__dirstamp) \
+$(reader)/scroll_controller.lo: $(reader)/$(am__dirstamp) \
 	$(reader)/$(DEPDIR)/$(am__dirstamp)
-$(reader)/load_reader.lo: $(reader)/$(am__dirstamp) \
+$(reader)/decorator.lo: $(reader)/$(am__dirstamp) \
 	$(reader)/$(DEPDIR)/$(am__dirstamp)
-$(reader)/zoom_reader.lo: $(reader)/$(am__dirstamp) \
+$(reader)/page_indicator.lo: $(reader)/$(am__dirstamp) \
 	$(reader)/$(DEPDIR)/$(am__dirstamp)
 
 lib_reader.la: $(lib_reader_la_OBJECTS) $(lib_reader_la_DEPENDENCIES) $(EXTRA_lib_reader_la_DEPENDENCIES) 
@@ -1045,6 +1071,16 @@ $(thread)/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) $(thread)/$(DEPDIR)
 	@: > $(thread)/$(DEPDIR)/$(am__dirstamp)
 $(thread)/thread.lo: $(thread)/$(am__dirstamp) \
+	$(thread)/$(DEPDIR)/$(am__dirstamp)
+$(thread)/load_image.lo: $(thread)/$(am__dirstamp) \
+	$(thread)/$(DEPDIR)/$(am__dirstamp)
+$(thread)/load_image_controller.lo: $(thread)/$(am__dirstamp) \
+	$(thread)/$(DEPDIR)/$(am__dirstamp)
+$(thread)/find_handler.lo: $(thread)/$(am__dirstamp) \
+	$(thread)/$(DEPDIR)/$(am__dirstamp)
+$(thread)/find_handler_controller.lo: $(thread)/$(am__dirstamp) \
+	$(thread)/$(DEPDIR)/$(am__dirstamp)
+$(thread)/rescale.lo: $(thread)/$(am__dirstamp) \
 	$(thread)/$(DEPDIR)/$(am__dirstamp)
 
 lib_thread.la: $(lib_thread_la_OBJECTS) $(lib_thread_la_DEPENDENCIES) $(EXTRA_lib_thread_la_DEPENDENCIES) 
@@ -1060,6 +1096,10 @@ $(window)/scrolledwindow.lo: $(window)/$(am__dirstamp) \
 $(window)/flex_grid_window.lo: $(window)/$(am__dirstamp) \
 	$(window)/$(DEPDIR)/$(am__dirstamp)
 $(window)/flex_grid_cell_window.lo: $(window)/$(am__dirstamp) \
+	$(window)/$(DEPDIR)/$(am__dirstamp)
+$(window)/scrolled_image.lo: $(window)/$(am__dirstamp) \
+	$(window)/$(DEPDIR)/$(am__dirstamp)
+$(window)/decorator.lo: $(window)/$(am__dirstamp) \
 	$(window)/$(DEPDIR)/$(am__dirstamp)
 
 lib_window.la: $(lib_window_la_OBJECTS) $(lib_window_la_DEPENDENCIES) $(EXTRA_lib_window_la_DEPENDENCIES) 
@@ -1101,16 +1141,18 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/bitmap.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/bitmap_page_ctrl.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/bmp.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/image_util.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/loader.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/page_loader.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/position.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/position_ctrl.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/size.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(common)/$(DEPDIR)/compare.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(common)/$(DEPDIR)/path.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/controller_explorer.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/find_explorer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/image_window_explorer.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/load_explorer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/window_explorer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(fmr)/$(DEPDIR)/app.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(gui)/$(DEPDIR)/frame.Plo@am__quote@ # am--include-marker
@@ -1120,13 +1162,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/std_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/struct_stream.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/wxarchive_handler.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/controller_reader.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/load_reader.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/window_reader.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/zoom_reader.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/controller.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/decorator.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/page_indicator.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/scroll_controller.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/find_handler.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/find_handler_controller.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/load_image.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/load_image_controller.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/rescale.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/thread.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/decorator.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/flex_grid_cell_window.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/flex_grid_window.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/scrolled_image.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/scrolledwindow.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -1546,16 +1595,18 @@ clean-am: clean-binPROGRAMS clean-bitmapLTLIBRARIES \
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 		-rm -f $(bitmap)/$(DEPDIR)/bitmap.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/bitmap_page_ctrl.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/bmp.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/image_util.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/loader.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/page_loader.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/position.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/position_ctrl.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/size.Plo
 	-rm -f $(common)/$(DEPDIR)/compare.Plo
 	-rm -f $(common)/$(DEPDIR)/path.Plo
-	-rm -f $(explorer)/$(DEPDIR)/controller_explorer.Plo
-	-rm -f $(explorer)/$(DEPDIR)/find_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/image_window_explorer.Plo
-	-rm -f $(explorer)/$(DEPDIR)/load_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/window_explorer.Plo
 	-rm -f $(fmr)/$(DEPDIR)/app.Po
 	-rm -f $(gui)/$(DEPDIR)/frame.Plo
@@ -1565,13 +1616,20 @@ distclean: distclean-recursive
 	-rm -f $(handler)/$(DEPDIR)/std_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
-	-rm -f $(reader)/$(DEPDIR)/controller_reader.Plo
-	-rm -f $(reader)/$(DEPDIR)/load_reader.Plo
-	-rm -f $(reader)/$(DEPDIR)/window_reader.Plo
-	-rm -f $(reader)/$(DEPDIR)/zoom_reader.Plo
+	-rm -f $(reader)/$(DEPDIR)/controller.Plo
+	-rm -f $(reader)/$(DEPDIR)/decorator.Plo
+	-rm -f $(reader)/$(DEPDIR)/page_indicator.Plo
+	-rm -f $(reader)/$(DEPDIR)/scroll_controller.Plo
+	-rm -f $(thread)/$(DEPDIR)/find_handler.Plo
+	-rm -f $(thread)/$(DEPDIR)/find_handler_controller.Plo
+	-rm -f $(thread)/$(DEPDIR)/load_image.Plo
+	-rm -f $(thread)/$(DEPDIR)/load_image_controller.Plo
+	-rm -f $(thread)/$(DEPDIR)/rescale.Plo
 	-rm -f $(thread)/$(DEPDIR)/thread.Plo
+	-rm -f $(window)/$(DEPDIR)/decorator.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_window.Plo
+	-rm -f $(window)/$(DEPDIR)/scrolled_image.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolledwindow.Plo
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -1624,16 +1682,18 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
 		-rm -f $(bitmap)/$(DEPDIR)/bitmap.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/bitmap_page_ctrl.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/bmp.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/image_util.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/loader.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/page_loader.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/position.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/position_ctrl.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/size.Plo
 	-rm -f $(common)/$(DEPDIR)/compare.Plo
 	-rm -f $(common)/$(DEPDIR)/path.Plo
-	-rm -f $(explorer)/$(DEPDIR)/controller_explorer.Plo
-	-rm -f $(explorer)/$(DEPDIR)/find_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/image_window_explorer.Plo
-	-rm -f $(explorer)/$(DEPDIR)/load_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/window_explorer.Plo
 	-rm -f $(fmr)/$(DEPDIR)/app.Po
 	-rm -f $(gui)/$(DEPDIR)/frame.Plo
@@ -1643,13 +1703,20 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(handler)/$(DEPDIR)/std_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
-	-rm -f $(reader)/$(DEPDIR)/controller_reader.Plo
-	-rm -f $(reader)/$(DEPDIR)/load_reader.Plo
-	-rm -f $(reader)/$(DEPDIR)/window_reader.Plo
-	-rm -f $(reader)/$(DEPDIR)/zoom_reader.Plo
+	-rm -f $(reader)/$(DEPDIR)/controller.Plo
+	-rm -f $(reader)/$(DEPDIR)/decorator.Plo
+	-rm -f $(reader)/$(DEPDIR)/page_indicator.Plo
+	-rm -f $(reader)/$(DEPDIR)/scroll_controller.Plo
+	-rm -f $(thread)/$(DEPDIR)/find_handler.Plo
+	-rm -f $(thread)/$(DEPDIR)/find_handler_controller.Plo
+	-rm -f $(thread)/$(DEPDIR)/load_image.Plo
+	-rm -f $(thread)/$(DEPDIR)/load_image_controller.Plo
+	-rm -f $(thread)/$(DEPDIR)/rescale.Plo
 	-rm -f $(thread)/$(DEPDIR)/thread.Plo
+	-rm -f $(window)/$(DEPDIR)/decorator.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_window.Plo
+	-rm -f $(window)/$(DEPDIR)/scrolled_image.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolledwindow.Plo
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic

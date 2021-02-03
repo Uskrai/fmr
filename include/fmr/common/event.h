@@ -22,13 +22,26 @@
 
 #include <vector>
 
+namespace fmr {
+
 namespace event {
+
+template <typename TargetBind, typename EventTag, typename Class,
+          typename EventArg, typename EventHandler>
+void Bind(TargetBind *bind, const EventTag &type, void (Class::*fp)(EventArg &),
+          EventHandler *handler, int id = wxID_ANY, int last_id = wxID_ANY) {
+  for (auto &it : type) bind->Bind(it, fp, handler, id, last_id);
+}
+
 template <typename EventType, typename Class, typename EventArg,
           typename EventHandler>
 void Bind(std::vector<EventType> type, void (Class::*fp)(EventArg &),
           EventHandler *handler, int id = wxID_ANY, int lastId = wxID_ANY) {
-  for (auto &it : type) handler->Bind(it, fp, handler, id, lastId);
+  Bind(handler, type, fp, handler, id, lastId);
 }
+
 }  // namespace event
+
+}  // namespace fmr
 
 #endif  // FMR_COMMON_WINDOW end

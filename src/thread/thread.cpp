@@ -76,10 +76,15 @@ void ThreadController::OnCompleted(wxThreadEvent &event) {
 BaseThread::BaseThread(ThreadController *parent, wxThreadKind type, int id)
     : wxThread(type) {
   parent_ = parent;
-  SetId(id);
+  SetEventId(id);
 }
 
 void BaseThread::SetId(int id) {
+  wxCriticalSectionLocker locker(g_sLock);
+  m_id = id;
+}
+
+void BaseThread::SetEventId(int id) {
   wxCriticalSectionLocker locker(g_sLock);
   m_id = id;
 }

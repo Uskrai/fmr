@@ -31,15 +31,20 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/bitmap.cpp \
 						$(bitmap)/size.cpp \
 						$(bitmap)/image_util.cpp \
-						$(bitmap)/position.cpp
+						$(bitmap)/position.cpp \
+						$(bitmap)/loader.cpp \
+						$(bitmap)/bitmap_ctrl.cpp \
+						$(bitmap)/position_ctrl.cpp \
+						$(bitmap)/bitmap_page_ctrl.cpp \
+						$(bitmap)/page_loader.cpp
 
 reader = src/reader
 readerdir = @abs_builddir@/reader
 reader_LTLIBRARIES =  lib_reader.la
-lib_reader_la_SOURCES = $(reader)/window_reader.cpp \
-						$(reader)/controller_reader.cpp \
-						$(reader)/load_reader.cpp \
-						$(reader)/zoom_reader.cpp
+lib_reader_la_SOURCES = $(reader)/controller.cpp \
+												$(reader)/scroll_controller.cpp \
+												$(reader)/decorator.cpp \
+												$(reader)/page_indicator.cpp
 
 lib_reader_la_LIBADD = lib_bitmap.la \
 					   lib_handler.la \
@@ -50,10 +55,7 @@ explorer = src/explorer
 explorerdir = @abs_builddir@/explorer
 explorer_LTLIBRARIES = lib_explorer.la
 lib_explorer_la_SOURCES = $(explorer)/window_explorer.cpp \
-						  $(explorer)/controller_explorer.cpp \
-						  $(explorer)/image_window_explorer.cpp \
-						  $(explorer)/find_explorer.cpp \
-						  $(explorer)/load_explorer.cpp
+													$(explorer)/image_window_explorer.cpp
 
 lib_explorer_la_LIBADD = lib_handler.la \
 						 lib_thread.la \
@@ -74,13 +76,20 @@ window = src/window
 windowdir = @abs_builddir@/window
 window_LTLIBRARIES = lib_window.la
 lib_window_la_SOURCES = $(window)/scrolledwindow.cpp \
-						$(window)/flex_grid_window.cpp \
-						$(window)/flex_grid_cell_window.cpp
+												$(window)/flex_grid_window.cpp \
+												$(window)/flex_grid_cell_window.cpp \
+												$(window)/scrolled_image.cpp \
+												$(window)/decorator.cpp
 
 thread = src/thread
 threaddir = @abs_builddir@/thread
 thread_LTLIBRARIES = lib_thread.la
-lib_thread_la_SOURCES = $(thread)/thread.cpp
+lib_thread_la_SOURCES = $(thread)/thread.cpp \
+												$(thread)/load_image.cpp \
+												$(thread)/load_image_controller.cpp \
+												$(thread)/find_handler.cpp \
+												$(thread)/find_handler_controller.cpp \
+												$(thread)/rescale.cpp
 
 fmr = src/main
 bin_PROGRAMS = fmr

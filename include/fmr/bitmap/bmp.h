@@ -54,7 +54,7 @@ struct SBitmap {
   wxBitmap m_item = wxBitmap(wxSize(1, 1));
   wxString m_name = wxEmptyString;
   size_t m_index = -1;
-  float m_scale;
+  double scale_x_ = 1, scale_y_ = 1;
   wxPoint m_pos = wxPoint(0, 0);
   bool m_isOk = false;  // determine bitmap status
   bool m_isLoaded = false;
@@ -66,6 +66,11 @@ struct SBitmap {
   bool IsOk() const;
   bool IsLoaded() const;
 
+  wxRect CalcMinimumRect(const wxRect& rect, wxPoint* pos = nullptr) const;
+
+  void Draw(wxDC& dc, const wxPoint& view_start, const wxSize& area);
+  void Draw(wxDC& dc, const wxRect& rect);
+
   bool IsPointed(const wxPoint& area, const wxPoint& position) const;
   bool IsShown(const wxPoint& area, const wxSize& size) const;
 
@@ -74,7 +79,8 @@ struct SBitmap {
 
   wxString GetName();
   size_t GetIndex();
-  float GetScale();
+  [[deprecated]] double GetScale();
+  void GetScale(double& x, double& y) const;
   int GetWidth() const;
   int GetHeight() const;
   int GetY() const;
@@ -84,7 +90,8 @@ struct SBitmap {
   void SetLoaded(bool stat = true);
   void SetName(const wxString& name);
   void SetIndex(size_t idx);
-  void SetScale(float scale);
+  void SetScale(double scale);
+  void SetScale(double x, double y);
   void SetPosition(const wxPoint& pos);
   void SetY(int PosY);
   void SetX(int PosX);
