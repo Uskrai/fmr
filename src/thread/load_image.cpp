@@ -28,18 +28,6 @@ namespace thread {
 
 wxDEFINE_EVENT(kEventImageLoaded, LoadImageEvent);
 
-void LoadImage::SetSize(const wxSize &size) { image_size_ = size; }
-
-void LoadImage::SetImageQuality(wxImageResizeQuality quality) {
-  image_quality_ = quality;
-}
-
-void LoadImage::Clear() { load_queue_ = std::queue<SStream *>(); }
-
-void LoadImage::DeleteOnEmptyQueue(bool condition) {
-  is_delete_on_empty_ = condition;
-}
-
 void LoadImage::Load(SStream *stream) {
 #define TEST_RETURN() \
   if (TestDestroy()) return;

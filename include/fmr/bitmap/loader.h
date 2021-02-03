@@ -66,6 +66,8 @@ class Loader : public ThreadController {
     GetFindController()->Push(stream);
   };
 
+  void SendImageToParent(const SStream *stream, const SBitmap &bitmap);
+
   virtual void SetControllerId(int find_controller_id, int load_controller);
 
   int GetEventId() { return event_id_; }

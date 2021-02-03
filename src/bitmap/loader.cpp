@@ -81,17 +81,19 @@ void Loader::OnStreamFound(thread::FoundEvent &event) {
   }
 }
 
+void Loader::SendImageToParent(const SStream *stream, const SBitmap &bitmap) {
+  auto send_event = std::make_unique<thread::LoadImageEvent>(
+      thread::kEventImageLoaded, GetEventId());
+
+  send_event->SetStream(stream);
+  send_event->SetBitmap(bitmap);
+  wxQueueEvent(GetParent(), send_event.release());
+}
+
 void Loader::OnImageLoaded(thread::LoadImageEvent &event) {
-  auto source_stream = find_controller_.GetSourceStream(event.GetStream());
+  auto source_stream = GetSourceStream(event.GetStream());
 
-  if (source_stream) {
-    auto send_event = std::make_unique<thread::LoadImageEvent>(
-        thread::kEventImageLoaded, GetEventId());
-
-    send_event->SetStream(event.GetStream());
-    send_event->SetBitmap(event.GetBitmap());
-    wxQueueEvent(GetParent(), send_event.release());
-  }
+  if (source_stream) SendImageToParent(event.GetStream(), event.GetBitmap());
 }
 
 bool Loader::Run() {

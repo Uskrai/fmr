@@ -61,21 +61,6 @@ class LoadImage : public Queue<SStream *> {
 
   ExitCode Entry();
   void Load(SStream *stream);
-
-  void SetSize(const wxSize &size);
-  void SetImageQuality(wxImageResizeQuality quality);
-  void Clear();
-
-  void DeleteOnEmptyQueue(bool condition = true);
-
- protected:
-  std::queue<SStream *> load_queue_;
-
-  bool is_delete_on_empty_ = false;
-
-  bitmap::Rescaler image_rescaler_;
-  wxSize image_size_;
-  wxImageResizeQuality image_quality_ = wxIMAGE_QUALITY_NORMAL;
 };
 
 };  // namespace thread
