@@ -131,17 +131,21 @@ bool Panel::OpenExplorer() {
   if (explorer_->HasFocus()) {
     return explorer_->OpenParent();
   } else {
+    if (reader_) {
+      reader_->GetWindow()->Hide();
+    }
     explorer_->SetFocus();
     explorer_->Show();
+    Layout();
     if (explorer_->OpenParent(select_path)) {
       explorer_->Show();
-      if (reader_) {
-        reader_->Clear();
-        reader_->GetWindow()->Hide();
-      }
       explorer_->SetFocus();
-      Layout();
+      if (reader_) reader_->Clear();
       return true;
+    } else {
+      if (reader_) {
+        reader_->GetWindow()->Show();
+      }
     }
   }
   return false;

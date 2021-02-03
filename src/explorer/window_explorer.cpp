@@ -106,6 +106,7 @@ bool Window::Open(std::shared_ptr<AbstractOpenableHandler> handler) {
   Layout();
   FitInside();
   GoToCell(0);
+  AdjustScrollbars();
   return true;
 }
 

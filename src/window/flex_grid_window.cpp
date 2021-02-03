@@ -118,15 +118,17 @@ void FlexGridWindow::MakeCellVisible(size_t index) {
   wxSize size = GetClientSize();
   wxPoint scroll_to = GetViewStart();
 
-  if (rect.GetLeft() < 0)
-    LineUp(wxHORIZONTAL, -rect.GetLeft());
-  else if (rect.GetRight() > size.GetWidth())
-    LineDown(wxHORIZONTAL, rect.GetRight() - size.GetWidth());
+  if (rect.GetLeft() < 0) {
+    scroll_to.x += rect.GetLeft();
+  } else if (rect.GetRight() > size.GetWidth()) {
+    scroll_to.x += rect.GetRight() - size.GetWidth();
+  }
 
-  if (rect.GetTop() < 0)
-    LineUp(wxVERTICAL, -rect.GetTop());
-  else if (rect.GetBottom() > size.GetHeight())
-    LineDown(wxVERTICAL, rect.GetBottom() - size.GetHeight());
+  if (rect.GetTop() < 0) {
+    scroll_to.y += rect.GetTop();
+  } else if (rect.GetBottom() > size.GetHeight()) {
+    scroll_to.y += rect.GetBottom() - size.GetHeight();
+  }
 
   Scroll(scroll_to);
 }
