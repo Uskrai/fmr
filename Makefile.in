@@ -144,11 +144,10 @@ LTLIBRARIES = $(bitmap_LTLIBRARIES) $(common_LTLIBRARIES) \
 	$(thread_LTLIBRARIES) $(window_LTLIBRARIES)
 lib_bitmap_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
-am_lib_bitmap_la_OBJECTS = $(bitmap)/bmp.lo $(bitmap)/bitmap.lo \
-	$(bitmap)/size.lo $(bitmap)/image_util.lo \
-	$(bitmap)/position.lo $(bitmap)/loader.lo \
-	$(bitmap)/bitmap_ctrl.lo $(bitmap)/position_ctrl.lo \
-	$(bitmap)/bitmap_page_ctrl.lo $(bitmap)/page_loader.lo
+am_lib_bitmap_la_OBJECTS = $(bitmap)/bmp.lo $(bitmap)/image_util.lo \
+	$(bitmap)/loader.lo $(bitmap)/bitmap_ctrl.lo \
+	$(bitmap)/position_ctrl.lo $(bitmap)/bitmap_page_ctrl.lo \
+	$(bitmap)/page_loader.lo
 lib_bitmap_la_OBJECTS = $(am_lib_bitmap_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -208,16 +207,13 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/aux-build/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap.Plo \
-	$(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
+am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(bitmap)/$(DEPDIR)/bitmap_page_ctrl.Plo \
 	$(bitmap)/$(DEPDIR)/bmp.Plo $(bitmap)/$(DEPDIR)/image_util.Plo \
 	$(bitmap)/$(DEPDIR)/loader.Plo \
 	$(bitmap)/$(DEPDIR)/page_loader.Plo \
-	$(bitmap)/$(DEPDIR)/position.Plo \
 	$(bitmap)/$(DEPDIR)/position_ctrl.Plo \
-	$(bitmap)/$(DEPDIR)/size.Plo $(common)/$(DEPDIR)/compare.Plo \
-	$(common)/$(DEPDIR)/path.Plo \
+	$(common)/$(DEPDIR)/compare.Plo $(common)/$(DEPDIR)/path.Plo \
 	$(explorer)/$(DEPDIR)/image_window_explorer.Plo \
 	$(explorer)/$(DEPDIR)/window_explorer.Plo \
 	$(fmr)/$(DEPDIR)/app.Po $(gui)/$(DEPDIR)/frame.Plo \
@@ -525,10 +521,7 @@ bitmap = src/bitmap
 bitmapdir = @abs_builddir@/bitmap
 bitmap_LTLIBRARIES = lib_bitmap.la
 lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
-						$(bitmap)/bitmap.cpp \
-						$(bitmap)/size.cpp \
 						$(bitmap)/image_util.cpp \
-						$(bitmap)/position.cpp \
 						$(bitmap)/loader.cpp \
 						$(bitmap)/bitmap_ctrl.cpp \
 						$(bitmap)/position_ctrl.cpp \
@@ -965,13 +958,7 @@ $(bitmap)/$(DEPDIR)/$(am__dirstamp):
 	@: > $(bitmap)/$(DEPDIR)/$(am__dirstamp)
 $(bitmap)/bmp.lo: $(bitmap)/$(am__dirstamp) \
 	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
-$(bitmap)/bitmap.lo: $(bitmap)/$(am__dirstamp) \
-	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
-$(bitmap)/size.lo: $(bitmap)/$(am__dirstamp) \
-	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
 $(bitmap)/image_util.lo: $(bitmap)/$(am__dirstamp) \
-	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
-$(bitmap)/position.lo: $(bitmap)/$(am__dirstamp) \
 	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
 $(bitmap)/loader.lo: $(bitmap)/$(am__dirstamp) \
 	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
@@ -1140,16 +1127,13 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/bitmap.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/bitmap_page_ctrl.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/bmp.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/image_util.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/loader.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/page_loader.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/position.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/position_ctrl.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/size.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(common)/$(DEPDIR)/compare.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(common)/$(DEPDIR)/path.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/image_window_explorer.Plo@am__quote@ # am--include-marker
@@ -1594,16 +1578,13 @@ clean-am: clean-binPROGRAMS clean-bitmapLTLIBRARIES \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-		-rm -f $(bitmap)/$(DEPDIR)/bitmap.Plo
-	-rm -f $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo
+		-rm -f $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/bitmap_page_ctrl.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/bmp.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/image_util.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/loader.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/page_loader.Plo
-	-rm -f $(bitmap)/$(DEPDIR)/position.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/position_ctrl.Plo
-	-rm -f $(bitmap)/$(DEPDIR)/size.Plo
 	-rm -f $(common)/$(DEPDIR)/compare.Plo
 	-rm -f $(common)/$(DEPDIR)/path.Plo
 	-rm -f $(explorer)/$(DEPDIR)/image_window_explorer.Plo
@@ -1681,16 +1662,13 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-		-rm -f $(bitmap)/$(DEPDIR)/bitmap.Plo
-	-rm -f $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo
+		-rm -f $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/bitmap_page_ctrl.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/bmp.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/image_util.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/loader.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/page_loader.Plo
-	-rm -f $(bitmap)/$(DEPDIR)/position.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/position_ctrl.Plo
-	-rm -f $(bitmap)/$(DEPDIR)/size.Plo
 	-rm -f $(common)/$(DEPDIR)/compare.Plo
 	-rm -f $(common)/$(DEPDIR)/path.Plo
 	-rm -f $(explorer)/$(DEPDIR)/image_window_explorer.Plo

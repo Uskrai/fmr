@@ -28,10 +28,7 @@ bitmap = src/bitmap
 bitmapdir = @abs_builddir@/bitmap
 bitmap_LTLIBRARIES = lib_bitmap.la
 lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
-						$(bitmap)/bitmap.cpp \
-						$(bitmap)/size.cpp \
 						$(bitmap)/image_util.cpp \
-						$(bitmap)/position.cpp \
 						$(bitmap)/loader.cpp \
 						$(bitmap)/bitmap_ctrl.cpp \
 						$(bitmap)/position_ctrl.cpp \
