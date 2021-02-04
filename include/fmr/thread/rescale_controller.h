@@ -67,18 +67,13 @@ class RescaleController : public ThreadController {
 
   int GetThreadId() { return thread_id_; }
 
-  void DoSetNull(int id) {
-    if (id == GetThreadId()) thread_ = nullptr;
-  }
-
-  BaseThread *GetThread(int id) {
-    if (id == GetThreadId()) return thread_;
-    return nullptr;
+  void DoSetNull(BaseThread *thread) {
+    if (thread == thread_) thread_ = nullptr;
   }
 
   wxEvtHandler *GetParent() { return parent_; }
 
-  void Clear() { DeleteThread(GetThreadId(), lock_); }
+  void Clear() { DeleteThread(thread_, lock_); }
   void DisableOnEmptyQueue(bool disable = true) {
     if (thread_) thread_->DisableOnEmptyQueue(disable);
   }

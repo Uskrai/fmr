@@ -57,8 +57,7 @@ class FindHandlerController : public ThreadController {
   void Push(const SStream *stream) { stream_queue_.push(stream); };
   bool Run();
 
-  BaseThread *GetThread(int id);
-  void DoSetNull(int id);
+  void DoSetNull(BaseThread *thread);
   wxEvtHandler *GetParent() { return parent_; }
 
   void SetChecker(bool (*checker)(const SStream &stream)) {

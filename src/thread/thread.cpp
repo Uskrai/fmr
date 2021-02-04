@@ -38,30 +38,29 @@ void ThreadController::BindEvent() {
   Bind(EVT_COMMAND_THREAD_COMPLETED, &ThreadController::OnCompleted, this);
 }
 
-bool ThreadController::Delete(int thread_id, wxCriticalSection &lock) {
-  wxCriticalSectionLocker locker(lock);
-  if (GetThread(thread_id))
-    return GetThread(thread_id)->Delete() == wxTHREAD_NO_ERROR;
-  return false;
-}
-
-bool ThreadController::Wait(int thread_id, wxCriticalSection &lock) {
-  while (true) {
-    {
-      wxCriticalSectionLocker locker(lock);
-      if (!GetThread(thread_id)) break;
-    }
-    wxThread::This()->Sleep(1);
-  }
-  return true;
-}
-
-bool ThreadController::DeleteThread(int thread_id, wxCriticalSection &lock) {
-  if (Delete(thread_id, lock)) {
-    return Wait(thread_id, lock);
-  }
-  return false;
-}
+// bool ThreadController::Delete(BaseThread **const thread,
+// wxCriticalSection &lock) {
+// wxCriticalSectionLocker locker(lock);
+// if (thread) return (*thread)->Delete() == wxTHREAD_NO_ERROR;
+// return true;
+// }
+//
+// bool ThreadController::Wait(BaseThread **const thread,
+// wxCriticalSection &lock) {
+// while (true) {
+// wxCriticalSectionLocker locker(lock);
+// if (!*thread) break;
+// }
+// return true;
+// }
+//
+// bool ThreadController::DeleteThread(BaseThread **const thread,
+// wxCriticalSection &lock) {
+// if (Delete(thread, lock)) {
+// return Wait(thread, lock);
+// }
+// return false;
+// }
 
 void ThreadController::Update(int id) { ThreadUpdate(GetParent(), id); }
 
@@ -122,7 +121,7 @@ void BaseThread::DisableEventOnDestroy(bool disable) {
 
 BaseThread::~BaseThread() {
   wxCriticalSectionLocker locker(g_sLock);
-  if (GetParent()) GetParent()->DoSetNull(m_id);
+  if (GetParent()) GetParent()->DoSetNull(this);
 }
 
 };  // namespace fmr

@@ -23,8 +23,7 @@ namespace fmr {
 namespace bitmap {
 
 Loader::Loader(wxEvtHandler *parent, int id)
-    : ThreadController(),
-      find_controller_(this, kFindImageHandlerThreadID),
+    : find_controller_(this, kFindImageHandlerThreadID),
       load_controller_(this, kLoadImageThreadID) {
   parent_ = parent;
 

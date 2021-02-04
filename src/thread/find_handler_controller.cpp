@@ -82,7 +82,7 @@ bool FindHandlerController::IsInQueue(const SStream *stream) const {
 }
 
 void FindHandlerController::Clear() {
-  DeleteThread(GetThreadId(), lock_);
+  DeleteThread(thread_, lock_);
   found_source_map_.clear();
   loaded_stream_.clear();
 }
@@ -111,13 +111,8 @@ void FindHandlerController::DisableOnEmptyQueue(bool disable) {
   }
 }
 
-BaseThread *FindHandlerController::GetThread(int id) {
-  if (id == GetThreadId()) return thread_;
-  return nullptr;
-}
-
-void FindHandlerController::DoSetNull(int id) {
-  if (id == GetThreadId()) thread_ = nullptr;
+void FindHandlerController::DoSetNull(BaseThread *thread) {
+  if (thread == thread_) thread_ = nullptr;
 }
 
 }  // namespace thread

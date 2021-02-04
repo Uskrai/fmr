@@ -35,12 +35,39 @@ class ThreadController : public wxEvtHandler {
   ThreadController();
   ~ThreadController() {}
   virtual wxEvtHandler *GetParent() = 0;
-  virtual void DoSetNull(int id) = 0;
-  virtual BaseThread *GetThread(int id) = 0;
+  virtual void DoSetNull(BaseThread *thread) = 0;
+  [[deprecated]] virtual void DoSetNull(int id) = delete;
+  [[deprecated]] virtual BaseThread *GetThread(int id) = delete;
 
-  bool Delete(int thread_id, wxCriticalSection &lock);
-  bool Wait(int thread_id, wxCriticalSection &lock);
-  bool DeleteThread(int thread_id, wxCriticalSection &lock);
+  template <typename T>
+  bool Delete(T *&thread, wxCriticalSection &lock) {
+    wxCriticalSectionLocker locker(lock);
+    if (thread) {
+      return thread->Delete() == wxTHREAD_NO_ERROR;
+    }
+    return false;
+  }
+
+  template <typename T>
+  bool Wait(T *&thread, wxCriticalSection &lock) {
+    while (thread) {
+      wxCriticalSectionLocker locker(lock);
+    }
+    return true;
+  }
+
+  template <typename T>
+  bool DeleteThread(T *&thread, wxCriticalSection &lock) {
+    if (Delete(thread, lock)) {
+      return Wait(thread, lock);
+    }
+    return false;
+  };
+
+  [[deprecated]] bool Delete(int thread_id, wxCriticalSection &lock) = delete;
+  [[deprecated]] bool Wait(int thread_id, wxCriticalSection &lock) = delete;
+  [[deprecated]] bool DeleteThread(int thread_id,
+                                   wxCriticalSection &lock) = delete;
 
   void Update(int id);
   void Completed(int id);

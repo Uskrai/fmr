@@ -42,11 +42,8 @@ enum ThreadLoaderID {
   kRescaleImageThreadID
 };
 
-class Loader : public ThreadController {
+class Loader : public wxEvtHandler {
  private:
-  thread::FindHandler *find_thread_ = nullptr;
-  thread::FindHandlerFlags find_flags_ = thread::kFindHandlerDefault;
-  thread::LoadImage *load_image_thread_ = nullptr;
   std::queue<wxImage> queue_in_rescale_;
   std::unordered_map<wxImage *, const SStream *> map_loaded_to_source_;
 
@@ -74,8 +71,6 @@ class Loader : public ThreadController {
   const SStream *GetSourceStream(const SStream *found_stream);
 
   wxEvtHandler *GetParent() { return parent_; }
-  BaseThread *GetThread(int id) { return nullptr; };
-  void DoSetNull(int id){};
   bool Run();
   void Clear();
 

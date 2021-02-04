@@ -51,19 +51,14 @@ bool LoadImageController::Run() {
   return ret;
 }
 
-void LoadImageController::Clear() { DeleteThread(GetThreadId(), lock_); }
+void LoadImageController::Clear() { DeleteThread(thread_, lock_); }
 
 void LoadImageController::DisableOnEmptyQueue(bool disable) {
   if (thread_) thread_->DisableOnEmptyQueue(disable);
 }
 
-void LoadImageController::DoSetNull(int id) {
-  if (id == GetThreadId()) thread_ = nullptr;
-}
-
-BaseThread *LoadImageController::GetThread(int id) {
-  if (id == GetThreadId()) return thread_;
-  return nullptr;
+void LoadImageController::DoSetNull(BaseThread *thread) {
+  if (thread == thread_) thread_ = nullptr;
 }
 
 }  // namespace thread

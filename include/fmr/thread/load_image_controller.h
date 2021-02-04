@@ -44,8 +44,7 @@ class LoadImageController : public ThreadController {
   virtual void SetParent(wxEvtHandler *parent) { parent_ = parent; }
   virtual wxEvtHandler *GetParent() { return parent_; }
 
-  void DoSetNull(int id);
-  BaseThread *GetThread(int id);
+  void DoSetNull(BaseThread *thread);
 
   void SetThreadId(int id);
   int GetThreadId() const { return thread_id_; }
