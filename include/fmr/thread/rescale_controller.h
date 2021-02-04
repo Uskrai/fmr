@@ -40,7 +40,7 @@ class RescaleController : public ThreadController {
 
   virtual ~RescaleController() { Clear(); }
 
-  void SetRescaller(bitmap::Rescaler *rescaler) { rescaler_ = rescaler; }
+  void SetRescaler(bitmap::Rescaler *rescaler) { rescaler_ = rescaler; }
 
   void SetThreadId(int id) {
     Unbind(kEventImageRescaled, &RescaleController::OnImageRescalled, this,

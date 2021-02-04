@@ -28,18 +28,12 @@ namespace explorer {
 Window::Window(wxWindow *parent, const wxWindowID &id, const wxPoint &pos,
                const wxSize &size, const long &style, const wxString &name)
     : FlexGridWindow(parent, id, pos, size, style, name) {
-  // HideColLabels();
-  // HideRowLabels();
-  // DisableCellEditControl();
-  // EnableEditing( false );
-  // SetCellHighlightColour( *wxWHITE );
-  // SetGridLineColour( *wxBLACK );
   CreateGrid(0, 0);
-  // grid_table_ = new wxGridStringTable();
-  // SetTable( grid_table_, true );
   BindEvent();
   loader_.SetFindFlags(thread::kFindHandlerOnlyFirstItem |
                        thread::kFindHandlerRecursive);
+  rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleFitAll);
+  loader_.GetRescaleController()->SetRescaler(rescaler_.get());
 }
 
 void Window::BindEvent() {
@@ -68,7 +62,6 @@ bool Window::Open(std::shared_ptr<AbstractOpenableHandler> handler) {
   wxSize child_size = wxSize(both_size, both_size);
   wxSize best_bitmap_size = ImageWindow::GetBestBitmapSize(child_size);
 
-  rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleFitAll);
   rescaler_->SetFitSize(best_bitmap_size);
 
   CreateGrid(row, column, wxSize(1, 1));

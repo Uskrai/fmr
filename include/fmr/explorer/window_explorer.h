@@ -18,7 +18,7 @@
 #ifndef FMR_EXPLORER_WINDOW
 #define FMR_EXPLORER_WINDOW
 
-#include <fmr/bitmap/loader.h>
+#include <fmr/bitmap/rescale_loader.h>
 #include <fmr/common/path.h>
 #include <fmr/explorer/common.h>
 #include <fmr/explorer/image_window_explorer.h>
@@ -44,7 +44,7 @@ enum ControllerId {
 
 class Window : public FlexGridWindow {
  protected:
-  bitmap::Loader loader_ = bitmap::Loader(this, kLoaderId);
+  bitmap::RescaleLoader loader_ = bitmap::RescaleLoader(this, kLoaderId);
   std::unordered_map<const SStream *, ImageWindow *> map_window_;
   std::shared_ptr<AbstractOpenableHandler> handler_;
   std::vector<std::unique_ptr<SStream>> list_stream_;

@@ -50,8 +50,6 @@ class Loader : public ThreadController {
   std::queue<wxImage> queue_in_rescale_;
   std::unordered_map<wxImage *, const SStream *> map_loaded_to_source_;
 
-  Rescaler *rescaler_ = nullptr;
-
   wxEvtHandler *parent_ = nullptr;
   int event_id_;
 

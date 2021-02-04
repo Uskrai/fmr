@@ -33,7 +33,8 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/bitmap_ctrl.cpp \
 						$(bitmap)/position_ctrl.cpp \
 						$(bitmap)/bitmap_page_ctrl.cpp \
-						$(bitmap)/page_loader.cpp
+						$(bitmap)/page_loader.cpp \
+						$(bitmap)/rescale_loader.cpp
 
 reader = src/reader
 readerdir = @abs_builddir@/reader
