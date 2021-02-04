@@ -64,13 +64,13 @@ bool PageLoader::Open(const std::string &path) {
 
 void PageLoader::SetControllerId(int find_controller_id,
                                  int load_image_controller_id) {
-  GetFindController()->Unbind(thread::kEventStreamFound,
+  GetFindController()->Unbind(queue::kEventStreamFound,
                               &PageLoader::OnStreamFound, this,
                               GetFindController()->GetThreadId());
 
   Loader::SetControllerId(find_controller_id, load_image_controller_id);
 
-  GetFindController()->Bind(thread::kEventStreamFound,
+  GetFindController()->Bind(queue::kEventStreamFound,
                             &PageLoader::OnStreamFound, this,
                             find_controller_id);
 }
@@ -123,7 +123,7 @@ bool PageLoader::IsFoundStreamInBack(const SStream *found_stream) {
   return false;
 }
 
-void PageLoader::OnStreamFound(thread::FoundEvent &event) {
+void PageLoader::OnStreamFound(queue::FoundEvent &event) {
   if (per_page_stream_.empty() ||
       per_page_stream_.back().size() >= GetImagePerPage()) {
     per_page_stream_.push_back(std::vector<SStream *>());

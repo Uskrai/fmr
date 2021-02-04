@@ -18,7 +18,7 @@
 #include <fmr/common/string.h>
 #include <fmr/handler/abstract_handler.h>
 #include <fmr/handler/handler_factory.h>
-#include <fmr/thread/find_handler.h>
+#include <fmr/queue/find_handler.h>
 #include <wx/filename.h>
 #include <wx/image.h>
 #include <wx/log.h>
@@ -27,7 +27,7 @@
 
 namespace fmr {
 
-namespace thread {
+namespace queue {
 
 wxDEFINE_EVENT(kEventStreamFound, FoundEvent);
 wxDEFINE_EVENT(kEventStreamNotFound, FoundEvent);
@@ -51,35 +51,29 @@ bool FindHandler::Push(const SStream *stream) {
   return false;
 }
 #define TEST_RETURN() \
-  if (TestDestroy()) return false
+  if (IsBeingDeleted()) return false
 
-wxThread::ExitCode FindHandler::Entry() {
+void FindHandler::PopTask() {
   wxLogMessage("Starting Find thread");
 
-  while (!TestDestroy()) {
-    if (!QueueEmpty()) {
-      auto &item = Front();
+  if (IsEmpty()) return;
 
-      auto event = MakeEvent(kEventStreamFound, GetEventId(), item.first,
-                             std::make_unique<SStream>(item.second));
+  auto &item = Front();
 
-      wxLogMessage("Starting to search for %s/%s", item.second.GetHandlerPath(),
-                   item.second.GetName());
+  auto event = MakeEvent(kEventStreamFound, GetEventId(), item.first,
+                         std::make_unique<SStream>(item.second));
 
-      if (!TestDestroy()) {
-        if (!Find(event.get())) {
-          event->SetEventType(kEventStreamNotFound);
-          QueueEventParent(event.release());
-        }
-        Update();
-        if (TestDestroy()) break;
-      }
-      Pop();
+  wxLogMessage("Starting to search for %s/%s", item.second.GetHandlerPath(),
+               item.second.GetName());
+
+  if (!IsBeingDeleted()) {
+    if (!Find(event.get())) {
+      event->SetEventType(kEventStreamNotFound);
+      SendEventToParent(event.release());
     }
-  };
+  }
+  Pop();
   wxLogMessage("Find thread completed");
-  Completed();
-  return (wxThread::ExitCode)0;
 }
 
 bool FindHandler::Find(FoundEvent *event) {
@@ -148,9 +142,9 @@ bool FindHandler::Find(AbstractOpenableHandler *handler, FoundEvent *event) {
 }
 
 void FindHandler::StreamFound(FoundEvent *event) {
-  if (TestDestroy()) return;
+  if (IsBeingDeleted()) return;
   wxLogMessage("Sending FoundEvent to %p", GetParent());
-  QueueEventParent(event);
+  SendEventToParent(event);
 }
 
 template <typename T>
@@ -216,6 +210,6 @@ bool FindHandler::SendIfFound(FoundEvent *event) {
   return true;
 }
 
-};  // namespace thread
+};  // namespace queue
 
 };  // namespace fmr

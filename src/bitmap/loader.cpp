@@ -43,20 +43,20 @@ void Loader::OnThreadCompleted(wxThreadEvent &event) {
 
 void Loader::SetControllerId(int find_controller_id,
                              int load_image_controller_id) {
-  GetFindController()->Unbind(thread::kEventStreamFound, &Loader::OnStreamFound,
+  GetFindController()->Unbind(queue::kEventStreamFound, &Loader::OnStreamFound,
                               this, GetFindController()->GetThreadId());
 
-  GetLoadImageController()->Unbind(thread::kEventImageLoaded,
+  GetLoadImageController()->Unbind(queue::kEventImageLoaded,
                                    &Loader::OnImageLoaded, this,
                                    GetLoadImageController()->GetThreadId());
 
   GetFindController()->SetThreadId(find_controller_id);
   GetLoadImageController()->SetThreadId(load_image_controller_id);
 
-  GetFindController()->Bind(thread::kEventStreamFound, &Loader::OnStreamFound,
+  GetFindController()->Bind(queue::kEventStreamFound, &Loader::OnStreamFound,
                             this, GetFindController()->GetThreadId());
 
-  GetLoadImageController()->Bind(thread::kEventImageLoaded,
+  GetLoadImageController()->Bind(queue::kEventImageLoaded,
                                  &Loader::OnImageLoaded, this,
                                  GetLoadImageController()->GetThreadId());
 }
@@ -69,7 +69,7 @@ const SStream *Loader::GetSourceStream(const SStream *found_stream) {
   return GetFindController()->GetSourceStream(found_stream);
 }
 
-void Loader::OnStreamFound(thread::FoundEvent &event) {
+void Loader::OnStreamFound(queue::FoundEvent &event) {
   auto item = event.GetSourceStream();
 
   if (GetFindController()->IsInQueue(item)) {
@@ -81,15 +81,15 @@ void Loader::OnStreamFound(thread::FoundEvent &event) {
 }
 
 void Loader::SendImageToParent(const SStream *stream, const SBitmap &bitmap) {
-  auto send_event = std::make_unique<thread::LoadImageEvent>(
-      thread::kEventImageLoaded, GetEventId());
+  auto send_event = std::make_unique<queue::LoadImageEvent>(
+      queue::kEventImageLoaded, GetEventId());
 
   send_event->SetStream(stream);
   send_event->SetBitmap(bitmap);
   wxQueueEvent(GetParent(), send_event.release());
 }
 
-void Loader::OnImageLoaded(thread::LoadImageEvent &event) {
+void Loader::OnImageLoaded(queue::LoadImageEvent &event) {
   auto source_stream = GetSourceStream(event.GetStream());
 
   if (source_stream) SendImageToParent(event.GetStream(), event.GetBitmap());

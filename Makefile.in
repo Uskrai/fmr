@@ -108,8 +108,8 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bitmapdir)" \
 	"$(DESTDIR)$(commondir)" "$(DESTDIR)$(explorerdir)" \
 	"$(DESTDIR)$(guidir)" "$(DESTDIR)$(handlerdir)" \
-	"$(DESTDIR)$(readerdir)" "$(DESTDIR)$(threaddir)" \
-	"$(DESTDIR)$(windowdir)"
+	"$(DESTDIR)$(queuedir)" "$(DESTDIR)$(readerdir)" \
+	"$(DESTDIR)$(threaddir)" "$(DESTDIR)$(windowdir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -140,8 +140,9 @@ am__uninstall_files_from_dir = { \
   }
 LTLIBRARIES = $(bitmap_LTLIBRARIES) $(common_LTLIBRARIES) \
 	$(explorer_LTLIBRARIES) $(gui_LTLIBRARIES) \
-	$(handler_LTLIBRARIES) $(reader_LTLIBRARIES) \
-	$(thread_LTLIBRARIES) $(window_LTLIBRARIES)
+	$(handler_LTLIBRARIES) $(queue_LTLIBRARIES) \
+	$(reader_LTLIBRARIES) $(thread_LTLIBRARIES) \
+	$(window_LTLIBRARIES)
 lib_bitmap_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am_lib_bitmap_la_OBJECTS = $(bitmap)/bmp.lo $(bitmap)/image_util.lo \
@@ -172,16 +173,20 @@ lib_handler_la_OBJECTS = $(am_lib_handler_la_OBJECTS)
 lib_path_la_LIBADD =
 am_lib_path_la_OBJECTS = $(common)/path.lo
 lib_path_la_OBJECTS = $(am_lib_path_la_OBJECTS)
+lib_queue_la_LIBADD =
+am_lib_queue_la_OBJECTS = $(queue)/load_image.lo \
+	$(queue)/find_handler.lo $(queue)/rescale.lo
+lib_queue_la_OBJECTS = $(am_lib_queue_la_OBJECTS)
 lib_reader_la_DEPENDENCIES = lib_bitmap.la lib_handler.la \
 	lib_window.la lib_thread.la
 am_lib_reader_la_OBJECTS = $(reader)/controller.lo \
 	$(reader)/scroll_controller.lo $(reader)/decorator.lo \
 	$(reader)/page_indicator.lo
 lib_reader_la_OBJECTS = $(am_lib_reader_la_OBJECTS)
-lib_thread_la_LIBADD =
-am_lib_thread_la_OBJECTS = $(thread)/thread.lo $(thread)/load_image.lo \
-	$(thread)/load_image_controller.lo $(thread)/find_handler.lo \
-	$(thread)/find_handler_controller.lo $(thread)/rescale.lo
+lib_thread_la_DEPENDENCIES = lib_queue.la
+am_lib_thread_la_OBJECTS = $(thread)/thread.lo \
+	$(thread)/load_image_controller.lo \
+	$(thread)/find_handler_controller.lo
 lib_thread_la_OBJECTS = $(am_lib_thread_la_OBJECTS)
 lib_window_la_LIBADD =
 am_lib_window_la_OBJECTS = $(window)/scrolledwindow.lo \
@@ -224,15 +229,16 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(handler)/$(DEPDIR)/std_handler.Plo \
 	$(handler)/$(DEPDIR)/struct_stream.Plo \
 	$(handler)/$(DEPDIR)/wxarchive_handler.Plo \
+	$(queue)/$(DEPDIR)/find_handler.Plo \
+	$(queue)/$(DEPDIR)/load_image.Plo \
+	$(queue)/$(DEPDIR)/rescale.Plo \
 	$(reader)/$(DEPDIR)/controller.Plo \
 	$(reader)/$(DEPDIR)/decorator.Plo \
 	$(reader)/$(DEPDIR)/page_indicator.Plo \
 	$(reader)/$(DEPDIR)/scroll_controller.Plo \
-	$(thread)/$(DEPDIR)/find_handler.Plo \
 	$(thread)/$(DEPDIR)/find_handler_controller.Plo \
-	$(thread)/$(DEPDIR)/load_image.Plo \
 	$(thread)/$(DEPDIR)/load_image_controller.Plo \
-	$(thread)/$(DEPDIR)/rescale.Plo $(thread)/$(DEPDIR)/thread.Plo \
+	$(thread)/$(DEPDIR)/thread.Plo \
 	$(window)/$(DEPDIR)/decorator.Plo \
 	$(window)/$(DEPDIR)/flex_grid_cell_window.Plo \
 	$(window)/$(DEPDIR)/flex_grid_window.Plo \
@@ -260,13 +266,15 @@ am__v_CXXLD_1 =
 SOURCES = $(lib_bitmap_la_SOURCES) $(lib_compare_la_SOURCES) \
 	$(lib_explorer_la_SOURCES) $(lib_frame_la_SOURCES) \
 	$(lib_handler_la_SOURCES) $(lib_path_la_SOURCES) \
-	$(lib_reader_la_SOURCES) $(lib_thread_la_SOURCES) \
-	$(lib_window_la_SOURCES) $(fmr_SOURCES)
+	$(lib_queue_la_SOURCES) $(lib_reader_la_SOURCES) \
+	$(lib_thread_la_SOURCES) $(lib_window_la_SOURCES) \
+	$(fmr_SOURCES)
 DIST_SOURCES = $(lib_bitmap_la_SOURCES) $(lib_compare_la_SOURCES) \
 	$(lib_explorer_la_SOURCES) $(lib_frame_la_SOURCES) \
 	$(lib_handler_la_SOURCES) $(lib_path_la_SOURCES) \
-	$(lib_reader_la_SOURCES) $(lib_thread_la_SOURCES) \
-	$(lib_window_la_SOURCES) $(fmr_SOURCES)
+	$(lib_queue_la_SOURCES) $(lib_reader_la_SOURCES) \
+	$(lib_thread_la_SOURCES) $(lib_window_la_SOURCES) \
+	$(fmr_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -553,8 +561,6 @@ lib_explorer_la_LIBADD = lib_handler.la \
 						 lib_thread.la \
 						 lib_window.la
 
-
-# make libraries for gui
 gui = src/gui
 guidir = @abs_builddir@/gui
 gui_LTLIBRARIES = lib_frame.la
@@ -577,11 +583,16 @@ thread = src/thread
 threaddir = @abs_builddir@/thread
 thread_LTLIBRARIES = lib_thread.la
 lib_thread_la_SOURCES = $(thread)/thread.cpp \
-												$(thread)/load_image.cpp \
 												$(thread)/load_image_controller.cpp \
-												$(thread)/find_handler.cpp \
-												$(thread)/find_handler_controller.cpp \
-												$(thread)/rescale.cpp
+												$(thread)/find_handler_controller.cpp
+
+lib_thread_la_LIBADD = lib_queue.la
+queue = src/queue
+queuedir = @abs_builddir@/queue
+queue_LTLIBRARIES = lib_queue.la
+lib_queue_la_SOURCES = $(queue)/load_image.cpp \
+											 $(queue)/find_handler.cpp \
+											 $(queue)/rescale.cpp 
 
 fmr = src/main
 fmr_SOURCES = $(fmr)/app.cpp
@@ -848,6 +859,41 @@ clean-handlerLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
+install-queueLTLIBRARIES: $(queue_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	@list='$(queue_LTLIBRARIES)'; test -n "$(queuedir)" || list=; \
+	list2=; for p in $$list; do \
+	  if test -f $$p; then \
+	    list2="$$list2 $$p"; \
+	  else :; fi; \
+	done; \
+	test -z "$$list2" || { \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(queuedir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(queuedir)" || exit 1; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(queuedir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(queuedir)"; \
+	}
+
+uninstall-queueLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(queue_LTLIBRARIES)'; test -n "$(queuedir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(queuedir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(queuedir)/$$f"; \
+	done
+
+clean-queueLTLIBRARIES:
+	-test -z "$(queue_LTLIBRARIES)" || rm -f $(queue_LTLIBRARIES)
+	@list='$(queue_LTLIBRARIES)'; \
+	locs=`for p in $$list; do echo $$p; done | \
+	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
+	      sort -u`; \
+	test -z "$$locs" || { \
+	  echo rm -f $${locs}; \
+	  rm -f $${locs}; \
+	}
+
 install-readerLTLIBRARIES: $(reader_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
 	@list='$(reader_LTLIBRARIES)'; test -n "$(readerdir)" || list=; \
@@ -1038,6 +1084,21 @@ $(common)/path.lo: $(common)/$(am__dirstamp) \
 
 lib_path.la: $(lib_path_la_OBJECTS) $(lib_path_la_DEPENDENCIES) $(EXTRA_lib_path_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(commondir) $(lib_path_la_OBJECTS) $(lib_path_la_LIBADD) $(LIBS)
+$(queue)/$(am__dirstamp):
+	@$(MKDIR_P) $(queue)
+	@: > $(queue)/$(am__dirstamp)
+$(queue)/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) $(queue)/$(DEPDIR)
+	@: > $(queue)/$(DEPDIR)/$(am__dirstamp)
+$(queue)/load_image.lo: $(queue)/$(am__dirstamp) \
+	$(queue)/$(DEPDIR)/$(am__dirstamp)
+$(queue)/find_handler.lo: $(queue)/$(am__dirstamp) \
+	$(queue)/$(DEPDIR)/$(am__dirstamp)
+$(queue)/rescale.lo: $(queue)/$(am__dirstamp) \
+	$(queue)/$(DEPDIR)/$(am__dirstamp)
+
+lib_queue.la: $(lib_queue_la_OBJECTS) $(lib_queue_la_DEPENDENCIES) $(EXTRA_lib_queue_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(queuedir) $(lib_queue_la_OBJECTS) $(lib_queue_la_LIBADD) $(LIBS)
 $(reader)/$(am__dirstamp):
 	@$(MKDIR_P) $(reader)
 	@: > $(reader)/$(am__dirstamp)
@@ -1063,15 +1124,9 @@ $(thread)/$(DEPDIR)/$(am__dirstamp):
 	@: > $(thread)/$(DEPDIR)/$(am__dirstamp)
 $(thread)/thread.lo: $(thread)/$(am__dirstamp) \
 	$(thread)/$(DEPDIR)/$(am__dirstamp)
-$(thread)/load_image.lo: $(thread)/$(am__dirstamp) \
-	$(thread)/$(DEPDIR)/$(am__dirstamp)
 $(thread)/load_image_controller.lo: $(thread)/$(am__dirstamp) \
 	$(thread)/$(DEPDIR)/$(am__dirstamp)
-$(thread)/find_handler.lo: $(thread)/$(am__dirstamp) \
-	$(thread)/$(DEPDIR)/$(am__dirstamp)
 $(thread)/find_handler_controller.lo: $(thread)/$(am__dirstamp) \
-	$(thread)/$(DEPDIR)/$(am__dirstamp)
-$(thread)/rescale.lo: $(thread)/$(am__dirstamp) \
 	$(thread)/$(DEPDIR)/$(am__dirstamp)
 
 lib_thread.la: $(lib_thread_la_OBJECTS) $(lib_thread_la_DEPENDENCIES) $(EXTRA_lib_thread_la_DEPENDENCIES) 
@@ -1121,6 +1176,8 @@ mostlyclean-compile:
 	-rm -f $(gui)/*.lo
 	-rm -f $(handler)/*.$(OBJEXT)
 	-rm -f $(handler)/*.lo
+	-rm -f $(queue)/*.$(OBJEXT)
+	-rm -f $(queue)/*.lo
 	-rm -f $(reader)/*.$(OBJEXT)
 	-rm -f $(reader)/*.lo
 	-rm -f $(thread)/*.$(OBJEXT)
@@ -1151,15 +1208,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/std_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/struct_stream.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/wxarchive_handler.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/find_handler.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/load_image.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/rescale.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/controller.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/decorator.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/page_indicator.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/scroll_controller.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/find_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/find_handler_controller.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/load_image.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/load_image_controller.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/rescale.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/thread.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/decorator.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/flex_grid_cell_window.Plo@am__quote@ # am--include-marker
@@ -1206,6 +1263,7 @@ clean-libtool:
 	-rm -rf $(explorer)/.libs $(explorer)/_libs
 	-rm -rf $(gui)/.libs $(gui)/_libs
 	-rm -rf $(handler)/.libs $(handler)/_libs
+	-rm -rf $(queue)/.libs $(queue)/_libs
 	-rm -rf $(reader)/.libs $(reader)/_libs
 	-rm -rf $(thread)/.libs $(thread)/_libs
 	-rm -rf $(window)/.libs $(window)/_libs
@@ -1522,7 +1580,7 @@ check: check-recursive
 all-am: Makefile $(PROGRAMS) $(LTLIBRARIES)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bitmapdir)" "$(DESTDIR)$(commondir)" "$(DESTDIR)$(explorerdir)" "$(DESTDIR)$(guidir)" "$(DESTDIR)$(handlerdir)" "$(DESTDIR)$(readerdir)" "$(DESTDIR)$(threaddir)" "$(DESTDIR)$(windowdir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bitmapdir)" "$(DESTDIR)$(commondir)" "$(DESTDIR)$(explorerdir)" "$(DESTDIR)$(guidir)" "$(DESTDIR)$(handlerdir)" "$(DESTDIR)$(queuedir)" "$(DESTDIR)$(readerdir)" "$(DESTDIR)$(threaddir)" "$(DESTDIR)$(windowdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -1563,6 +1621,8 @@ distclean-generic:
 	-test -z "$(gui)/$(am__dirstamp)" || rm -f $(gui)/$(am__dirstamp)
 	-test -z "$(handler)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(handler)/$(DEPDIR)/$(am__dirstamp)
 	-test -z "$(handler)/$(am__dirstamp)" || rm -f $(handler)/$(am__dirstamp)
+	-test -z "$(queue)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(queue)/$(DEPDIR)/$(am__dirstamp)
+	-test -z "$(queue)/$(am__dirstamp)" || rm -f $(queue)/$(am__dirstamp)
 	-test -z "$(reader)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(reader)/$(DEPDIR)/$(am__dirstamp)
 	-test -z "$(reader)/$(am__dirstamp)" || rm -f $(reader)/$(am__dirstamp)
 	-test -z "$(thread)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(thread)/$(DEPDIR)/$(am__dirstamp)
@@ -1578,8 +1638,8 @@ clean: clean-recursive
 clean-am: clean-binPROGRAMS clean-bitmapLTLIBRARIES \
 	clean-commonLTLIBRARIES clean-explorerLTLIBRARIES \
 	clean-generic clean-guiLTLIBRARIES clean-handlerLTLIBRARIES \
-	clean-libtool clean-readerLTLIBRARIES clean-threadLTLIBRARIES \
-	clean-windowLTLIBRARIES mostlyclean-am
+	clean-libtool clean-queueLTLIBRARIES clean-readerLTLIBRARIES \
+	clean-threadLTLIBRARIES clean-windowLTLIBRARIES mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -1603,15 +1663,15 @@ distclean: distclean-recursive
 	-rm -f $(handler)/$(DEPDIR)/std_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
+	-rm -f $(queue)/$(DEPDIR)/find_handler.Plo
+	-rm -f $(queue)/$(DEPDIR)/load_image.Plo
+	-rm -f $(queue)/$(DEPDIR)/rescale.Plo
 	-rm -f $(reader)/$(DEPDIR)/controller.Plo
 	-rm -f $(reader)/$(DEPDIR)/decorator.Plo
 	-rm -f $(reader)/$(DEPDIR)/page_indicator.Plo
 	-rm -f $(reader)/$(DEPDIR)/scroll_controller.Plo
-	-rm -f $(thread)/$(DEPDIR)/find_handler.Plo
 	-rm -f $(thread)/$(DEPDIR)/find_handler_controller.Plo
-	-rm -f $(thread)/$(DEPDIR)/load_image.Plo
 	-rm -f $(thread)/$(DEPDIR)/load_image_controller.Plo
-	-rm -f $(thread)/$(DEPDIR)/rescale.Plo
 	-rm -f $(thread)/$(DEPDIR)/thread.Plo
 	-rm -f $(window)/$(DEPDIR)/decorator.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo
@@ -1636,8 +1696,9 @@ info-am:
 
 install-data-am: install-bitmapLTLIBRARIES install-commonLTLIBRARIES \
 	install-explorerLTLIBRARIES install-guiLTLIBRARIES \
-	install-handlerLTLIBRARIES install-readerLTLIBRARIES \
-	install-threadLTLIBRARIES install-windowLTLIBRARIES
+	install-handlerLTLIBRARIES install-queueLTLIBRARIES \
+	install-readerLTLIBRARIES install-threadLTLIBRARIES \
+	install-windowLTLIBRARIES
 
 install-dvi: install-dvi-recursive
 
@@ -1688,15 +1749,15 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(handler)/$(DEPDIR)/std_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
+	-rm -f $(queue)/$(DEPDIR)/find_handler.Plo
+	-rm -f $(queue)/$(DEPDIR)/load_image.Plo
+	-rm -f $(queue)/$(DEPDIR)/rescale.Plo
 	-rm -f $(reader)/$(DEPDIR)/controller.Plo
 	-rm -f $(reader)/$(DEPDIR)/decorator.Plo
 	-rm -f $(reader)/$(DEPDIR)/page_indicator.Plo
 	-rm -f $(reader)/$(DEPDIR)/scroll_controller.Plo
-	-rm -f $(thread)/$(DEPDIR)/find_handler.Plo
 	-rm -f $(thread)/$(DEPDIR)/find_handler_controller.Plo
-	-rm -f $(thread)/$(DEPDIR)/load_image.Plo
 	-rm -f $(thread)/$(DEPDIR)/load_image_controller.Plo
-	-rm -f $(thread)/$(DEPDIR)/rescale.Plo
 	-rm -f $(thread)/$(DEPDIR)/thread.Plo
 	-rm -f $(window)/$(DEPDIR)/decorator.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo
@@ -1722,8 +1783,8 @@ ps-am:
 uninstall-am: uninstall-binPROGRAMS uninstall-bitmapLTLIBRARIES \
 	uninstall-commonLTLIBRARIES uninstall-explorerLTLIBRARIES \
 	uninstall-guiLTLIBRARIES uninstall-handlerLTLIBRARIES \
-	uninstall-readerLTLIBRARIES uninstall-threadLTLIBRARIES \
-	uninstall-windowLTLIBRARIES
+	uninstall-queueLTLIBRARIES uninstall-readerLTLIBRARIES \
+	uninstall-threadLTLIBRARIES uninstall-windowLTLIBRARIES
 
 .MAKE: $(am__recursive_targets) install-am install-strip
 
@@ -1732,29 +1793,30 @@ uninstall-am: uninstall-binPROGRAMS uninstall-bitmapLTLIBRARIES \
 	clean-binPROGRAMS clean-bitmapLTLIBRARIES \
 	clean-commonLTLIBRARIES clean-cscope clean-explorerLTLIBRARIES \
 	clean-generic clean-guiLTLIBRARIES clean-handlerLTLIBRARIES \
-	clean-libtool clean-readerLTLIBRARIES clean-threadLTLIBRARIES \
-	clean-windowLTLIBRARIES cscope cscopelist-am ctags ctags-am \
-	dist dist-all dist-bzip2 dist-gzip dist-lzip dist-shar \
-	dist-tarZ dist-xz dist-zip dist-zstd distcheck distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distcleancheck distdir distuninstallcheck dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-bitmapLTLIBRARIES \
-	install-commonLTLIBRARIES install-data install-data-am \
-	install-dvi install-dvi-am install-exec install-exec-am \
-	install-explorerLTLIBRARIES install-guiLTLIBRARIES \
-	install-handlerLTLIBRARIES install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am \
-	install-readerLTLIBRARIES install-strip \
-	install-threadLTLIBRARIES install-windowLTLIBRARIES \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-bitmapLTLIBRARIES \
-	uninstall-commonLTLIBRARIES uninstall-explorerLTLIBRARIES \
-	uninstall-guiLTLIBRARIES uninstall-handlerLTLIBRARIES \
+	clean-libtool clean-queueLTLIBRARIES clean-readerLTLIBRARIES \
+	clean-threadLTLIBRARIES clean-windowLTLIBRARIES cscope \
+	cscopelist-am ctags ctags-am dist dist-all dist-bzip2 \
+	dist-gzip dist-lzip dist-shar dist-tarZ dist-xz dist-zip \
+	dist-zstd distcheck distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-tags \
+	distcleancheck distdir distuninstallcheck dvi dvi-am html \
+	html-am info info-am install install-am install-binPROGRAMS \
+	install-bitmapLTLIBRARIES install-commonLTLIBRARIES \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-explorerLTLIBRARIES \
+	install-guiLTLIBRARIES install-handlerLTLIBRARIES install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-queueLTLIBRARIES install-readerLTLIBRARIES \
+	install-strip install-threadLTLIBRARIES \
+	install-windowLTLIBRARIES installcheck installcheck-am \
+	installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
+	uninstall-bitmapLTLIBRARIES uninstall-commonLTLIBRARIES \
+	uninstall-explorerLTLIBRARIES uninstall-guiLTLIBRARIES \
+	uninstall-handlerLTLIBRARIES uninstall-queueLTLIBRARIES \
 	uninstall-readerLTLIBRARIES uninstall-threadLTLIBRARIES \
 	uninstall-windowLTLIBRARIES
 

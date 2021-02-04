@@ -59,7 +59,6 @@ lib_explorer_la_LIBADD = lib_handler.la \
 						 lib_thread.la \
 						 lib_window.la
 
-# make libraries for gui
 gui = src/gui
 guidir = @abs_builddir@/gui
 gui_LTLIBRARIES = lib_frame.la
@@ -83,11 +82,17 @@ thread = src/thread
 threaddir = @abs_builddir@/thread
 thread_LTLIBRARIES = lib_thread.la
 lib_thread_la_SOURCES = $(thread)/thread.cpp \
-												$(thread)/load_image.cpp \
 												$(thread)/load_image_controller.cpp \
-												$(thread)/find_handler.cpp \
-												$(thread)/find_handler_controller.cpp \
-												$(thread)/rescale.cpp
+												$(thread)/find_handler_controller.cpp
+lib_thread_la_LIBADD = lib_queue.la
+
+queue = src/queue
+queuedir = @abs_builddir@/queue
+queue_LTLIBRARIES = lib_queue.la
+lib_queue_la_SOURCES = $(queue)/load_image.cpp \
+											 $(queue)/find_handler.cpp \
+											 $(queue)/rescale.cpp 
+
 
 fmr = src/main
 bin_PROGRAMS = fmr

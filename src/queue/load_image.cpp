@@ -18,19 +18,18 @@
 #include <fmr/bitmap/image_util.h>
 #include <fmr/common/string.h>
 #include <fmr/handler/handler_factory.h>
-#include <fmr/thread/load_image.h>
+#include <fmr/queue/load_image.h>
 #include <wx/log.h>
-#include <wx/stopwatch.h>
 
 namespace fmr {
 
-namespace thread {
+namespace queue {
 
 wxDEFINE_EVENT(kEventImageLoaded, LoadImageEvent);
 
 void LoadImage::Load(SStream *stream) {
 #define TEST_RETURN() \
-  if (TestDestroy()) return;
+  if (IsBeingDeleted()) return;
 
   auto event =
       std::make_unique<LoadImageEvent>(kEventImageLoaded, GetEventId());
@@ -52,49 +51,38 @@ void LoadImage::Load(SStream *stream) {
   event->GetBitmap().SetImage(image);
 
   TEST_RETURN();
+
   wxLogMessage("Sending Image Loaded Event to %p", GetParent());
-  wxQueueEvent(GetParent(), event.release());
+  SendEventToParent(event.release());
 }
 
-wxThread::ExitCode LoadImage::Entry() {
-#define TEST_BREAK() \
-  if (TestDestroy()) break
-
+void LoadImage::PopTask() {
   wxLogMessage("Starting load thread");
 
-  while (!TestDestroy()) {
-    if (!QueueEmpty()) {
-      TEST_BREAK();
-      SStream *&stream = Front();
-      std::shared_ptr<wxInputStream> input_stream = stream->GetStream();
+  if (IsEmpty()) return;
 
-      TEST_BREAK();
+  SStream *&stream = Front();
+  std::shared_ptr<wxInputStream> input_stream = stream->GetStream();
 
-      if (!stream->IsOk() || !wxImage::CanRead(*input_stream)) {
-        TEST_BREAK();
-        std::unique_ptr<AbstractHandler> handler(
-            HandlerFactory::NewHandler(stream->GetHandlerPath()));
-        TEST_BREAK();
-        wxLogMessage("Loading Stream in %s/%s",
-                     String::FromString<wxString>(stream->GetHandlerPath())),
-            String::FromString<wxString>(stream->GetName());
-        TEST_BREAK();
-        handler->GetStream(*stream);
-      }
-      TEST_BREAK();
-      Load(stream);
-      Pop();
-    }
+  TEST_RETURN();
 
-    TEST_BREAK();
+  if (!stream->IsOk() || !wxImage::CanRead(*input_stream)) {
+    TEST_RETURN();
+    std::unique_ptr<AbstractHandler> handler(
+        HandlerFactory::NewHandler(stream->GetHandlerPath()));
+    TEST_RETURN();
+    wxLogMessage("Loading Stream in %s/%s",
+                 String::FromString<wxString>(stream->GetHandlerPath())),
+        String::FromString<wxString>(stream->GetName());
+    TEST_RETURN();
+    handler->GetStream(*stream);
   }
 
-  wxLogMessage("ID:%d Load thread completed", GetEventId());
-  Completed();
+  TEST_RETURN();
+  Load(stream);
 
-  return (wxThread::ExitCode)0;
+  Pop();
 }
 
-}  // namespace thread
-
+}  // namespace queue
 };  // namespace fmr

@@ -41,8 +41,8 @@ class RescaleLoader : public Loader {
   }
 
  private:
-  void OnImageLoaded(thread::LoadImageEvent &event);
-  void OnImageRescaled(thread::RescaledEvent &event);
+  void OnImageLoaded(queue::LoadImageEvent &event);
+  void OnImageRescaled(queue::RescaledEvent &event);
 };
 
 }  // namespace bitmap

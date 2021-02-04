@@ -44,7 +44,7 @@ Controller::Controller() {
   loader_ =
       std::make_unique<bitmap::PageLoader>(this, GetBitmapCtrl(), kLoaderId);
 
-  Bind(thread::kEventImageLoaded, &Controller::OnLoadedImage, this, kLoaderId);
+  Bind(queue::kEventImageLoaded, &Controller::OnLoadedImage, this, kLoaderId);
 
   Bind(bitmap::kEventOpenedStreamFound, &Controller::OnOpenedStreamFound, this,
        kLoaderId);
@@ -128,7 +128,7 @@ void Controller::AdjustBitmap() {
   GetWindow()->SetBitmapPage(page);
 }
 
-void Controller::OnLoadedImage(thread::LoadImageEvent &event) {
+void Controller::OnLoadedImage(queue::LoadImageEvent &event) {
   GetBitmapCtrl()->AddBitmap(event.GetBitmap(),
                              loader_->GetStreamPage(event.GetStream()),
                              loader_->GetStreamPosInPage(event.GetStream()));

@@ -29,27 +29,27 @@ RescaleLoader::RescaleLoader(wxEvtHandler *parent, int id)
 }
 
 void RescaleLoader::SetControllerId(int find_id, int load_id, int rescale_id) {
-  GetLoadImageController()->Unbind(thread::kEventImageLoaded,
+  GetLoadImageController()->Unbind(queue::kEventImageLoaded,
                                    &RescaleLoader::OnImageLoaded, this,
                                    GetLoadImageController()->GetThreadId());
 
-  GetRescaleController()->Unbind(thread::kEventImageRescaled,
+  GetRescaleController()->Unbind(queue::kEventImageRescaled,
                                  &RescaleLoader::OnImageRescaled, this,
                                  GetRescaleController()->GetThreadId());
 
   SetControllerId(find_id, load_id);
   GetRescaleController()->SetThreadId(rescale_id);
 
-  GetLoadImageController()->Bind(thread::kEventImageLoaded,
+  GetLoadImageController()->Bind(queue::kEventImageLoaded,
                                  &RescaleLoader::OnImageLoaded, this,
                                  GetLoadImageController()->GetThreadId());
 
-  GetRescaleController()->Bind(thread::kEventImageRescaled,
+  GetRescaleController()->Bind(queue::kEventImageRescaled,
                                &RescaleLoader::OnImageRescaled, this,
                                GetRescaleController()->GetThreadId());
 }
 
-void RescaleLoader::OnImageLoaded(thread::LoadImageEvent &event) {
+void RescaleLoader::OnImageLoaded(queue::LoadImageEvent &event) {
   stream_bmp_.insert(std::make_pair(event.GetStream(), event.GetBitmap()));
 
   wxImage *img = &stream_bmp_[event.GetStream()].GetImage();
@@ -58,7 +58,7 @@ void RescaleLoader::OnImageLoaded(thread::LoadImageEvent &event) {
   GetRescaleController()->Push(img);
 }
 
-void RescaleLoader::OnImageRescaled(thread::RescaledEvent &event) {
+void RescaleLoader::OnImageRescaled(queue::RescaledEvent &event) {
   auto stream_item = img_stream_.find(event.GetImage());
   if (stream_item != img_stream_.end()) {
     auto item = stream_bmp_.find(stream_item->second);

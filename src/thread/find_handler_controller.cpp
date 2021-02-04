@@ -47,10 +47,10 @@ bool FindHandlerController::Open(const std::string &path) {
 }
 
 void FindHandlerController::SetThreadId(int id) {
-  Unbind(kEventStreamFound, &FindHandlerController::OnStreamFound, this,
+  Unbind(queue::kEventStreamFound, &FindHandlerController::OnStreamFound, this,
          thread_id_);
   thread_id_ = id;
-  Bind(kEventStreamFound, &FindHandlerController::OnStreamFound, this,
+  Bind(queue::kEventStreamFound, &FindHandlerController::OnStreamFound, this,
        thread_id_);
 }
 
@@ -61,7 +61,7 @@ void FindHandlerController::AddFoundStream(
   loaded_stream_.push_back(std::move(found_stream));
 }
 
-void FindHandlerController::OnStreamFound(FoundEvent &event) {
+void FindHandlerController::OnStreamFound(queue::FoundEvent &event) {
   AddFoundStream(event.GetSourceStream(), event.GetFoundStreamOwnerShip());
 }
 
@@ -90,7 +90,8 @@ void FindHandlerController::Clear() {
 bool FindHandlerController::Run() {
   Clear();
 
-  thread_ = new FindHandler(this, wxTHREAD_DETACHED, GetThreadId());
+  thread_ =
+      new Queue<queue::FindHandler>(this, wxTHREAD_DETACHED, GetThreadId());
 
   while (!stream_queue_.empty()) {
     auto item = stream_queue_.front();

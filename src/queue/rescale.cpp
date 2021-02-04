@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmr/thread/rescale.h"
+#include "fmr/queue/rescale.h"
 
 #include <memory>
 
 namespace fmr {
 
-namespace thread {
+namespace queue {
 
 wxDEFINE_EVENT(kEventImageRescaled, RescaledEvent);
 
@@ -29,23 +29,18 @@ void Rescale::SendEvent(wxImage *image) {
   auto event =
       std::make_unique<RescaledEvent>(kEventImageRescaled, GetEventId(), image);
 
-  QueueEventParent(event.release());
+  SendEventToParent(event.release());
 }
 
-wxThread::ExitCode Rescale::Entry() {
-  while (!TestDestroy()) {
-    if (!QueueEmpty()) {
-      auto item = Front();
-      rescaler_->DoRescale(*item);
+void Rescale::PopTask() {
+  if (IsEmpty()) return;
+  auto item = Front();
+  rescaler_->DoRescale(*item);
 
-      SendEvent(item);
-      Pop();
-    }
-  }
-  Completed();
-  return (wxThread::ExitCode)0;
+  SendEvent(item);
+  Pop();
 }
 
-}  // namespace thread
+}  // namespace queue
 
 }  // namespace fmr

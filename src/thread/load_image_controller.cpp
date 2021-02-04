@@ -27,14 +27,14 @@ LoadImageController::LoadImageController(wxEvtHandler *parent, int id)
 }
 
 void LoadImageController::SetThreadId(int id) {
-  Unbind(kEventImageLoaded, &LoadImageController::OnImageLoaded, this,
+  Unbind(queue::kEventImageLoaded, &LoadImageController::OnImageLoaded, this,
          GetThreadId());
   thread_id_ = id;
-  Bind(kEventImageLoaded, &LoadImageController::OnImageLoaded, this,
+  Bind(queue::kEventImageLoaded, &LoadImageController::OnImageLoaded, this,
        GetThreadId());
 }
 
-void LoadImageController::OnImageLoaded(LoadImageEvent &event) {
+void LoadImageController::OnImageLoaded(queue::LoadImageEvent &event) {
   //
 }
 
@@ -44,7 +44,8 @@ void LoadImageController::Push(SStream *stream) {
 }
 
 bool LoadImageController::Run() {
-  auto thread_temp = new LoadImage(this, wxTHREAD_DETACHED, GetThreadId());
+  auto thread_temp =
+      new Queue<queue::LoadImage>(this, wxTHREAD_DETACHED, GetThreadId());
   bool ret = thread_temp->Run() == wxTHREAD_NO_ERROR;
   thread_ = thread_temp;
 

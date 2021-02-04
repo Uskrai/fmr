@@ -26,11 +26,11 @@
 
 #include <queue>
 
-#include "fmr/thread/queue.h"
+#include "fmr/queue/base.h"
 
 namespace fmr {
 
-namespace thread {
+namespace queue {
 
 /// flags used by FindHandler
 enum FindHandlerFlags {
@@ -73,15 +73,16 @@ wxDECLARE_EVENT(kEventStreamNotFound, FoundEvent);
 typedef void (wxEvtHandler::*FoundEventFunction)(FoundEvent &);
 #define FoundEventHandler(func) wxEVENT_HANDLER_CAST(FoundEventFunction, func);
 
-class FindHandler : public Queue<std::pair<const SStream *, SStream>> {
+class FindHandler : public Base<std::pair<const SStream *, SStream>> {
  private:
-  bool (*check_func_)(const SStream &stream);  // function to check if the
-                                               // thread should send FoundEvent
   FindHandlerFlags flags_;
 
+  bool (*check_func_)(const SStream &stream);  // function to check if the
+                                               // thread should send FoundEvent
+                                               // FindHandlerFlags flags_;
+
  public:
-  FindHandler(ThreadController *parent, wxThreadKind type, int id)
-      : Queue(parent, type, id){};
+  FindHandler(ThreadController *parent, int id) : Base(parent, id){};
 
   bool Find(FoundEvent *event);
   bool Find(AbstractOpenableHandler *handler, FoundEvent *event);
@@ -104,8 +105,10 @@ class FindHandler : public Queue<std::pair<const SStream *, SStream>> {
    */
   void SetFlags(FindHandlerFlags flags) { flags_ = flags; }
 
-  using Queue::Push;
+  using Base::Push;
   bool Push(const SStream *stream);
+
+  void PopTask();
 
  private:
   std::unique_ptr<FoundEvent> MakeEvent(
@@ -121,11 +124,9 @@ class FindHandler : public Queue<std::pair<const SStream *, SStream>> {
   void StreamFound(FoundEvent *stream);
   template <typename T>
   bool TraverseHandler(T *handler, FoundEvent *stream);
-
-  ExitCode Entry();
 };
 
-};  // namespace thread
+};  // namespace queue
 
 };  // namespace fmr
 

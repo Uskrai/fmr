@@ -19,8 +19,8 @@
 #define FMR_THREAD_LOAD_IMAGE_CONTROLLER
 
 #include "fmr/handler/struct_stream.h"
-#include "fmr/thread/load_image.h"
-#include "fmr/thread/thread.h"
+#include "fmr/queue/load_image.h"
+#include "fmr/thread/queue.h"
 
 namespace fmr {
 namespace thread {
@@ -29,7 +29,7 @@ constexpr int kLoadImageControllerIdDefault = wxID_HIGHEST + 4000;
 
 class LoadImageController : public ThreadController {
  protected:
-  LoadImage *thread_ = nullptr;
+  Queue<queue::LoadImage> *thread_ = nullptr;
 
   int thread_id_ = kLoadImageControllerIdDefault;
   wxEvtHandler *parent_ = nullptr;
@@ -53,7 +53,7 @@ class LoadImageController : public ThreadController {
   void DisableOnEmptyQueue(bool disable = true);
 
  private:
-  void OnImageLoaded(LoadImageEvent &event);
+  void OnImageLoaded(queue::LoadImageEvent &event);
 };
 
 }  // namespace thread

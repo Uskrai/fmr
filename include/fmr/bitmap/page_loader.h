@@ -73,7 +73,7 @@ class PageLoader : public Loader {
   const SStream *GetFirstFoundStream(const SStream *source_stream);
 
  private:
-  void OnStreamFound(thread::FoundEvent &event);
+  void OnStreamFound(queue::FoundEvent &event);
   void OnCompleted(wxThreadEvent &event);
 };
 

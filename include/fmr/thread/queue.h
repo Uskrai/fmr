@@ -18,41 +18,46 @@
 #ifndef FMR_THREAD_QUEUE
 #define FMR_THREAD_QUEUE
 
-#include <queue>
-
 #include "fmr/thread/thread.h"
 
 namespace fmr {
 
 namespace thread {
 
-template <class T>
-class Queue : public BaseThread {
-  std::queue<T> queue_item_;
-  bool disable_on_empty_queue_ = false;
+template <class QueueClass>
+class Queue : public BaseThread, public QueueClass {
+  bool is_disable_on_empty_queue_;
 
  public:
-  Queue(ThreadController *parent, wxThreadKind type, int id)
-      : BaseThread(parent, type, id){};
-  virtual ~Queue(){};
+  Queue(ThreadController *parent, wxThreadKind type, int event_id)
+      : BaseThread(parent, type, event_id), QueueClass(parent, event_id) {}
 
-  void Push(const T &item) { queue_item_.push(item); }
-  void Push(T &&item) { queue_item_.push(std::move(item)); }
+  ExitCode Entry() {
+    while (!TestDestroy()) {
+      if (!QueueClass::IsEmpty()) {
+        QueueClass::PopTask();
+        Update();
+      }
+    }
+    Completed();
 
-  T &Front() { return queue_item_.front(); }
-
-  void Pop() { queue_item_.pop(); }
-
-  void DisableOnEmptyQueue(bool disable = true) {
-    disable_on_empty_queue_ = disable;
+    return (wxThread::ExitCode)0;
   }
 
-  virtual bool TestDestroy() {
+  void DisableOnEmptyQueue(bool cond = true) {
+    is_disable_on_empty_queue_ = cond;
+  }
+
+  bool TestDestroy() {
     return BaseThread::TestDestroy() ||
-           (disable_on_empty_queue_ && queue_item_.empty());
+           (is_disable_on_empty_queue_ && QueueClass ::IsEmpty());
   }
 
-  virtual bool QueueEmpty() { return queue_item_.empty(); }
+  wxThreadError Delete(ExitCode *rc = NULL,
+                       wxThreadWait waitMode = wxTHREAD_WAIT_DEFAULT) {
+    QueueClass::Delete();
+    return BaseThread::Delete();
+  }
 };
 
 }  // namespace thread

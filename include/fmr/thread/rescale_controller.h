@@ -18,7 +18,8 @@
 #ifndef FMR_THREAD_RESCALE_CONTROLLER
 #define FMR_THREAD_RESCALE_CONTROLLER
 
-#include "fmr/thread/rescale.h"
+#include "fmr/queue/rescale.h"
+#include "fmr/thread/queue.h"
 
 namespace fmr {
 
@@ -26,7 +27,7 @@ namespace thread {
 
 class RescaleController : public ThreadController {
  protected:
-  Rescale *thread_ = nullptr;
+  Queue<queue::Rescale> *thread_ = nullptr;
   int thread_id_;
   bitmap::Rescaler *rescaler_ = nullptr;
   wxEvtHandler *parent_ = nullptr;
@@ -43,14 +44,14 @@ class RescaleController : public ThreadController {
   void SetRescaler(bitmap::Rescaler *rescaler) { rescaler_ = rescaler; }
 
   void SetThreadId(int id) {
-    Unbind(kEventImageRescaled, &RescaleController::OnImageRescalled, this,
-           thread_id_);
+    Unbind(queue::kEventImageRescaled, &RescaleController::OnImageRescalled,
+           this, thread_id_);
     thread_id_ = id;
-    Bind(kEventImageRescaled, &RescaleController::OnImageRescalled, this,
+    Bind(queue::kEventImageRescaled, &RescaleController::OnImageRescalled, this,
          thread_id_);
   }
 
-  void OnImageRescalled(RescaledEvent &event) {
+  void OnImageRescalled(queue::RescaledEvent &event) {
     wxPostEvent(GetParent(), event);
   }
 
@@ -60,7 +61,7 @@ class RescaleController : public ThreadController {
   };
 
   bool Run() {
-    thread_ = new Rescale(this, wxTHREAD_DETACHED, thread_id_);
+    thread_ = new Queue<queue::Rescale>(this, wxTHREAD_DETACHED, thread_id_);
     thread_->SetRescaler(rescaler_);
     return thread_->Run() == wxTHREAD_NO_ERROR;
   }

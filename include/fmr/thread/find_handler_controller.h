@@ -22,8 +22,8 @@
 #include <unordered_map>
 
 #include "fmr/handler/abstract_handler.h"
-#include "fmr/thread/find_handler.h"
-#include "fmr/thread/thread.h"
+#include "fmr/queue/find_handler.h"
+#include "fmr/thread/queue.h"
 
 namespace fmr {
 
@@ -37,8 +37,8 @@ class FindHandlerController : public ThreadController {
   std::unique_ptr<AbstractHandler> handler_;
   std::queue<const SStream *> stream_queue_;
   std::vector<const SStream *> in_queue_vec_;
-  FindHandler *thread_ = nullptr;
-  FindHandlerFlags thread_flags_ = kFindHandlerDefault;
+  Queue<queue::FindHandler> *thread_ = nullptr;
+  queue::FindHandlerFlags thread_flags_ = queue::kFindHandlerDefault;
 
   // map to found (first) and source (second) stream
   std::unordered_map<const SStream *, const SStream *> found_source_map_;
@@ -63,7 +63,7 @@ class FindHandlerController : public ThreadController {
   void SetChecker(bool (*checker)(const SStream &stream)) {
     stream_checker_ = checker;
   }
-  void SetFlags(FindHandlerFlags flags) { thread_flags_ = flags; }
+  void SetFlags(queue::FindHandlerFlags flags) { thread_flags_ = flags; }
   void SetThreadId(int thread_id);
   int GetThreadId() const { return thread_id_; }
 
@@ -78,7 +78,7 @@ class FindHandlerController : public ThreadController {
   void Clear();
 
  private:
-  void OnStreamFound(FoundEvent &event);
+  void OnStreamFound(queue::FoundEvent &event);
 };
 
 }  // namespace thread

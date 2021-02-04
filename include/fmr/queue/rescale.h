@@ -21,12 +21,11 @@
 #include <queue>
 
 #include "fmr/bitmap/rescaler.h"
-#include "fmr/thread/queue.h"
-#include "fmr/thread/thread.h"
+#include "fmr/queue/base.h"
 
 namespace fmr {
 
-namespace thread {
+namespace queue {
 
 class RescaledEvent : public wxCommandEvent {
  protected:
@@ -45,24 +44,22 @@ class RescaledEvent : public wxCommandEvent {
 
 wxDECLARE_EVENT(kEventImageRescaled, RescaledEvent);
 
-class Rescale : public Queue<wxImage *> {
+class Rescale : public Base<wxImage *> {
  private:
   bitmap::Rescaler *rescaler_ = nullptr;
 
  public:
-  Rescale(ThreadController *parent, wxThreadKind type = wxTHREAD_DETACHED,
-          int id = wxID_ANY)
-      : Queue(parent, type, id){};
+  Rescale(wxEvtHandler *parent, int id = wxID_ANY) : Base(parent, id){};
 
   void SetRescaler(bitmap::Rescaler *rescaler) { rescaler_ = rescaler; }
 
-  ExitCode Entry();
+  void PopTask();
 
  private:
   void SendEvent(wxImage *image);
 };
 
-}  // namespace thread
+}  // namespace queue
 
 }  // namespace fmr
 

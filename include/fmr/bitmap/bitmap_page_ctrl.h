@@ -65,7 +65,7 @@ class BitmapPageCtrl : public BitmapCtrl {
   void Clear();
 
  private:
-  void OnImageLoaded(thread::LoadImageEvent &event);
+  void OnImageLoaded(queue::LoadImageEvent &event);
 };
 
 }  // namespace bitmap

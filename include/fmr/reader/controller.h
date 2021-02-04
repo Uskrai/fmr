@@ -83,7 +83,7 @@ class Controller : public ScrollController {
   wxWindow *GetParent() { return parent_; }
 
  private:
-  void OnLoadedImage(thread::LoadImageEvent &event);
+  void OnLoadedImage(queue::LoadImageEvent &event);
   void OnOpenedStreamFound(wxCommandEvent &event);
   void OnWindowScroll(wxScrollWinEvent &event);
 };

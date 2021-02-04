@@ -30,8 +30,8 @@ Window::Window(wxWindow *parent, const wxWindowID &id, const wxPoint &pos,
     : FlexGridWindow(parent, id, pos, size, style, name) {
   CreateGrid(0, 0);
   BindEvent();
-  loader_.SetFindFlags(thread::kFindHandlerOnlyFirstItem |
-                       thread::kFindHandlerRecursive);
+  loader_.SetFindFlags(queue::kFindHandlerOnlyFirstItem |
+                       queue::kFindHandlerRecursive);
   rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleFitAll);
   loader_.GetRescaleController()->SetRescaler(rescaler_.get());
 }
@@ -40,7 +40,7 @@ void Window::BindEvent() {
   Bind(EVT_COMMAND_THREAD_UPDATE, &Window::OnThreadUpdate, this);
   Bind(EVT_COMMAND_THREAD_COMPLETED, &Window::OnThreadUpdate, this);
   Bind(wxEVT_KEY_DOWN, &Window::OnKeyDown, this);
-  Bind(thread::kEventImageLoaded, &Window::OnImageLoaded, this, kLoaderId);
+  Bind(queue::kEventImageLoaded, &Window::OnImageLoaded, this, kLoaderId);
 }
 
 bool Window::Destroy() { return wxWindow::Destroy(); }
@@ -208,7 +208,7 @@ void Window::OnKeyDown(wxKeyEvent &event) {
   event.Skip();
 }
 
-void Window::OnImageLoaded(thread::LoadImageEvent &event) {
+void Window::OnImageLoaded(queue::LoadImageEvent &event) {
   auto item = map_window_.find(loader_.GetSourceStream(event.GetStream()));
   if (item != map_window_.end()) {
     item->second->SetBitmap(event.GetBitmap());

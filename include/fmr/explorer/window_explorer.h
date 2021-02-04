@@ -79,7 +79,7 @@ class Window : public FlexGridWindow {
 
   void OnThreadUpdate(wxThreadEvent &event);
   void OnKeyDown(wxKeyEvent &event);
-  void OnImageLoaded(thread::LoadImageEvent &event);
+  void OnImageLoaded(queue::LoadImageEvent &event);
 };
 
 };  // namespace explorer

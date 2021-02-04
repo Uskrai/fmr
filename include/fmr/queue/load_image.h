@@ -18,7 +18,6 @@
 #ifndef FMR_EXPLORER_LOAD_EXPLORER
 #define FMR_EXPLORER_LOAD_EXPLORER
 
-#include <fmr/bitmap/rescaler.h>
 #include <fmr/handler/struct_stream.h>
 #include <fmr/thread/thread.h>
 #include <wx/event.h>
@@ -26,11 +25,11 @@
 #include <queue>
 
 #include "fmr/bitmap/bmp.h"
-#include "fmr/thread/queue.h"
+#include "fmr/queue/base.h"
 
 namespace fmr {
 
-namespace thread {
+namespace queue {
 
 class LoadImageEvent : public wxCommandEvent {
  protected:
@@ -53,17 +52,16 @@ class LoadImageEvent : public wxCommandEvent {
 
 wxDECLARE_EVENT(kEventImageLoaded, LoadImageEvent);
 
-class LoadImage : public Queue<SStream *> {
+class LoadImage : public Base<SStream *> {
  public:
-  LoadImage(ThreadController *parent, wxThreadKind kind = wxTHREAD_DETACHED,
-            int id = wxID_ANY)
-      : Queue(parent, kind, id){};
+  LoadImage(ThreadController *parent, int id = wxID_ANY) : Base(parent, id){};
 
-  ExitCode Entry();
+  void PopTask();
   void Load(SStream *stream);
 };
 
-};  // namespace thread
+};  // namespace queue
+
 };  // namespace fmr
 
 #endif

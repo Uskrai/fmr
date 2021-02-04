@@ -53,7 +53,7 @@ class BitmapCtrl {
 
  private:
   void OnWindowSize(wxSizeEvent &event);
-  void OnImageLoaded(thread::LoadImageEvent &event);
+  void OnImageLoaded(queue::LoadImageEvent &event);
 };
 
 }  // namespace bitmap
