@@ -52,12 +52,14 @@ class LoadImageEvent : public wxCommandEvent {
 
 wxDECLARE_EVENT(kEventImageLoaded, LoadImageEvent);
 
+enum LoadReturn { kLoadBeingDeleted, kLoadSuccess, kLoadCannotReadStream };
+
 class LoadImage : public Base<SStream *> {
  public:
   LoadImage(ThreadController *parent, int id = wxID_ANY) : Base(parent, id){};
 
-  void PopTask();
-  void Load(SStream *stream);
+  bool ProcessTask(value_type &item) override;
+  LoadReturn Load(SStream *stream);
 };
 
 };  // namespace queue

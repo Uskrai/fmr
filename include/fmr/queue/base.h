@@ -43,6 +43,8 @@ class Base {
     event_id_ = id;
   };
 
+  using value_type = T;
+
   const std::queue<T> &GetContainer() const { return queue_item_; }
   std::queue<T> &GetContainer() { return queue_item_; }
 
@@ -74,7 +76,27 @@ class Base {
 
   bool IsEmpty() const { return queue_item_.empty(); }
 
-  virtual void PopTask() = 0;
+  /**
+   * @brief: The method that should be overriden
+   *
+   * @param: the item that should be processed
+   *
+   * @return: true if the task should be removed from queue if called from
+   * PopTask
+   */
+  virtual bool ProcessTask(value_type &item) = 0;
+
+  /**
+   * @brief: Process front Queue
+   * @return: @see ProcessTask
+   */
+  virtual bool PopTask() {
+    if (ProcessTask(queue_item_.front())) {
+      queue_item_.pop();
+      return true;
+    }
+    return false;
+  };
 };
 
 }  // namespace queue

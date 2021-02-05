@@ -32,13 +32,10 @@ void Rescale::SendEvent(wxImage *image) {
   SendEventToParent(event.release());
 }
 
-void Rescale::PopTask() {
-  if (IsEmpty()) return;
-  auto item = Front();
+bool Rescale::ProcessTask(value_type &item) {
   rescaler_->DoRescale(*item);
-
   SendEvent(item);
-  Pop();
+  return true;
 }
 
 }  // namespace queue

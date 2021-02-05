@@ -73,6 +73,8 @@ wxDECLARE_EVENT(kEventStreamNotFound, FoundEvent);
 typedef void (wxEvtHandler::*FoundEventFunction)(FoundEvent &);
 #define FoundEventHandler(func) wxEVENT_HANDLER_CAST(FoundEventFunction, func);
 
+enum FindReturn { kFindBeingDeleted, kFindSuccess, kFindNotFound };
+
 class FindHandler : public Base<std::pair<const SStream *, SStream>> {
  private:
   FindHandlerFlags flags_;
@@ -84,15 +86,15 @@ class FindHandler : public Base<std::pair<const SStream *, SStream>> {
  public:
   FindHandler(ThreadController *parent, int id) : Base(parent, id){};
 
-  bool Find(FoundEvent *event);
-  bool Find(AbstractOpenableHandler *handler, FoundEvent *event);
-  bool Find(AbstractHandler *handler, FoundEvent *event);
+  FindReturn Find(FoundEvent *event);
+  FindReturn Find(AbstractOpenableHandler *handler, FoundEvent *event);
+  FindReturn Find(AbstractHandler *handler, FoundEvent *event);
 
   void SetChecker(bool (*check_func)(const SStream &stream)) {
     check_func_ = check_func;
   }
 
-  bool SendIfFound(FoundEvent *event);
+  FindReturn SendIfFound(FoundEvent *event);
   bool CheckStream(const SStream &stream) { return check_func_(stream); }
 
   /**
@@ -108,7 +110,7 @@ class FindHandler : public Base<std::pair<const SStream *, SStream>> {
   using Base::Push;
   bool Push(const SStream *stream);
 
-  void PopTask();
+  bool ProcessTask(value_type &item);
 
  private:
   std::unique_ptr<FoundEvent> MakeEvent(
@@ -123,7 +125,7 @@ class FindHandler : public Base<std::pair<const SStream *, SStream>> {
 
   void StreamFound(FoundEvent *stream);
   template <typename T>
-  bool TraverseHandler(T *handler, FoundEvent *stream);
+  FindReturn TraverseHandler(T *handler, FoundEvent *stream);
 };
 
 };  // namespace queue

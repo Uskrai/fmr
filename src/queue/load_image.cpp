@@ -27,20 +27,20 @@ namespace queue {
 
 wxDEFINE_EVENT(kEventImageLoaded, LoadImageEvent);
 
-void LoadImage::Load(SStream *stream) {
-#define TEST_RETURN() \
-  if (IsBeingDeleted()) return;
+LoadReturn LoadImage::Load(SStream *stream) {
+#define TEST_DELETED() \
+  if (IsBeingDeleted()) return kLoadBeingDeleted;
 
   auto event =
       std::make_unique<LoadImageEvent>(kEventImageLoaded, GetEventId());
   event->SetStream(stream);
 
-  TEST_RETURN();
+  TEST_DELETED();
 
   auto input_stream = stream->GetStream();
-  if (!wxImage::CanRead(*input_stream)) return;
+  if (!wxImage::CanRead(*input_stream)) return kLoadCannotReadStream;
 
-  TEST_RETURN();
+  TEST_DELETED();
 
   wxLogMessage("Loading image in %s/%s",
                String::FromString<wxString>(stream->GetHandlerPath()),
@@ -50,18 +50,15 @@ void LoadImage::Load(SStream *stream) {
 
   event->GetBitmap().SetImage(image);
 
-  TEST_RETURN();
-
   wxLogMessage("Sending Image Loaded Event to %p", GetParent());
   SendEventToParent(event.release());
+  return kLoadSuccess;
 }
 
-void LoadImage::PopTask() {
-  wxLogMessage("Starting load thread");
+bool LoadImage::ProcessTask(LoadImage::value_type &stream) {
+#define TEST_RETURN() \
+  if (IsBeingDeleted()) return false;
 
-  if (IsEmpty()) return;
-
-  SStream *&stream = Front();
   std::shared_ptr<wxInputStream> input_stream = stream->GetStream();
 
   TEST_RETURN();
@@ -79,9 +76,11 @@ void LoadImage::PopTask() {
   }
 
   TEST_RETURN();
-  Load(stream);
+  if (Load(stream) == kLoadBeingDeleted) {
+    return false;
+  }
 
-  Pop();
+  return true;
 }
 
 }  // namespace queue

@@ -50,33 +50,31 @@ bool FindHandler::Push(const SStream *stream) {
   }
   return false;
 }
-#define TEST_RETURN() \
-  if (IsBeingDeleted()) return false
 
-void FindHandler::PopTask() {
-  wxLogMessage("Starting Find thread");
-
-  if (IsEmpty()) return;
-
-  auto &item = Front();
-
+bool FindHandler::ProcessTask(value_type &item) {
   auto event = MakeEvent(kEventStreamFound, GetEventId(), item.first,
                          std::make_unique<SStream>(item.second));
 
   wxLogMessage("Starting to search for %s/%s", item.second.GetHandlerPath(),
                item.second.GetName());
 
-  if (!IsBeingDeleted()) {
-    if (!Find(event.get())) {
-      event->SetEventType(kEventStreamNotFound);
-      SendEventToParent(event.release());
-    }
-  }
-  Pop();
-  wxLogMessage("Find thread completed");
+  if (IsBeingDeleted()) return false;
+
+  FindReturn ret = Find(event.get());
+
+  if (ret == kFindNotFound) {
+    event->SetEventType(kEventStreamNotFound);
+    SendEventToParent(event.release());
+  } else if (ret == kFindBeingDeleted)
+    return false;
+
+  return true;
 }
 
-bool FindHandler::Find(FoundEvent *event) {
+#define TEST_RETURN() \
+  if (IsBeingDeleted()) return kFindBeingDeleted
+
+FindReturn FindHandler::Find(FoundEvent *event) {
   auto search_stream = event->GetFoundStream();
   std::string handler_path = search_stream->GetHandlerPath();
 
@@ -93,10 +91,11 @@ bool FindHandler::Find(FoundEvent *event) {
       return Find(handler.get(), event);
     }
   }
-  return false;
+  return kFindNotFound;
 }
 
-bool FindHandler::Find(AbstractOpenableHandler *handler, FoundEvent *event) {
+FindReturn FindHandler::Find(AbstractOpenableHandler *handler,
+                             FoundEvent *event) {
   auto search_stream = event->GetFoundStream();
   std::string path = handler->GetItemPath(*search_stream);
 
@@ -120,25 +119,25 @@ bool FindHandler::Find(AbstractOpenableHandler *handler, FoundEvent *event) {
     TEST_RETURN();
     // traverse non-openable handler and if item found and with flags Only first
     // item, return
-    if (TraverseHandler(non_openable_handler.get(), event) &&
+    if (TraverseHandler(non_openable_handler.get(), event) == kFindSuccess &&
         Is(kFindHandlerOnlyFirstItem)) {
-      return true;
+      return kFindSuccess;
     } else if (!Is(kFindHandlerCheckHandler)) {
-      return false;
+      return kFindNotFound;
     }
   }
 
   TEST_RETURN();
-  if (SendIfFound(event)) return true;
+  if (SendIfFound(event) == kFindSuccess) return kFindSuccess;
 
-  if (path != stream_handler->GetName()) return false;
+  if (path != stream_handler->GetName()) return kFindNotFound;
 
   TEST_RETURN();
 
   if (Is(kFindHandlerRecursive))
     return TraverseHandler(stream_handler.get(), event);
 
-  return false;
+  return kFindNotFound;
 }
 
 void FindHandler::StreamFound(FoundEvent *event) {
@@ -148,11 +147,11 @@ void FindHandler::StreamFound(FoundEvent *event) {
 }
 
 template <typename T>
-bool FindHandler::TraverseHandler(T *handler, FoundEvent *event) {
+FindReturn FindHandler::TraverseHandler(T *handler, FoundEvent *event) {
   wxLogMessage("Traversing %s", handler->GetName());
   handler->Traverse(false);
 
-  bool is_found = false;
+  FindReturn is_found = kFindNotFound;
   for (const auto &it : handler->GetChild()) {
     TEST_RETURN();
 
@@ -161,17 +160,18 @@ bool FindHandler::TraverseHandler(T *handler, FoundEvent *event) {
                   std::make_unique<SStream>(it));
 
     TEST_RETURN();
-    if (Find(handler, child_event.get())) {
+    if (Find(handler, child_event.get()) == kFindSuccess) {
       if (Is(kFindHandlerOnlyFirstItem))
-        return true;
+        // return after once if only find first item
+        return kFindSuccess;
       else
-        is_found = true;
+        is_found = kFindSuccess;
     }
   }
   return is_found;
 }
 
-bool FindHandler::Find(AbstractHandler *handler, FoundEvent *event) {
+FindReturn FindHandler::Find(AbstractHandler *handler, FoundEvent *event) {
   auto search_stream = event->GetFoundStream();
 
   TEST_RETURN();
@@ -181,7 +181,7 @@ bool FindHandler::Find(AbstractHandler *handler, FoundEvent *event) {
   return SendIfFound(event);
 };
 
-bool FindHandler::SendIfFound(FoundEvent *event) {
+FindReturn FindHandler::SendIfFound(FoundEvent *event) {
   TEST_RETURN();
 
   auto search_stream = event->GetFoundStream();
@@ -191,7 +191,7 @@ bool FindHandler::SendIfFound(FoundEvent *event) {
   if (!CheckStream(*search_stream)) {
     wxLogMessage("Can't Read %s/%s", search_stream->GetHandlerPath(),
                  search_stream->GetName());
-    return false;
+    return kFindNotFound;
   }
 
   TEST_RETURN();
@@ -207,7 +207,7 @@ bool FindHandler::SendIfFound(FoundEvent *event) {
   wxLogMessage("Item found in handler %s/%s\n", search_stream->GetHandlerPath(),
                search_stream->GetName());
   StreamFound(send_event.release());
-  return true;
+  return kFindSuccess;
 }
 
 };  // namespace queue
