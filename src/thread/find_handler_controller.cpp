@@ -84,6 +84,7 @@ bool FindHandlerController::IsInQueue(const SStream *stream) const {
 
 void FindHandlerController::Clear() {
   DeleteThread(thread_, lock_);
+  queue_->ClearTask();
   found_source_map_.clear();
   loaded_stream_.clear();
 }

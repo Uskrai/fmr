@@ -55,7 +55,10 @@ bool LoadImageController::Run() {
   return ret;
 }
 
-void LoadImageController::Clear() { DeleteThread(thread_, lock_); }
+void LoadImageController::Clear() {
+  DeleteThread(thread_, lock_);
+  queue_->ClearTask();
+}
 
 void LoadImageController::DisableOnEmptyQueue(bool disable) {
   if (thread_) thread_->DisableOnEmptyQueue(disable);

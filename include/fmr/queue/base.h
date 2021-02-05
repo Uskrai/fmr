@@ -97,6 +97,10 @@ class Base {
     }
     return false;
   };
+
+  virtual void ClearTask() {
+    while (!queue_item_.empty()) queue_item_.pop();
+  }
 };
 
 }  // namespace queue
