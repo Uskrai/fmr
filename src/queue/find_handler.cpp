@@ -39,16 +39,11 @@ FoundEvent::FoundEvent(const FoundEvent &event) : wxCommandEvent(event) {
     found_stream_ = std::unique_ptr<SStream>(new SStream(*event.found_stream_));
 }
 
-bool FindHandler::Push(const SStream *stream) {
-  std::pair<const SStream *, SStream> item;
+FindHandler::value_type FindHandler::Make(const SStream *stream) {
+  value_type item;
   item.first = stream;
-
-  if (stream) {
-    item.second = *stream;
-    Push(std::move(item));
-    return true;
-  }
-  return false;
+  item.second = *stream;
+  return item;
 }
 
 bool FindHandler::ProcessTask(value_type &item) {

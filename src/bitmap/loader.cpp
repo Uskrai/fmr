@@ -96,13 +96,19 @@ void Loader::OnImageLoaded(queue::LoadImageEvent &event) {
 }
 
 bool Loader::Run() {
-  Clear();
+  ClearThread();
   bool ret = GetFindController()->Run();
   if (ret) GetFindController()->DisableOnEmptyQueue(true);
   return ret;
 }
 
+void Loader::ClearThread() {
+  GetLoadImageController()->Clear();
+  GetFindController()->ClearThread();
+}
+
 void Loader::Clear() {
+  ClearThread();
   GetLoadImageController()->Clear();
   GetFindController()->Clear();
 }

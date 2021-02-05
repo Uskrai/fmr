@@ -107,8 +107,10 @@ class FindHandler : public Base<std::pair<const SStream *, SStream>> {
    */
   void SetFlags(FindHandlerFlags flags) { flags_ = flags; }
 
+  static value_type Make(const SStream *stream);
+
   using Base::Push;
-  bool Push(const SStream *stream);
+  void Push(const SStream *stream) { Push(Make(stream)); }
 
   bool ProcessTask(value_type &item);
 

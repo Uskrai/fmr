@@ -143,11 +143,9 @@ class QueueThreadCtrl : public ThreadController {
   }
 
   virtual void Clear() {
-    printf("before:%ld\n", queue_->Size());
     ClearThread();
     disable_on_empty_queue_ = false;
     queue_->ClearTask();
-    printf("after:%ld\n", queue_->Size());
   }
 
   void DoSetNull(BaseThread *thread) {

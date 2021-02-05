@@ -72,6 +72,8 @@ class Loader : public wxEvtHandler {
 
   wxEvtHandler *GetParent() { return parent_; }
   bool Run();
+
+  void ClearThread();
   void Clear();
 
   void SetFindFlags(const queue::FindHandlerFlags &flags) {

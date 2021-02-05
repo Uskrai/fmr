@@ -98,6 +98,8 @@ class Base {
     return false;
   };
 
+  size_t Size() { return queue_item_.size(); }
+
   virtual void ClearTask() {
     while (!queue_item_.empty()) queue_item_.pop();
   }

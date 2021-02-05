@@ -24,6 +24,7 @@
 #include "fmr/handler/abstract_handler.h"
 #include "fmr/queue/find_handler.h"
 #include "fmr/thread/queue.h"
+#include "fmr/thread/queue_ctrl.h"
 
 namespace fmr {
 
@@ -31,14 +32,14 @@ namespace thread {
 
 constexpr int FindHandlerControllerIdDefault = wxID_HIGHEST + 3010;
 
-class FindHandlerController : public ThreadController {
+class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
  protected:
   bool (*stream_checker_)(const SStream &stream);
   std::unique_ptr<AbstractHandler> handler_;
   std::queue<const SStream *> stream_queue_;
   std::vector<const SStream *> in_queue_vec_;
-  Queue<queue::FindHandler> *thread_ = nullptr;
-  std::unique_ptr<queue::FindHandler> queue_;
+  // Queue<queue::FindHandler> *thread_ = nullptr;
+  // std::unique_ptr<queue::FindHandler> queue_;
   queue::FindHandlerFlags thread_flags_ = queue::kFindHandlerDefault;
 
   // map to found (first) and source (second) stream
@@ -55,10 +56,10 @@ class FindHandlerController : public ThreadController {
                         int id = FindHandlerControllerIdDefault);
   virtual ~FindHandlerController() { Clear(); }
   bool Open(const std::string &path);
-  void Push(const SStream *stream) { stream_queue_.push(stream); };
-  bool Run();
 
-  void DoSetNull(BaseThread *thread);
+  using QueueThreadCtrl::Push;
+  void Push(const SStream *stream) { Push(GetQueue()->Make(stream)); };
+
   wxEvtHandler *GetParent() { return parent_; }
 
   void SetChecker(bool (*checker)(const SStream &stream)) {
@@ -73,10 +74,15 @@ class FindHandlerController : public ThreadController {
   void AddFoundStream(const SStream *source,
                       std::unique_ptr<SStream> &&found_stream);
 
+  ThreadClass *CreateThread();
+
   bool IsInQueue(const SStream *stream) const;
-  void DisableOnEmptyQueue(bool disable = true);
+  // void DisableOnEmptyQueue(bool disable = true);
 
   void Clear();
+
+ protected:
+  void OnPush(value_type &item) { in_queue_vec_.push_back(item.first); }
 
  private:
   void OnStreamFound(queue::FoundEvent &event);
