@@ -24,14 +24,14 @@ namespace bitmap {
 RescaleLoader::RescaleLoader(wxEvtHandler *parent, int id)
     : Loader(parent, id), rescale_controller_(this, kRescaleImageThreadID) {
   SetControllerId(GetFindController()->GetThreadId(),
-                  GetLoadImageController()->GetThreadId(),
+                  GetLoadImageController()->GetEventId(),
                   GetRescaleController()->GetThreadId());
 }
 
 void RescaleLoader::SetControllerId(int find_id, int load_id, int rescale_id) {
   GetLoadImageController()->Unbind(queue::kEventImageLoaded,
                                    &RescaleLoader::OnImageLoaded, this,
-                                   GetLoadImageController()->GetThreadId());
+                                   GetLoadImageController()->GetEventId());
 
   GetRescaleController()->Unbind(queue::kEventImageRescaled,
                                  &RescaleLoader::OnImageRescaled, this,
@@ -42,7 +42,7 @@ void RescaleLoader::SetControllerId(int find_id, int load_id, int rescale_id) {
 
   GetLoadImageController()->Bind(queue::kEventImageLoaded,
                                  &RescaleLoader::OnImageLoaded, this,
-                                 GetLoadImageController()->GetThreadId());
+                                 GetLoadImageController()->GetEventId());
 
   GetRescaleController()->Bind(queue::kEventImageRescaled,
                                &RescaleLoader::OnImageRescaled, this,

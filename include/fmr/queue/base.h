@@ -50,6 +50,7 @@ class Base {
 
   wxEvtHandler *GetParent() { return parent_; }
   int GetEventId() const { return event_id_; }
+  void SetEventId(int id) { event_id_ = id; }
 
   void SendEventToParent(wxEvent *event) {
     if (event_type_ == kEventUsePost) {

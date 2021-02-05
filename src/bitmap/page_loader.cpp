@@ -26,7 +26,7 @@ wxDEFINE_EVENT(kEventOpenedStreamFound, wxCommandEvent);
 PageLoader::PageLoader(wxEvtHandler *parent, BitmapPageCtrl *bmp_ctrl, int id)
     : Loader(parent, id) {
   SetControllerId(GetFindController()->GetThreadId(),
-                  GetLoadImageController()->GetThreadId());
+                  GetLoadImageController()->GetEventId());
   bmp_ctrl_ = bmp_ctrl;
   Bind(EVT_COMMAND_THREAD_COMPLETED, &PageLoader::OnCompleted, this);
 }

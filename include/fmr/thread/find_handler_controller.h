@@ -36,7 +36,6 @@ class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
  protected:
   bool (*stream_checker_)(const SStream &stream);
   std::unique_ptr<AbstractHandler> handler_;
-  std::queue<const SStream *> stream_queue_;
   std::vector<const SStream *> in_queue_vec_;
   // Queue<queue::FindHandler> *thread_ = nullptr;
   // std::unique_ptr<queue::FindHandler> queue_;
@@ -47,7 +46,6 @@ class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
   std::vector<std::unique_ptr<SStream>> loaded_stream_;
 
   wxEvtHandler *parent_ = nullptr;
-  wxCriticalSection lock_;
 
   int thread_id_ = FindHandlerControllerIdDefault;
 
@@ -82,7 +80,7 @@ class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
   void Clear();
 
  protected:
-  void OnPush(value_type &item) { in_queue_vec_.push_back(item.first); }
+  void OnPush(const value_type &item) { in_queue_vec_.push_back(item.first); }
 
  private:
   void OnStreamFound(queue::FoundEvent &event);

@@ -48,12 +48,15 @@ class QueueThreadCtrl : public ThreadController {
 
  public:
   QueueThreadCtrl(wxEvtHandler *parent, int id) : ThreadController() {
-    parent_ = parent;
-    event_id_ = id;
+    SetParent(parent);
+    SetEventId(id);
     SetQueue(std::make_unique<QueueClass>(this, id));
     Bind(kEventThreadUpdate, &QueueThreadCtrl::OnThreadUpdate, this);
   }
   virtual ~QueueThreadCtrl() { Clear(); }
+
+  wxEvtHandler *GetParent() { return parent_; }
+  void SetParent(wxEvtHandler *parent) { parent_ = parent; }
 
   void SetQueue(std::unique_ptr<QueueClass> &&queue) {
     queue_ = std::move(queue);
@@ -81,7 +84,13 @@ class QueueThreadCtrl : public ThreadController {
   wxCriticalSection &GetQueueLock() { return queue_lock_; }
   wxCriticalSection &GetLock() { return lock_; }
 
-  virtual int GetEventId() const { return event_id_; }
+  int GetEventId() const { return event_id_; }
+  virtual void SetEventId(int id) {
+    event_id_ = id;
+    if (queue_) {
+      queue_->SetEventId(id);
+    }
+  }
 
   void Push(value_type &&item) {
     OnPush(item);
@@ -93,7 +102,7 @@ class QueueThreadCtrl : public ThreadController {
     queue_->Push(item);
   }
 
-  virtual void OnPush(value_type &item) = 0;
+  virtual void OnPush(const value_type &item){};
 
   /**
    * @brief: Count Thread

@@ -26,7 +26,7 @@ namespace thread {
 
 template <class QueueClass>
 class Queue : public BaseThread {
-  bool is_disable_on_empty_queue_;
+  bool is_disable_on_empty_queue_ = false;
   QueueClass *queue_ = nullptr;
   wxCriticalSection *queue_lock_ = nullptr;
 

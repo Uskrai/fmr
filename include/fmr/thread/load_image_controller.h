@@ -20,44 +20,18 @@
 
 #include "fmr/handler/struct_stream.h"
 #include "fmr/queue/load_image.h"
-#include "fmr/thread/queue.h"
+#include "fmr/thread/queue_ctrl.h"
 
 namespace fmr {
+
 namespace thread {
 
-constexpr int kLoadImageControllerIdDefault = wxID_HIGHEST + 4000;
-
-class LoadImageController : public ThreadController {
- protected:
-  Queue<queue::LoadImage> *thread_ = nullptr;
-  std::unique_ptr<queue::LoadImage> queue_;
-
-  int thread_id_ = kLoadImageControllerIdDefault;
-  wxEvtHandler *parent_ = nullptr;
-  wxCriticalSection lock_;
-
- public:
-  LoadImageController(wxEvtHandler *parent,
-                      int thread_id = kLoadImageControllerIdDefault);
-  void Push(SStream *stream);
-  bool Run();
-
-  virtual void SetParent(wxEvtHandler *parent) { parent_ = parent; }
-  virtual wxEvtHandler *GetParent() { return parent_; }
-
-  void DoSetNull(BaseThread *thread);
-
-  void SetThreadId(int id);
-  int GetThreadId() const { return thread_id_; }
-
-  void Clear();
-  void DisableOnEmptyQueue(bool disable = true);
-
- private:
-  void OnImageLoaded(queue::LoadImageEvent &event);
+class LoadImageController : public QueueThreadCtrl<queue::LoadImage> {
+  using QueueThreadCtrl::QueueThreadCtrl;
 };
 
 }  // namespace thread
+
 }  // namespace fmr
 
 #endif /* end of include guard: FMR_THREAD_LOAD_IMAGE_CONTROLLER */

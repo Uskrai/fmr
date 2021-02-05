@@ -50,10 +50,11 @@ bool FindHandlerController::Open(const std::string &path) {
 
 void FindHandlerController::SetThreadId(int id) {
   Unbind(queue::kEventStreamFound, &FindHandlerController::OnStreamFound, this,
-         thread_id_);
+         GetEventId());
+  SetEventId(GetEventId());
   thread_id_ = id;
   Bind(queue::kEventStreamFound, &FindHandlerController::OnStreamFound, this,
-       thread_id_);
+       GetEventId());
 }
 
 void FindHandlerController::AddFoundStream(

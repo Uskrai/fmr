@@ -185,7 +185,6 @@ am_lib_reader_la_OBJECTS = $(reader)/controller.lo \
 lib_reader_la_OBJECTS = $(am_lib_reader_la_OBJECTS)
 lib_thread_la_DEPENDENCIES = lib_queue.la
 am_lib_thread_la_OBJECTS = $(thread)/thread.lo \
-	$(thread)/load_image_controller.lo \
 	$(thread)/find_handler_controller.lo
 lib_thread_la_OBJECTS = $(am_lib_thread_la_OBJECTS)
 lib_window_la_LIBADD =
@@ -237,7 +236,6 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(reader)/$(DEPDIR)/page_indicator.Plo \
 	$(reader)/$(DEPDIR)/scroll_controller.Plo \
 	$(thread)/$(DEPDIR)/find_handler_controller.Plo \
-	$(thread)/$(DEPDIR)/load_image_controller.Plo \
 	$(thread)/$(DEPDIR)/thread.Plo \
 	$(window)/$(DEPDIR)/decorator.Plo \
 	$(window)/$(DEPDIR)/flex_grid_cell_window.Plo \
@@ -583,7 +581,6 @@ thread = src/thread
 threaddir = @abs_builddir@/thread
 thread_LTLIBRARIES = lib_thread.la
 lib_thread_la_SOURCES = $(thread)/thread.cpp \
-												$(thread)/load_image_controller.cpp \
 												$(thread)/find_handler_controller.cpp
 
 lib_thread_la_LIBADD = lib_queue.la
@@ -1124,8 +1121,6 @@ $(thread)/$(DEPDIR)/$(am__dirstamp):
 	@: > $(thread)/$(DEPDIR)/$(am__dirstamp)
 $(thread)/thread.lo: $(thread)/$(am__dirstamp) \
 	$(thread)/$(DEPDIR)/$(am__dirstamp)
-$(thread)/load_image_controller.lo: $(thread)/$(am__dirstamp) \
-	$(thread)/$(DEPDIR)/$(am__dirstamp)
 $(thread)/find_handler_controller.lo: $(thread)/$(am__dirstamp) \
 	$(thread)/$(DEPDIR)/$(am__dirstamp)
 
@@ -1216,7 +1211,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/page_indicator.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/scroll_controller.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/find_handler_controller.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/load_image_controller.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/thread.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/decorator.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/flex_grid_cell_window.Plo@am__quote@ # am--include-marker
@@ -1671,7 +1665,6 @@ distclean: distclean-recursive
 	-rm -f $(reader)/$(DEPDIR)/page_indicator.Plo
 	-rm -f $(reader)/$(DEPDIR)/scroll_controller.Plo
 	-rm -f $(thread)/$(DEPDIR)/find_handler_controller.Plo
-	-rm -f $(thread)/$(DEPDIR)/load_image_controller.Plo
 	-rm -f $(thread)/$(DEPDIR)/thread.Plo
 	-rm -f $(window)/$(DEPDIR)/decorator.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo
@@ -1757,7 +1750,6 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(reader)/$(DEPDIR)/page_indicator.Plo
 	-rm -f $(reader)/$(DEPDIR)/scroll_controller.Plo
 	-rm -f $(thread)/$(DEPDIR)/find_handler_controller.Plo
-	-rm -f $(thread)/$(DEPDIR)/load_image_controller.Plo
 	-rm -f $(thread)/$(DEPDIR)/thread.Plo
 	-rm -f $(window)/$(DEPDIR)/decorator.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo

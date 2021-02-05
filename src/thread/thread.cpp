@@ -29,44 +29,19 @@ const wxEventTypeTag<wxThreadEvent> EVT_COMMAND_THREAD_COMPLETED =
     kEventThreadCompleted;
 
 void ThreadUpdate(wxEvtHandler *dest, int thread_id) {
-  wxQueueEvent(dest, new wxThreadEvent(EVT_COMMAND_THREAD_UPDATE, thread_id));
+  wxQueueEvent(dest, new wxThreadEvent(kEventThreadUpdate, thread_id));
 }
 
 void ThreadCompleted(wxEvtHandler *dest, int thread_id) {
-  wxQueueEvent(dest,
-               new wxThreadEvent(EVT_COMMAND_THREAD_COMPLETED, thread_id));
+  wxQueueEvent(dest, new wxThreadEvent(kEventThreadCompleted, thread_id));
 }
 
 ThreadController::ThreadController() { BindEvent(); }
 
 void ThreadController::BindEvent() {
-  Bind(EVT_COMMAND_THREAD_UPDATE, &ThreadController::OnUpdate, this);
-  Bind(EVT_COMMAND_THREAD_COMPLETED, &ThreadController::OnCompleted, this);
+  Bind(kEventThreadUpdate, &ThreadController::OnUpdate, this);
+  Bind(kEventThreadCompleted, &ThreadController::OnCompleted, this);
 }
-
-// bool ThreadController::Delete(BaseThread **const thread,
-// wxCriticalSection &lock) {
-// wxCriticalSectionLocker locker(lock);
-// if (thread) return (*thread)->Delete() == wxTHREAD_NO_ERROR;
-// return true;
-// }
-//
-// bool ThreadController::Wait(BaseThread **const thread,
-// wxCriticalSection &lock) {
-// while (true) {
-// wxCriticalSectionLocker locker(lock);
-// if (!*thread) break;
-// }
-// return true;
-// }
-//
-// bool ThreadController::DeleteThread(BaseThread **const thread,
-// wxCriticalSection &lock) {
-// if (Delete(thread, lock)) {
-// return Wait(thread, lock);
-// }
-// return false;
-// }
 
 void ThreadController::Update(int id) { ThreadUpdate(GetParent(), id); }
 
@@ -110,13 +85,13 @@ void BaseThread::QueueEventParent(wxEvent *event) {
 }
 
 void BaseThread::Update() {
-  wxThreadEvent *event = new wxThreadEvent(EVT_COMMAND_THREAD_UPDATE, m_id);
+  wxThreadEvent *event = new wxThreadEvent(kEventThreadCompleted, m_id);
 
   QueueEventParent(event);
 }
 
 void BaseThread::Completed() {
-  wxThreadEvent *event = new wxThreadEvent(EVT_COMMAND_THREAD_COMPLETED, m_id);
+  wxThreadEvent *event = new wxThreadEvent(kEventThreadCompleted, m_id);
 
   QueueEventParent(event);
 }
