@@ -155,6 +155,7 @@ class QueueThreadCtrl : public ThreadController {
     ClearThread();
     disable_on_empty_queue_ = false;
     queue_->ClearTask();
+    queue_->Delete(false);
   }
 
   void DoSetNull(BaseThread *thread) {

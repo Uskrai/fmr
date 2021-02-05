@@ -66,7 +66,7 @@ class Base {
 
   void SetEventType(EventType type) { event_type_ = type; }
 
-  virtual void Delete() { is_being_deleted_ = true; }
+  virtual void Delete(bool cond = true) { is_being_deleted_ = cond; }
   virtual bool IsBeingDeleted() const { return is_being_deleted_; }
 
   void Push(const T &item) { return queue_item_.push(item); }
