@@ -39,14 +39,20 @@ class Queue : public BaseThread {
 
   ExitCode Entry() {
     while (!TestDestroy()) {
+      if (queue_lock_) queue_lock_->Enter();
       if (!GetQueue()->IsEmpty()) {
-        if (queue_lock_) queue_lock_->Enter();
         value_type item = std::move(GetQueue()->Front());
         GetQueue()->Pop();
         if (queue_lock_) queue_lock_->Leave();
+
         GetQueue()->ProcessTask(item);
         Update();
+
+        // make sure current thread not leave critical section from another
+        // thread
+        if (queue_lock_) queue_lock_->Enter();
       }
+      if (queue_lock_) queue_lock_->Leave();
     }
     Completed();
 
