@@ -85,7 +85,7 @@ void BaseThread::QueueEventParent(wxEvent *event) {
 }
 
 void BaseThread::Update() {
-  wxThreadEvent *event = new wxThreadEvent(kEventThreadCompleted, m_id);
+  wxThreadEvent *event = new wxThreadEvent(kEventThreadUpdate, m_id);
 
   QueueEventParent(event);
 }
