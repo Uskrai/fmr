@@ -25,6 +25,7 @@ namespace thread {
 FindHandlerController::FindHandlerController(wxEvtHandler *parent, int id) {
   parent_ = parent;
 
+  queue_ = std::make_unique<queue::FindHandler>(this, id);
   SetThreadId(id);
 }
 
@@ -92,16 +93,17 @@ bool FindHandlerController::Run() {
 
   thread_ =
       new Queue<queue::FindHandler>(this, wxTHREAD_DETACHED, GetThreadId());
+  thread_->SetQueue(queue_.get());
 
   while (!stream_queue_.empty()) {
     auto item = stream_queue_.front();
-    thread_->GetQueue().Push(item);
+    thread_->GetQueue()->Push(item);
     in_queue_vec_.push_back(item);
     stream_queue_.pop();
   }
 
-  thread_->GetQueue().SetChecker(stream_checker_);
-  thread_->GetQueue().SetFlags(thread_flags_);
+  thread_->GetQueue()->SetChecker(stream_checker_);
+  thread_->GetQueue()->SetFlags(thread_flags_);
 
   return thread_->Run() == wxTHREAD_NO_ERROR;
 }

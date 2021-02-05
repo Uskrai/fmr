@@ -27,16 +27,16 @@ namespace thread {
 template <class QueueClass>
 class Queue : public BaseThread {
   bool is_disable_on_empty_queue_;
-  QueueClass queue_;
+  QueueClass *queue_ = nullptr;
 
  public:
   Queue(ThreadController *parent, wxThreadKind type, int event_id)
-      : BaseThread(parent, type, event_id), queue_(parent, event_id) {}
+      : BaseThread(parent, type, event_id) {}
 
   ExitCode Entry() {
     while (!TestDestroy()) {
-      if (!GetQueue().IsEmpty()) {
-        GetQueue().PopTask();
+      if (!GetQueue()->IsEmpty()) {
+        GetQueue()->PopTask();
         Update();
       }
     }
@@ -45,8 +45,16 @@ class Queue : public BaseThread {
     return (wxThread::ExitCode)0;
   }
 
-  QueueClass &GetQueue() { return queue_; }
-  const QueueClass &GetQueue() const { return queue_; }
+  QueueClass *GetQueue() { return queue_; }
+  const QueueClass *GetQueue() const { return queue_; }
+
+  void SetQueue(QueueClass *queue) { queue_ = queue; }
+
+  using value_type = typename QueueClass::value_type;
+
+  void Push(const value_type &item) { GetQueue()->Push(item); }
+
+  void Push(value_type &&item) { GetQueue()->Push(std::move(item)); }
 
   void DisableOnEmptyQueue(bool cond = true) {
     is_disable_on_empty_queue_ = cond;
@@ -54,12 +62,12 @@ class Queue : public BaseThread {
 
   bool TestDestroy() {
     return BaseThread::TestDestroy() ||
-           (is_disable_on_empty_queue_ && GetQueue().IsEmpty());
+           (is_disable_on_empty_queue_ && GetQueue()->IsEmpty());
   }
 
   wxThreadError Delete(ExitCode *rc = NULL,
                        wxThreadWait waitMode = wxTHREAD_WAIT_DEFAULT) {
-    GetQueue().Delete();
+    GetQueue()->Delete();
     return BaseThread::Delete();
   }
 };

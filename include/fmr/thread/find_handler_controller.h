@@ -38,6 +38,7 @@ class FindHandlerController : public ThreadController {
   std::queue<const SStream *> stream_queue_;
   std::vector<const SStream *> in_queue_vec_;
   Queue<queue::FindHandler> *thread_ = nullptr;
+  std::unique_ptr<queue::FindHandler> queue_;
   queue::FindHandlerFlags thread_flags_ = queue::kFindHandlerDefault;
 
   // map to found (first) and source (second) stream

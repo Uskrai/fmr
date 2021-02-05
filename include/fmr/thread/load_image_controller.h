@@ -30,6 +30,7 @@ constexpr int kLoadImageControllerIdDefault = wxID_HIGHEST + 4000;
 class LoadImageController : public ThreadController {
  protected:
   Queue<queue::LoadImage> *thread_ = nullptr;
+  std::unique_ptr<queue::LoadImage> queue_;
 
   int thread_id_ = kLoadImageControllerIdDefault;
   wxEvtHandler *parent_ = nullptr;

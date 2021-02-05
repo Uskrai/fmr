@@ -24,6 +24,8 @@ LoadImageController::LoadImageController(wxEvtHandler *parent, int id)
     : ThreadController() {
   SetParent(parent);
   SetThreadId(id);
+
+  queue_ = std::make_unique<queue::LoadImage>(this, id);
 }
 
 void LoadImageController::SetThreadId(int id) {
@@ -40,12 +42,13 @@ void LoadImageController::OnImageLoaded(queue::LoadImageEvent &event) {
 
 void LoadImageController::Push(SStream *stream) {
   if (!thread_) Run();
-  thread_->GetQueue().Push(stream);
+  thread_->GetQueue()->Push(stream);
 }
 
 bool LoadImageController::Run() {
   auto thread_temp =
       new Queue<queue::LoadImage>(this, wxTHREAD_DETACHED, GetThreadId());
+  thread_temp->SetQueue(queue_.get());
   bool ret = thread_temp->Run() == wxTHREAD_NO_ERROR;
   thread_ = thread_temp;
 

@@ -18,6 +18,8 @@
 #ifndef FMR_THREAD_RESCALE_CONTROLLER
 #define FMR_THREAD_RESCALE_CONTROLLER
 
+#include <memory>
+
 #include "fmr/queue/rescale.h"
 #include "fmr/thread/queue.h"
 
@@ -28,6 +30,7 @@ namespace thread {
 class RescaleController : public ThreadController {
  protected:
   Queue<queue::Rescale> *thread_ = nullptr;
+  std::unique_ptr<queue::Rescale> queue_;
   int thread_id_;
   bitmap::Rescaler *rescaler_ = nullptr;
   wxEvtHandler *parent_ = nullptr;
@@ -37,6 +40,8 @@ class RescaleController : public ThreadController {
   RescaleController(wxEvtHandler *parent, int id) : ThreadController() {
     thread_id_ = id;
     parent_ = parent;
+
+    queue_ = std::make_unique<queue::Rescale>(this, id);
   }
 
   virtual ~RescaleController() { Clear(); }
@@ -57,12 +62,13 @@ class RescaleController : public ThreadController {
 
   void Push(wxImage *image) {
     if (!thread_) Run();
-    thread_->GetQueue().Push(image);
+    thread_->GetQueue()->Push(image);
   };
 
   bool Run() {
     thread_ = new Queue<queue::Rescale>(this, wxTHREAD_DETACHED, thread_id_);
-    thread_->GetQueue().SetRescaler(rescaler_);
+    thread_->SetQueue(queue_.get());
+    thread_->GetQueue()->SetRescaler(rescaler_);
     return thread_->Run() == wxTHREAD_NO_ERROR;
   }
 
