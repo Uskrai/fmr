@@ -25,17 +25,18 @@ namespace fmr {
 namespace thread {
 
 template <class QueueClass>
-class Queue : public BaseThread, public QueueClass {
+class Queue : public BaseThread {
   bool is_disable_on_empty_queue_;
+  QueueClass queue_;
 
  public:
   Queue(ThreadController *parent, wxThreadKind type, int event_id)
-      : BaseThread(parent, type, event_id), QueueClass(parent, event_id) {}
+      : BaseThread(parent, type, event_id), queue_(parent, event_id) {}
 
   ExitCode Entry() {
     while (!TestDestroy()) {
-      if (!QueueClass::IsEmpty()) {
-        QueueClass::PopTask();
+      if (!GetQueue().IsEmpty()) {
+        GetQueue().PopTask();
         Update();
       }
     }
@@ -44,18 +45,21 @@ class Queue : public BaseThread, public QueueClass {
     return (wxThread::ExitCode)0;
   }
 
+  QueueClass &GetQueue() { return queue_; }
+  const QueueClass &GetQueue() const { return queue_; }
+
   void DisableOnEmptyQueue(bool cond = true) {
     is_disable_on_empty_queue_ = cond;
   }
 
   bool TestDestroy() {
     return BaseThread::TestDestroy() ||
-           (is_disable_on_empty_queue_ && QueueClass ::IsEmpty());
+           (is_disable_on_empty_queue_ && GetQueue().IsEmpty());
   }
 
   wxThreadError Delete(ExitCode *rc = NULL,
                        wxThreadWait waitMode = wxTHREAD_WAIT_DEFAULT) {
-    QueueClass::Delete();
+    GetQueue().Delete();
     return BaseThread::Delete();
   }
 };

@@ -95,13 +95,13 @@ bool FindHandlerController::Run() {
 
   while (!stream_queue_.empty()) {
     auto item = stream_queue_.front();
-    thread_->Push(item);
+    thread_->GetQueue().Push(item);
     in_queue_vec_.push_back(item);
     stream_queue_.pop();
   }
 
-  thread_->SetChecker(stream_checker_);
-  thread_->SetFlags(thread_flags_);
+  thread_->GetQueue().SetChecker(stream_checker_);
+  thread_->GetQueue().SetFlags(thread_flags_);
 
   return thread_->Run() == wxTHREAD_NO_ERROR;
 }

@@ -57,12 +57,12 @@ class RescaleController : public ThreadController {
 
   void Push(wxImage *image) {
     if (!thread_) Run();
-    thread_->Push(image);
+    thread_->GetQueue().Push(image);
   };
 
   bool Run() {
     thread_ = new Queue<queue::Rescale>(this, wxTHREAD_DETACHED, thread_id_);
-    thread_->SetRescaler(rescaler_);
+    thread_->GetQueue().SetRescaler(rescaler_);
     return thread_->Run() == wxTHREAD_NO_ERROR;
   }
 

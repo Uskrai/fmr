@@ -72,7 +72,7 @@ class Base {
   T &Front() { return queue_item_.front(); }
   void Pop() { return queue_item_.pop(); }
 
-  bool IsEmpty() { return queue_item_.empty(); }
+  bool IsEmpty() const { return queue_item_.empty(); }
 
   virtual void PopTask() = 0;
 };

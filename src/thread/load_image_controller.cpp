@@ -40,7 +40,7 @@ void LoadImageController::OnImageLoaded(queue::LoadImageEvent &event) {
 
 void LoadImageController::Push(SStream *stream) {
   if (!thread_) Run();
-  thread_->Push(stream);
+  thread_->GetQueue().Push(stream);
 }
 
 bool LoadImageController::Run() {
