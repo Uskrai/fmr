@@ -28,15 +28,23 @@ template <class QueueClass>
 class Queue : public BaseThread {
   bool is_disable_on_empty_queue_;
   QueueClass *queue_ = nullptr;
+  wxCriticalSection *queue_lock_ = nullptr;
 
  public:
-  Queue(ThreadController *parent, wxThreadKind type, int event_id)
-      : BaseThread(parent, type, event_id) {}
+  Queue(ThreadController *parent, wxThreadKind type, int event_id,
+        wxCriticalSection *queue_lock = nullptr)
+      : BaseThread(parent, type, event_id) {
+    queue_lock_ = queue_lock;
+  }
 
   ExitCode Entry() {
     while (!TestDestroy()) {
       if (!GetQueue()->IsEmpty()) {
-        GetQueue()->PopTask();
+        if (queue_lock_) queue_lock_->Enter();
+        value_type item = std::move(GetQueue()->Front());
+        GetQueue()->Pop();
+        if (queue_lock_) queue_lock_->Leave();
+        GetQueue()->ProcessTask(item);
         Update();
       }
     }
@@ -49,6 +57,10 @@ class Queue : public BaseThread {
   const QueueClass *GetQueue() const { return queue_; }
 
   void SetQueue(QueueClass *queue) { queue_ = queue; }
+
+  void SetQueueLocker(wxCriticalSection *queue_lock) {
+    queue_lock_ = queue_lock;
+  }
 
   using value_type = typename QueueClass::value_type;
 
