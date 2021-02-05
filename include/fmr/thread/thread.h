@@ -25,8 +25,10 @@ inline wxCriticalSection g_sLock;
 
 namespace fmr {
 
-wxDECLARE_EVENT(EVT_COMMAND_THREAD_UPDATE, wxThreadEvent);
-wxDECLARE_EVENT(EVT_COMMAND_THREAD_COMPLETED, wxThreadEvent);
+wxDECLARE_EVENT(kEventThreadUpdate, wxThreadEvent);
+wxDECLARE_EVENT(kEventThreadCompleted, wxThreadEvent);
+[[deprecated]] wxDECLARE_EVENT(EVT_COMMAND_THREAD_UPDATE, wxThreadEvent);
+[[deprecated]] wxDECLARE_EVENT(EVT_COMMAND_THREAD_COMPLETED, wxThreadEvent);
 
 class BaseThread;
 
@@ -40,12 +42,13 @@ class ThreadController : public wxEvtHandler {
   [[deprecated]] virtual BaseThread *GetThread(int id) = delete;
 
   template <typename T>
-  bool Delete(T *&thread, wxCriticalSection &lock) {
+  wxThreadError Delete(T *&thread, wxCriticalSection &lock) {
+    wxThreadError ret = wxTHREAD_NO_ERROR;
     wxCriticalSectionLocker locker(lock);
     if (thread) {
-      return thread->Delete() == wxTHREAD_NO_ERROR;
+      ret = thread->Delete();
     }
-    return false;
+    return ret;
   }
 
   template <typename T>
@@ -58,7 +61,7 @@ class ThreadController : public wxEvtHandler {
 
   template <typename T>
   bool DeleteThread(T *&thread, wxCriticalSection &lock) {
-    if (Delete(thread, lock)) {
+    if (Delete(thread, lock) == wxTHREAD_NO_ERROR) {
       return Wait(thread, lock);
     }
     return false;

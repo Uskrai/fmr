@@ -19,8 +19,14 @@
 
 namespace fmr {
 
-wxDEFINE_EVENT(EVT_COMMAND_THREAD_UPDATE, wxThreadEvent);
-wxDEFINE_EVENT(EVT_COMMAND_THREAD_COMPLETED, wxThreadEvent);
+wxDEFINE_EVENT(kEventThreadUpdate, wxThreadEvent);
+wxDEFINE_EVENT(kEventThreadCompleted, wxThreadEvent);
+
+const wxEventTypeTag<wxThreadEvent> EVT_COMMAND_THREAD_UPDATE =
+    kEventThreadUpdate;
+
+const wxEventTypeTag<wxThreadEvent> EVT_COMMAND_THREAD_COMPLETED =
+    kEventThreadCompleted;
 
 void ThreadUpdate(wxEvtHandler *dest, int thread_id) {
   wxQueueEvent(dest, new wxThreadEvent(EVT_COMMAND_THREAD_UPDATE, thread_id));
