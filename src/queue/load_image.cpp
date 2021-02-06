@@ -48,6 +48,8 @@ LoadReturn LoadImage::Load(SStream *stream) {
   wxImage image;
   image_util::Load(image, *stream);
 
+  if (rescaler_) rescaler_->DoRescale(image);
+
   event->GetBitmap().SetImage(image);
 
   wxLogMessage("Sending Image Loaded Event to %p", GetParent());
