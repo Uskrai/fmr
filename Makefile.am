@@ -82,7 +82,9 @@ thread = src/thread
 threaddir = @abs_builddir@/thread
 thread_LTLIBRARIES = lib_thread.la
 lib_thread_la_SOURCES = $(thread)/thread.cpp \
-												$(thread)/find_handler_controller.cpp
+												$(thread)/find_handler_controller.cpp \
+												$(thread)/controller_factory.cpp
+
 lib_thread_la_LIBADD = lib_queue.la
 
 queue = src/queue

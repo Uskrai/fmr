@@ -18,14 +18,21 @@
 #include <fmr/bitmap/image_util.h>
 #include <fmr/bitmap/loader.h>
 
+#include "fmr/thread/find_handler_controller.h"
+#include "fmr/thread/load_image_controller.h"
+
 namespace fmr {
 
 namespace bitmap {
 
-Loader::Loader(wxEvtHandler *parent, int id)
-    : find_controller_(this, kFindImageHandlerThreadID),
-      load_controller_(this, kLoadImageThreadID) {
+Loader::Loader(wxEvtHandler *parent, int id) {
   parent_ = parent;
+
+  find_controller_ = thread::controller_factory::NewFindHandler(
+      this, kFindImageHandlerThreadID);
+
+  load_controller_ =
+      thread::controller_factory::NewLoadImage(this, kLoadImageThreadID);
 
   SetEventId(id);
   GetFindController()->SetChecker(&image_util::CanRead);
@@ -41,7 +48,7 @@ Loader::Loader(wxEvtHandler *parent, int id)
 }
 
 void Loader::OnThreadCompleted(wxThreadEvent &event) {
-  if (event.GetId() == find_controller_.GetThreadId()) {
+  if (event.GetId() == GetFindController()->GetThreadId()) {
     GetLoadImageController()->DisableOnEmptyQueue(true);
   }
   event.Skip();
@@ -69,6 +76,22 @@ void Loader::SetControllerId(int find_controller_id,
 
 bool Loader::Open(const std::string &path) {
   return GetFindController()->Open(path);
+}
+
+void Loader::PushFind(const SStream *stream) {
+  GetFindController()->Push(stream);
+}
+
+thread::FindHandlerController *Loader::GetFindController() {
+  return find_controller_.get();
+}
+
+thread::LoadImageController *Loader::GetLoadImageController() {
+  return load_controller_.get();
+}
+
+void Loader::SetFindFlags(const queue::FindHandlerFlags &flags) {
+  GetFindController()->SetFlags(flags);
 }
 
 const SStream *Loader::GetSourceStream(const SStream *found_stream) {
@@ -121,6 +144,8 @@ void Loader::Clear() {
   GetLoadImageController()->Clear();
   GetFindController()->Clear();
 }
+
+Loader::~Loader() { Clear(); }
 
 }  // namespace bitmap
 

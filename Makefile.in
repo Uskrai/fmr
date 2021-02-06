@@ -185,7 +185,8 @@ am_lib_reader_la_OBJECTS = $(reader)/controller.lo \
 lib_reader_la_OBJECTS = $(am_lib_reader_la_OBJECTS)
 lib_thread_la_DEPENDENCIES = lib_queue.la
 am_lib_thread_la_OBJECTS = $(thread)/thread.lo \
-	$(thread)/find_handler_controller.lo
+	$(thread)/find_handler_controller.lo \
+	$(thread)/controller_factory.lo
 lib_thread_la_OBJECTS = $(am_lib_thread_la_OBJECTS)
 lib_window_la_LIBADD =
 am_lib_window_la_OBJECTS = $(window)/scrolledwindow.lo \
@@ -235,6 +236,7 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(reader)/$(DEPDIR)/decorator.Plo \
 	$(reader)/$(DEPDIR)/page_indicator.Plo \
 	$(reader)/$(DEPDIR)/scroll_controller.Plo \
+	$(thread)/$(DEPDIR)/controller_factory.Plo \
 	$(thread)/$(DEPDIR)/find_handler_controller.Plo \
 	$(thread)/$(DEPDIR)/thread.Plo \
 	$(window)/$(DEPDIR)/decorator.Plo \
@@ -581,7 +583,8 @@ thread = src/thread
 threaddir = @abs_builddir@/thread
 thread_LTLIBRARIES = lib_thread.la
 lib_thread_la_SOURCES = $(thread)/thread.cpp \
-												$(thread)/find_handler_controller.cpp
+												$(thread)/find_handler_controller.cpp \
+												$(thread)/controller_factory.cpp
 
 lib_thread_la_LIBADD = lib_queue.la
 queue = src/queue
@@ -1123,6 +1126,8 @@ $(thread)/thread.lo: $(thread)/$(am__dirstamp) \
 	$(thread)/$(DEPDIR)/$(am__dirstamp)
 $(thread)/find_handler_controller.lo: $(thread)/$(am__dirstamp) \
 	$(thread)/$(DEPDIR)/$(am__dirstamp)
+$(thread)/controller_factory.lo: $(thread)/$(am__dirstamp) \
+	$(thread)/$(DEPDIR)/$(am__dirstamp)
 
 lib_thread.la: $(lib_thread_la_OBJECTS) $(lib_thread_la_DEPENDENCIES) $(EXTRA_lib_thread_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(threaddir) $(lib_thread_la_OBJECTS) $(lib_thread_la_LIBADD) $(LIBS)
@@ -1210,6 +1215,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/decorator.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/page_indicator.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/scroll_controller.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/controller_factory.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/find_handler_controller.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/thread.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/decorator.Plo@am__quote@ # am--include-marker
@@ -1664,6 +1670,7 @@ distclean: distclean-recursive
 	-rm -f $(reader)/$(DEPDIR)/decorator.Plo
 	-rm -f $(reader)/$(DEPDIR)/page_indicator.Plo
 	-rm -f $(reader)/$(DEPDIR)/scroll_controller.Plo
+	-rm -f $(thread)/$(DEPDIR)/controller_factory.Plo
 	-rm -f $(thread)/$(DEPDIR)/find_handler_controller.Plo
 	-rm -f $(thread)/$(DEPDIR)/thread.Plo
 	-rm -f $(window)/$(DEPDIR)/decorator.Plo
@@ -1749,6 +1756,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(reader)/$(DEPDIR)/decorator.Plo
 	-rm -f $(reader)/$(DEPDIR)/page_indicator.Plo
 	-rm -f $(reader)/$(DEPDIR)/scroll_controller.Plo
+	-rm -f $(thread)/$(DEPDIR)/controller_factory.Plo
 	-rm -f $(thread)/$(DEPDIR)/find_handler_controller.Plo
 	-rm -f $(thread)/$(DEPDIR)/thread.Plo
 	-rm -f $(window)/$(DEPDIR)/decorator.Plo

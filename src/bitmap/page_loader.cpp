@@ -17,6 +17,9 @@
 
 #include "fmr/bitmap/page_loader.h"
 
+#include "fmr/thread/find_handler_controller.h"
+#include "fmr/thread/load_image_controller.h"
+
 namespace fmr {
 
 namespace bitmap {

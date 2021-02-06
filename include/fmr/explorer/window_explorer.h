@@ -55,7 +55,7 @@ class Window : public FlexGridWindow {
          const wxPoint &pos = wxDefaultPosition,
          const wxSize &size = wxDefaultSize, const long &style = wxWANTS_CHARS,
          const wxString &name = wxPanelNameStr);
-  ~Window() { Clear(); }
+  ~Window();
 
   bool Open(std::shared_ptr<AbstractOpenableHandler> handler);
   bool Open(const std::string &name);

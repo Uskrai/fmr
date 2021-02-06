@@ -17,12 +17,19 @@
 
 #include "fmr/bitmap/rescale_loader.h"
 
+#include "fmr/thread/find_handler_controller.h"
+#include "fmr/thread/load_image_controller.h"
+#include "fmr/thread/rescale_controller.h"
+
 namespace fmr {
 
 namespace bitmap {
 
 RescaleLoader::RescaleLoader(wxEvtHandler *parent, int id)
-    : Loader(parent, id), rescale_controller_(this, kRescaleImageThreadID) {
+    : Loader(parent, id) {
+  rescale_controller_ =
+      thread::controller_factory::NewRescale(this, kRescaleImageThreadID);
+
   SetControllerId(GetFindController()->GetThreadId(),
                   GetLoadImageController()->GetEventId(),
                   GetRescaleController()->GetThreadId());
@@ -74,6 +81,8 @@ void RescaleLoader::OnImageRescaled(queue::RescaledEvent &event) {
     if (item != stream_bmp_.end()) SendImageToParent(item->first, item->second);
   }
 }
+
+RescaleLoader::~RescaleLoader() {}
 
 }  // namespace bitmap
 

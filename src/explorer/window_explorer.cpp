@@ -19,6 +19,10 @@
 #include <wx/filename.h>
 #include <wx/stopwatch.h>
 
+#include "fmr/thread/find_handler_controller.h"
+#include "fmr/thread/load_image_controller.h"
+#include "fmr/thread/rescale_controller.h"
+
 namespace fmr {
 
 wxDEFINE_EVENT(EVT_OPEN_FILE, StreamEvent);
@@ -234,6 +238,8 @@ void Window::Select(std::string name) {
     idx++;
   }
 }
+
+Window::~Window() { Clear(); }
 
 // void Window::OnGridSelect( wxGridEvent &event )
 // {
