@@ -175,6 +175,7 @@ class QueueThreadCtrl : public ThreadController {
         if (it) it->DisableOnEmptyQueue();
       }
     }
+    event.Skip();
   }
 };
 

@@ -43,6 +43,7 @@ class RescaleLoader : public Loader {
  private:
   void OnImageLoaded(queue::LoadImageEvent &event);
   void OnImageRescaled(queue::RescaledEvent &event);
+  void OnThreadCompleted(wxThreadEvent &event);
 };
 
 }  // namespace bitmap

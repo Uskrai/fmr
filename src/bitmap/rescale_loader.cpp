@@ -26,6 +26,8 @@ RescaleLoader::RescaleLoader(wxEvtHandler *parent, int id)
   SetControllerId(GetFindController()->GetThreadId(),
                   GetLoadImageController()->GetEventId(),
                   GetRescaleController()->GetThreadId());
+
+  Bind(kEventThreadCompleted, &RescaleLoader::OnThreadCompleted, this);
 }
 
 void RescaleLoader::SetControllerId(int find_id, int load_id, int rescale_id) {
@@ -47,6 +49,13 @@ void RescaleLoader::SetControllerId(int find_id, int load_id, int rescale_id) {
   GetRescaleController()->Bind(queue::kEventImageRescaled,
                                &RescaleLoader::OnImageRescaled, this,
                                GetRescaleController()->GetThreadId());
+}
+
+void RescaleLoader::OnThreadCompleted(wxThreadEvent &event) {
+  if (event.GetId() == GetLoadImageController()->GetEventId()) {
+    GetRescaleController()->DisableOnEmptyQueue(true);
+  }
+  event.Skip();
 }
 
 void RescaleLoader::OnImageLoaded(queue::LoadImageEvent &event) {

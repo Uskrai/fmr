@@ -37,8 +37,8 @@ Window::Window(wxWindow *parent, const wxWindowID &id, const wxPoint &pos,
 }
 
 void Window::BindEvent() {
-  Bind(EVT_COMMAND_THREAD_UPDATE, &Window::OnThreadUpdate, this);
-  Bind(EVT_COMMAND_THREAD_COMPLETED, &Window::OnThreadUpdate, this);
+  Bind(kEventThreadUpdate, &Window::OnThreadUpdate, this);
+  Bind(kEventThreadCompleted, &Window::OnThreadUpdate, this);
   Bind(wxEVT_KEY_DOWN, &Window::OnKeyDown, this);
   Bind(queue::kEventImageLoaded, &Window::OnImageLoaded, this, kLoaderId);
 }
