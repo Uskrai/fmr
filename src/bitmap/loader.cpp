@@ -30,6 +30,12 @@ Loader::Loader(wxEvtHandler *parent, int id)
   SetEventId(id);
   GetFindController()->SetChecker(&image_util::CanRead);
 
+  GetFindController()->SetAutoRun(true);
+  GetLoadImageController()->SetAutoRun(true);
+
+  GetFindController()->DisableOnEmptyQueue(true);
+  GetLoadImageController()->DisableOnEmptyQueue(true);
+
   SetControllerId(kFindImageHandlerThreadID, kLoadImageThreadID);
   Bind(kEventThreadCompleted, &Loader::OnThreadCompleted, this);
 }
@@ -96,11 +102,13 @@ void Loader::OnImageLoaded(queue::LoadImageEvent &event) {
 }
 
 bool Loader::Run() {
-  ClearThread();
-  bool ret = GetFindController()->Run();
-  if (ret) GetFindController()->DisableOnEmptyQueue(true);
-  GetLoadImageController()->Run();
-  return ret;
+  bool ret = true;
+
+  if (!GetFindController()->IsRunning()) {
+    ret = GetFindController()->Run();
+    ret = GetLoadImageController()->Run() && ret;
+  }
+  return true;
 }
 
 void Loader::ClearThread() {

@@ -18,6 +18,7 @@
 #ifndef FMR_THREAD_QUEUE_CTRL
 #define FMR_THREAD_QUEUE_CTRL
 
+#include <algorithm>
 #include <forward_list>
 #include <memory>
 
@@ -42,9 +43,10 @@ class QueueThreadCtrl : public ThreadController {
   std::forward_list<ThreadClass *> thread_list_;
   wxThreadKind thread_type_ = wxTHREAD_DETACHED;
 
-  wxCriticalSection lock_;
+  mutable wxCriticalSection lock_;
 
   size_t thread_concurrency_ = 1;
+  bool is_auto_run_ = false;
 
  public:
   QueueThreadCtrl(wxEvtHandler *parent, int id) : ThreadController() {
@@ -70,6 +72,11 @@ class QueueThreadCtrl : public ThreadController {
   void SetConcurrency(size_t limit) { thread_concurrency_ = limit; }
   size_t GetConcurrency() const { return thread_concurrency_; }
 
+  void SetAutoRun(bool cond) { is_auto_run_ = cond; }
+  bool IsAutoRun() const { return is_auto_run_; }
+
+  bool IsRunning() const { return CountRunning() != 0; }
+
   void SetThreadKind(wxThreadKind type = wxTHREAD_DETACHED) {
     thread_type_ = type;
   }
@@ -83,7 +90,7 @@ class QueueThreadCtrl : public ThreadController {
    * @return: Queue locker
    */
   wxCriticalSection &GetQueueLock() { return queue_lock_; }
-  wxCriticalSection &GetLock() { return lock_; }
+  wxCriticalSection &GetLock() const { return lock_; }
 
   int GetEventId() const { return event_id_; }
   virtual void SetEventId(int id) {
@@ -96,11 +103,13 @@ class QueueThreadCtrl : public ThreadController {
   void Push(value_type &&item) {
     OnPush(item);
     queue_->Push(std::move(item));
+    if (IsAutoRun()) Run();
   }
 
   void Push(const value_type &item) {
     OnPush(item);
     queue_->Push(item);
+    if (IsAutoRun()) Run();
   }
 
   virtual void OnPush(const value_type &item){};
@@ -111,6 +120,12 @@ class QueueThreadCtrl : public ThreadController {
    */
   size_t CountThread() {
     return std::distance(thread_list_.begin(), thread_list_.end());
+  }
+
+  size_t CountRunning() const {
+    wxCriticalSectionLocker locker(GetLock());
+    return std::count_if(thread_list_.begin(), thread_list_.end(),
+                         [](const void *ptr) { return ptr != nullptr; });
   }
 
   /**
@@ -125,6 +140,7 @@ class QueueThreadCtrl : public ThreadController {
   }
 
   bool Run() {
+    wxCriticalSectionLocker locker(GetLock());
     PrepareThread();
     for (auto &it : thread_list_) {
       if (it && !it->IsRunning()) it->Run();
@@ -155,7 +171,6 @@ class QueueThreadCtrl : public ThreadController {
 
   virtual void Clear() {
     ClearThread();
-    disable_on_empty_queue_ = false;
     queue_->ClearTask();
     queue_->Delete(false);
   }
@@ -175,7 +190,8 @@ class QueueThreadCtrl : public ThreadController {
 
  private:
   void PrepareThread() {
-    while (CountThread() < GetConcurrency()) AddThread(CreateThread());
+    wxCriticalSectionLocker locker(GetLock());
+    while (CountRunning() < GetConcurrency()) AddThread(CreateThread());
   }
 
   void OnThreadUpdate(wxThreadEvent &event) {
