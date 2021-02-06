@@ -52,6 +52,7 @@ class QueueThreadCtrl : public ThreadController {
     SetEventId(id);
     SetQueue(std::make_unique<QueueClass>(this, id));
     Bind(kEventThreadUpdate, &QueueThreadCtrl::OnThreadUpdate, this);
+    Bind(kEventThreadCompleted, &QueueThreadCtrl::OnThreadCompleted, this);
   }
   virtual ~QueueThreadCtrl() { Clear(); }
 
@@ -148,6 +149,7 @@ class QueueThreadCtrl : public ThreadController {
       Wait(it, GetLock());
     }
 
+    wxCriticalSectionLocker locker(GetLock());
     thread_list_.clear();
   }
 
@@ -159,8 +161,15 @@ class QueueThreadCtrl : public ThreadController {
   }
 
   void DoSetNull(BaseThread *thread) {
+    wxCriticalSectionLocker locker(GetLock());
     for (auto &it : thread_list_) {
-      if (it == thread) it = nullptr;
+      if (it == thread) {
+        it = nullptr;
+        for (auto &it : thread_list_) {
+          if (it != nullptr) return;
+        }
+        Completed(GetEventId());
+      }
     }
   }
 
@@ -177,6 +186,8 @@ class QueueThreadCtrl : public ThreadController {
     }
     event.Skip();
   }
+
+  void OnThreadCompleted(wxThreadEvent &event) {}
 };
 
 }  // namespace thread
