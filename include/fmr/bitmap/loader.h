@@ -19,8 +19,6 @@
 #define FMR_BITMAP_LOADER
 
 #include <fmr/bitmap/bmp.h>
-#include <fmr/queue/find_handler.h>
-#include <fmr/queue/load_image.h>
 #include <wx/event.h>
 
 #include <memory>
@@ -29,6 +27,7 @@
 #include <unordered_map>
 
 #include "fmr/handler/struct_stream.h"
+#include "fmr/queue/factory.h"
 #include "fmr/thread/controller_factory.h"
 
 namespace fmr {
@@ -72,8 +71,6 @@ class Loader : public wxEvtHandler {
 
   void ClearThread();
   void Clear();
-
-  void SetFindFlags(const queue::FindHandlerFlags &flags);
 
   thread::FindHandlerController *GetFindController();
 

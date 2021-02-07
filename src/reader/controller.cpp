@@ -17,9 +17,12 @@
 
 #include "fmr/reader/controller.h"
 
+#include "fmr/bitmap/rescaler.h"
 #include "fmr/common/dimension.h"
 #include "fmr/common/event.h"
 #include "fmr/common/string.h"
+#include "fmr/handler/handler_factory.h"
+#include "fmr/thread/load_image_controller.h"
 
 namespace fmr {
 

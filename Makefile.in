@@ -175,7 +175,8 @@ am_lib_path_la_OBJECTS = $(common)/path.lo
 lib_path_la_OBJECTS = $(am_lib_path_la_OBJECTS)
 lib_queue_la_LIBADD =
 am_lib_queue_la_OBJECTS = $(queue)/load_image.lo \
-	$(queue)/find_handler.lo $(queue)/rescale.lo
+	$(queue)/find_handler.lo $(queue)/rescale.lo \
+	$(queue)/factory.lo
 lib_queue_la_OBJECTS = $(am_lib_queue_la_OBJECTS)
 lib_reader_la_DEPENDENCIES = lib_bitmap.la lib_handler.la \
 	lib_window.la lib_thread.la
@@ -229,6 +230,7 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(handler)/$(DEPDIR)/std_handler.Plo \
 	$(handler)/$(DEPDIR)/struct_stream.Plo \
 	$(handler)/$(DEPDIR)/wxarchive_handler.Plo \
+	$(queue)/$(DEPDIR)/factory.Plo \
 	$(queue)/$(DEPDIR)/find_handler.Plo \
 	$(queue)/$(DEPDIR)/load_image.Plo \
 	$(queue)/$(DEPDIR)/rescale.Plo \
@@ -592,7 +594,8 @@ queuedir = @abs_builddir@/queue
 queue_LTLIBRARIES = lib_queue.la
 lib_queue_la_SOURCES = $(queue)/load_image.cpp \
 											 $(queue)/find_handler.cpp \
-											 $(queue)/rescale.cpp 
+											 $(queue)/rescale.cpp  \
+											 $(queue)/factory.cpp
 
 fmr = src/main
 fmr_SOURCES = $(fmr)/app.cpp
@@ -1096,6 +1099,8 @@ $(queue)/find_handler.lo: $(queue)/$(am__dirstamp) \
 	$(queue)/$(DEPDIR)/$(am__dirstamp)
 $(queue)/rescale.lo: $(queue)/$(am__dirstamp) \
 	$(queue)/$(DEPDIR)/$(am__dirstamp)
+$(queue)/factory.lo: $(queue)/$(am__dirstamp) \
+	$(queue)/$(DEPDIR)/$(am__dirstamp)
 
 lib_queue.la: $(lib_queue_la_OBJECTS) $(lib_queue_la_DEPENDENCIES) $(EXTRA_lib_queue_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(queuedir) $(lib_queue_la_OBJECTS) $(lib_queue_la_LIBADD) $(LIBS)
@@ -1208,6 +1213,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/std_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/struct_stream.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/wxarchive_handler.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/factory.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/find_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/load_image.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/rescale.Plo@am__quote@ # am--include-marker
@@ -1663,6 +1669,7 @@ distclean: distclean-recursive
 	-rm -f $(handler)/$(DEPDIR)/std_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
+	-rm -f $(queue)/$(DEPDIR)/factory.Plo
 	-rm -f $(queue)/$(DEPDIR)/find_handler.Plo
 	-rm -f $(queue)/$(DEPDIR)/load_image.Plo
 	-rm -f $(queue)/$(DEPDIR)/rescale.Plo
@@ -1749,6 +1756,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(handler)/$(DEPDIR)/std_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
+	-rm -f $(queue)/$(DEPDIR)/factory.Plo
 	-rm -f $(queue)/$(DEPDIR)/find_handler.Plo
 	-rm -f $(queue)/$(DEPDIR)/load_image.Plo
 	-rm -f $(queue)/$(DEPDIR)/rescale.Plo

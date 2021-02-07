@@ -18,6 +18,7 @@
 #include <fmr/bitmap/image_util.h>
 #include <fmr/bitmap/loader.h>
 
+#include "fmr/handler/abstract_handler.h"
 #include "fmr/thread/find_handler_controller.h"
 #include "fmr/thread/load_image_controller.h"
 
@@ -35,7 +36,7 @@ Loader::Loader(wxEvtHandler *parent, int id) {
       thread::controller_factory::NewLoadImage(this, kLoadImageThreadID);
 
   SetEventId(id);
-  GetFindController()->SetChecker(&image_util::CanRead);
+  GetFindController()->GetQueue()->SetChecker(&image_util::CanRead);
 
   GetFindController()->SetAutoRun(true);
   GetLoadImageController()->SetAutoRun(true);
@@ -88,10 +89,6 @@ thread::FindHandlerController *Loader::GetFindController() {
 
 thread::LoadImageController *Loader::GetLoadImageController() {
   return load_controller_.get();
-}
-
-void Loader::SetFindFlags(const queue::FindHandlerFlags &flags) {
-  GetFindController()->SetFlags(flags);
 }
 
 const SStream *Loader::GetSourceStream(const SStream *found_stream) {

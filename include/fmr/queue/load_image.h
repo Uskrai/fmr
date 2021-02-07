@@ -59,7 +59,7 @@ class LoadImage : public Base<SStream *> {
   bitmap::Rescaler *rescaler_ = nullptr;
 
  public:
-  LoadImage(ThreadController *parent, int id = wxID_ANY) : Base(parent, id){};
+  LoadImage(wxEvtHandler *parent, int id = wxID_ANY) : Base(parent, id){};
 
   bool ProcessTask(value_type &item) override;
   LoadReturn Load(SStream *stream);

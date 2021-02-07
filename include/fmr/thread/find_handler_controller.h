@@ -47,8 +47,6 @@ class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
 
   wxEvtHandler *parent_ = nullptr;
 
-  int thread_id_ = FindHandlerControllerIdDefault;
-
  public:
   FindHandlerController(wxEvtHandler *parent,
                         int id = FindHandlerControllerIdDefault);
@@ -60,19 +58,19 @@ class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
 
   wxEvtHandler *GetParent() { return parent_; }
 
-  void SetChecker(bool (*checker)(const SStream &stream)) {
-    stream_checker_ = checker;
+  void SetEventId(int id) override;
+
+  [[deprecated("Replaced by SetEventId")]] void SetThreadId(int id) {
+    SetEventId(id);
   }
-  void SetFlags(queue::FindHandlerFlags flags) { thread_flags_ = flags; }
-  void SetThreadId(int thread_id);
-  int GetThreadId() const { return thread_id_; }
+  [[deprecated("Replaced by GetEventId")]] int GetThreadId() const {
+    return GetEventId();
+  }
 
   const SStream *GetSourceStream(const SStream *found_stream);
 
   void AddFoundStream(const SStream *source,
                       std::unique_ptr<SStream> &&found_stream);
-
-  ThreadClass *CreateThread();
 
   bool IsInQueue(const SStream *stream) const;
   // void DisableOnEmptyQueue(bool disable = true);

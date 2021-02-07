@@ -17,6 +17,8 @@
 
 #include "fmr/bitmap/bitmap_ctrl.h"
 
+#include "fmr/bitmap/rescaler.h"
+
 namespace fmr {
 
 namespace bitmap {

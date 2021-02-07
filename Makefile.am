@@ -92,7 +92,8 @@ queuedir = @abs_builddir@/queue
 queue_LTLIBRARIES = lib_queue.la
 lib_queue_la_SOURCES = $(queue)/load_image.cpp \
 											 $(queue)/find_handler.cpp \
-											 $(queue)/rescale.cpp 
+											 $(queue)/rescale.cpp  \
+											 $(queue)/factory.cpp
 
 
 fmr = src/main

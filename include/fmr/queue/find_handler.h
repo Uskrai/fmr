@@ -84,7 +84,7 @@ class FindHandler : public Base<std::pair<const SStream *, SStream>> {
                                                // FindHandlerFlags flags_;
 
  public:
-  FindHandler(ThreadController *parent, int id) : Base(parent, id){};
+  FindHandler(wxEvtHandler *parent, int id) : Base(parent, id){};
 
   FindReturn Find(FoundEvent *event);
   FindReturn Find(AbstractOpenableHandler *handler, FoundEvent *event);

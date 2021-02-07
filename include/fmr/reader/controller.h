@@ -21,6 +21,7 @@
 #include "fmr/bitmap/bitmap_page_ctrl.h"
 #include "fmr/bitmap/page_loader.h"
 #include "fmr/bitmap/position_ctrl.h"
+#include "fmr/bitmap/rescaler.h"
 #include "fmr/reader/decorator.h"
 #include "fmr/reader/scroll_controller.h"
 #include "fmr/window/scrolled_image.h"

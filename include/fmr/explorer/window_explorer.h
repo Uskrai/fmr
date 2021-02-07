@@ -29,6 +29,8 @@
 #include <map>
 #include <memory>
 
+#include "fmr/handler/handler_factory.h"
+
 class wxPanel;
 
 namespace fmr {

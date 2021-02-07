@@ -19,6 +19,7 @@
 #include <wx/filename.h>
 #include <wx/stopwatch.h>
 
+#include "fmr/handler/handler_factory.h"
 #include "fmr/thread/find_handler_controller.h"
 #include "fmr/thread/load_image_controller.h"
 #include "fmr/thread/rescale_controller.h"
@@ -34,8 +35,8 @@ Window::Window(wxWindow *parent, const wxWindowID &id, const wxPoint &pos,
     : FlexGridWindow(parent, id, pos, size, style, name) {
   CreateGrid(0, 0);
   BindEvent();
-  loader_.SetFindFlags(queue::kFindHandlerOnlyFirstItem |
-                       queue::kFindHandlerRecursive);
+  loader_.GetFindController()->GetQueue()->SetFlags(
+      queue::kFindHandlerOnlyFirstItem | queue::kFindHandlerRecursive);
   rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleFitAll);
   loader_.GetRescaleController()->SetRescaler(rescaler_.get());
 }

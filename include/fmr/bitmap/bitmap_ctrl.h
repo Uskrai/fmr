@@ -27,6 +27,8 @@ namespace fmr {
 
 namespace bitmap {
 
+class Rescaler;
+
 class BitmapCtrl {
  private:
   std::vector<SBitmap *> vec_bitmap_;

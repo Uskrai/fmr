@@ -27,7 +27,7 @@ FindHandlerController::FindHandlerController(wxEvtHandler *parent, int id)
     : QueueThreadCtrl(parent, id) {
   parent_ = parent;
 
-  SetThreadId(id);
+  SetEventId(id);
 }
 
 bool FindHandlerController::Open(const std::string &path) {
@@ -48,11 +48,12 @@ bool FindHandlerController::Open(const std::string &path) {
   return false;
 }
 
-void FindHandlerController::SetThreadId(int id) {
+void FindHandlerController::SetEventId(int id) {
   Unbind(queue::kEventStreamFound, &FindHandlerController::OnStreamFound, this,
          GetEventId());
-  SetEventId(GetEventId());
-  thread_id_ = id;
+
+  QueueThreadCtrl::SetEventId(GetEventId());
+
   Bind(queue::kEventStreamFound, &FindHandlerController::OnStreamFound, this,
        GetEventId());
 }
@@ -89,14 +90,6 @@ void FindHandlerController::Clear() {
   found_source_map_.clear();
   loaded_stream_.clear();
   in_queue_vec_.clear();
-}
-
-FindHandlerController::ThreadClass *FindHandlerController::CreateThread() {
-  auto thread = QueueThreadCtrl::CreateThread();
-  thread->SetQueue(GetQueue());
-  thread->GetQueue()->SetChecker(stream_checker_);
-  thread->GetQueue()->SetFlags(thread_flags_);
-  return thread;
 }
 
 }  // namespace thread
