@@ -89,6 +89,17 @@ class QueueThreadCtrl : public ThreadController {
 
   bool IsRunning() const { return CountRunning() != 0; }
 
+  bool IsEmpty() const {
+    std::scoped_lock locker(queue_mutex_);
+
+    auto ret = GetQueue()->IsEmpty();
+    for (const auto &it : thread_list_) {
+      if (it && !it->IsEmpty()) ret = false;
+    }
+
+    return ret;
+  }
+
   void SetThreadKind(wxThreadKind type = wxTHREAD_DETACHED) {
     thread_type_ = type;
   }
@@ -226,12 +237,9 @@ class QueueThreadCtrl : public ThreadController {
   }
 
   void OnThreadUpdate(wxThreadEvent &event) {
-    // check for all thread if any is not empty then return
-    for (const auto &it : thread_list_)
-      if (it && !it->IsEmpty()) return;
-
-    Completed(GetEventId());
-
+    if (IsEmpty()) {
+      Completed(GetEventId());
+    }
     event.Skip();
   }
 
