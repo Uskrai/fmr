@@ -106,7 +106,6 @@ class Queue : public BaseThread {
   using value_type = typename QueueClass::value_type;
 
   void Push(const value_type &item) { GetQueue()->Push(item); }
-
   void Push(value_type &&item) { GetQueue()->Push(std::move(item)); }
 
   void DisableOnEmptyQueue(bool cond = true) {

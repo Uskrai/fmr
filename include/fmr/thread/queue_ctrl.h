@@ -106,7 +106,6 @@ class QueueThreadCtrl : public ThreadController {
    * @return: Queue locker
    */
   std::mutex &GetQueueMutex() { return queue_mutex_; }
-  // wxCriticalSection &GetQueueLock() { return queue_lock_; }
   wxCriticalSection &GetLock() const { return lock_; }
 
   int GetEventId() const { return event_id_; }
@@ -129,6 +128,30 @@ class QueueThreadCtrl : public ThreadController {
     queue_->Push(item);
     queue_wait_.notify_one();
     if (IsAutoRun()) Run();
+  }
+
+  void PushFront(const value_type &item) {
+    OnPush(item);
+    GetQueue()->PushFront(item);
+    queue_wait_.notify_one();
+    if (IsAutoRun()) Run();
+  }
+
+  void PushFront(value_type &&item) {
+    OnPush(item);
+    GetQueue()->PushFront(std::move(item));
+    queue_wait_.notify_one();
+    if (IsAutoRun()) Run();
+  }
+
+  void MakeFront(const value_type &item) {
+    std::scoped_lock locker(GetQueueMutex());
+    return GetQueue()->MakeFront(item);
+  }
+
+  void MakeFront(value_type &&item) {
+    std::scoped_lock locker(GetQueueMutex());
+    return GetQueue()->MakeFront(std::move(item));
   }
 
   virtual void OnPush(const value_type &item){};
