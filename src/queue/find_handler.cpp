@@ -47,21 +47,21 @@ bool FindHandler::ProcessTask(value_type &item) {
                event->GetFoundStream()->GetHandlerPath(),
                event->GetFoundStream()->GetName());
 
-  if (IsBeingDeleted()) return false;
+  if (IsBeingStopped()) return false;
 
   FindReturn ret = Find(event.get());
 
   if (ret == kFindNotFound) {
     event->SetEventType(kEventStreamNotFound);
     SendEventToParent(event.release());
-  } else if (ret == kFindBeingDeleted)
+  } else if (ret == kFindBeingStopped)
     return false;
 
   return true;
 }
 
 #define TEST_RETURN() \
-  if (IsBeingDeleted()) return kFindBeingDeleted
+  if (IsBeingStopped()) return kFindBeingStopped
 
 FindReturn FindHandler::Find(FoundEvent *event) {
   auto search_stream = event->GetFoundStream();
@@ -130,7 +130,6 @@ FindReturn FindHandler::Find(AbstractOpenableHandler *handler,
 }
 
 void FindHandler::StreamFound(FoundEvent *event) {
-  if (IsBeingDeleted()) return;
   wxLogMessage("Sending FoundEvent to %p", GetParent());
   SendEventToParent(event);
 }

@@ -73,7 +73,7 @@ wxDECLARE_EVENT(kEventStreamNotFound, FoundEvent);
 typedef void (wxEvtHandler::*FoundEventFunction)(FoundEvent &);
 #define FoundEventHandler(func) wxEVENT_HANDLER_CAST(FoundEventFunction, func);
 
-enum FindReturn { kFindBeingDeleted, kFindSuccess, kFindNotFound };
+enum FindReturn { kFindBeingStopped = 0, kFindSuccess, kFindNotFound };
 
 class FindHandler : public Base<const SStream *> {
  private:

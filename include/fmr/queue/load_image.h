@@ -53,7 +53,7 @@ class LoadImageEvent : public wxCommandEvent {
 
 wxDECLARE_EVENT(kEventImageLoaded, LoadImageEvent);
 
-enum LoadReturn { kLoadBeingDeleted, kLoadSuccess, kLoadCannotReadStream };
+enum LoadReturn { kLoadBeingStopped, kLoadSuccess, kLoadCannotReadStream };
 
 class LoadImage : public Base<SStream *> {
   bitmap::Rescaler *rescaler_ = nullptr;

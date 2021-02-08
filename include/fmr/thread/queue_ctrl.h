@@ -214,7 +214,7 @@ class QueueThreadCtrl : public ThreadController {
 
   virtual void Clear() {
     std::scoped_lock locker(GetQueueMutex());
-    queue_->Delete(true);
+    queue_->Stop(true);
     queue_->ClearTask();
 
     // wait for thread to go to waiting state
@@ -223,7 +223,7 @@ class QueueThreadCtrl : public ThreadController {
       }
     }
 
-    queue_->Delete(false);
+    queue_->Stop(false);
   }
 
   void DoSetNull(BaseThread *thread) {

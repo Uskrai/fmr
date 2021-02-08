@@ -41,34 +41,26 @@ Loader::Loader(wxEvtHandler *parent, int id) {
   GetFindController()->SetAutoRun(true);
   GetLoadImageController()->SetAutoRun(true);
 
-  GetFindController()->DisableOnEmptyQueue(true);
-  GetLoadImageController()->DisableOnEmptyQueue(true);
-
   SetControllerId(kFindImageHandlerThreadID, kLoadImageThreadID);
   Bind(kEventThreadCompleted, &Loader::OnThreadCompleted, this);
 }
 
-void Loader::OnThreadCompleted(wxThreadEvent &event) {
-  if (event.GetId() == GetFindController()->GetThreadId()) {
-    GetLoadImageController()->DisableOnEmptyQueue(true);
-  }
-  event.Skip();
-}
+void Loader::OnThreadCompleted(wxThreadEvent &event) { event.Skip(); }
 
 void Loader::SetControllerId(int find_controller_id,
                              int load_image_controller_id) {
   GetFindController()->Unbind(queue::kEventStreamFound, &Loader::OnStreamFound,
-                              this, GetFindController()->GetThreadId());
+                              this, GetFindController()->GetEventId());
 
   GetLoadImageController()->Unbind(queue::kEventImageLoaded,
                                    &Loader::OnImageLoaded, this,
                                    GetLoadImageController()->GetEventId());
 
-  GetFindController()->SetThreadId(find_controller_id);
+  GetFindController()->SetEventId(find_controller_id);
   GetLoadImageController()->SetEventId(load_image_controller_id);
 
   GetFindController()->Bind(queue::kEventStreamFound, &Loader::OnStreamFound,
-                            this, GetFindController()->GetThreadId());
+                            this, GetFindController()->GetEventId());
 
   GetLoadImageController()->Bind(queue::kEventImageLoaded,
                                  &Loader::OnImageLoaded, this,

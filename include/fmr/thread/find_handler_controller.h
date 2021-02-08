@@ -70,7 +70,6 @@ class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
                       std::unique_ptr<SStream> &&found_stream);
 
   bool IsInQueue(const SStream *stream) const;
-  // void DisableOnEmptyQueue(bool disable = true);
 
   void Clear();
 

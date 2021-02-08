@@ -98,7 +98,6 @@ bool Window::Open(std::shared_ptr<AbstractOpenableHandler> handler) {
   SetCellBorderWidth(10);
   SetCellHighlightPenWidth(3);
 
-  loader_.Run();
   Refresh();
   handler_ = handler;
   Layout();

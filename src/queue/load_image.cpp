@@ -29,7 +29,7 @@ wxDEFINE_EVENT(kEventImageLoaded, LoadImageEvent);
 
 LoadReturn LoadImage::Load(SStream *stream) {
 #define TEST_DELETED() \
-  if (IsBeingDeleted()) return kLoadBeingDeleted;
+  if (IsBeingStopped()) return kLoadBeingStopped;
 
   auto event =
       std::make_unique<LoadImageEvent>(kEventImageLoaded, GetEventId());
@@ -59,7 +59,7 @@ LoadReturn LoadImage::Load(SStream *stream) {
 
 bool LoadImage::ProcessTask(LoadImage::value_type &stream) {
 #define TEST_RETURN() \
-  if (IsBeingDeleted()) return false;
+  if (IsBeingStopped()) return false;
 
   std::shared_ptr<wxInputStream> input_stream = stream->GetStream();
 
@@ -78,7 +78,7 @@ bool LoadImage::ProcessTask(LoadImage::value_type &stream) {
   }
 
   TEST_RETURN();
-  if (Load(stream) == kLoadBeingDeleted) {
+  if (Load(stream) == kLoadBeingStopped) {
     return false;
   }
 
