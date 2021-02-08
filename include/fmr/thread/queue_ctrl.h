@@ -92,15 +92,21 @@ class QueueThreadCtrl : public ThreadController {
   }
   wxThreadKind GetThreadKind() const { return thread_type_; }
 
-  void DisableOnEmptyQueue(bool cond) { disable_on_empty_queue_ = cond; }
-  bool IsDisableOnEmptyQueue() { return disable_on_empty_queue_; }
+  [[deprecated("Thread is automatically disabled ")]] void DisableOnEmptyQueue(
+      bool cond) {
+    disable_on_empty_queue_ = cond;
+  }
+  [[deprecated("Thread is automatically disabled ")]] bool
+  IsDisableOnEmptyQueue() {
+    return disable_on_empty_queue_;
+  }
 
   /**
    * @brief: Get Queue's Locker
    * @return: Queue locker
    */
   std::mutex &GetQueueMutex() { return queue_mutex_; }
-  wxCriticalSection &GetQueueLock() { return queue_lock_; }
+  // wxCriticalSection &GetQueueLock() { return queue_lock_; }
   wxCriticalSection &GetLock() const { return lock_; }
 
   int GetEventId() const { return event_id_; }
@@ -217,12 +223,6 @@ class QueueThreadCtrl : public ThreadController {
   }
 
   void OnThreadUpdate(wxThreadEvent &event) {
-    if (GetQueue()->IsEmpty() && IsDisableOnEmptyQueue()) {
-      for (auto &it : thread_list_) {
-        if (it) it->DisableOnEmptyQueue();
-      }
-    }
-
     // check for all thread if any is not empty then return
     for (const auto &it : thread_list_)
       if (it && !it->IsEmpty()) return;

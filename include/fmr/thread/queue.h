@@ -114,14 +114,12 @@ class Queue : public BaseThread {
   }
 
   bool TestDestroy() {
-    return BaseThread::TestDestroy();  //||
-                                       // (is_disable_on_empty_queue_ &&
-                                       // GetQueue()->IsEmpty());
+    return BaseThread::TestDestroy() ||
+           (is_disable_on_empty_queue_ && IsEmpty());
   }
 
   wxThreadError Delete(ExitCode *rc = NULL,
                        wxThreadWait waitMode = wxTHREAD_WAIT_DEFAULT) {
-    GetQueue()->Delete();
     return BaseThread::Delete();
   }
 
