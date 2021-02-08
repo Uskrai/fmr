@@ -53,9 +53,6 @@ class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
   virtual ~FindHandlerController() { Clear(); }
   bool Open(const std::string &path);
 
-  using QueueThreadCtrl::Push;
-  void Push(const SStream *stream) { Push(GetQueue()->Make(stream)); };
-
   wxEvtHandler *GetParent() { return parent_; }
 
   void SetEventId(int id) override;
@@ -78,7 +75,7 @@ class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
   void Clear();
 
  protected:
-  void OnPush(const value_type &item) { in_queue_vec_.push_back(item.first); }
+  void OnPush(const value_type &item) { in_queue_vec_.push_back(item); }
 
  private:
   void OnStreamFound(queue::FoundEvent &event);

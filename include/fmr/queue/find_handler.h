@@ -75,7 +75,7 @@ typedef void (wxEvtHandler::*FoundEventFunction)(FoundEvent &);
 
 enum FindReturn { kFindBeingDeleted, kFindSuccess, kFindNotFound };
 
-class FindHandler : public Base<std::pair<const SStream *, SStream>> {
+class FindHandler : public Base<const SStream *> {
  private:
   FindHandlerFlags flags_;
 
@@ -106,11 +106,6 @@ class FindHandler : public Base<std::pair<const SStream *, SStream>> {
    * level contain Non openable handler, it will be checked too.
    */
   void SetFlags(FindHandlerFlags flags) { flags_ = flags; }
-
-  static value_type Make(const SStream *stream);
-
-  using Base::Push;
-  void Push(const SStream *stream) { Push(Make(stream)); }
 
   bool ProcessTask(value_type &item);
 

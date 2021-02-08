@@ -39,19 +39,13 @@ FoundEvent::FoundEvent(const FoundEvent &event) : wxCommandEvent(event) {
     found_stream_ = std::unique_ptr<SStream>(new SStream(*event.found_stream_));
 }
 
-FindHandler::value_type FindHandler::Make(const SStream *stream) {
-  value_type item;
-  item.first = stream;
-  item.second = *stream;
-  return item;
-}
-
 bool FindHandler::ProcessTask(value_type &item) {
-  auto event = MakeEvent(kEventStreamFound, GetEventId(), item.first,
-                         std::make_unique<SStream>(item.second));
+  auto event = MakeEvent(kEventStreamFound, GetEventId(), item,
+                         std::make_unique<SStream>(*item));
 
-  wxLogMessage("Starting to search for %s/%s", item.second.GetHandlerPath(),
-               item.second.GetName());
+  wxLogMessage("Starting to search for %s/%s",
+               event->GetFoundStream()->GetHandlerPath(),
+               event->GetFoundStream()->GetName());
 
   if (IsBeingDeleted()) return false;
 
