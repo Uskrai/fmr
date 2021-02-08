@@ -45,6 +45,9 @@ class QueueThreadCtrl : public ThreadController {
 
   mutable wxCriticalSection lock_;
 
+  mutable std::mutex queue_mutex_;
+  std::condition_variable queue_wait_;
+
   size_t thread_concurrency_ = 1;
   bool is_auto_run_ = false;
 
@@ -53,10 +56,14 @@ class QueueThreadCtrl : public ThreadController {
     SetParent(parent);
     SetEventId(id);
     SetQueue(std::make_unique<QueueClass>(this, id));
+    PrepareThread();
     Bind(kEventThreadUpdate, &QueueThreadCtrl::OnThreadUpdate, this);
     Bind(kEventThreadCompleted, &QueueThreadCtrl::OnThreadCompleted, this);
   }
-  virtual ~QueueThreadCtrl() { Clear(); }
+  virtual ~QueueThreadCtrl() {
+    Clear();
+    ClearThread();
+  }
 
   wxEvtHandler *GetParent() { return parent_; }
   void SetParent(wxEvtHandler *parent) { parent_ = parent; }
@@ -69,7 +76,10 @@ class QueueThreadCtrl : public ThreadController {
 
   using value_type = typename QueueClass::value_type;
 
-  void SetConcurrency(size_t limit) { thread_concurrency_ = limit; }
+  void SetConcurrency(size_t limit) {
+    thread_concurrency_ = limit;
+    PrepareThread();
+  }
   size_t GetConcurrency() const { return thread_concurrency_; }
 
   void SetAutoRun(bool cond) { is_auto_run_ = cond; }
@@ -89,6 +99,7 @@ class QueueThreadCtrl : public ThreadController {
    * @brief: Get Queue's Locker
    * @return: Queue locker
    */
+  std::mutex &GetQueueMutex() { return queue_mutex_; }
   wxCriticalSection &GetQueueLock() { return queue_lock_; }
   wxCriticalSection &GetLock() const { return lock_; }
 
@@ -103,12 +114,14 @@ class QueueThreadCtrl : public ThreadController {
   void Push(value_type &&item) {
     OnPush(item);
     queue_->Push(std::move(item));
+    queue_wait_.notify_one();
     if (IsAutoRun()) Run();
   }
 
   void Push(const value_type &item) {
     OnPush(item);
     queue_->Push(item);
+    queue_wait_.notify_one();
     if (IsAutoRun()) Run();
   }
 
@@ -123,7 +136,6 @@ class QueueThreadCtrl : public ThreadController {
   }
 
   size_t CountRunning() const {
-    wxCriticalSectionLocker locker(GetLock());
     return std::count_if(thread_list_.begin(), thread_list_.end(),
                          [](const void *ptr) { return ptr != nullptr; });
   }
@@ -140,7 +152,7 @@ class QueueThreadCtrl : public ThreadController {
   }
 
   bool Run() {
-    wxCriticalSectionLocker locker(GetLock());
+    std::scoped_lock locker(GetQueueMutex());
     PrepareThread();
     for (auto &it : thread_list_) {
       if (it && !it->IsRunning()) it->Run();
@@ -150,8 +162,8 @@ class QueueThreadCtrl : public ThreadController {
 
   void AddThread(ThreadClass *thread) {
     thread->SetQueue(queue_.get());
-    thread->SetQueueLocker(&GetQueueLock());
-
+    thread->SetQueueLocker(&GetQueueMutex(), &queue_wait_);
+    thread->Run();
     thread_list_.push_front(thread);
   }
 
@@ -161,37 +173,47 @@ class QueueThreadCtrl : public ThreadController {
       if (ret != wxTHREAD_NO_ERROR) it = nullptr;
     }
 
+    queue_wait_.notify_all();
+
     for (auto &it : thread_list_) {
       Wait(it, GetLock());
     }
 
-    wxCriticalSectionLocker locker(GetLock());
+    std::scoped_lock locker(GetQueueMutex());
     thread_list_.clear();
   }
 
   virtual void Clear() {
-    ClearThread();
+    std::scoped_lock locker(GetQueueMutex());
+    queue_->Delete(true);
     queue_->ClearTask();
+
+    // wait for thread to go to waiting state
+    for (const auto &it : thread_list_) {
+      while (it && it->IsOnTask()) {
+      }
+    }
+
     queue_->Delete(false);
   }
 
   void DoSetNull(BaseThread *thread) {
-    wxCriticalSectionLocker locker(GetLock());
+    std::scoped_lock locker(GetQueueMutex());
     for (auto &it : thread_list_) {
       if (it == thread) {
         it = nullptr;
-        for (auto &it : thread_list_) {
-          if (it != nullptr) return;
-        }
-        Completed(GetEventId());
       }
     }
   }
 
  private:
   void PrepareThread() {
-    wxCriticalSectionLocker locker(GetLock());
     while (CountRunning() < GetConcurrency()) AddThread(CreateThread());
+    while (CountRunning() > GetConcurrency()) {
+      auto thread = thread_list_.front();
+      Delete(thread, GetLock());
+      thread_list_.pop_front();
+    }
   }
 
   void OnThreadUpdate(wxThreadEvent &event) {
@@ -200,6 +222,13 @@ class QueueThreadCtrl : public ThreadController {
         if (it) it->DisableOnEmptyQueue();
       }
     }
+
+    // check for all thread if any is not empty then return
+    for (const auto &it : thread_list_)
+      if (it && !it->IsEmpty()) return;
+
+    Completed(GetEventId());
+
     event.Skip();
   }
 

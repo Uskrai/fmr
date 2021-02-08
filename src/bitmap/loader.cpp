@@ -137,7 +137,6 @@ void Loader::ClearThread() {
 }
 
 void Loader::Clear() {
-  ClearThread();
   GetLoadImageController()->Clear();
   GetFindController()->Clear();
 }

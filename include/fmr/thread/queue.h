@@ -18,6 +18,9 @@
 #ifndef FMR_THREAD_QUEUE
 #define FMR_THREAD_QUEUE
 
+#include <condition_variable>
+#include <mutex>
+
 #include "fmr/thread/thread.h"
 
 namespace fmr {
@@ -27,32 +30,41 @@ namespace thread {
 template <class QueueClass>
 class Queue : public BaseThread {
   bool is_disable_on_empty_queue_ = false;
+  bool is_on_task_ = false;
+  bool is_waiting_queue_ = false;
+
   QueueClass *queue_ = nullptr;
-  wxCriticalSection *queue_lock_ = nullptr;
+
+  std::condition_variable *queue_wait_ = nullptr;
+  std::mutex *queue_mutex_ = nullptr;
 
  public:
-  Queue(ThreadController *parent, wxThreadKind type, int event_id,
-        wxCriticalSection *queue_lock = nullptr)
-      : BaseThread(parent, type, event_id) {
-    queue_lock_ = queue_lock;
-  }
+  Queue(ThreadController *parent, wxThreadKind type, int event_id)
+      : BaseThread(parent, type, event_id) {}
 
   ExitCode Entry() {
     while (!TestDestroy()) {
-      if (queue_lock_) queue_lock_->Enter();
-      if (!GetQueue()->IsEmpty()) {
+      WaitForQueue();
+
+      Lock();
+
+      if (!GetQueue()->IsEmpty() && !TestDestroy()) {
         value_type item = std::move(GetQueue()->Front());
         GetQueue()->Pop();
-        if (queue_lock_) queue_lock_->Leave();
 
+        Unlock();
+
+        SetOnTask(true);
         GetQueue()->ProcessTask(item);
+        SetOnTask(false);
+
         Update();
 
         // make sure current thread not leave critical section from another
         // thread
-        if (queue_lock_) queue_lock_->Enter();
+        Lock();
       }
-      if (queue_lock_) queue_lock_->Leave();
+      Unlock();
     }
     Completed();
 
@@ -64,9 +76,32 @@ class Queue : public BaseThread {
 
   void SetQueue(QueueClass *queue) { queue_ = queue; }
 
-  void SetQueueLocker(wxCriticalSection *queue_lock) {
-    queue_lock_ = queue_lock;
+  void Lock() {
+    if (queue_mutex_) queue_mutex_->lock();
   }
+  void Unlock() {
+    if (queue_mutex_) queue_mutex_->unlock();
+  }
+
+  void SetQueueLocker(std::mutex *mutex, std::condition_variable *cond) {
+    queue_mutex_ = mutex;
+    queue_wait_ = cond;
+  }
+
+  void WaitForQueue() {
+    if (GetQueue()->IsEmpty()) {
+      if (queue_wait_ && queue_mutex_) {
+        SetWaitingQueue(true);
+        std::unique_lock<std::mutex> locker(*queue_mutex_);
+        queue_wait_->wait(locker);
+        SetWaitingQueue(false);
+      }
+    }
+  }
+
+  bool IsOnTask() const { return is_on_task_; }
+  bool IsEmpty() { return GetQueue()->IsEmpty() && !IsOnTask(); }
+  bool IsWaitingQueue() const { return is_waiting_queue_; }
 
   using value_type = typename QueueClass::value_type;
 
@@ -79,8 +114,9 @@ class Queue : public BaseThread {
   }
 
   bool TestDestroy() {
-    return BaseThread::TestDestroy() ||
-           (is_disable_on_empty_queue_ && GetQueue()->IsEmpty());
+    return BaseThread::TestDestroy();  //||
+                                       // (is_disable_on_empty_queue_ &&
+                                       // GetQueue()->IsEmpty());
   }
 
   wxThreadError Delete(ExitCode *rc = NULL,
@@ -88,6 +124,10 @@ class Queue : public BaseThread {
     GetQueue()->Delete();
     return BaseThread::Delete();
   }
+
+ private:
+  void SetOnTask(bool cond = true) { is_on_task_ = cond; }
+  void SetWaitingQueue(bool cond) { is_waiting_queue_ = cond; }
 };
 
 }  // namespace thread
