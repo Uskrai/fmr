@@ -74,7 +74,10 @@ class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
   void Clear();
 
  protected:
-  void OnPush(const value_type &item) { in_queue_vec_.push_back(item); }
+  void DoPush(value_type item, QueuePushType type) override {
+    in_queue_vec_.push_back(item);
+    QueueThreadCtrl::DoPush(std::move(item), type);
+  }
 
  private:
   void OnStreamFound(queue::FoundEvent &event);

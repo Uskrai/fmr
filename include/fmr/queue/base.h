@@ -94,8 +94,7 @@ class Base {
   /**
    * @brief: push item to the queue
    */
-  void Push(const value_type &item) { return GetContainer().push_back(item); }
-  void Push(value_type &&item) {
+  void Push(value_type item) {
     return GetContainer().push_back(std::move(item));
   }
 
@@ -119,18 +118,8 @@ class Base {
   bool MakeFront(const value_type &item) {
     auto it = GetIterator(item);
     if (it != GetContainer().end()) {
+      PushFront(*it);
       GetContainer().erase(it);
-      PushFront(item);
-      return true;
-    }
-    return false;
-  }
-
-  bool MakeFront(value_type &&item) {
-    auto it = GetIterator(item);
-    if (it != GetContainer().end()) {
-      GetContainer().erase(it);
-      PushFront(std::move(item));
       return true;
     }
     return false;

@@ -28,6 +28,8 @@ namespace fmr {
 
 namespace thread {
 
+enum QueuePushType { kQueuePushFront, kQueuePushBack };
+
 template <typename QueueClass>
 class QueueThreadCtrl : public ThreadController {
  public:
@@ -68,7 +70,7 @@ class QueueThreadCtrl : public ThreadController {
   wxEvtHandler *GetParent() { return parent_; }
   void SetParent(wxEvtHandler *parent) { parent_ = parent; }
 
-  void SetQueue(std::unique_ptr<QueueClass> &&queue) {
+  void SetQueue(std::unique_ptr<QueueClass> queue) {
     queue_ = std::move(queue);
   }
   QueueClass *GetQueue() { return queue_.get(); }
@@ -116,45 +118,14 @@ class QueueThreadCtrl : public ThreadController {
     }
   }
 
-  void Push(value_type &&item) {
-    OnPush(item);
-    queue_->Push(std::move(item));
-    queue_wait_.notify_one();
-    if (IsAutoRun()) Run();
-  }
+  void Push(value_type item) { DoPush(std::move(item), kQueuePushBack); }
 
-  void Push(const value_type &item) {
-    OnPush(item);
-    queue_->Push(item);
-    queue_wait_.notify_one();
-    if (IsAutoRun()) Run();
-  }
-
-  void PushFront(const value_type &item) {
-    OnPush(item);
-    GetQueue()->PushFront(item);
-    queue_wait_.notify_one();
-    if (IsAutoRun()) Run();
-  }
-
-  void PushFront(value_type &&item) {
-    OnPush(item);
-    GetQueue()->PushFront(std::move(item));
-    queue_wait_.notify_one();
-    if (IsAutoRun()) Run();
-  }
+  void PushFront(value_type item) { DoPush(std::move(item), kQueuePushFront); }
 
   void MakeFront(const value_type &item) {
     std::scoped_lock locker(GetQueueMutex());
     return GetQueue()->MakeFront(item);
   }
-
-  void MakeFront(value_type &&item) {
-    std::scoped_lock locker(GetQueueMutex());
-    return GetQueue()->MakeFront(std::move(item));
-  }
-
-  virtual void OnPush(const value_type &item){};
 
   /**
    * @brief: Count Thread
@@ -233,6 +204,15 @@ class QueueThreadCtrl : public ThreadController {
         it = nullptr;
       }
     }
+  }
+
+  virtual void DoPush(value_type item, QueuePushType type) {
+    if (type == kQueuePushBack)
+      GetQueue()->Push(std::move(item));
+    else if (type == kQueuePushFront)
+      GetQueue()->PushFront(std::move(item));
+    queue_wait_.notify_one();
+    if (IsAutoRun()) Run();
   }
 
  private:
