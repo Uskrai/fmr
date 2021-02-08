@@ -73,8 +73,17 @@ void RescaleLoader::OnImageRescaled(queue::RescaledEvent &event) {
   auto stream_item = img_stream_.find(event.GetImage());
   if (stream_item != img_stream_.end()) {
     auto item = stream_bmp_.find(stream_item->second);
-    if (item != stream_bmp_.end()) SendImageToParent(item->first, item->second);
+    if (item != stream_bmp_.end()) {
+      SendImageToParent(item->first, item->second);
+    }
   }
+}
+
+void RescaleLoader::Clear() {
+  Loader::Clear();
+  GetRescaleController()->Clear();
+  stream_bmp_.clear();
+  img_stream_.clear();
 }
 
 RescaleLoader::~RescaleLoader() {}

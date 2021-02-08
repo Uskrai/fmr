@@ -41,6 +41,8 @@ class RescaleLoader : public Loader {
     return rescale_controller_.get();
   };
 
+  void Clear();
+
  private:
   void OnImageLoaded(queue::LoadImageEvent &event);
   void OnImageRescaled(queue::RescaledEvent &event);

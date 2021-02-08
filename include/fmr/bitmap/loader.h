@@ -69,8 +69,8 @@ class Loader : public wxEvtHandler {
   wxEvtHandler *GetParent() { return parent_; }
   bool Run();
 
-  void ClearThread();
-  void Clear();
+  virtual void ClearThread();
+  virtual void Clear();
 
   thread::FindHandlerController *GetFindController();
 
