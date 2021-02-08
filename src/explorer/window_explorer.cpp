@@ -38,7 +38,7 @@ Window::Window(wxWindow *parent, const wxWindowID &id, const wxPoint &pos,
   loader_.GetFindController()->GetQueue()->SetFlags(
       queue::kFindHandlerOnlyFirstItem | queue::kFindHandlerRecursive);
   rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleFitAll);
-  loader_.GetRescaleController()->SetRescaler(rescaler_.get());
+  loader_.GetRescaleController()->GetQueue()->SetRescaler(rescaler_.get());
 }
 
 void Window::BindEvent() {
