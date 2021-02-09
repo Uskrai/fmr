@@ -21,6 +21,13 @@ namespace fmr {
 
 namespace bitmap {
 
+std::vector<const SBitmap *> ConvertVecBitmapToConst(
+    const std::vector<SBitmap *> vec) {
+  std::vector<const SBitmap *> temp;
+  for (const auto &it : vec) temp.push_back(it);
+  return temp;
+}
+
 PositionCtrl::PositionCtrl(PositionFlags flags) { flags_ = flags; }
 
 void PositionCtrl::RecalcPosition(const std::vector<SBitmap *> &page) const {
@@ -69,8 +76,30 @@ void PositionCtrl::RecalcPosition(const std::vector<SBitmap *> &page) const {
   }
 }
 
+wxSize PositionCtrl::GetSize(const std::vector<SBitmap *> &vec_bitmap) const {
+  return GetSize(ConvertVecBitmapToConst(vec_bitmap));
+}
+
+wxSize PositionCtrl::GetSize(const std::vector<const SBitmap *> &page) const {
+  wxSize size = GetMinimumBitmapSize(page);
+
+  if (size.GetHeight() < GetMinimumSize().GetHeight()) {
+    size.SetHeight(GetMinimumSize().GetHeight());
+  }
+  if (size.GetWidth() < GetMinimumSize().GetWidth()) {
+    size.SetWidth(GetMinimumSize().GetWidth());
+  }
+
+  return size;
+}
+
 wxSize PositionCtrl::GetMinimumBitmapSize(
     const std::vector<SBitmap *> &page) const {
+  return GetMinimumBitmapSize(ConvertVecBitmapToConst(page));
+}
+
+wxSize PositionCtrl::GetMinimumBitmapSize(
+    const std::vector<const SBitmap *> &page) const {
   wxSize size;
 
   auto iterate = [&page](int (SBitmap::*bmp_incrementer)() const,
@@ -99,19 +128,6 @@ wxSize PositionCtrl::GetMinimumBitmapSize(
   if (flags_ & kPositionHorizontal) {
     size = iterate(&SBitmap::GetWidth, &wxSize::GetWidth, &wxSize::SetWidth,
                    &SBitmap::GetHeight, &wxSize::GetHeight, &wxSize::SetWidth);
-  }
-
-  return size;
-}
-
-wxSize PositionCtrl::GetSize(const std::vector<SBitmap *> &page) const {
-  wxSize size = GetMinimumBitmapSize(page);
-
-  if (size.GetHeight() < GetMinimumSize().GetHeight()) {
-    size.SetHeight(GetMinimumSize().GetHeight());
-  }
-  if (size.GetWidth() < GetMinimumSize().GetWidth()) {
-    size.SetWidth(GetMinimumSize().GetWidth());
   }
 
   return size;

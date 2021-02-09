@@ -52,8 +52,13 @@ class PositionCtrl {
   const wxSize &GetMinimumSize() const { return minimum_size_; }
 
   void RecalcPosition(const std::vector<SBitmap *> &vec_bitmap) const;
+
   wxSize GetSize(const std::vector<SBitmap *> &vec_bitmap) const;
+  wxSize GetSize(const std::vector<const SBitmap *> &vec_bitmap) const;
+
   wxSize GetMinimumBitmapSize(const std::vector<SBitmap *> &vec_bitmap) const;
+  wxSize GetMinimumBitmapSize(
+      const std::vector<const SBitmap *> &vec_bitmap) const;
 
   void SetWindowSize(const wxSize &size) { window_size_ = size; }
   const wxSize &GetWindowSize() const { return window_size_; }
