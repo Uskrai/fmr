@@ -116,7 +116,7 @@ class Base {
    * @return: true if the item exist within the queue
    */
   bool MakeFront(const value_type &item) {
-    auto it = GetIterator(item);
+    auto it = FindIterator(item);
     if (it != GetContainer().end()) {
       PushFront(*it);
       GetContainer().erase(it);
@@ -188,13 +188,10 @@ class Base {
     return a == b;
   }
 
-  iterator GetIterator(const value_type &item) {
-    for (auto &it = GetContainer().begin(); it != GetContainer().end(); ++it) {
-      if (Compare(*it, item)) {
-        return it;
-      }
-    }
-    return GetContainer().end();
+  iterator FindIterator(const value_type &item) {
+    return std::find(
+        GetContainer().begin(), GetContainer().end(),
+        [&](const value_type &compare) { return Compare(compare, item); });
   }
 };
 
