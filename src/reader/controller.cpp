@@ -39,10 +39,11 @@ Controller::Controller() {
 
   rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleNone);
 
-  decorator_ = std::make_unique<DecoratorList>();
+  bitmap_ctrl_ = std::make_unique<bitmap::BitmapPageCtrl>(
+      GetWindow(), position_ctrl_.get(), rescaler_.get());
 
-  bitmap_ctrl_ = std::make_unique<bitmap::BitmapPageCtrl>(position_ctrl_.get(),
-                                                          rescaler_.get());
+  decorator_ = std::make_unique<DecoratorCtrl>(GetWindow(), bitmap_ctrl_.get());
+  ;
 
   loader_ =
       std::make_unique<bitmap::PageLoader>(this, GetBitmapCtrl(), kLoaderId);
@@ -102,33 +103,24 @@ void Controller::SetScaleFlags(bitmap::RescalerFlags flags) {
 }
 
 void Controller::AdjustBitmap() {
-  bitmap::BitmapPage *page = GetBitmapCtrl()->GetBitmapPage();
-  if (page) {
-    wxPoint first_shown_pos;
-    const SBitmap *first_shown = nullptr;
+  if (!GetBitmapCtrl()->GetBitmapPage()) return;
 
-    GetFirstShown(first_shown, &first_shown_pos);
+  wxPoint first_shown_pos;
+  const SBitmap *first_shown = nullptr;
+  GetFirstShown(first_shown, &first_shown_pos);
 
-    position_ctrl_->SetMinimumSize(GetWindow()->GetClientSize());
-    rescaler_->SetFitSize(GetWindow()->GetClientSize());
-    GetBitmapCtrl()->AdjustBitmap();
+  rescaler_->SetFitSize(GetWindow()->GetClientSize());
 
-    wxSize size = GetBitmapCtrl()->GetSize(page);
+  GetBitmapCtrl()->AdjustBitmap();
 
-    GetWindow()->SetVirtualSize(size);
-    GetWindow()->AdjustScrollbars();
-    position_ctrl_->SetWindowSize(size);
-    GetBitmapCtrl()->RecalcPosition(page);
+  GetWindow()->SetVirtualSize(GetBitmapCtrl()->GetSize());
 
-    SetFirstShown(first_shown, &first_shown_pos);
+  SetFirstShown(first_shown, &first_shown_pos);
 
-    // to make sure the bitmap is really fit
-    if (rescaler_->GetFitSise() != GetWindow()->GetClientSize())
-      return AdjustBitmap();
+  if (rescaler_->GetFitSise() != GetWindow()->GetClientSize())
+    return AdjustBitmap();
 
-    GetWindow()->Refresh();
-  }
-  GetWindow()->SetBitmapPage(page);
+  GetWindow()->Refresh();
 }
 
 void Controller::OnLoadedImage(queue::LoadImageEvent &event) {
@@ -148,7 +140,9 @@ void Controller::OnOpenedStreamFound(wxCommandEvent &event) {
 bool Controller::GoToPage(size_t idx, wxDirection direction) {
   if (!GetBitmapCtrl()->IsPageExist(idx)) return false;
 
-  GetBitmapCtrl()->SetBitmapPage(idx);
+  GetBitmapCtrl()->GoToPage(idx);
+
+  // GetBitmapCtrl()->SetBitmapPage(idx);
   AdjustBitmap();
   GetWindow()->AdjustScrollBar();
   ResetScroll(direction);
@@ -166,7 +160,7 @@ bool Controller::ChangePage(wxDirection direction) {
 
   size_t idx = GetBitmapCtrl()->GetPagePos() + step;
 
-  for (const auto &it : GetBitmapCtrl()->GetBitmap()) {
+  for (const auto &it : GetBitmapCtrl()->GetVectorPtr()) {
     if (!it->IsLoaded()) return true;
   }
 

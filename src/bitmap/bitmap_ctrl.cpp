@@ -18,19 +18,65 @@
 #include "fmr/bitmap/bitmap_ctrl.h"
 
 #include "fmr/bitmap/rescaler.h"
+#include "fmr/window/scrolled_image.h"
 
 namespace fmr {
 
 namespace bitmap {
 
-BitmapCtrl::BitmapCtrl(PositionCtrl *pos_ctrl, Rescaler *rescaler) {
+std::vector<SBitmap *> BitmapPageToBitmapPtr(BitmapVector *vec) {
+  std::vector<SBitmap *> vec_ptr;
+
+  if (vec) {
+    for (auto &it : vec->GetBitmap()) {
+      vec_ptr.push_back(&it);
+    }
+  }
+  return vec_ptr;
+}
+
+BitmapCtrl::BitmapCtrl(ScrolledImageWindow *window, PositionCtrl *pos_ctrl,
+                       Rescaler *rescaler) {
+  window_ = window;
   pos_ctrl_ = pos_ctrl;
   rescaler_ = rescaler;
 }
 
-void BitmapCtrl::RecalcPosition() { pos_ctrl_->RecalcPosition(GetBitmap()); }
+void BitmapCtrl::RecalcPosition() { pos_ctrl_->RecalcPosition(GetVectorPtr()); }
 
-wxSize BitmapCtrl::GetSize() const { return pos_ctrl_->GetSize(GetBitmap()); }
+wxSize BitmapCtrl::GetSize() const {
+  return pos_ctrl_->GetSize(GetVectorPtr());
+}
+
+std::vector<const SBitmap *> BitmapCtrl::GetVectorPtr() const {
+  std::vector<const SBitmap *> bmp_ptr;
+  if (GetBitmapVec()) {
+    for (const auto &it : GetBitmapVec()->GetBitmap()) {
+      bmp_ptr.push_back(&it);
+    }
+  }
+  return bmp_ptr;
+}
+
+std::vector<SBitmap *> BitmapCtrl::GetVectorPtr() {
+  std::vector<SBitmap *> bmp_ptr;
+  if (GetBitmapVec()) {
+    for (auto &it : GetBitmapVec()->GetBitmap()) {
+      bmp_ptr.push_back(&it);
+    }
+  }
+  return bmp_ptr;
+}
+
+void BitmapCtrl::OnImageLoaded(queue::LoadImageEvent &event) {}
+
+void BitmapCtrl::OnWindowSize(wxSizeEvent &event) {}
+
+void BitmapCtrl::SetBitmapVec(BitmapVector *bmp_vec) {
+  bmp_vec_ = bmp_vec;
+  GetWindow()->SetBitmapPage(GetBitmapVec());
+  printf("owo\n");
+}
 
 void BitmapCtrl::RecalcPosition(const std::vector<SBitmap *> &bitmap) const {
   pos_ctrl_->RecalcPosition(bitmap);
@@ -41,13 +87,17 @@ wxSize BitmapCtrl::GetSize(const std::vector<SBitmap *> &bitmap) const {
 }
 
 void BitmapCtrl::AdjustBitmap() {
-  RecalcPosition(GetBitmap());
-  for (const auto &it : GetBitmap()) {
-    rescaler_->DoRescale(*it);
+  if (GetBitmapVec()) {
+    GetPosCtrl()->SetMinimumSize(GetWindow()->GetClientSize());
+    GetRescaler()->SetFitSize(GetWindow()->GetClientSize());
+
+    RecalcPosition();
+    GetPosCtrl()->SetWindowSize(GetSize());
+    RecalcPosition();
   }
 }
 
-void BitmapCtrl::Clear() { GetBitmap().clear(); }
+void BitmapCtrl::Clear() { bmp_vec_ = nullptr; }
 
 }  // namespace bitmap
 

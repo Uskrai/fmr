@@ -34,9 +34,11 @@ class WindowDecoratorList {
 
  public:
   WindowDecoratorList(){};
-  WindowDecoratorList(wxWindow *window) { window_ = window; }
+  WindowDecoratorList(wxWindow *window) { SetWindow(window); }
 
   wxWindow *GetWindow() { return window_; }
+  void SetWindow(wxWindow *window) { window_ = window; }
+
   void AddDecorator(WindowDecorator *decorator);
   void DrawDecorator(wxDC &dc);
 };

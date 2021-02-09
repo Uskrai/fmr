@@ -15,16 +15,38 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmr/reader/decorator.h"
+#ifndef FMR_READER_DECORATOR
+#define FMR_READER_DECORATOR
+
+#include <memory>
+
+#include "fmr/bitmap/bitmap_page_ctrl.h"
+#include "fmr/reader/page_indicator.h"
+#include "fmr/window/decorator.h"
 
 namespace fmr {
 
 namespace reader {
-void DecoratorList::Create() {
-  page_indicator_ = std::make_unique<PageIndicator>();
-  AddDecorator(page_indicator_.get());
-}
+
+wxDECLARE_EVENT(kEventUpdateInfo, wxCommandEvent);
+
+class DecoratorCtrl : public WindowDecoratorList {
+  std::unique_ptr<PageIndicator> page_indicator_ = nullptr;
+  bitmap::BitmapPageCtrl *bitmap_page_ctrl_;
+
+ public:
+  DecoratorCtrl() = delete;
+  DecoratorCtrl(wxWindow *window, bitmap::BitmapPageCtrl *bmp_page_ctrl) {
+    Create(window, bmp_page_ctrl);
+  };
+
+  PageIndicator *GetPageIndicator() { return page_indicator_.get(); }
+
+  void Create(wxWindow *window, bitmap::BitmapPageCtrl *bmp_page_ctrl);
+};
 
 }  // namespace reader
 
 }  // namespace fmr
+
+#endif /* end of include guard: FMR_READER_DECORATOR */

@@ -21,20 +21,10 @@ namespace fmr {
 
 namespace bitmap {
 
-std::vector<SBitmap *> BitmapPageToBitmapPtr(BitmapPage *page) {
-  std::vector<SBitmap *> vec_ptr;
-
-  if (page) {
-    for (auto &it : page->GetBitmap()) {
-      vec_ptr.push_back(&it);
-    }
-  }
-  return vec_ptr;
-}
-
-BitmapPageCtrl::BitmapPageCtrl(PositionCtrl *pos_ctrl, Rescaler *rescaler,
+BitmapPageCtrl::BitmapPageCtrl(ScrolledImageWindow *window,
+                               PositionCtrl *pos_ctrl, Rescaler *rescaler,
                                size_t bitmap_per_page)
-    : BitmapCtrl(pos_ctrl, rescaler) {
+    : BitmapCtrl(window, pos_ctrl, rescaler) {
   SetBitmapPerPage(bitmap_per_page);
 }
 
@@ -62,16 +52,7 @@ void BitmapPageCtrl::AddBitmap(const SBitmap &bitmap, size_t page_pos,
   }
 }
 
-void BitmapPageCtrl::SetBitmapPage(size_t page) {
-  curr_page_ = page;
-
-  if (size_t(page) < vec_page_.size()) {
-    std::vector<SBitmap *> page_ptr;
-    for (auto &it : vec_page_.at(page)->GetBitmap()) page_ptr.push_back(&it);
-    RecalcPosition(page_ptr);
-    SetBitmap(page_ptr);
-  }
-}
+void BitmapPageCtrl::SetBitmapPage(size_t page) { GoToPage(page); }
 
 BitmapPage *BitmapPageCtrl::GetBitmapPage() {
   if (curr_page_ < vec_page_.size()) {
@@ -100,6 +81,24 @@ void BitmapPageCtrl::EnlargeBitmapPage(size_t page_pos, size_t size) {
 
 wxSize BitmapPageCtrl::GetSize(BitmapPage *page) {
   return GetSize(BitmapPageToBitmapPtr(page));
+}
+
+bool BitmapPageCtrl::GoToPage(size_t idx) {
+  if (!IsPageExist(idx)) return false;
+
+  curr_page_ = idx;
+  SetBitmapVec(GetPage(idx).get());
+
+  return true;
+}
+
+bool BitmapPageCtrl::ChangePage(int step) {
+  size_t idx = GetPagePos() + step;
+  for (const auto &it : GetVectorPtr()) {
+    if (!it->IsLoaded()) return false;
+  }
+
+  return GoToPage(idx);
 }
 
 void BitmapPageCtrl::Clear() {
