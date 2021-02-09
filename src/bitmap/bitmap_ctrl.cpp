@@ -75,7 +75,6 @@ void BitmapCtrl::OnWindowSize(wxSizeEvent &event) {}
 void BitmapCtrl::SetBitmapVec(BitmapVector *bmp_vec) {
   bmp_vec_ = bmp_vec;
   GetWindow()->SetBitmapPage(GetBitmapVec());
-  printf("owo\n");
 }
 
 void BitmapCtrl::RecalcPosition(const std::vector<SBitmap *> &bitmap) const {
