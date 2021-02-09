@@ -19,7 +19,9 @@ lib_handler_la_SOURCES = $(handler)/default_handler.cpp \
 						 $(handler)/wxarchive_handler.cpp \
 						 $(handler)/handler_factory.cpp \
 						 $(handler)/struct_stream.cpp \
-						 $(handler)/std_handler.cpp
+						 $(handler)/std_handler.cpp \
+						 $(handler)/stream_util.cpp
+
 lib_handler_la_LIBADD = lib_path.la \
 						lib_compare.la
 
@@ -94,6 +96,7 @@ lib_queue_la_SOURCES = $(queue)/load_image.cpp \
 											 $(queue)/find_handler.cpp \
 											 $(queue)/rescale.cpp  \
 											 $(queue)/factory.cpp
+lib_queue_la_LIBADD = lib_handler.la
 
 
 fmr = src/main

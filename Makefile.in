@@ -168,12 +168,13 @@ lib_frame_la_OBJECTS = $(am_lib_frame_la_OBJECTS)
 lib_handler_la_DEPENDENCIES = lib_path.la lib_compare.la
 am_lib_handler_la_OBJECTS = $(handler)/default_handler.lo \
 	$(handler)/wxarchive_handler.lo $(handler)/handler_factory.lo \
-	$(handler)/struct_stream.lo $(handler)/std_handler.lo
+	$(handler)/struct_stream.lo $(handler)/std_handler.lo \
+	$(handler)/stream_util.lo
 lib_handler_la_OBJECTS = $(am_lib_handler_la_OBJECTS)
 lib_path_la_LIBADD =
 am_lib_path_la_OBJECTS = $(common)/path.lo
 lib_path_la_OBJECTS = $(am_lib_path_la_OBJECTS)
-lib_queue_la_LIBADD =
+lib_queue_la_DEPENDENCIES = lib_handler.la
 am_lib_queue_la_OBJECTS = $(queue)/load_image.lo \
 	$(queue)/find_handler.lo $(queue)/rescale.lo \
 	$(queue)/factory.lo
@@ -181,7 +182,7 @@ lib_queue_la_OBJECTS = $(am_lib_queue_la_OBJECTS)
 lib_reader_la_DEPENDENCIES = lib_bitmap.la lib_handler.la \
 	lib_window.la lib_thread.la
 am_lib_reader_la_OBJECTS = $(reader)/controller.lo \
-	$(reader)/scroll_controller.lo $(reader)/decorator.lo \
+	$(reader)/scroll_controller.lo $(reader)/decorator_ctrl.lo \
 	$(reader)/page_indicator.lo
 lib_reader_la_OBJECTS = $(am_lib_reader_la_OBJECTS)
 lib_thread_la_DEPENDENCIES = lib_queue.la
@@ -228,6 +229,7 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(handler)/$(DEPDIR)/default_handler.Plo \
 	$(handler)/$(DEPDIR)/handler_factory.Plo \
 	$(handler)/$(DEPDIR)/std_handler.Plo \
+	$(handler)/$(DEPDIR)/stream_util.Plo \
 	$(handler)/$(DEPDIR)/struct_stream.Plo \
 	$(handler)/$(DEPDIR)/wxarchive_handler.Plo \
 	$(queue)/$(DEPDIR)/factory.Plo \
@@ -235,7 +237,7 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(queue)/$(DEPDIR)/load_image.Plo \
 	$(queue)/$(DEPDIR)/rescale.Plo \
 	$(reader)/$(DEPDIR)/controller.Plo \
-	$(reader)/$(DEPDIR)/decorator.Plo \
+	$(reader)/$(DEPDIR)/decorator_ctrl.Plo \
 	$(reader)/$(DEPDIR)/page_indicator.Plo \
 	$(reader)/$(DEPDIR)/scroll_controller.Plo \
 	$(thread)/$(DEPDIR)/controller_factory.Plo \
@@ -521,7 +523,8 @@ lib_handler_la_SOURCES = $(handler)/default_handler.cpp \
 						 $(handler)/wxarchive_handler.cpp \
 						 $(handler)/handler_factory.cpp \
 						 $(handler)/struct_stream.cpp \
-						 $(handler)/std_handler.cpp
+						 $(handler)/std_handler.cpp \
+						 $(handler)/stream_util.cpp
 
 lib_handler_la_LIBADD = lib_path.la \
 						lib_compare.la
@@ -545,7 +548,7 @@ readerdir = @abs_builddir@/reader
 reader_LTLIBRARIES = lib_reader.la
 lib_reader_la_SOURCES = $(reader)/controller.cpp \
 												$(reader)/scroll_controller.cpp \
-												$(reader)/decorator.cpp \
+												$(reader)/decorator_ctrl.cpp \
 												$(reader)/page_indicator.cpp
 
 lib_reader_la_LIBADD = lib_bitmap.la \
@@ -597,6 +600,7 @@ lib_queue_la_SOURCES = $(queue)/load_image.cpp \
 											 $(queue)/rescale.cpp  \
 											 $(queue)/factory.cpp
 
+lib_queue_la_LIBADD = lib_handler.la
 fmr = src/main
 fmr_SOURCES = $(fmr)/app.cpp
 fmr_LDADD = lib_frame.la
@@ -1079,6 +1083,8 @@ $(handler)/struct_stream.lo: $(handler)/$(am__dirstamp) \
 	$(handler)/$(DEPDIR)/$(am__dirstamp)
 $(handler)/std_handler.lo: $(handler)/$(am__dirstamp) \
 	$(handler)/$(DEPDIR)/$(am__dirstamp)
+$(handler)/stream_util.lo: $(handler)/$(am__dirstamp) \
+	$(handler)/$(DEPDIR)/$(am__dirstamp)
 
 lib_handler.la: $(lib_handler_la_OBJECTS) $(lib_handler_la_DEPENDENCIES) $(EXTRA_lib_handler_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(handlerdir) $(lib_handler_la_OBJECTS) $(lib_handler_la_LIBADD) $(LIBS)
@@ -1114,7 +1120,7 @@ $(reader)/controller.lo: $(reader)/$(am__dirstamp) \
 	$(reader)/$(DEPDIR)/$(am__dirstamp)
 $(reader)/scroll_controller.lo: $(reader)/$(am__dirstamp) \
 	$(reader)/$(DEPDIR)/$(am__dirstamp)
-$(reader)/decorator.lo: $(reader)/$(am__dirstamp) \
+$(reader)/decorator_ctrl.lo: $(reader)/$(am__dirstamp) \
 	$(reader)/$(DEPDIR)/$(am__dirstamp)
 $(reader)/page_indicator.lo: $(reader)/$(am__dirstamp) \
 	$(reader)/$(DEPDIR)/$(am__dirstamp)
@@ -1211,6 +1217,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/default_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/handler_factory.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/std_handler.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/stream_util.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/struct_stream.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/wxarchive_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/factory.Plo@am__quote@ # am--include-marker
@@ -1218,7 +1225,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/load_image.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/rescale.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/controller.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/decorator.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/decorator_ctrl.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/page_indicator.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/scroll_controller.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/controller_factory.Plo@am__quote@ # am--include-marker
@@ -1667,6 +1674,7 @@ distclean: distclean-recursive
 	-rm -f $(handler)/$(DEPDIR)/default_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/handler_factory.Plo
 	-rm -f $(handler)/$(DEPDIR)/std_handler.Plo
+	-rm -f $(handler)/$(DEPDIR)/stream_util.Plo
 	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
 	-rm -f $(queue)/$(DEPDIR)/factory.Plo
@@ -1674,7 +1682,7 @@ distclean: distclean-recursive
 	-rm -f $(queue)/$(DEPDIR)/load_image.Plo
 	-rm -f $(queue)/$(DEPDIR)/rescale.Plo
 	-rm -f $(reader)/$(DEPDIR)/controller.Plo
-	-rm -f $(reader)/$(DEPDIR)/decorator.Plo
+	-rm -f $(reader)/$(DEPDIR)/decorator_ctrl.Plo
 	-rm -f $(reader)/$(DEPDIR)/page_indicator.Plo
 	-rm -f $(reader)/$(DEPDIR)/scroll_controller.Plo
 	-rm -f $(thread)/$(DEPDIR)/controller_factory.Plo
@@ -1754,6 +1762,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(handler)/$(DEPDIR)/default_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/handler_factory.Plo
 	-rm -f $(handler)/$(DEPDIR)/std_handler.Plo
+	-rm -f $(handler)/$(DEPDIR)/stream_util.Plo
 	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
 	-rm -f $(queue)/$(DEPDIR)/factory.Plo
@@ -1761,7 +1770,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(queue)/$(DEPDIR)/load_image.Plo
 	-rm -f $(queue)/$(DEPDIR)/rescale.Plo
 	-rm -f $(reader)/$(DEPDIR)/controller.Plo
-	-rm -f $(reader)/$(DEPDIR)/decorator.Plo
+	-rm -f $(reader)/$(DEPDIR)/decorator_ctrl.Plo
 	-rm -f $(reader)/$(DEPDIR)/page_indicator.Plo
 	-rm -f $(reader)/$(DEPDIR)/scroll_controller.Plo
 	-rm -f $(thread)/$(DEPDIR)/controller_factory.Plo
