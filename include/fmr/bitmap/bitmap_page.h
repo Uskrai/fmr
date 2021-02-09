@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_BITMAP_PAGED_BITMAP
-#define FMR_BITMAP_PAGED_BITMAP
+#ifndef FMR_BITMAP_BITMAP_VECTOR
+#define FMR_BITMAP_BITMAP_VECTOR
 
 #include <vector>
 
@@ -26,14 +26,14 @@ namespace fmr {
 
 namespace bitmap {
 
-class BitmapPage {
+class BitmapVector {
  private:
   std::vector<SBitmap> vec_bitmap_;
   wxSize size_;
 
  public:
-  BitmapPage() {}
-  BitmapPage(std::vector<SBitmap> vec_bitmap) { SetBitmap(vec_bitmap_); }
+  BitmapVector() {}
+  BitmapVector(std::vector<SBitmap> vec_bitmap) { SetBitmap(vec_bitmap_); }
 
   void SetBitmap(std::vector<SBitmap> vec_bitmap) { vec_bitmap_ = vec_bitmap; }
   void PushBack(const SBitmap &bitmap) { vec_bitmap_.push_back(bitmap); }
@@ -71,8 +71,10 @@ class BitmapPage {
   }
 };
 
+typedef BitmapVector BitmapPage;
+
 }  // namespace bitmap
 
 }  // namespace fmr
 
-#endif /* end of include guard: FMR_BITMAP_PAGED_BITMAP */
+#endif /* end of include guard: FMR_BITMAP_BITMAP_VECTOR */
