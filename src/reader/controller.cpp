@@ -17,6 +17,7 @@
 
 #include "fmr/reader/controller.h"
 
+#include "fmr/bitmap/bitmap_vector_event.h"
 #include "fmr/bitmap/rescaler.h"
 #include "fmr/common/dimension.h"
 #include "fmr/common/event.h"
@@ -42,8 +43,12 @@ Controller::Controller() {
   bitmap_ctrl_ = std::make_unique<bitmap::BitmapPageCtrl>(
       GetWindow(), position_ctrl_.get(), rescaler_.get());
 
+  GetBitmapCtrl()->Bind(bitmap::kEventBitmapChanged,
+                        &Controller::OnBitmapChanged, this);
+  GetBitmapCtrl()->Bind(bitmap::kEventBitmapPageNotFound,
+                        &Controller::OnBitmapPageNotFound, this);
+
   decorator_ = std::make_unique<DecoratorCtrl>(GetWindow(), bitmap_ctrl_.get());
-  ;
 
   loader_ =
       std::make_unique<bitmap::PageLoader>(this, GetBitmapCtrl(), kLoaderId);
@@ -114,6 +119,7 @@ void Controller::AdjustBitmap() {
   GetBitmapCtrl()->AdjustBitmap();
 
   GetWindow()->SetVirtualSize(GetBitmapCtrl()->GetSize());
+  GetWindow()->AdjustScrollbars();
 
   SetFirstShown(first_shown, &first_shown_pos);
 
@@ -137,32 +143,18 @@ void Controller::OnOpenedStreamFound(wxCommandEvent &event) {
   AdjustBitmap();
 }
 
-bool Controller::GoToPage(size_t idx, wxDirection direction) {
-  if (!GetBitmapCtrl()->IsPageExist(idx)) return false;
-
-  GetBitmapCtrl()->GoToPage(idx);
-
-  // GetBitmapCtrl()->SetBitmapPage(idx);
-  AdjustBitmap();
-  GetWindow()->AdjustScrollBar();
-  ResetScroll(direction);
-  decorator_->GetPageIndicator()->SetPage(idx);
-  decorator_->GetPageIndicator()->SetPageLimit(
-      GetBitmapCtrl()->GetAllPage().size());
-
-  decorator_->GetPageIndicator()->SetRect(wxPoint(0, 0),
-                                          GetWindow()->GetClientSize());
-  return true;
+void Controller::GoToPage(size_t idx, wxDirection direction) {
+  GetBitmapCtrl()->GoToPage(idx, direction);
 }
 
-bool Controller::ChangePage(wxDirection direction) {
+void Controller::ChangePage(wxDirection direction) {
   int step = GetStep(direction);
 
   size_t idx = GetBitmapCtrl()->GetPagePos() + step;
-
-  for (const auto &it : GetBitmapCtrl()->GetVectorPtr()) {
-    if (!it->IsLoaded()) return true;
-  }
+  //
+  // for (const auto &it : GetBitmapCtrl()->GetVectorPtr()) {
+  // if (!it->IsLoaded()) return;
+  // }
 
   return GoToPage(idx, direction);
 }
@@ -181,14 +173,6 @@ bool Controller::ChangeFolder(wxDirection direction) {
   return false;
 }
 
-bool Controller::Change(wxDirection direction) {
-  if (ChangePage(direction)) {
-    return true;
-  }
-
-  return ChangeFolder(direction);
-}
-
 void Controller::OnWindowScroll(wxScrollWinEvent &event) {
   if (event.GetEventType() == wxEVT_SCROLLWIN_LINEUP ||
       event.GetEventType() == wxEVT_SCROLLWIN_LINEDOWN) {
@@ -197,10 +181,21 @@ void Controller::OnWindowScroll(wxScrollWinEvent &event) {
     if (IsOnEdge(orient, event.GetPosition())) {
       wxDirection direction =
           dimension::GetDirection(orient, event.GetPosition());
-      if (Change(direction)) return;
+      return ChangePage(direction);
     }
   }
   GetWindow()->Refresh();
+  event.Skip();
+}
+
+void Controller::OnBitmapChanged(bitmap::BitmapVectorEvent &event) {
+  AdjustBitmap();
+  ResetScroll(event.GetDirection());
+  event.Skip();
+}
+
+void Controller::OnBitmapPageNotFound(bitmap::BitmapVectorEvent &event) {
+  ChangeFolder(event.GetDirection());
   event.Skip();
 }
 

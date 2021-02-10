@@ -28,7 +28,7 @@ class PageIndicator : public WindowDecorator {
   size_t page_pos_ = 0, page_limit_ = 0;
   wxRect rect_;
 
-  virtual void OnDraw(wxDC &dc);
+  virtual void OnDraw(wxDC &dc, const wxRect &area);
 
  public:
   PageIndicator(){};

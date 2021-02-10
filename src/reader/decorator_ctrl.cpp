@@ -17,16 +17,38 @@
 
 #include "fmr/reader/decorator_ctrl.h"
 
+#include "fmr/bitmap/bitmap_vector_event.h"
+
 namespace fmr {
 
 namespace reader {
-void DecoratorCtrl::Create(wxWindow *window,
+void DecoratorCtrl::Create(ScrolledImageWindow *window,
                            bitmap::BitmapPageCtrl *bmp_page_ctrl) {
   page_indicator_ = std::make_unique<PageIndicator>();
 
   bitmap_page_ctrl_ = bmp_page_ctrl;
+  bitmap_page_ctrl_->Bind(bitmap::kEventBitmapChanged,
+                          &DecoratorCtrl::OnBitmapChanged, this);
+
   AddDecorator(page_indicator_.get());
   SetWindow(window);
+}
+
+void DecoratorCtrl::OnBitmapChanged(bitmap::BitmapVectorEvent &event) {
+  page_indicator_->SetPage(event.GetPagePos() + 1);
+  page_indicator_->SetPageLimit(bitmap_page_ctrl_->GetAllPage().size());
+  page_indicator_->ShowOnce(500);
+  page_indicator_->SetRect(wxPoint(0, 0), GetWindow()->GetClientSize());
+  GetWindow()->Refresh();
+  event.Skip();
+}
+
+ScrolledImageWindow *DecoratorCtrl::GetWindow() {
+  return static_cast<ScrolledImageWindow *>(WindowDecoratorList::GetWindow());
+}
+
+void DecoratorCtrl::SetWindow(ScrolledImageWindow *window) {
+  return WindowDecoratorList::SetWindow(window);
 }
 
 }  // namespace reader

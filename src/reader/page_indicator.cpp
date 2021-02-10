@@ -25,7 +25,7 @@ namespace fmr {
 
 namespace reader {
 
-void PageIndicator::OnDraw(wxDC &dc) {
+void PageIndicator::OnDraw(wxDC &dc, const wxRect &area) {
   dc.SetTextForeground(*wxBLACK);
   wxString draw_text = wxString::Format("%ld/%ld", page_pos_, page_limit_);
 
@@ -35,11 +35,10 @@ void PageIndicator::OnDraw(wxDC &dc) {
 
   wxSize text_size = dc.GetTextExtent(draw_text);
   wxPoint pos = dimension::AlignPosition(
-      rect_, text_size, wxALIGN_BOTTOM | wxALIGN_CENTER_HORIZONTAL);
+      area, text_size, wxALIGN_BOTTOM | wxALIGN_CENTER_HORIZONTAL);
 
   dc.DrawRectangle(pos, text_size);
   dc.DrawText(draw_text, pos);
-  // dc.DrawEllipse(wxPoint(100 + pos.x, 300 + pos.y), wxSize(1000, 1000));
 }
 
 }  // namespace reader

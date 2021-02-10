@@ -17,12 +17,17 @@
 
 #include "fmr/bitmap/bitmap_ctrl.h"
 
+#include "fmr/bitmap/bitmap_vector_event.h"
 #include "fmr/bitmap/rescaler.h"
 #include "fmr/window/scrolled_image.h"
 
 namespace fmr {
 
 namespace bitmap {
+
+wxDEFINE_EVENT(kEventBitmapChanging, BitmapVectorEvent);
+wxDEFINE_EVENT(kEventBitmapChanged, BitmapVectorEvent);
+wxDEFINE_EVENT(kEventBitmapNotChanged, BitmapVectorEvent);
 
 std::vector<SBitmap *> BitmapPageToBitmapPtr(BitmapVector *vec) {
   std::vector<SBitmap *> vec_ptr;
@@ -40,6 +45,7 @@ BitmapCtrl::BitmapCtrl(ScrolledImageWindow *window, PositionCtrl *pos_ctrl,
   window_ = window;
   pos_ctrl_ = pos_ctrl;
   rescaler_ = rescaler;
+  Bind(kEventBitmapChanging, &BitmapCtrl::DoChangeBitmapVector, this);
 }
 
 void BitmapCtrl::RecalcPosition() { pos_ctrl_->RecalcPosition(GetVectorPtr()); }
@@ -73,8 +79,26 @@ void BitmapCtrl::OnImageLoaded(queue::LoadImageEvent &event) {}
 void BitmapCtrl::OnWindowSize(wxSizeEvent &event) {}
 
 void BitmapCtrl::SetBitmapVec(BitmapVector *bmp_vec) {
-  bmp_vec_ = bmp_vec;
-  GetWindow()->SetBitmapPage(GetBitmapVec());
+  BitmapVectorEvent event(kEventBitmapChanging, wxID_ANY);
+  event.SetBitmapVec(bmp_vec);
+  wxPostEvent(this, event);
+}
+
+void BitmapCtrl::DoChangeBitmapVector(BitmapVectorEvent &event) {
+  if (event.IsAllowed()) {
+    bmp_vec_ = event.GetBitmapVec();
+    GetWindow()->SetBitmapPage(GetBitmapVec());
+
+    // AdjustBitmap();
+
+    auto temp = event;
+    temp.SetEventType(kEventBitmapChanged);
+    wxPostEvent(this, temp);
+  } else {
+    auto temp = event;
+    temp.SetEventType(kEventBitmapNotChanged);
+    wxPostEvent(this, temp);
+  }
 }
 
 void BitmapCtrl::RecalcPosition(const std::vector<SBitmap *> &bitmap) const {

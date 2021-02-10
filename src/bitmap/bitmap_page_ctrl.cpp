@@ -17,15 +17,20 @@
 
 #include "fmr/bitmap/bitmap_page_ctrl.h"
 
+#include "fmr/bitmap/bitmap_vector_event.h"
+
 namespace fmr {
 
 namespace bitmap {
+
+wxDEFINE_EVENT(kEventBitmapPageNotFound, BitmapVectorEvent);
 
 BitmapPageCtrl::BitmapPageCtrl(ScrolledImageWindow *window,
                                PositionCtrl *pos_ctrl, Rescaler *rescaler,
                                size_t bitmap_per_page)
     : BitmapCtrl(window, pos_ctrl, rescaler) {
   SetBitmapPerPage(bitmap_per_page);
+  Bind(kEventBitmapChanging, &BitmapPageCtrl::OnBitmapChanging, this);
 }
 
 void BitmapPageCtrl::AddBitmap(const SBitmap &bitmap, size_t page_pos,
@@ -83,13 +88,29 @@ wxSize BitmapPageCtrl::GetSize(BitmapPage *page) {
   return GetSize(BitmapPageToBitmapPtr(page));
 }
 
-bool BitmapPageCtrl::GoToPage(size_t idx) {
-  if (!IsPageExist(idx)) return false;
+bool BitmapPageCtrl::GoToPage(size_t idx, wxDirection direction) {
+  BitmapVectorEvent event(kEventBitmapChanging, wxID_ANY);
+  event.SetBitmapVec((IsPageExist(idx)) ? GetPage(idx).get() : nullptr);
+  event.SetPagePos(idx);
+  event.SetDirection(direction);
 
-  curr_page_ = idx;
-  SetBitmapVec(GetPage(idx).get());
+  wxPostEvent(this, event);
 
   return true;
+}
+
+void BitmapPageCtrl::OnBitmapChanging(BitmapVectorEvent &event) {
+  if (event.IsAllowed()) {
+    if (IsPageExist(event.GetPagePos())) {
+      curr_page_ = event.GetPagePos();
+    } else {
+      auto temp = event;
+      temp.SetEventType(kEventBitmapPageNotFound);
+      wxPostEvent(this, temp);
+      event.Veto();
+    }
+  }
+  event.Skip();
 }
 
 bool BitmapPageCtrl::ChangePage(int step) {

@@ -25,6 +25,8 @@ namespace fmr {
 
 namespace bitmap {
 
+wxDECLARE_EVENT(kEventBitmapPageNotFound, BitmapVectorEvent);
+
 class BitmapPageCtrl : public BitmapCtrl {
   std::vector<std::unique_ptr<BitmapPage>> vec_page_;
   size_t bitmap_per_page_ = -1;
@@ -65,13 +67,15 @@ class BitmapPageCtrl : public BitmapCtrl {
   void EnlargePage(size_t size);
   void EnlargeBitmapPage(size_t page_pos, size_t size);
 
-  bool GoToPage(size_t idx);
+  bool GoToPage(size_t idx, wxDirection direction = wxDOWN);
   bool ChangePage(int step);
 
   void Clear();
 
  private:
   void OnImageLoaded(queue::LoadImageEvent &event);
+
+  void OnBitmapChanging(BitmapVectorEvent &event);
 };
 
 }  // namespace bitmap

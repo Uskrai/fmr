@@ -23,12 +23,11 @@
 #include "fmr/bitmap/bitmap_page_ctrl.h"
 #include "fmr/reader/page_indicator.h"
 #include "fmr/window/decorator.h"
+#include "fmr/window/scrolled_image.h"
 
 namespace fmr {
 
 namespace reader {
-
-wxDECLARE_EVENT(kEventUpdateInfo, wxCommandEvent);
 
 class DecoratorCtrl : public WindowDecoratorList {
   std::unique_ptr<PageIndicator> page_indicator_ = nullptr;
@@ -36,13 +35,21 @@ class DecoratorCtrl : public WindowDecoratorList {
 
  public:
   DecoratorCtrl() = delete;
-  DecoratorCtrl(wxWindow *window, bitmap::BitmapPageCtrl *bmp_page_ctrl) {
+  DecoratorCtrl(ScrolledImageWindow *window,
+                bitmap::BitmapPageCtrl *bmp_page_ctrl) {
     Create(window, bmp_page_ctrl);
   };
 
   PageIndicator *GetPageIndicator() { return page_indicator_.get(); }
 
-  void Create(wxWindow *window, bitmap::BitmapPageCtrl *bmp_page_ctrl);
+  void SetWindow(ScrolledImageWindow *window);
+  ScrolledImageWindow *GetWindow();
+
+  void Create(ScrolledImageWindow *window,
+              bitmap::BitmapPageCtrl *bmp_page_ctrl);
+
+ private:
+  void OnBitmapChanged(bitmap::BitmapVectorEvent &event);
 };
 
 }  // namespace reader

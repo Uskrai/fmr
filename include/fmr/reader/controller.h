@@ -76,9 +76,9 @@ class Controller : public ScrollController {
     return bitmap_ctrl_.get();
   }
 
-  bool GoToPage(size_t idx, wxDirection direction = wxDOWN);
-  bool Change(wxDirection direction);
-  bool ChangePage(wxDirection direction);
+  void GoToPage(size_t idx, wxDirection direction = wxDOWN);
+  void ChangePage(wxDirection direction);
+
   bool ChangeFolder(wxDirection direction);
 
   wxWindow *GetParent() { return parent_; }
@@ -87,6 +87,8 @@ class Controller : public ScrollController {
   void OnLoadedImage(queue::LoadImageEvent &event);
   void OnOpenedStreamFound(wxCommandEvent &event);
   void OnWindowScroll(wxScrollWinEvent &event);
+  void OnBitmapChanged(bitmap::BitmapVectorEvent &event);
+  void OnBitmapPageNotFound(bitmap::BitmapVectorEvent &event);
 };
 
 }  // namespace reader

@@ -21,16 +21,22 @@
 namespace fmr {
 
 void WindowDecoratorList::AddDecorator(WindowDecorator *decorator) {
+  decorator->Bind(wxEVT_TIMER, &WindowDecoratorList::OnDecoratorHide, this);
   list_decorator_.push_back(decorator);
 }
 
-void WindowDecoratorList::DrawDecorator(wxDC &dc) {
-  wxPoint device_origin = dc.GetDeviceOrigin();
-  dc.SetDeviceOrigin(0, 0);
+void WindowDecoratorList::DrawDecorator(wxDC &dc, const wxRect &area) {
+  // wxPoint device_origin = dc.GetDeviceOrigin();
+  // dc.SetDeviceOrigin(0, 0);
   for (auto &it : list_decorator_) {
-    it->Draw(dc);
+    it->Draw(dc, area);
   }
-  dc.SetDeviceOrigin(device_origin.x, device_origin.y);
+  // dc.SetDeviceOrigin(device_origin.x, device_origin.y);
+}
+
+void WindowDecoratorList::OnDecoratorHide(wxTimerEvent &event) {
+  GetWindow()->Refresh();
+  event.Skip();
 }
 
 WindowDecorator::WindowDecorator() {
@@ -47,8 +53,8 @@ void WindowDecorator::ShowOnce(const int miliseconds) {
   hide_timer_.StartOnce(miliseconds);
 }
 
-void WindowDecorator::Draw(wxDC &dc) {
-  if (IsShown()) return OnDraw(dc);
+void WindowDecorator::Draw(wxDC &dc, const wxRect &area) {
+  if (IsShown()) return OnDraw(dc, area);
 }
 
 void WindowDecorator::SetParent(WindowDecoratorList *window) {

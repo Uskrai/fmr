@@ -30,11 +30,16 @@ class ScrolledImageWindow;
 
 namespace bitmap {
 
+class BitmapVectorEvent;
+wxDECLARE_EVENT(kEventBitmapChanging, BitmapVectorEvent);
+wxDECLARE_EVENT(kEventBitmapChanged, BitmapVectorEvent);
+wxDECLARE_EVENT(kEventBitmapNotChanged, BitmapVectorEvent);
+
 class Rescaler;
 
 std::vector<SBitmap *> BitmapPageToBitmapPtr(BitmapVector *page);
 
-class BitmapCtrl {
+class BitmapCtrl : public wxEvtHandler {
  private:
   std::vector<SBitmap *> vec_bitmap_;
   PositionCtrl *pos_ctrl_ = nullptr;
@@ -71,6 +76,7 @@ class BitmapCtrl {
  private:
   void OnWindowSize(wxSizeEvent &event);
   void OnImageLoaded(queue::LoadImageEvent &event);
+  void DoChangeBitmapVector(BitmapVectorEvent &event);
 };
 
 }  // namespace bitmap
