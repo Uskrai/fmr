@@ -25,6 +25,7 @@
 #include <queue>
 
 #include "fmr/bitmap/bmp.h"
+#include "fmr/bitmap/rescaler.h"
 #include "fmr/queue/base.h"
 
 namespace fmr {
@@ -52,12 +53,22 @@ class LoadImageEvent : public wxCommandEvent {
 
 wxDECLARE_EVENT(kEventImageLoaded, LoadImageEvent);
 
-class LoadImage : public Base<SStream *> {
- public:
-  LoadImage(ThreadController *parent, int id = wxID_ANY) : Base(parent, id){};
+enum LoadReturn { kLoadBeingStopped, kLoadSuccess, kLoadCannotReadStream };
 
-  void PopTask();
-  void Load(SStream *stream);
+class LoadImage : public Base<SStream *> {
+  bitmap::Rescaler *rescaler_ = nullptr;
+
+ public:
+  LoadImage(wxEvtHandler *parent, int id = wxID_ANY) : Base(parent, id){};
+
+  bool ProcessTask(value_type &item) override;
+  LoadReturn Load(SStream *stream);
+
+  /**
+   * @brief: Rescaller to use after load image physically ( if any )
+   * @param: rescaler bitmap Rescaler
+   */
+  void SetRescaler(bitmap::Rescaler *rescaler) { rescaler_ = rescaler; }
 };
 
 };  // namespace queue

@@ -15,28 +15,26 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmr/queue/rescale.h"
+#include "fmr/queue/factory.h"
 
-#include <memory>
+#include "fmr/queue/find_handler.h"
+#include "fmr/queue/load_image.h"
+#include "fmr/queue/rescale.h"
 
 namespace fmr {
 
 namespace queue {
 
-wxDEFINE_EVENT(kEventImageRescaled, RescaledEvent);
+namespace factory {
 
-void Rescale::SendEvent(wxImage *image) {
-  auto event =
-      std::make_unique<RescaledEvent>(kEventImageRescaled, GetEventId(), image);
-
-  SendEventToParent(event.release());
+std::unique_ptr<queue::LoadImage> LoadImage(wxEvtHandler *parent, int id) {
+  return std::make_unique<queue::LoadImage>(parent, id);
+}
+std::unique_ptr<queue::FindHandler> FindHandler(wxEvtHandler *parent, int id) {
+  return std::make_unique<queue::FindHandler>(parent, id);
 }
 
-bool Rescale::ProcessTask(value_type &item) {
-  rescaler_->DoRescale(*item);
-  SendEvent(item);
-  return true;
-}
+}  // namespace factory
 
 }  // namespace queue
 

@@ -19,13 +19,13 @@
 #include <fmr/common/dimension.h>
 #include <fmr/common/path.h>
 #include <fmr/gui/panel.h>
-#include <fmr/handler/abstract_handler.h>
 #include <wx/popupwin.h>
 #include <wx/sizer.h>
+#include <wx/window.h>
 
 #include <iostream>
 
-#include "wx/window.h"
+#include "fmr/handler/handler_factory.h"
 
 namespace fmr {
 

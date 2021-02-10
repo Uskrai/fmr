@@ -17,6 +17,9 @@
 
 #include "fmr/bitmap/page_loader.h"
 
+#include "fmr/thread/find_handler_controller.h"
+#include "fmr/thread/load_image_controller.h"
+
 namespace fmr {
 
 namespace bitmap {
@@ -25,10 +28,10 @@ wxDEFINE_EVENT(kEventOpenedStreamFound, wxCommandEvent);
 
 PageLoader::PageLoader(wxEvtHandler *parent, BitmapPageCtrl *bmp_ctrl, int id)
     : Loader(parent, id) {
-  SetControllerId(GetFindController()->GetThreadId(),
-                  GetLoadImageController()->GetThreadId());
+  SetControllerId(GetFindController()->GetEventId(),
+                  GetLoadImageController()->GetEventId());
   bmp_ctrl_ = bmp_ctrl;
-  Bind(EVT_COMMAND_THREAD_COMPLETED, &PageLoader::OnCompleted, this);
+  Bind(kEventThreadCompleted, &PageLoader::OnCompleted, this);
 }
 
 bool PageLoader::Open(const std::string &path) {
@@ -66,7 +69,7 @@ void PageLoader::SetControllerId(int find_controller_id,
                                  int load_image_controller_id) {
   GetFindController()->Unbind(queue::kEventStreamFound,
                               &PageLoader::OnStreamFound, this,
-                              GetFindController()->GetThreadId());
+                              GetFindController()->GetEventId());
 
   Loader::SetControllerId(find_controller_id, load_image_controller_id);
 
@@ -185,7 +188,7 @@ void PageLoader::PushStreamStack() {
 }
 
 void PageLoader::OnCompleted(wxThreadEvent &event) {
-  if (event.GetId() == GetFindController()->GetThreadId()) {
+  if (event.GetId() == GetFindController()->GetEventId()) {
     PushStreamStack();
   }
   event.Skip();

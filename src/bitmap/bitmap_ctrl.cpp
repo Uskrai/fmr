@@ -17,18 +17,89 @@
 
 #include "fmr/bitmap/bitmap_ctrl.h"
 
+#include "fmr/bitmap/bitmap_vector_event.h"
+#include "fmr/bitmap/rescaler.h"
+#include "fmr/window/scrolled_image.h"
+
 namespace fmr {
 
 namespace bitmap {
 
-BitmapCtrl::BitmapCtrl(PositionCtrl *pos_ctrl, Rescaler *rescaler) {
-  pos_ctrl_ = pos_ctrl;
-  rescaler_ = rescaler;
+wxDEFINE_EVENT(kEventBitmapChanging, BitmapVectorEvent);
+wxDEFINE_EVENT(kEventBitmapChanged, BitmapVectorEvent);
+wxDEFINE_EVENT(kEventBitmapNotChanged, BitmapVectorEvent);
+
+std::vector<SBitmap *> BitmapPageToBitmapPtr(BitmapVector *vec) {
+  std::vector<SBitmap *> vec_ptr;
+
+  if (vec) {
+    for (auto &it : vec->GetBitmap()) {
+      vec_ptr.push_back(&it);
+    }
+  }
+  return vec_ptr;
 }
 
-void BitmapCtrl::RecalcPosition() { pos_ctrl_->RecalcPosition(GetBitmap()); }
+BitmapCtrl::BitmapCtrl(ScrolledImageWindow *window, PositionCtrl *pos_ctrl,
+                       Rescaler *rescaler) {
+  window_ = window;
+  pos_ctrl_ = pos_ctrl;
+  rescaler_ = rescaler;
+  Bind(kEventBitmapChanging, &BitmapCtrl::DoChangeBitmapVector, this);
+}
 
-wxSize BitmapCtrl::GetSize() const { return pos_ctrl_->GetSize(GetBitmap()); }
+void BitmapCtrl::RecalcPosition() { pos_ctrl_->RecalcPosition(GetVectorPtr()); }
+
+wxSize BitmapCtrl::GetSize() const {
+  return pos_ctrl_->GetSize(GetVectorPtr());
+}
+
+std::vector<const SBitmap *> BitmapCtrl::GetVectorPtr() const {
+  std::vector<const SBitmap *> bmp_ptr;
+  if (GetBitmapVec()) {
+    for (const auto &it : GetBitmapVec()->GetBitmap()) {
+      bmp_ptr.push_back(&it);
+    }
+  }
+  return bmp_ptr;
+}
+
+std::vector<SBitmap *> BitmapCtrl::GetVectorPtr() {
+  std::vector<SBitmap *> bmp_ptr;
+  if (GetBitmapVec()) {
+    for (auto &it : GetBitmapVec()->GetBitmap()) {
+      bmp_ptr.push_back(&it);
+    }
+  }
+  return bmp_ptr;
+}
+
+void BitmapCtrl::OnImageLoaded(queue::LoadImageEvent &event) {}
+
+void BitmapCtrl::OnWindowSize(wxSizeEvent &event) {}
+
+void BitmapCtrl::SetBitmapVec(BitmapVector *bmp_vec) {
+  BitmapVectorEvent event(kEventBitmapChanging, wxID_ANY);
+  event.SetBitmapVec(bmp_vec);
+  wxPostEvent(this, event);
+}
+
+void BitmapCtrl::DoChangeBitmapVector(BitmapVectorEvent &event) {
+  if (event.IsAllowed()) {
+    bmp_vec_ = event.GetBitmapVec();
+    GetWindow()->SetBitmapPage(GetBitmapVec());
+
+    // AdjustBitmap();
+
+    auto temp = event;
+    temp.SetEventType(kEventBitmapChanged);
+    wxPostEvent(this, temp);
+  } else {
+    auto temp = event;
+    temp.SetEventType(kEventBitmapNotChanged);
+    wxPostEvent(this, temp);
+  }
+}
 
 void BitmapCtrl::RecalcPosition(const std::vector<SBitmap *> &bitmap) const {
   pos_ctrl_->RecalcPosition(bitmap);
@@ -39,13 +110,17 @@ wxSize BitmapCtrl::GetSize(const std::vector<SBitmap *> &bitmap) const {
 }
 
 void BitmapCtrl::AdjustBitmap() {
-  RecalcPosition(GetBitmap());
-  for (const auto &it : GetBitmap()) {
-    rescaler_->DoRescale(*it);
+  if (GetBitmapVec()) {
+    GetPosCtrl()->SetMinimumSize(GetWindow()->GetClientSize());
+    GetRescaler()->SetFitSize(GetWindow()->GetClientSize());
+
+    RecalcPosition();
+    GetPosCtrl()->SetWindowSize(GetSize());
+    RecalcPosition();
   }
 }
 
-void BitmapCtrl::Clear() { GetBitmap().clear(); }
+void BitmapCtrl::Clear() { bmp_vec_ = nullptr; }
 
 }  // namespace bitmap
 

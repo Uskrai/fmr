@@ -30,7 +30,13 @@ enum EventType { kEventUsePost, kEventUseQueue };
 
 template <class T>
 class Base {
-  std::queue<T> queue_item_;
+ public:
+  using Container = typename std::deque<T>;
+  using value_type = typename Container::value_type;
+  using iterator = typename Container::iterator;
+
+ private:
+  std::deque<T> queue_item_;
   wxEvtHandler *parent_ = nullptr;
   bool is_being_deleted_ = false;
   int event_id_ = wxID_ANY;
@@ -43,11 +49,9 @@ class Base {
     event_id_ = id;
   };
 
-  const std::queue<T> &GetContainer() const { return queue_item_; }
-  std::queue<T> &GetContainer() { return queue_item_; }
-
   wxEvtHandler *GetParent() { return parent_; }
   int GetEventId() const { return event_id_; }
+  void SetEventId(int id) { event_id_ = id; }
 
   void SendEventToParent(wxEvent *event) {
     if (event_type_ == kEventUsePost) {
@@ -63,18 +67,132 @@ class Base {
 
   void SetEventType(EventType type) { event_type_ = type; }
 
-  virtual void Delete() { is_being_deleted_ = true; }
-  virtual bool IsBeingDeleted() const { return is_being_deleted_; }
+  /**
+   * @brief: to Stop the task if using multi-thread
+   */
+  [[deprecated("Use Stop")]] virtual void Delete(bool cond = true) {
+    Stop(cond);
+  }
 
-  void Push(const T &item) { return queue_item_.push(item); }
-  void Push(T &&item) { return queue_item_.push(item); }
+  /**
+   * @see IsBeingStopped
+   */
+  [[deprecated("Use IsBeingStopped")]] virtual bool IsBeingDeleted() const {
+    return IsBeingStopped();
+  }
 
-  T &Front() { return queue_item_.front(); }
-  void Pop() { return queue_item_.pop(); }
+  /**
+   * @brief: to Stop the task if using a multi threaded
+   */
+  virtual void Stop(bool cond = true) { is_being_deleted_ = cond; }
 
-  bool IsEmpty() { return queue_item_.empty(); }
+  /**
+   * @brief: To check if the queue is being stopped
+   */
+  virtual bool IsBeingStopped() const { return is_being_deleted_; }
 
-  virtual void PopTask() = 0;
+  /**
+   * @brief: push item to the queue
+   */
+  void Push(value_type item) {
+    return GetContainer().push_back(std::move(item));
+  }
+
+  /**
+   * @brief: Push Item to the front of the queue
+   */
+  void PushFront(value_type &&item) {
+    return GetContainer().push_front(std::move(item));
+  }
+  void PushFront(const value_type &item) {
+    return GetContainer().push_front(item);
+  }
+
+  /**
+   * @brief: Make item to the front of the queue
+   *
+   * @param: item the item that need to be moved
+   *
+   * @return: true if the item exist within the queue
+   */
+  bool MakeFront(const value_type &item) {
+    auto it = FindIterator(item);
+    if (it != GetContainer().end()) {
+      PushFront(*it);
+      GetContainer().erase(it);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * @brief: access the first element
+   * @return: reference to the first element in the container
+   */
+  value_type &Front() { return GetContainer().front(); }
+  /**
+   * @brief: remove the first elemt
+   */
+  void Pop() { return GetContainer().pop_front(); }
+
+  /**
+   * @brief: check whether the container is empty
+   * @return: true if container is empty
+   */
+  bool IsEmpty() const { return GetContainer().empty(); }
+
+  /**
+   * @brief: The method that should be overriden
+   *
+   * @param: the item that should be processed
+   *
+   * @return: true if the task should be removed from queue
+   */
+  virtual bool ProcessTask(value_type &item) = 0;
+
+  /**
+   * @brief: Process front Queue
+   * @return: @see ProcessTask
+   */
+  virtual bool PopTask() {
+    if (ProcessTask(Front())) {
+      Pop();
+      return true;
+    }
+    return false;
+  };
+
+  /**
+   * @brief: Return the size of the container
+   * @return:
+   */
+  size_t Size() { return GetContainer().size(); }
+
+  /**
+   * @brief: Clear the container
+   */
+  virtual void ClearTask() { GetContainer().clear(); }
+
+ protected:
+  const std::deque<T> &GetContainer() const { return queue_item_; }
+  std::deque<T> &GetContainer() { return queue_item_; }
+
+  /**
+   * @brief: Compare function to compare value_type
+   * override this if value_type doesnt support operator==
+   * @param: a value from queue
+   * @param: b value from caller
+   * @return: true if a and b equal
+   */
+  virtual bool Compare(const value_type &a, const value_type &b) {
+    return a == b;
+  }
+
+  iterator FindIterator(const value_type &item) {
+    return std::find(
+        GetContainer().begin(), GetContainer().end(),
+        [&](const value_type &compare) { return Compare(compare, item); });
+  }
 };
 
 }  // namespace queue

@@ -15,29 +15,27 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmr/queue/rescale.h"
+#ifndef FMR_HANDLER_STREAM_UTIL
+#define FMR_HANDLER_STREAM_UTIL
 
 #include <memory>
 
 namespace fmr {
 
-namespace queue {
+class SStream;
+class AbstractHandler;
+class AbstractOpenableHandler;
 
-wxDEFINE_EVENT(kEventImageRescaled, RescaledEvent);
+namespace stream_util {
 
-void Rescale::SendEvent(wxImage *image) {
-  auto event =
-      std::make_unique<RescaledEvent>(kEventImageRescaled, GetEventId(), image);
+std::unique_ptr<AbstractHandler> MakeParentHandler(const SStream &stream);
+std::unique_ptr<AbstractOpenableHandler> MakeParentOpenableHandler(
+    const SStream &stream);
 
-  SendEventToParent(event.release());
-}
+bool LoadStream(SStream &stream);
 
-bool Rescale::ProcessTask(value_type &item) {
-  rescaler_->DoRescale(*item);
-  SendEvent(item);
-  return true;
-}
-
-}  // namespace queue
+}  // namespace stream_util
 
 }  // namespace fmr
+
+#endif /* end of include guard: FMR_HANDLER_STREAM_UTIL */

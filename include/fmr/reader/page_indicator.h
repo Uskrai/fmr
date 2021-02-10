@@ -27,11 +27,17 @@ namespace reader {
 class PageIndicator : public WindowDecorator {
   size_t page_pos_ = 0, page_limit_ = 0;
   wxRect rect_;
+  wxFont font_;
+  wxColour background_colour_, text_colour_;
 
-  virtual void OnDraw(wxDC &dc);
+  virtual void OnDraw(wxDC &dc, const wxRect &area);
 
  public:
-  PageIndicator(){};
+  PageIndicator();
+
+  wxString GetString();
+
+  wxSize GetSize(wxDC &dc);
 
   void SetPage(int pos) { page_pos_ = pos; };
   void SetPageLimit(int size) { page_limit_ = size; }

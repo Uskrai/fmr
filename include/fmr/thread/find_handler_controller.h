@@ -24,6 +24,7 @@
 #include "fmr/handler/abstract_handler.h"
 #include "fmr/queue/find_handler.h"
 #include "fmr/thread/queue.h"
+#include "fmr/thread/queue_ctrl.h"
 
 namespace fmr {
 
@@ -31,13 +32,13 @@ namespace thread {
 
 constexpr int FindHandlerControllerIdDefault = wxID_HIGHEST + 3010;
 
-class FindHandlerController : public ThreadController {
+class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
  protected:
   bool (*stream_checker_)(const SStream &stream);
   std::unique_ptr<AbstractHandler> handler_;
-  std::queue<const SStream *> stream_queue_;
   std::vector<const SStream *> in_queue_vec_;
-  Queue<queue::FindHandler> *thread_ = nullptr;
+  // Queue<queue::FindHandler> *thread_ = nullptr;
+  // std::unique_ptr<queue::FindHandler> queue_;
   queue::FindHandlerFlags thread_flags_ = queue::kFindHandlerDefault;
 
   // map to found (first) and source (second) stream
@@ -45,27 +46,23 @@ class FindHandlerController : public ThreadController {
   std::vector<std::unique_ptr<SStream>> loaded_stream_;
 
   wxEvtHandler *parent_ = nullptr;
-  wxCriticalSection lock_;
-
-  int thread_id_ = FindHandlerControllerIdDefault;
 
  public:
   FindHandlerController(wxEvtHandler *parent,
                         int id = FindHandlerControllerIdDefault);
   virtual ~FindHandlerController() { Clear(); }
   bool Open(const std::string &path);
-  void Push(const SStream *stream) { stream_queue_.push(stream); };
-  bool Run();
 
-  void DoSetNull(BaseThread *thread);
   wxEvtHandler *GetParent() { return parent_; }
 
-  void SetChecker(bool (*checker)(const SStream &stream)) {
-    stream_checker_ = checker;
+  void SetEventId(int id) override;
+
+  [[deprecated("Replaced by SetEventId")]] void SetThreadId(int id) {
+    SetEventId(id);
   }
-  void SetFlags(queue::FindHandlerFlags flags) { thread_flags_ = flags; }
-  void SetThreadId(int thread_id);
-  int GetThreadId() const { return thread_id_; }
+  [[deprecated("Replaced by GetEventId")]] int GetThreadId() const {
+    return GetEventId();
+  }
 
   const SStream *GetSourceStream(const SStream *found_stream);
 
@@ -73,9 +70,14 @@ class FindHandlerController : public ThreadController {
                       std::unique_ptr<SStream> &&found_stream);
 
   bool IsInQueue(const SStream *stream) const;
-  void DisableOnEmptyQueue(bool disable = true);
 
   void Clear();
+
+ protected:
+  void DoPush(value_type item, QueuePushType type) override {
+    in_queue_vec_.push_back(item);
+    QueueThreadCtrl::DoPush(std::move(item), type);
+  }
 
  private:
   void OnStreamFound(queue::FoundEvent &event);

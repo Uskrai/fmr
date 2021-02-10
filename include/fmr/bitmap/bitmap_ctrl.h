@@ -16,31 +16,48 @@
  */
 
 #ifndef FMR_BITMAP_BITMAP_CTRL
-#define FMR_BITMAP_BITMAP
+#define FMR_BITMAP_BITMAP_CTRL
 
 #include <wx/window.h>
 
+#include "fmr/bitmap/bitmap_page.h"
 #include "fmr/bitmap/loader.h"
 #include "fmr/bitmap/position_ctrl.h"
 
 namespace fmr {
 
+class ScrolledImageWindow;
+
 namespace bitmap {
 
-class BitmapCtrl {
+class BitmapVectorEvent;
+wxDECLARE_EVENT(kEventBitmapChanging, BitmapVectorEvent);
+wxDECLARE_EVENT(kEventBitmapChanged, BitmapVectorEvent);
+wxDECLARE_EVENT(kEventBitmapNotChanged, BitmapVectorEvent);
+
+class Rescaler;
+
+std::vector<SBitmap *> BitmapPageToBitmapPtr(BitmapVector *page);
+
+class BitmapCtrl : public wxEvtHandler {
  private:
   std::vector<SBitmap *> vec_bitmap_;
   PositionCtrl *pos_ctrl_ = nullptr;
   Rescaler *rescaler_ = nullptr;
+  ScrolledImageWindow *window_ = nullptr;
+  BitmapVector *bmp_vec_;
 
  public:
-  BitmapCtrl(PositionCtrl *position, Rescaler *rescaler);
+  BitmapCtrl(ScrolledImageWindow *window, PositionCtrl *position,
+             Rescaler *rescaler);
 
-  std::vector<SBitmap *> &GetBitmap() { return vec_bitmap_; }
-  const std::vector<SBitmap *> &GetBitmap() const { return vec_bitmap_; }
-  void SetBitmap(const std::vector<SBitmap *> &bitmap) {
-    vec_bitmap_ = bitmap;
-  };
+  BitmapVector *GetBitmapVec() { return bmp_vec_; }
+  const BitmapVector *GetBitmapVec() const { return bmp_vec_; }
+
+  std::vector<SBitmap *> GetVectorPtr();
+  std::vector<const SBitmap *> GetVectorPtr() const;
+
+  void SetBitmapVec(BitmapVector *bmp_vec);
 
   void AdjustBitmap();
 
@@ -51,13 +68,19 @@ class BitmapCtrl {
 
   void Clear();
 
+ protected:
+  ScrolledImageWindow *GetWindow() { return window_; };
+  Rescaler *GetRescaler() { return rescaler_; }
+  PositionCtrl *GetPosCtrl() { return pos_ctrl_; }
+
  private:
   void OnWindowSize(wxSizeEvent &event);
   void OnImageLoaded(queue::LoadImageEvent &event);
+  void DoChangeBitmapVector(BitmapVectorEvent &event);
 };
 
 }  // namespace bitmap
 
 }  // namespace fmr
 
-#endif /* end of include guard: FMR_BITMAP_BITMAP */
+#endif /* end of include guard: FMR_BITMAP_BITMAP_CTRL */

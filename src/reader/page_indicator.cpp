@@ -25,21 +25,42 @@ namespace fmr {
 
 namespace reader {
 
-void PageIndicator::OnDraw(wxDC &dc) {
-  dc.SetTextForeground(*wxBLACK);
-  wxString draw_text = wxString::Format("%ld/%ld", page_pos_, page_limit_);
+PageIndicator::PageIndicator()
+    : font_(*wxNORMAL_FONT),
+      background_colour_("DIM GRAY"),
+      text_colour_(*wxBLACK) {
+  font_.MakeLarger().MakeLarger();
+  auto *color = &background_colour_;
+  background_colour_.Set(color->Red(), color->Green(), color->Blue(), 150);
+}
 
-  wxFont font = *wxNORMAL_FONT;
-  font.MakeLarger().MakeLarger();
-  dc.SetFont(font);
+wxString PageIndicator::GetString() {
+  return wxString::Format("%ld/%ld", page_pos_, page_limit_);
+}
 
-  wxSize text_size = dc.GetTextExtent(draw_text);
+wxSize PageIndicator::GetSize(wxDC &dc) {
+  wxFont temp_font = dc.GetFont();
+
+  dc.SetFont(font_);
+
+  wxSize text_size = dc.GetTextExtent(GetString());
+  dc.SetFont(temp_font);
+  return text_size;
+}
+
+void PageIndicator::OnDraw(wxDC &dc, const wxRect &area) {
+  dc.SetTextForeground(*text_colour_);
+  dc.SetBrush(wxBrush(background_colour_, wxBRUSHSTYLE_SOLID));
+  wxString draw_text = GetString();
+
+  dc.SetFont(font_);
+
+  wxSize text_size = GetSize(dc);
   wxPoint pos = dimension::AlignPosition(
-      rect_, text_size, wxALIGN_BOTTOM | wxALIGN_CENTER_HORIZONTAL);
+      area, text_size, wxALIGN_BOTTOM | wxALIGN_CENTER_HORIZONTAL);
 
   dc.DrawRectangle(pos, text_size);
   dc.DrawText(draw_text, pos);
-  // dc.DrawEllipse(wxPoint(100 + pos.x, 300 + pos.y), wxSize(1000, 1000));
 }
 
 }  // namespace reader

@@ -15,16 +15,32 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmr/reader/decorator.h"
+#ifndef FMR_THREAD_CONTROLLER_FACTORY
+#define FMR_THREAD_CONTROLLER_FACTORY
+
+#include <memory>
+
+class wxEvtHandler;
 
 namespace fmr {
 
-namespace reader {
-void DecoratorList::Create() {
-  page_indicator_ = std::make_unique<PageIndicator>();
-  AddDecorator(page_indicator_.get());
-}
+namespace thread {
 
-}  // namespace reader
+class FindHandlerController;
+class LoadImageController;
+class RescaleController;
+
+namespace controller_factory {
+
+std::unique_ptr<LoadImageController> NewLoadImage(wxEvtHandler *parent, int id);
+std::unique_ptr<FindHandlerController> NewFindHandler(wxEvtHandler *parent,
+                                                      int id);
+std::unique_ptr<RescaleController> NewRescale(wxEvtHandler *parent, int id);
+
+};  // namespace controller_factory
+
+}  // namespace thread
 
 }  // namespace fmr
+
+#endif /* end of include guard: FMR_THREAD_CONTROLLER_FACTORY */

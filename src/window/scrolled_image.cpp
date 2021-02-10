@@ -73,7 +73,8 @@ void ScrolledImageWindow::OnScroll(wxScrollWinEvent &event) {
 
 void ScrolledImageWindow::OnDraw(wxDC &dc) {
   DrawBitmap(dc);
-  if (decorator_) decorator_->DrawDecorator(dc);
+  if (decorator_)
+    decorator_->DrawDecorator(dc, wxRect(GetViewStart(), GetClientSize()));
 }
 
 void ScrolledImageWindow::SetBitmapPage(bitmap::BitmapPage *page) {

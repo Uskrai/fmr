@@ -17,37 +17,48 @@
 
 #include "fmr/bitmap/rescale_loader.h"
 
+#include "fmr/thread/find_handler_controller.h"
+#include "fmr/thread/load_image_controller.h"
+#include "fmr/thread/rescale_controller.h"
+
 namespace fmr {
 
 namespace bitmap {
 
 RescaleLoader::RescaleLoader(wxEvtHandler *parent, int id)
-    : Loader(parent, id), rescale_controller_(this, kRescaleImageThreadID) {
-  SetControllerId(GetFindController()->GetThreadId(),
-                  GetLoadImageController()->GetThreadId(),
-                  GetRescaleController()->GetThreadId());
+    : Loader(parent, id) {
+  rescale_controller_ =
+      thread::controller_factory::NewRescale(this, kRescaleImageThreadID);
+
+  SetControllerId(GetFindController()->GetEventId(),
+                  GetLoadImageController()->GetEventId(),
+                  GetRescaleController()->GetEventId());
+
+  Bind(kEventThreadCompleted, &RescaleLoader::OnThreadCompleted, this);
 }
 
 void RescaleLoader::SetControllerId(int find_id, int load_id, int rescale_id) {
   GetLoadImageController()->Unbind(queue::kEventImageLoaded,
                                    &RescaleLoader::OnImageLoaded, this,
-                                   GetLoadImageController()->GetThreadId());
+                                   GetLoadImageController()->GetEventId());
 
   GetRescaleController()->Unbind(queue::kEventImageRescaled,
                                  &RescaleLoader::OnImageRescaled, this,
-                                 GetRescaleController()->GetThreadId());
+                                 GetRescaleController()->GetEventId());
 
   SetControllerId(find_id, load_id);
-  GetRescaleController()->SetThreadId(rescale_id);
+  GetRescaleController()->SetEventId(rescale_id);
 
   GetLoadImageController()->Bind(queue::kEventImageLoaded,
                                  &RescaleLoader::OnImageLoaded, this,
-                                 GetLoadImageController()->GetThreadId());
+                                 GetLoadImageController()->GetEventId());
 
   GetRescaleController()->Bind(queue::kEventImageRescaled,
                                &RescaleLoader::OnImageRescaled, this,
-                               GetRescaleController()->GetThreadId());
+                               GetRescaleController()->GetEventId());
 }
+
+void RescaleLoader::OnThreadCompleted(wxThreadEvent &event) { event.Skip(); }
 
 void RescaleLoader::OnImageLoaded(queue::LoadImageEvent &event) {
   stream_bmp_.insert(std::make_pair(event.GetStream(), event.GetBitmap()));
@@ -62,9 +73,20 @@ void RescaleLoader::OnImageRescaled(queue::RescaledEvent &event) {
   auto stream_item = img_stream_.find(event.GetImage());
   if (stream_item != img_stream_.end()) {
     auto item = stream_bmp_.find(stream_item->second);
-    if (item != stream_bmp_.end()) SendImageToParent(item->first, item->second);
+    if (item != stream_bmp_.end()) {
+      SendImageToParent(item->first, item->second);
+    }
   }
 }
+
+void RescaleLoader::Clear() {
+  Loader::Clear();
+  GetRescaleController()->Clear();
+  stream_bmp_.clear();
+  img_stream_.clear();
+}
+
+RescaleLoader::~RescaleLoader() {}
 
 }  // namespace bitmap
 

@@ -18,65 +18,42 @@
 #ifndef FMR_THREAD_RESCALE_CONTROLLER
 #define FMR_THREAD_RESCALE_CONTROLLER
 
+#include <memory>
+
 #include "fmr/queue/rescale.h"
 #include "fmr/thread/queue.h"
+#include "fmr/thread/queue_ctrl.h"
 
 namespace fmr {
 
 namespace thread {
 
-class RescaleController : public ThreadController {
- protected:
-  Queue<queue::Rescale> *thread_ = nullptr;
-  int thread_id_;
-  bitmap::Rescaler *rescaler_ = nullptr;
-  wxEvtHandler *parent_ = nullptr;
-  wxCriticalSection lock_;
-
+class RescaleController : public QueueThreadCtrl<queue::Rescale> {
  public:
-  RescaleController(wxEvtHandler *parent, int id) : ThreadController() {
-    thread_id_ = id;
-    parent_ = parent;
+  RescaleController(wxEvtHandler *parent, int id)
+      : QueueThreadCtrl(parent, id) {
+    SetEventId(id);
   }
 
   virtual ~RescaleController() { Clear(); }
 
-  void SetRescaler(bitmap::Rescaler *rescaler) { rescaler_ = rescaler; }
-
-  void SetThreadId(int id) {
+  void SetEventId(int id) {
     Unbind(queue::kEventImageRescaled, &RescaleController::OnImageRescalled,
-           this, thread_id_);
-    thread_id_ = id;
+           this, GetEventId());
+    QueueThreadCtrl::SetEventId(id);
     Bind(queue::kEventImageRescaled, &RescaleController::OnImageRescalled, this,
-         thread_id_);
+         GetEventId());
+  }
+
+  [[deprecated("Replaced by SetEventId")]] void SetThreadId(int id) {
+    SetEventId(id);
+  }
+  [[deprecated("Replaced by GetEventId")]] int GetThreadId() {
+    return GetEventId();
   }
 
   void OnImageRescalled(queue::RescaledEvent &event) {
     wxPostEvent(GetParent(), event);
-  }
-
-  void Push(wxImage *image) {
-    if (!thread_) Run();
-    thread_->Push(image);
-  };
-
-  bool Run() {
-    thread_ = new Queue<queue::Rescale>(this, wxTHREAD_DETACHED, thread_id_);
-    thread_->SetRescaler(rescaler_);
-    return thread_->Run() == wxTHREAD_NO_ERROR;
-  }
-
-  int GetThreadId() { return thread_id_; }
-
-  void DoSetNull(BaseThread *thread) {
-    if (thread == thread_) thread_ = nullptr;
-  }
-
-  wxEvtHandler *GetParent() { return parent_; }
-
-  void Clear() { DeleteThread(thread_, lock_); }
-  void DisableOnEmptyQueue(bool disable = true) {
-    if (thread_) thread_->DisableOnEmptyQueue(disable);
   }
 };
 

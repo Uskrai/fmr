@@ -20,12 +20,14 @@
 #include "fmr/handler/handler_factory.h"
 
 namespace fmr {
+
 namespace thread {
 
-FindHandlerController::FindHandlerController(wxEvtHandler *parent, int id) {
+FindHandlerController::FindHandlerController(wxEvtHandler *parent, int id)
+    : QueueThreadCtrl(parent, id) {
   parent_ = parent;
 
-  SetThreadId(id);
+  SetEventId(id);
 }
 
 bool FindHandlerController::Open(const std::string &path) {
@@ -46,12 +48,14 @@ bool FindHandlerController::Open(const std::string &path) {
   return false;
 }
 
-void FindHandlerController::SetThreadId(int id) {
+void FindHandlerController::SetEventId(int id) {
   Unbind(queue::kEventStreamFound, &FindHandlerController::OnStreamFound, this,
-         thread_id_);
-  thread_id_ = id;
+         GetEventId());
+
+  QueueThreadCtrl::SetEventId(GetEventId());
+
   Bind(queue::kEventStreamFound, &FindHandlerController::OnStreamFound, this,
-       thread_id_);
+       GetEventId());
 }
 
 void FindHandlerController::AddFoundStream(
@@ -82,39 +86,12 @@ bool FindHandlerController::IsInQueue(const SStream *stream) const {
 }
 
 void FindHandlerController::Clear() {
-  DeleteThread(thread_, lock_);
+  QueueThreadCtrl::Clear();
   found_source_map_.clear();
   loaded_stream_.clear();
-}
-
-bool FindHandlerController::Run() {
-  Clear();
-
-  thread_ =
-      new Queue<queue::FindHandler>(this, wxTHREAD_DETACHED, GetThreadId());
-
-  while (!stream_queue_.empty()) {
-    auto item = stream_queue_.front();
-    thread_->Push(item);
-    in_queue_vec_.push_back(item);
-    stream_queue_.pop();
-  }
-
-  thread_->SetChecker(stream_checker_);
-  thread_->SetFlags(thread_flags_);
-
-  return thread_->Run() == wxTHREAD_NO_ERROR;
-}
-
-void FindHandlerController::DisableOnEmptyQueue(bool disable) {
-  if (thread_) {
-    thread_->DisableOnEmptyQueue(disable);
-  }
-}
-
-void FindHandlerController::DoSetNull(BaseThread *thread) {
-  if (thread == thread_) thread_ = nullptr;
+  in_queue_vec_.clear();
 }
 
 }  // namespace thread
+
 }  // namespace fmr

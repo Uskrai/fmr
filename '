@@ -73,6 +73,7 @@ bool LoadImage::ProcessTask(LoadImage::value_type &stream) {
                  String::FromString<wxString>(stream->GetHandlerPath())),
         String::FromString<wxString>(stream->GetName());
     stream_util::LoadStream(*stream);
+    TEST_RETURN();
   }
 
   TEST_RETURN();

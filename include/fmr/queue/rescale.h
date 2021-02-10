@@ -53,7 +53,7 @@ class Rescale : public Base<wxImage *> {
 
   void SetRescaler(bitmap::Rescaler *rescaler) { rescaler_ = rescaler; }
 
-  void PopTask();
+  bool ProcessTask(value_type &item);
 
  private:
   void SendEvent(wxImage *image);

@@ -19,30 +19,34 @@
 #define FMR_BITMAP_RESCALE_LOADER
 
 #include "fmr/bitmap/loader.h"
-#include "fmr/thread/rescale_controller.h"
+#include "fmr/queue/rescale.h"
 
 namespace fmr {
 
 namespace bitmap {
 
 class RescaleLoader : public Loader {
-  thread::RescaleController rescale_controller_;
+  std::unique_ptr<thread::RescaleController> rescale_controller_;
   std::unordered_map<const SStream *, SBitmap> stream_bmp_;
   std::unordered_map<const wxImage *, const SStream *> img_stream_;
 
  public:
   RescaleLoader(wxEvtHandler *parent, int id);
+  virtual ~RescaleLoader();
 
   using Loader::SetControllerId;
   void SetControllerId(int find_id, int load_id, int rescale_id);
 
   thread::RescaleController *GetRescaleController() {
-    return &rescale_controller_;
-  }
+    return rescale_controller_.get();
+  };
+
+  void Clear();
 
  private:
   void OnImageLoaded(queue::LoadImageEvent &event);
   void OnImageRescaled(queue::RescaledEvent &event);
+  void OnThreadCompleted(wxThreadEvent &event);
 };
 
 }  // namespace bitmap

@@ -19,8 +19,6 @@
 #define FMR_BITMAP_LOADER
 
 #include <fmr/bitmap/bmp.h>
-#include <fmr/queue/find_handler.h>
-#include <fmr/queue/load_image.h>
 #include <wx/event.h>
 
 #include <memory>
@@ -28,9 +26,9 @@
 #include <string>
 #include <unordered_map>
 
-#include "fmr/thread/find_handler_controller.h"
-#include "fmr/thread/load_image_controller.h"
-#include "fmr/thread/rescale_controller.h"
+#include "fmr/handler/struct_stream.h"
+#include "fmr/queue/factory.h"
+#include "fmr/thread/controller_factory.h"
 
 namespace fmr {
 
@@ -50,16 +48,14 @@ class Loader : public wxEvtHandler {
   wxEvtHandler *parent_ = nullptr;
   int event_id_;
 
-  thread::FindHandlerController find_controller_;
-  thread::LoadImageController load_controller_;
+  std::unique_ptr<thread::FindHandlerController> find_controller_;
+  std::unique_ptr<thread::LoadImageController> load_controller_;
 
  public:
   Loader(wxEvtHandler *parent, int id);
-  virtual ~Loader() { Clear(); }
+  virtual ~Loader();
   virtual bool Open(const std::string &name);
-  virtual void PushFind(const SStream *stream) {
-    GetFindController()->Push(stream);
-  };
+  virtual void PushFind(const SStream *stream);
 
   void SendImageToParent(const SStream *stream, const SBitmap &bitmap);
 
@@ -72,19 +68,13 @@ class Loader : public wxEvtHandler {
 
   wxEvtHandler *GetParent() { return parent_; }
   bool Run();
-  void Clear();
 
-  void SetFindFlags(const queue::FindHandlerFlags &flags) {
-    GetFindController()->SetFlags(flags);
-  };
+  virtual void ClearThread();
+  virtual void Clear();
 
-  thread::FindHandlerController *GetFindController() {
-    return &find_controller_;
-  }
+  thread::FindHandlerController *GetFindController();
 
-  thread::LoadImageController *GetLoadImageController() {
-    return &load_controller_;
-  }
+  thread::LoadImageController *GetLoadImageController();
 
  private:
   void OnStreamFound(queue::FoundEvent &event);

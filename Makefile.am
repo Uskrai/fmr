@@ -19,7 +19,9 @@ lib_handler_la_SOURCES = $(handler)/default_handler.cpp \
 						 $(handler)/wxarchive_handler.cpp \
 						 $(handler)/handler_factory.cpp \
 						 $(handler)/struct_stream.cpp \
-						 $(handler)/std_handler.cpp
+						 $(handler)/std_handler.cpp \
+						 $(handler)/stream_util.cpp
+
 lib_handler_la_LIBADD = lib_path.la \
 						lib_compare.la
 
@@ -41,7 +43,7 @@ readerdir = @abs_builddir@/reader
 reader_LTLIBRARIES =  lib_reader.la
 lib_reader_la_SOURCES = $(reader)/controller.cpp \
 												$(reader)/scroll_controller.cpp \
-												$(reader)/decorator.cpp \
+												$(reader)/decorator_ctrl.cpp \
 												$(reader)/page_indicator.cpp
 
 lib_reader_la_LIBADD = lib_bitmap.la \
@@ -82,8 +84,9 @@ thread = src/thread
 threaddir = @abs_builddir@/thread
 thread_LTLIBRARIES = lib_thread.la
 lib_thread_la_SOURCES = $(thread)/thread.cpp \
-												$(thread)/load_image_controller.cpp \
-												$(thread)/find_handler_controller.cpp
+												$(thread)/find_handler_controller.cpp \
+												$(thread)/controller_factory.cpp
+
 lib_thread_la_LIBADD = lib_queue.la
 
 queue = src/queue
@@ -91,7 +94,9 @@ queuedir = @abs_builddir@/queue
 queue_LTLIBRARIES = lib_queue.la
 lib_queue_la_SOURCES = $(queue)/load_image.cpp \
 											 $(queue)/find_handler.cpp \
-											 $(queue)/rescale.cpp 
+											 $(queue)/rescale.cpp  \
+											 $(queue)/factory.cpp
+lib_queue_la_LIBADD = lib_handler.la
 
 
 fmr = src/main

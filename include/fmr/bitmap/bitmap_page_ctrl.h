@@ -25,7 +25,7 @@ namespace fmr {
 
 namespace bitmap {
 
-std::vector<SBitmap *> BitmapPageToBitmapPtr(BitmapPage *page);
+wxDECLARE_EVENT(kEventBitmapPageNotFound, BitmapVectorEvent);
 
 class BitmapPageCtrl : public BitmapCtrl {
   std::vector<std::unique_ptr<BitmapPage>> vec_page_;
@@ -33,8 +33,8 @@ class BitmapPageCtrl : public BitmapCtrl {
   size_t curr_page_ = -1;
 
  public:
-  BitmapPageCtrl(PositionCtrl *pos_ctrl, Rescaler *rescaler,
-                 size_t bitmap_per_page = -1);
+  BitmapPageCtrl(ScrolledImageWindow *window, PositionCtrl *pos_ctrl,
+                 Rescaler *rescaler, size_t bitmap_per_page = -1);
 
   void SetBitmapPerPage(size_t size) { bitmap_per_page_ = size; };
 
@@ -46,6 +46,11 @@ class BitmapPageCtrl : public BitmapCtrl {
 
   using BitmapCtrl::GetSize;
   wxSize GetSize(BitmapPage *page);
+
+  std::unique_ptr<BitmapPage> &GetPage(size_t idx) { return vec_page_.at(idx); }
+  const std::unique_ptr<BitmapPage> &GetPage(size_t idx) const {
+    return vec_page_.at(idx);
+  }
 
   std::vector<std::unique_ptr<BitmapPage>> &GetAllPage() { return vec_page_; }
   const std::vector<std::unique_ptr<BitmapPage>> &GetAllPage() const {
@@ -62,10 +67,15 @@ class BitmapPageCtrl : public BitmapCtrl {
   void EnlargePage(size_t size);
   void EnlargeBitmapPage(size_t page_pos, size_t size);
 
+  bool GoToPage(size_t idx, wxDirection direction = wxDOWN);
+  bool ChangePage(int step);
+
   void Clear();
 
  private:
   void OnImageLoaded(queue::LoadImageEvent &event);
+
+  void OnBitmapChanging(BitmapVectorEvent &event);
 };
 
 }  // namespace bitmap

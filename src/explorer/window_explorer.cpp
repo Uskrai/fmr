@@ -19,6 +19,11 @@
 #include <wx/filename.h>
 #include <wx/stopwatch.h>
 
+#include "fmr/handler/handler_factory.h"
+#include "fmr/thread/find_handler_controller.h"
+#include "fmr/thread/load_image_controller.h"
+#include "fmr/thread/rescale_controller.h"
+
 namespace fmr {
 
 wxDEFINE_EVENT(EVT_OPEN_FILE, StreamEvent);
@@ -30,15 +35,15 @@ Window::Window(wxWindow *parent, const wxWindowID &id, const wxPoint &pos,
     : FlexGridWindow(parent, id, pos, size, style, name) {
   CreateGrid(0, 0);
   BindEvent();
-  loader_.SetFindFlags(queue::kFindHandlerOnlyFirstItem |
-                       queue::kFindHandlerRecursive);
+  loader_.GetFindController()->GetQueue()->SetFlags(
+      queue::kFindHandlerOnlyFirstItem | queue::kFindHandlerRecursive);
   rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleFitAll);
-  loader_.GetRescaleController()->SetRescaler(rescaler_.get());
+  loader_.GetRescaleController()->GetQueue()->SetRescaler(rescaler_.get());
 }
 
 void Window::BindEvent() {
-  Bind(EVT_COMMAND_THREAD_UPDATE, &Window::OnThreadUpdate, this);
-  Bind(EVT_COMMAND_THREAD_COMPLETED, &Window::OnThreadUpdate, this);
+  Bind(kEventThreadUpdate, &Window::OnThreadUpdate, this);
+  Bind(kEventThreadCompleted, &Window::OnThreadUpdate, this);
   Bind(wxEVT_KEY_DOWN, &Window::OnKeyDown, this);
   Bind(queue::kEventImageLoaded, &Window::OnImageLoaded, this, kLoaderId);
 }
@@ -93,7 +98,6 @@ bool Window::Open(std::shared_ptr<AbstractOpenableHandler> handler) {
   SetCellBorderWidth(10);
   SetCellHighlightPenWidth(3);
 
-  loader_.Run();
   Refresh();
   handler_ = handler;
   Layout();
@@ -235,22 +239,7 @@ void Window::Select(std::string name) {
   }
 }
 
-// void Window::OnGridSelect( wxGridEvent &event )
-// {
-//     wxGridCellCoords eve( event.GetRow(), event.GetCol() );
-
-//     bool is_change = false;
-//     for ( const auto &it : list_cell_pos_ )
-//         if ( event.GetRow() == it.GetRow() && event.GetCol() == it.GetCol())
-//             is_change = true;
-
-//     if ( is_change )
-//         selected_cell_.Set( event.GetRow(), event.GetCol() );
-//     else
-//         event.Veto();
-
-//     Refresh();
-// }
+Window::~Window() { Clear(); }
 
 };  // namespace explorer
 
