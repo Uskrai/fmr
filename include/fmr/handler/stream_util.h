@@ -32,6 +32,8 @@ std::unique_ptr<AbstractHandler> MakeParentHandler(const SStream &stream);
 std::unique_ptr<AbstractOpenableHandler> MakeParentOpenableHandler(
     const SStream &stream);
 
+std::string GetPath(const SStream &stream);
+
 bool LoadStream(SStream &stream);
 
 }  // namespace stream_util
