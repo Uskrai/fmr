@@ -78,22 +78,17 @@ void SStream::Open(const std::string &name) {
   Open();
 
   if (std::filesystem::exists(name)) {
-    std::streampos fsize = 0;
-    std::ifstream file(name.c_str(), std::ios::binary);
-    fsize = file.tellg();
-    file.seekg(0, std::ios::end);
-    fsize = file.tellg() - fsize;
-    file.seekg(0, std::ios::beg);
+    std::uintmax_t fsize = 0;
 
     try {
       using namespace std::filesystem;
-      auto temp = file_size(path(name));
+      fsize = file_size(path(name));
     } catch (std::filesystem::filesystem_error &err) {
       printf("%s\n", err.what());
       return;
     }
 
-    file = std::ifstream(name.c_str(), std::ios::binary);
+    auto file = std::ifstream(name.c_str(), std::ios::binary);
 
     auto buffer = std::make_unique<char[]>(fsize);
     file.read(buffer.get(), fsize);
