@@ -62,12 +62,15 @@ class Rescaler {
   }
 
   void DoRescale(SBitmap &bitmap) {
-    double scale_x = 1, scale_y = 1;
+    double scale_x, scale_y;
+    bitmap.GetScale(scale_x, scale_y);
     GetScale(bitmap, scale_x, scale_y);
     bitmap.SetScale(scale_x, scale_y);
   };
 
   void DoRescale(wxImage &image) {
+    if (!image.IsOk()) return;
+
     double x = 1, y = 1;
     GetScale(image, x, y);
     wxSize size = image.GetSize();
@@ -100,11 +103,11 @@ class Rescaler {
   }
 
   void GetScale(const SBitmap &bitmap, double &x, double &y) {
-    GetScale(bitmap.GetImage().GetSize(), x, y);
+    if (bitmap.IsOk()) GetScale(bitmap.GetImage().GetSize(), x, y);
   }
 
   void GetScale(const wxImage &image, double &x, double &y) {
-    GetScale(image.GetSize(), x, y);
+    if (image.IsOk()) GetScale(image.GetSize(), x, y);
   }
 
   [[deprecated("Use SetFitSize instead")]] void SetMaximumSize(

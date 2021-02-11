@@ -38,9 +38,16 @@ enum FindHandlerFlags {
   kFindHandlerRecursive = 0x01,
   kFindHandlerCheckHandler = 0x02,
   kFindHandlerOnlyFirstItem = 0x08,
-  kFindHandlerDontRecursiveNonOpenable = 0x10
+  kFindHandlerDontRecursiveNonOpenable = 0x10,
+  kFindHandlerCheckFilenameIfOpenable = 0x20
 };
 DEFINE_BITMASK_TYPE(FindHandlerFlags);
+
+enum FindHandlerStatus {
+  kFindHandlerCanRead,
+  kFindHandlerCannotRead,
+  kFindHandlerNeedStream
+};
 
 class FoundEvent : public wxCommandEvent {
  protected:
@@ -79,9 +86,10 @@ class FindHandler : public Base<const SStream *> {
  private:
   FindHandlerFlags flags_;
 
-  bool (*check_func_)(const SStream &stream);  // function to check if the
+  bool (*check_func_)(const SStream &stream) = nullptr;  // function to check if the
                                                // thread should send FoundEvent
                                                // FindHandlerFlags flags_;
+  FindHandlerStatus (*filename_checker_)(const std::string &name) = nullptr; // function to check filename
 
  public:
   FindHandler(wxEvtHandler *parent, int id) : Base(parent, id){};
@@ -92,6 +100,10 @@ class FindHandler : public Base<const SStream *> {
 
   void SetChecker(bool (*check_func)(const SStream &stream)) {
     check_func_ = check_func;
+  }
+
+  void SetFilenameChecker(FindHandlerStatus (*check_func)(const std::string &name) ) {
+    filename_checker_ = check_func;
   }
 
   FindReturn SendIfFound(FoundEvent *event);

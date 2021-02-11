@@ -113,6 +113,8 @@ void ImageWindow::PrepareRect(const wxRect &rect) {
 }
 
 void ImageWindow::OnPaint(wxPaintEvent &event) {
+  if (!bitmap_.IsOk()) return;
+
   wxPaintDC dc(this);
   wxRect rect(wxPoint(0, 0), GetSize());
 
