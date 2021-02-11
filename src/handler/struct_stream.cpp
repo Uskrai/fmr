@@ -23,6 +23,7 @@
 #include <wx/wfstream.h>
 #include <wx/wxcrtvararg.h>
 
+#include <filesystem>
 #include <fstream>
 
 namespace fmr {
@@ -83,6 +84,14 @@ void SStream::Open(const std::string &name) {
     file.seekg(0, std::ios::end);
     fsize = file.tellg() - fsize;
     file.seekg(0, std::ios::beg);
+
+    try {
+      using namespace std::filesystem;
+      auto temp = file_size(path(name));
+    } catch (std::filesystem::filesystem_error &err) {
+      printf("%s\n", err.what());
+      return;
+    }
 
     file = std::ifstream(name.c_str(), std::ios::binary);
 
