@@ -46,7 +46,8 @@ enum StreamActionType {
 DEFINE_BITMASK_TYPE(StreamActionType)
 
 struct SStream : public Compare::Sortable {
-  SStream(void *data = NULL, size_t length = 0);
+  SStream();
+  SStream(void *data, size_t length);
   SStream(const wxString &name) = delete;
   SStream(const char *name) { Open(std::string(name)); }
   SStream(const std::string &name) { Open(name); }

@@ -30,13 +30,9 @@ namespace fmr {
 
 char DUMMY_BUFFER;
 
-void SStream::Open(void *data, size_t length) {
-  m_stream = std::make_shared<wxMemoryOutputStream>(data, length);
-}
+SStream::SStream() { Open(); }
 
 SStream::SStream(void *data, size_t length) { Open(data, length); }
-
-// SStream::SStream(const wxString &name) : SStream() { Open(name); }
 
 SStream::SStream(wxInputStream *stream) : SStream() { Open(stream); }
 
@@ -73,6 +69,9 @@ SStream &SStream::operator=(const SStream &copy) {
 // m_stream->Write(stream);
 // }
 // }
+void SStream::Open(void *data, size_t length) {
+  m_stream = std::make_shared<wxMemoryOutputStream>(data, length);
+}
 
 void SStream::Open(const std::string &name) {
   Open();
