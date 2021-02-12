@@ -43,10 +43,10 @@ enum FindHandlerFlags {
 };
 DEFINE_BITMASK_TYPE(FindHandlerFlags);
 
-enum FindHandlerStatus {
-  kFindHandlerCanRead,
-  kFindHandlerCannotRead,
-  kFindHandlerNeedStream
+enum FindHandlerCheckStatus {
+  kCheckStatusCanRead,
+  kCheckStatusCannotRead,
+  kCheckStatusUseStream
 };
 
 class FoundEvent : public wxCommandEvent {
@@ -80,16 +80,19 @@ wxDECLARE_EVENT(kEventStreamNotFound, FoundEvent);
 typedef void (wxEvtHandler::*FoundEventFunction)(FoundEvent &);
 #define FoundEventHandler(func) wxEVENT_HANDLER_CAST(FoundEventFunction, func);
 
-enum FindReturn { kFindBeingStopped = 0, kFindSuccess, kFindNotFound };
+enum FindReturn { kFindSuccess = 0, kFindBeingStopped = 1, kFindNotFound = 2 };
+
+class FindHandlerChecker {
+ public:
+  virtual FindHandlerCheckStatus Check(const std::string &filename) const = 0;
+  virtual FindHandlerCheckStatus Check(const SStream &stream) const = 0;
+};
 
 class FindHandler : public Base<const SStream *> {
  private:
   FindHandlerFlags flags_;
 
-  bool (*check_func_)(const SStream &stream) = nullptr;  // function to check if the
-                                               // thread should send FoundEvent
-                                               // FindHandlerFlags flags_;
-  FindHandlerStatus (*filename_checker_)(const std::string &name) = nullptr; // function to check filename
+  FindHandlerChecker *checker_ = nullptr;
 
  public:
   FindHandler(wxEvtHandler *parent, int id) : Base(parent, id){};
@@ -98,16 +101,13 @@ class FindHandler : public Base<const SStream *> {
   FindReturn Find(AbstractOpenableHandler *handler, FoundEvent *event);
   FindReturn Find(AbstractHandler *handler, FoundEvent *event);
 
-  void SetChecker(bool (*check_func)(const SStream &stream)) {
-    check_func_ = check_func;
-  }
+  void SetChecker(FindHandlerChecker *checker) { checker_ = checker; }
+  FindHandlerChecker *GetChecker() { return checker_; }
 
-  void SetFilenameChecker(FindHandlerStatus (*check_func)(const std::string &name) ) {
-    filename_checker_ = check_func;
-  }
-
-  FindReturn SendIfFound(FoundEvent *event);
-  bool CheckStream(const SStream &stream) { return check_func_(stream); }
+  void SendFoundEvent(FoundEvent *event);
+  FindReturn CheckAndSendIfFound(AbstractOpenableHandler *handler,
+                                 FoundEvent *event);
+  FindReturn CheckAndSendIfFound(AbstractHandler *handler, FoundEvent *event);
 
   /**
    * @brief: flags for the thread

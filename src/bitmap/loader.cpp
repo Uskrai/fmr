@@ -18,6 +18,7 @@
 #include <fmr/bitmap/image_util.h>
 #include <fmr/bitmap/loader.h>
 
+#include "fmr/bitmap/image_checker.h"
 #include "fmr/handler/abstract_handler.h"
 #include "fmr/thread/find_handler_controller.h"
 #include "fmr/thread/load_image_controller.h"
@@ -26,7 +27,7 @@ namespace fmr {
 
 namespace bitmap {
 
-Loader::Loader(wxEvtHandler *parent, int id) {
+Loader::Loader(wxEvtHandler* parent, int id) {
   parent_ = parent;
 
   find_controller_ = thread::controller_factory::NewFindHandler(
@@ -35,8 +36,10 @@ Loader::Loader(wxEvtHandler *parent, int id) {
   load_controller_ =
       thread::controller_factory::NewLoadImage(this, kLoadImageThreadID);
 
+  checker_ = std::make_unique<ImageChecker>();
+
   SetEventId(id);
-  GetFindController()->GetQueue()->SetChecker(&image_util::CanRead);
+  GetFindController()->GetQueue()->SetChecker(checker_.get());
 
   GetFindController()->SetAutoRun(true);
   GetLoadImageController()->SetAutoRun(true);
@@ -45,7 +48,7 @@ Loader::Loader(wxEvtHandler *parent, int id) {
   Bind(kEventThreadCompleted, &Loader::OnThreadCompleted, this);
 }
 
-void Loader::OnThreadCompleted(wxThreadEvent &event) { event.Skip(); }
+void Loader::OnThreadCompleted(wxThreadEvent& event) { event.Skip(); }
 
 void Loader::SetControllerId(int find_controller_id,
                              int load_image_controller_id) {
@@ -67,27 +70,27 @@ void Loader::SetControllerId(int find_controller_id,
                                  GetLoadImageController()->GetEventId());
 }
 
-bool Loader::Open(const std::string &path) {
+bool Loader::Open(const std::string& path) {
   return GetFindController()->Open(path);
 }
 
-void Loader::PushFind(const SStream *stream) {
+void Loader::PushFind(const SStream* stream) {
   GetFindController()->Push(stream);
 }
 
-thread::FindHandlerController *Loader::GetFindController() {
+thread::FindHandlerController* Loader::GetFindController() {
   return find_controller_.get();
 }
 
-thread::LoadImageController *Loader::GetLoadImageController() {
+thread::LoadImageController* Loader::GetLoadImageController() {
   return load_controller_.get();
 }
 
-const SStream *Loader::GetSourceStream(const SStream *found_stream) {
+const SStream* Loader::GetSourceStream(const SStream* found_stream) {
   return GetFindController()->GetSourceStream(found_stream);
 }
 
-void Loader::OnStreamFound(queue::FoundEvent &event) {
+void Loader::OnStreamFound(queue::FoundEvent& event) {
   auto item = event.GetSourceStream();
 
   if (GetFindController()->IsInQueue(item)) {
@@ -98,7 +101,7 @@ void Loader::OnStreamFound(queue::FoundEvent &event) {
   }
 }
 
-void Loader::SendImageToParent(const SStream *stream, const SBitmap &bitmap) {
+void Loader::SendImageToParent(const SStream* stream, const SBitmap& bitmap) {
   auto send_event = std::make_unique<queue::LoadImageEvent>(
       queue::kEventImageLoaded, GetEventId());
 
@@ -107,7 +110,7 @@ void Loader::SendImageToParent(const SStream *stream, const SBitmap &bitmap) {
   wxQueueEvent(GetParent(), send_event.release());
 }
 
-void Loader::OnImageLoaded(queue::LoadImageEvent &event) {
+void Loader::OnImageLoaded(queue::LoadImageEvent& event) {
   auto source_stream = GetSourceStream(event.GetStream());
 
   if (source_stream) SendImageToParent(event.GetStream(), event.GetBitmap());

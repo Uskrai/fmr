@@ -40,6 +40,8 @@ enum ThreadLoaderID {
   kRescaleImageThreadID
 };
 
+class ImageChecker;
+
 class Loader : public wxEvtHandler {
  private:
   std::queue<wxImage> queue_in_rescale_;
@@ -48,6 +50,7 @@ class Loader : public wxEvtHandler {
   wxEvtHandler *parent_ = nullptr;
   int event_id_;
 
+  std::unique_ptr<ImageChecker> checker_;
   std::unique_ptr<thread::FindHandlerController> find_controller_;
   std::unique_ptr<thread::LoadImageController> load_controller_;
 

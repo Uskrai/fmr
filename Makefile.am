@@ -36,7 +36,8 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/position_ctrl.cpp \
 						$(bitmap)/bitmap_page_ctrl.cpp \
 						$(bitmap)/page_loader.cpp \
-						$(bitmap)/rescale_loader.cpp
+						$(bitmap)/rescale_loader.cpp \
+						$(bitmap)/image_checker.cpp
 
 reader = src/reader
 readerdir = @abs_builddir@/reader
@@ -47,9 +48,9 @@ lib_reader_la_SOURCES = $(reader)/controller.cpp \
 												$(reader)/page_indicator.cpp
 
 lib_reader_la_LIBADD = lib_bitmap.la \
-					   lib_handler.la \
-					   lib_window.la \
-					   lib_thread.la
+						 lib_handler.la \
+						 lib_window.la \
+						 lib_thread.la
 
 explorer = src/explorer
 explorerdir = @abs_builddir@/explorer
@@ -65,10 +66,10 @@ gui = src/gui
 guidir = @abs_builddir@/gui
 gui_LTLIBRARIES = lib_frame.la
 lib_frame_la_SOURCES = $(gui)/frame.cpp \
-					   $(gui)/panel.cpp
+						 $(gui)/panel.cpp
 
 lib_frame_la_LIBADD = lib_explorer.la \
-					  lib_reader.la
+						lib_reader.la
 
 
 window = src/window

@@ -23,7 +23,10 @@
 #include <wx/image.h>
 #include <wx/log.h>
 
+#include <iostream>
 #include <memory>
+
+#include "fmr/handler/stream_util.h"
 
 namespace fmr {
 
@@ -36,7 +39,7 @@ FoundEvent::FoundEvent(const FoundEvent &event) : wxCommandEvent(event) {
   source_stream_ = event.source_stream_;
 
   if (event.found_stream_)
-    found_stream_ = std::unique_ptr<SStream>(new SStream(*event.found_stream_));
+    found_stream_ = std::make_unique<SStream>(*event.found_stream_);
 }
 
 bool FindHandler::ProcessTask(value_type &item) {
@@ -68,13 +71,13 @@ FindReturn FindHandler::Find(FoundEvent *event) {
   std::string handler_path = search_stream->GetHandlerPath();
 
   if (HandlerFactory::IsOpenable(handler_path)) {
-    auto handler = HandlerFactory::NewOpenableHandler(handler_path);
+    auto handler = stream_util::MakeParentOpenableHandler(*search_stream);
 
     TEST_RETURN();
 
     return Find(handler.get(), event);
   } else {
-    auto handler = HandlerFactory::NewHandler(handler_path);
+    auto handler = stream_util::MakeParentHandler(*search_stream);
 
     if (handler) {
       return Find(handler.get(), event);
@@ -88,45 +91,41 @@ FindReturn FindHandler::Find(AbstractOpenableHandler *handler,
   auto search_stream = event->GetFoundStream();
   std::string path = handler->GetItemPath(*search_stream);
 
-  std::unique_ptr<AbstractOpenableHandler> stream_handler(
-      HandlerFactory::NewOpenableHandler(path));
-
-  TEST_RETURN();
+  FindReturn ret_val = kFindNotFound;
 
   // Get Stream from handler if openable or is check handler
-  if (HandlerFactory::IsOpenable(path) || Is(kFindHandlerCheckHandler)) {
-    handler->GetStream(*search_stream);
-  }
+  if (HandlerFactory::IsOpenable(path)) {
+    if (CheckAndSendIfFound(handler, event) == kFindSuccess)
+      ret_val = kFindSuccess;
 
-  TEST_RETURN();
+    if (ret_val == kFindSuccess && Is(kFindHandlerOnlyFirstItem))
+      return ret_val;
 
-  // if not openable
-  if (!HandlerFactory::IsOpenable(path)) {
+    if (!Is(kFindHandlerRecursive)) return ret_val;
+
+    std::unique_ptr<AbstractOpenableHandler> stream_handler(
+        HandlerFactory::NewOpenableHandler(path));
+    if (path != stream_handler->GetName()) return ret_val;
+
+    auto temp = TraverseHandler(stream_handler.get(), event);
+
+    if (temp < ret_val) ret_val = temp;
+    return ret_val;
+  } else if (!HandlerFactory::IsOpenable(path)) {
     std::unique_ptr<AbstractHandler> non_openable_handler(
         HandlerFactory::NewHandler(path));
 
     TEST_RETURN();
     // traverse non-openable handler and if item found and with flags Only first
     // item, return
-    if (TraverseHandler(non_openable_handler.get(), event) == kFindSuccess &&
-        Is(kFindHandlerOnlyFirstItem)) {
+    if (TraverseHandler(non_openable_handler.get(), event) == kFindSuccess) {
       return kFindSuccess;
     } else if (!Is(kFindHandlerCheckHandler)) {
       return kFindNotFound;
     }
   }
 
-  TEST_RETURN();
-  if (SendIfFound(event) == kFindSuccess) return kFindSuccess;
-
-  if (path != stream_handler->GetName()) return kFindNotFound;
-
-  TEST_RETURN();
-
-  if (Is(kFindHandlerRecursive))
-    return TraverseHandler(stream_handler.get(), event);
-
-  return kFindNotFound;
+  return ret_val;
 }
 
 void FindHandler::StreamFound(FoundEvent *event) {
@@ -160,42 +159,46 @@ FindReturn FindHandler::TraverseHandler(T *handler, FoundEvent *event) {
 }
 
 FindReturn FindHandler::Find(AbstractHandler *handler, FoundEvent *event) {
-  auto search_stream = event->GetFoundStream();
-
-  TEST_RETURN();
-  handler->GetStream(*search_stream);
-
-  TEST_RETURN();
-  return SendIfFound(event);
+  return CheckAndSendIfFound(handler, event);
 };
 
-FindReturn FindHandler::SendIfFound(FoundEvent *event) {
-  TEST_RETURN();
-
-  auto search_stream = event->GetFoundStream();
-
-  TEST_RETURN();
-
-  if (!CheckStream(*search_stream)) {
-    wxLogMessage("Can't Read %s/%s", search_stream->GetHandlerPath(),
-                 search_stream->GetName());
-    return kFindNotFound;
-  }
-
-  TEST_RETURN();
-
+void FindHandler::SendFoundEvent(FoundEvent *event) {
   auto send_event =
-      std::make_unique<FoundEvent>(kEventStreamFound, GetEventId());
-
+      std::make_unique<FoundEvent>(kEventStreamFound, event->GetId());
   send_event->SetSourceStream(event->GetSourceStream());
   send_event->SetFoundStream(event->GetFoundStreamOwnerShip());
 
-  TEST_RETURN();
+  SendEventToParent(send_event.release());
+}
 
-  wxLogMessage("Item found in handler %s/%s\n", search_stream->GetHandlerPath(),
-               search_stream->GetName());
-  StreamFound(send_event.release());
-  return kFindSuccess;
+FindReturn FindHandler::CheckAndSendIfFound(AbstractOpenableHandler *handler,
+                                            FoundEvent *event) {
+  TEST_RETURN();
+  auto status =
+      GetChecker()->Check(stream_util::GetPath(*event->GetFoundStream()));
+
+  if (status == kCheckStatusUseStream)
+    return CheckAndSendIfFound(static_cast<AbstractHandler *>(handler), event);
+
+  if (status == kCheckStatusCanRead) {
+    SendFoundEvent(event);
+    return kFindSuccess;
+  }
+  return kFindNotFound;
+}
+
+FindReturn FindHandler::CheckAndSendIfFound(AbstractHandler *handler,
+                                            FoundEvent *event) {
+  TEST_RETURN();
+  handler->GetStream(*event->GetFoundStream());
+  TEST_RETURN();
+  auto status = GetChecker()->Check(*event->GetFoundStream());
+
+  if (status == kCheckStatusCanRead) {
+    SendFoundEvent(event);
+    return kFindSuccess;
+  }
+  return kFindNotFound;
 }
 
 };  // namespace queue
