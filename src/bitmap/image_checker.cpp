@@ -18,25 +18,28 @@
 #include "fmr/bitmap/image_checker.h"
 
 #include "fmr/bitmap/image_util.h"
+#include "fmr/handler/stream_util.h"
 #include "fmr/queue/find_handler.h"
 
 namespace fmr {
 
 namespace bitmap {
 
-queue::FindHandlerCheckStatus ImageChecker::Check(const SStream &stream) const {
-  if (image_util::CanRead(stream)) {
-    return queue::kCheckStatusCanRead;
-  }
-  return queue::kCheckStatusCannotRead;
+queue::FindReturn ImageChecker::Check(queue::FindHandler &parent,
+                                      AbstractHandler &handler,
+                                      SStream &stream) {
+  handler.GetStream(stream);
+  if (image_util::CanRead(stream)) return queue::kFindItemFound;
+  return queue::kFindNotFound;
 }
 
-queue::FindHandlerCheckStatus ImageChecker::Check(
-    const std::string &filename) const {
-  if (image_util::CanRead(filename)) {
-    return queue::kCheckStatusCanRead;
-  }
-  return queue::kCheckStatusCannotRead;
+queue::FindReturn ImageChecker::Check(queue::FindHandler &parent,
+                                      AbstractOpenableHandler &handler,
+                                      SStream &stream) {
+  if (image_util::CanRead(stream_util::GetPath(stream)))
+    return queue::kFindItemFound;
+
+  return queue::kFindNotFound;
 }
 
 }  // namespace bitmap

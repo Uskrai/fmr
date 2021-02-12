@@ -95,10 +95,10 @@ FindReturn FindHandler::Find(AbstractOpenableHandler *handler,
 
   // Get Stream from handler if openable or is check handler
   if (HandlerFactory::IsOpenable(path)) {
-    if (CheckAndSendIfFound(handler, event) == kFindSuccess)
-      ret_val = kFindSuccess;
+    if (CheckAndSendIfFound(handler, event) == kFindItemFound)
+      ret_val = kFindItemFound;
 
-    if (ret_val == kFindSuccess && Is(kFindHandlerOnlyFirstItem))
+    if (ret_val == kFindItemFound && Is(kFindHandlerOnlyFirstItem))
       return ret_val;
 
     if (!Is(kFindHandlerRecursive)) return ret_val;
@@ -118,8 +118,8 @@ FindReturn FindHandler::Find(AbstractOpenableHandler *handler,
     TEST_RETURN();
     // traverse non-openable handler and if item found and with flags Only first
     // item, return
-    if (TraverseHandler(non_openable_handler.get(), event) == kFindSuccess) {
-      return kFindSuccess;
+    if (TraverseHandler(non_openable_handler.get(), event) == kFindItemFound) {
+      return kFindItemFound;
     } else if (!Is(kFindHandlerCheckHandler)) {
       return kFindNotFound;
     }
@@ -147,12 +147,12 @@ FindReturn FindHandler::TraverseHandler(T *handler, FoundEvent *event) {
                   std::make_unique<SStream>(it));
 
     TEST_RETURN();
-    if (Find(handler, child_event.get()) == kFindSuccess) {
+    if (Find(handler, child_event.get()) == kFindItemFound) {
       if (Is(kFindHandlerOnlyFirstItem))
         // return after once if only find first item
-        return kFindSuccess;
+        return kFindItemFound;
       else
-        is_found = kFindSuccess;
+        is_found = kFindItemFound;
     }
   }
   return is_found;
@@ -171,34 +171,14 @@ void FindHandler::SendFoundEvent(FoundEvent *event) {
   SendEventToParent(send_event.release());
 }
 
-FindReturn FindHandler::CheckAndSendIfFound(AbstractOpenableHandler *handler,
-                                            FoundEvent *event) {
+template <typename T>
+FindReturn FindHandler::CheckAndSendIfFound(T *handler, FoundEvent *event) {
   TEST_RETURN();
-  auto status =
-      GetChecker()->Check(stream_util::GetPath(*event->GetFoundStream()));
 
-  if (status == kCheckStatusUseStream)
-    return CheckAndSendIfFound(static_cast<AbstractHandler *>(handler), event);
+  auto status = GetChecker()->Check(*this, *handler, *event->GetFoundStream());
+  if (status == kFindItemFound) SendFoundEvent(event);
 
-  if (status == kCheckStatusCanRead) {
-    SendFoundEvent(event);
-    return kFindSuccess;
-  }
-  return kFindNotFound;
-}
-
-FindReturn FindHandler::CheckAndSendIfFound(AbstractHandler *handler,
-                                            FoundEvent *event) {
-  TEST_RETURN();
-  handler->GetStream(*event->GetFoundStream());
-  TEST_RETURN();
-  auto status = GetChecker()->Check(*event->GetFoundStream());
-
-  if (status == kCheckStatusCanRead) {
-    SendFoundEvent(event);
-    return kFindSuccess;
-  }
-  return kFindNotFound;
+  return status;
 }
 
 };  // namespace queue

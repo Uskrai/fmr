@@ -42,13 +42,6 @@ enum FindHandlerFlags {
   kFindHandlerCheckFilenameIfOpenable = 0x20
 };
 DEFINE_BITMASK_TYPE(FindHandlerFlags);
-
-enum FindHandlerCheckStatus {
-  kCheckStatusCanRead,
-  kCheckStatusCannotRead,
-  kCheckStatusUseStream
-};
-
 class FoundEvent : public wxCommandEvent {
  protected:
   const SStream *source_stream_ = nullptr;
@@ -80,12 +73,21 @@ wxDECLARE_EVENT(kEventStreamNotFound, FoundEvent);
 typedef void (wxEvtHandler::*FoundEventFunction)(FoundEvent &);
 #define FoundEventHandler(func) wxEVENT_HANDLER_CAST(FoundEventFunction, func);
 
-enum FindReturn { kFindSuccess = 0, kFindBeingStopped = 1, kFindNotFound = 2 };
+enum FindReturn {
+  kFindItemFound = 0,
+  kFindBeingStopped = 1,
+  kFindNotFound = 2
+};
 
+class FindHandler;
 class FindHandlerChecker {
  public:
-  virtual FindHandlerCheckStatus Check(const std::string &filename) const = 0;
-  virtual FindHandlerCheckStatus Check(const SStream &stream) const = 0;
+  virtual FindReturn Check(FindHandler &parent,
+                           AbstractOpenableHandler &handler, SStream &stream) {
+    return Check(parent, static_cast<AbstractHandler &>(handler), stream);
+  };
+  virtual FindReturn Check(FindHandler &parent, AbstractHandler &handler,
+                           SStream &stream) = 0;
 };
 
 class FindHandler : public Base<const SStream *> {
@@ -105,9 +107,9 @@ class FindHandler : public Base<const SStream *> {
   FindHandlerChecker *GetChecker() { return checker_; }
 
   void SendFoundEvent(FoundEvent *event);
-  FindReturn CheckAndSendIfFound(AbstractOpenableHandler *handler,
-                                 FoundEvent *event);
-  FindReturn CheckAndSendIfFound(AbstractHandler *handler, FoundEvent *event);
+
+  // FindReturn CheckAndSendIfFound(AbstractHandler *handler, FoundEvent
+  // *event);
 
   /**
    * @brief: flags for the thread
@@ -133,6 +135,9 @@ class FindHandler : public Base<const SStream *> {
   bool Is(FindHandlerFlags flags) { return flags_ & flags; }
 
   void StreamFound(FoundEvent *stream);
+  template <typename T>
+  FindReturn CheckAndSendIfFound(T *handler, FoundEvent *event);
+
   template <typename T>
   FindReturn TraverseHandler(T *handler, FoundEvent *stream);
 };
