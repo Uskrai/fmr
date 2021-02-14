@@ -19,6 +19,9 @@
 #define FMR_BITMAP_LOADER
 
 #include <fmr/bitmap/bmp.h>
+#include <fmr/handler/struct_stream.h>
+#include <fmr/queue/factory.h>
+#include <fmr/thread/controller_factory.h>
 #include <wx/event.h>
 
 #include <memory>
@@ -26,13 +29,25 @@
 #include <string>
 #include <unordered_map>
 
-#include "fmr/handler/struct_stream.h"
-#include "fmr/queue/factory.h"
-#include "fmr/thread/controller_factory.h"
-
 namespace fmr {
 
 namespace bitmap {
+
+typedef queue::ItemEvent<queue::FindItem> ImageFindEvent;
+typedef queue::ItemEvent<queue::LoadItem> ImageLoadEvent;
+
+/**
+ * @brief: Process Item from queue::FindHandler
+ */
+wxDECLARE_EVENT(kEventImageFind, ImageFindEvent);
+/**
+ * @brief: Process Item from queue::LoadImage
+ */
+wxDECLARE_EVENT(kEventImageLoad, ImageLoadEvent);
+/**
+ * @brief: Send Item from queue::LoadImage to parent
+ */
+wxDECLARE_EVENT(kEventImageLoaded, ImageLoadEvent);
 
 enum ThreadLoaderID {
   kFindImageHandlerThreadID = wxID_HIGHEST + 3000,
@@ -51,6 +66,8 @@ class Loader : public wxEvtHandler {
   int event_id_;
 
   std::unique_ptr<ImageChecker> checker_;
+  std::unique_ptr<queue::ItemReceiverEvent<queue::FindItem>> find_receiver_;
+  std::unique_ptr<queue::ItemReceiverEvent<queue::LoadItem>> load_receiver_;
   std::unique_ptr<thread::FindHandlerController> find_controller_;
   std::unique_ptr<thread::LoadImageController> load_controller_;
 
@@ -60,7 +77,7 @@ class Loader : public wxEvtHandler {
   virtual bool Open(const std::string &name);
   virtual void PushFind(const SStream *stream);
 
-  void SendImageToParent(const SStream *stream, const SBitmap &bitmap);
+  void SendImageToParent(const SStream *stream, const wxImage &image);
 
   virtual void SetControllerId(int find_controller_id, int load_controller);
 
@@ -80,8 +97,8 @@ class Loader : public wxEvtHandler {
   thread::LoadImageController *GetLoadImageController();
 
  private:
-  void OnStreamFound(queue::FoundEvent &event);
-  void OnImageLoaded(queue::LoadImageEvent &event);
+  void OnFindItemFound(ImageFindEvent &event);
+  void OnItemLoaded(ImageLoadEvent &event);
 
   void OnThreadCompleted(wxThreadEvent &event);
 };

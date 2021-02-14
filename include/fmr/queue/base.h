@@ -18,52 +18,45 @@
 #ifndef FMR_QUEUE_BASE
 #define FMR_QUEUE_BASE
 
-#include <wx/event.h>
-
+#include <algorithm>
 #include <queue>
 
 namespace fmr {
 
 namespace queue {
 
+template <typename T>
+class ItemReceiver {
+ public:
+  using value_type = T;
+  virtual void TakeItem(T &&item) = 0;
+};
+
 enum EventType { kEventUsePost, kEventUseQueue };
 
-template <class T>
+template <typename T, typename SendItemClass>
 class Base {
  public:
   using Container = typename std::deque<T>;
   using value_type = typename Container::value_type;
   using iterator = typename Container::iterator;
+  using send_type = SendItemClass;
+  using receiver_type = ItemReceiver<send_type>;
 
  private:
   std::deque<T> queue_item_;
-  wxEvtHandler *parent_ = nullptr;
+  receiver_type *receiver_ = nullptr;
   bool is_being_deleted_ = false;
-  int event_id_ = wxID_ANY;
 
   EventType event_type_ = kEventUseQueue;
 
  public:
-  Base(wxEvtHandler *parent, int id) {
-    parent_ = parent;
-    event_id_ = id;
-  };
+  Base() {}
+  Base(receiver_type *receiver) { SetReceiver(receiver); };
 
-  wxEvtHandler *GetParent() { return parent_; }
-  int GetEventId() const { return event_id_; }
-  void SetEventId(int id) { event_id_ = id; }
-
-  void SendEventToParent(wxEvent *event) {
-    if (event_type_ == kEventUsePost) {
-      wxPostEvent(GetParent(), *event);
-      delete event;
-    }
-    if (event_type_ == kEventUseQueue) return wxQueueEvent(GetParent(), event);
-  }
-
-  void QueueEventToParent(wxEvent *event) = delete;
-
-  void PostEventToParent(wxEvent *event) = delete;
+  void SetReceiver(receiver_type *receiver) { receiver_ = receiver; };
+  receiver_type *GetReceiver() { return receiver_; }
+  void SendItem(send_type &&item) { GetReceiver()->TakeItem(std::move(item)); }
 
   void SetEventType(EventType type) { event_type_ = type; }
 

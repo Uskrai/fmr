@@ -23,6 +23,7 @@
 #include "fmr/common/event.h"
 #include "fmr/common/string.h"
 #include "fmr/handler/handler_factory.h"
+#include "fmr/queue/event.h"
 #include "fmr/thread/load_image_controller.h"
 
 namespace fmr {
@@ -53,7 +54,7 @@ Controller::Controller() {
   loader_ =
       std::make_unique<bitmap::PageLoader>(this, GetBitmapCtrl(), kLoaderId);
 
-  Bind(queue::kEventImageLoaded, &Controller::OnLoadedImage, this, kLoaderId);
+  Bind(bitmap::kEventImageLoaded, &Controller::OnLoadedImage, this, kLoaderId);
 
   Bind(bitmap::kEventOpenedStreamFound, &Controller::OnOpenedStreamFound, this,
        kLoaderId);
@@ -129,10 +130,12 @@ void Controller::AdjustBitmap() {
   GetWindow()->Refresh();
 }
 
-void Controller::OnLoadedImage(queue::LoadImageEvent &event) {
-  GetBitmapCtrl()->AddBitmap(event.GetBitmap(),
-                             loader_->GetStreamPage(event.GetStream()),
-                             loader_->GetStreamPosInPage(event.GetStream()));
+void Controller::OnLoadedImage(queue::ItemEvent<queue::LoadItem> &event) {
+  SBitmap bitmap;
+  bitmap.SetImage(event.GetItem().GetImage());
+  GetBitmapCtrl()->AddBitmap(
+      bitmap, loader_->GetStreamPage(event.GetItem().GetStream()),
+      loader_->GetStreamPosInPage(event.GetItem().GetStream()));
   AdjustBitmap();
   event.Skip();
 }

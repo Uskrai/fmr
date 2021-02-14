@@ -97,7 +97,6 @@ lib_queue_la_SOURCES = $(queue)/load_image.cpp \
 											 $(queue)/find_handler.cpp \
 											 $(queue)/rescale.cpp  \
 											 $(queue)/factory.cpp
-lib_queue_la_LIBADD = lib_handler.la
 
 
 fmr = src/main

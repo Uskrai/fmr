@@ -25,9 +25,16 @@ namespace fmr {
 
 namespace bitmap {
 
+typedef queue::ItemReceiverEvent<queue::RescaleItem> RescaleReceiverEvent;
+typedef queue::ItemEvent<queue::RescaleItem> RescaleEvent;
+
+// Process item from queue::Rescale
+wxDECLARE_EVENT(kEventRescale, RescaleEvent);
+
 class RescaleLoader : public Loader {
   std::unique_ptr<thread::RescaleController> rescale_controller_;
-  std::unordered_map<const SStream *, SBitmap> stream_bmp_;
+  std::unique_ptr<RescaleReceiverEvent> rescale_receiver_;
+  std::unordered_map<const SStream *, wxImage> stream_bmp_;
   std::unordered_map<const wxImage *, const SStream *> img_stream_;
 
  public:
@@ -44,8 +51,8 @@ class RescaleLoader : public Loader {
   void Clear();
 
  private:
-  void OnImageLoaded(queue::LoadImageEvent &event);
-  void OnImageRescaled(queue::RescaledEvent &event);
+  void OnItemLoaded(ImageLoadEvent &event);
+  void OnRescaled(RescaleEvent &event);
   void OnThreadCompleted(wxThreadEvent &event);
 };
 

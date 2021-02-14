@@ -32,31 +32,15 @@ namespace fmr {
 
 namespace queue {
 
-wxDEFINE_EVENT(kEventStreamFound, FoundEvent);
-wxDEFINE_EVENT(kEventStreamNotFound, FoundEvent);
-
-FoundEvent::FoundEvent(const FoundEvent &event) : wxCommandEvent(event) {
-  source_stream_ = event.source_stream_;
-
-  if (event.found_stream_)
-    found_stream_ = std::make_unique<SStream>(*event.found_stream_);
-}
-
-bool FindHandler::ProcessTask(value_type &item) {
-  auto event = MakeEvent(kEventStreamFound, GetEventId(), item,
-                         std::make_unique<SStream>(*item));
-
-  wxLogMessage("Starting to search for %s/%s",
-               event->GetFoundStream()->GetHandlerPath(),
-               event->GetFoundStream()->GetName());
-
+bool FindHandler::ProcessTask(value_type &stream) {
+  auto item = FindItem(stream, *stream);
   if (IsBeingStopped()) return false;
 
-  FindReturn ret = Find(event.get());
+  FindStatus ret = Find(item);
 
   if (ret == kFindNotFound) {
-    event->SetEventType(kEventStreamNotFound);
-    SendEventToParent(event.release());
+    item.SetStatus(kFindNotFound);
+    SendItem(std::move(item));
   } else if (ret == kFindBeingStopped)
     return false;
 
@@ -66,36 +50,34 @@ bool FindHandler::ProcessTask(value_type &item) {
 #define TEST_RETURN() \
   if (IsBeingStopped()) return kFindBeingStopped
 
-FindReturn FindHandler::Find(FoundEvent *event) {
-  auto search_stream = event->GetFoundStream();
-  std::string handler_path = search_stream->GetHandlerPath();
+FindStatus FindHandler::Find(FindItem &item) {
+  auto search_stream = item.GetFoundStream();
+  std::string handler_path = search_stream.GetHandlerPath();
 
   if (HandlerFactory::IsOpenable(handler_path)) {
-    auto handler = stream_util::MakeParentOpenableHandler(*search_stream);
+    auto handler = stream_util::MakeParentOpenableHandler(search_stream);
 
     TEST_RETURN();
 
-    return Find(handler.get(), event);
+    return Find(handler.get(), item);
   } else {
-    auto handler = stream_util::MakeParentHandler(*search_stream);
+    auto handler = stream_util::MakeParentHandler(search_stream);
 
     if (handler) {
-      return Find(handler.get(), event);
+      return Find(handler.get(), item);
     }
   }
   return kFindNotFound;
 }
 
-FindReturn FindHandler::Find(AbstractOpenableHandler *handler,
-                             FoundEvent *event) {
-  auto search_stream = event->GetFoundStream();
-  std::string path = handler->GetItemPath(*search_stream);
+FindStatus FindHandler::Find(AbstractOpenableHandler *handler, FindItem &item) {
+  std::string path = handler->GetItemPath(item.GetFoundStream());
 
-  FindReturn ret_val = kFindNotFound;
+  FindStatus ret_val = kFindNotFound;
 
   // Get Stream from handler if openable or is check handler
   if (HandlerFactory::IsOpenable(path)) {
-    if (CheckAndSendIfFound(handler, event) == kFindItemFound)
+    if (CheckAndSendIfFound(handler, item) == kFindItemFound)
       ret_val = kFindItemFound;
 
     if (ret_val == kFindItemFound && Is(kFindHandlerOnlyFirstItem))
@@ -107,7 +89,7 @@ FindReturn FindHandler::Find(AbstractOpenableHandler *handler,
         HandlerFactory::NewOpenableHandler(path));
     if (path != stream_handler->GetName()) return ret_val;
 
-    auto temp = TraverseHandler(stream_handler.get(), event);
+    auto temp = TraverseHandler(stream_handler.get(), item);
 
     if (temp < ret_val) ret_val = temp;
     return ret_val;
@@ -118,7 +100,7 @@ FindReturn FindHandler::Find(AbstractOpenableHandler *handler,
     TEST_RETURN();
     // traverse non-openable handler and if item found and with flags Only first
     // item, return
-    if (TraverseHandler(non_openable_handler.get(), event) == kFindItemFound) {
+    if (TraverseHandler(non_openable_handler.get(), item) == kFindItemFound) {
       return kFindItemFound;
     } else if (!Is(kFindHandlerCheckHandler)) {
       return kFindNotFound;
@@ -128,26 +110,19 @@ FindReturn FindHandler::Find(AbstractOpenableHandler *handler,
   return ret_val;
 }
 
-void FindHandler::StreamFound(FoundEvent *event) {
-  wxLogMessage("Sending FoundEvent to %p", GetParent());
-  SendEventToParent(event);
-}
-
 template <typename T>
-FindReturn FindHandler::TraverseHandler(T *handler, FoundEvent *event) {
+FindStatus FindHandler::TraverseHandler(T *handler, FindItem &item) {
   wxLogMessage("Traversing %s", handler->GetName());
   handler->Traverse(false);
 
-  FindReturn is_found = kFindNotFound;
+  FindStatus is_found = kFindNotFound;
   for (const auto &it : handler->GetChild()) {
     TEST_RETURN();
 
-    auto child_event =
-        MakeEvent(kEventStreamFound, GetEventId(), event->GetSourceStream(),
-                  std::make_unique<SStream>(it));
+    auto child_item = FindItem(item.GetSourceStream(), it);
 
     TEST_RETURN();
-    if (Find(handler, child_event.get()) == kFindItemFound) {
+    if (Find(handler, child_item) == kFindItemFound) {
       if (Is(kFindHandlerOnlyFirstItem))
         // return after once if only find first item
         return kFindItemFound;
@@ -158,25 +133,19 @@ FindReturn FindHandler::TraverseHandler(T *handler, FoundEvent *event) {
   return is_found;
 }
 
-FindReturn FindHandler::Find(AbstractHandler *handler, FoundEvent *event) {
-  return CheckAndSendIfFound(handler, event);
+FindStatus FindHandler::Find(AbstractHandler *handler, FindItem &item) {
+  return CheckAndSendIfFound(handler, item);
 };
 
-void FindHandler::SendFoundEvent(FoundEvent *event) {
-  auto send_event =
-      std::make_unique<FoundEvent>(kEventStreamFound, event->GetId());
-  send_event->SetSourceStream(event->GetSourceStream());
-  send_event->SetFoundStream(event->GetFoundStreamOwnerShip());
-
-  SendEventToParent(send_event.release());
-}
-
 template <typename T>
-FindReturn FindHandler::CheckAndSendIfFound(T *handler, FoundEvent *event) {
+FindStatus FindHandler::CheckAndSendIfFound(T *handler, FindItem &item) {
   TEST_RETURN();
 
-  auto status = GetChecker()->Check(*this, *handler, *event->GetFoundStream());
-  if (status == kFindItemFound) SendFoundEvent(event);
+  auto temp_item = item;
+  auto status =
+      GetChecker()->Check(*this, *handler, temp_item.GetFoundStream());
+  temp_item.SetStatus(status);
+  if (status == kFindItemFound) SendItem(std::move(temp_item));
 
   return status;
 }

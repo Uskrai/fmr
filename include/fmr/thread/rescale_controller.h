@@ -37,23 +37,13 @@ class RescaleController : public QueueThreadCtrl<queue::Rescale> {
 
   virtual ~RescaleController() { Clear(); }
 
-  void SetEventId(int id) {
-    Unbind(queue::kEventImageRescaled, &RescaleController::OnImageRescalled,
-           this, GetEventId());
-    QueueThreadCtrl::SetEventId(id);
-    Bind(queue::kEventImageRescaled, &RescaleController::OnImageRescalled, this,
-         GetEventId());
-  }
+  void SetEventId(int id) { QueueThreadCtrl::SetEventId(id); }
 
   [[deprecated("Replaced by SetEventId")]] void SetThreadId(int id) {
     SetEventId(id);
   }
   [[deprecated("Replaced by GetEventId")]] int GetThreadId() {
     return GetEventId();
-  }
-
-  void OnImageRescalled(queue::RescaledEvent &event) {
-    wxPostEvent(GetParent(), event);
   }
 };
 

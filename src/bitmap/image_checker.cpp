@@ -28,7 +28,7 @@ namespace fmr {
 
 namespace bitmap {
 
-queue::FindReturn ImageChecker::Check(queue::FindHandler &parent,
+queue::FindStatus ImageChecker::Check(queue::FindHandler &parent,
                                       AbstractHandler &handler,
                                       SStream &stream) {
   std::string ext = String::ToString(wxImage::GetImageExtWildcard());
@@ -55,7 +55,7 @@ queue::FindReturn ImageChecker::Check(queue::FindHandler &parent,
   return queue::kFindNotFound;
 }
 
-queue::FindReturn ImageChecker::Check(queue::FindHandler &parent,
+queue::FindStatus ImageChecker::Check(queue::FindHandler &parent,
                                       AbstractOpenableHandler &handler,
                                       SStream &stream) {
   if (image_util::CanRead(stream_util::GetPath(stream)))

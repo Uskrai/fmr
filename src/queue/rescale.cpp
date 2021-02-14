@@ -23,18 +23,14 @@ namespace fmr {
 
 namespace queue {
 
-wxDEFINE_EVENT(kEventImageRescaled, RescaledEvent);
+bool Rescale::ProcessTask(value_type &image) {
+  rescaler_->DoRescale(*image);
+  RescaleStatus status = kRescaled;
+  if (!image->IsOk()) status = kCannotRescale;
+  auto item = RescaleItem(status, image);
 
-void Rescale::SendEvent(wxImage *image) {
-  auto event =
-      std::make_unique<RescaledEvent>(kEventImageRescaled, GetEventId(), image);
+  SendItem(std::move(item));
 
-  SendEventToParent(event.release());
-}
-
-bool Rescale::ProcessTask(value_type &item) {
-  rescaler_->DoRescale(*item);
-  SendEvent(item);
   return true;
 }
 

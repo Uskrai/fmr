@@ -17,6 +17,9 @@
 
 #include "fmr/bitmap/page_loader.h"
 
+#include "fmr/bitmap/loader.h"
+#include "fmr/queue/event.h"
+#include "fmr/queue/find_handler.h"
 #include "fmr/thread/find_handler_controller.h"
 #include "fmr/thread/load_image_controller.h"
 
@@ -67,15 +70,11 @@ bool PageLoader::Open(const std::string &path) {
 
 void PageLoader::SetControllerId(int find_controller_id,
                                  int load_image_controller_id) {
-  GetFindController()->Unbind(queue::kEventStreamFound,
-                              &PageLoader::OnStreamFound, this,
-                              GetFindController()->GetEventId());
+  Unbind(kEventImageFind, &PageLoader::OnItemFound, this, GetEventId());
 
   Loader::SetControllerId(find_controller_id, load_image_controller_id);
 
-  GetFindController()->Bind(queue::kEventStreamFound,
-                            &PageLoader::OnStreamFound, this,
-                            find_controller_id);
+  Bind(kEventImageFind, &PageLoader::OnItemFound, this, GetEventId());
 }
 
 size_t PageLoader::GetStreamPage(const SStream *stream) {
@@ -126,20 +125,24 @@ bool PageLoader::IsFoundStreamInBack(const SStream *found_stream) {
   return false;
 }
 
-void PageLoader::OnStreamFound(queue::FoundEvent &event) {
+void PageLoader::OnItemFound(ImageFindEvent &event) {
   if (per_page_stream_.empty() ||
       per_page_stream_.back().size() >= GetImagePerPage()) {
     per_page_stream_.push_back(std::vector<SStream *>());
   }
 
-  per_page_stream_.back().push_back(event.GetFoundStream());
-  size_t event_source_stream_idx = SourceStreamToIndex(event.GetSourceStream());
+  auto found_stream =
+      std::make_unique<SStream>(std::move(event.GetItem().GetFoundStream()));
+
+  per_page_stream_.back().push_back(found_stream.get());
+  size_t event_source_stream_idx =
+      SourceStreamToIndex(event.GetItem().GetSourceStream());
 
   GetBitmapCtrl()->EnlargeBitmapPage(per_page_stream_.size() - 1,
                                      per_page_stream_.back().size());
 
   if (opened_index_ < GetImagePerPage()) {
-    GetLoadImageController()->Push(event.GetFoundStream());
+    GetLoadImageController()->Push(found_stream.get());
   } else {
     if (event_source_stream_idx >= opened_index_) {
       if (event_source_stream_idx == opened_index_) {
@@ -151,18 +154,18 @@ void PageLoader::OnStreamFound(queue::FoundEvent &event) {
           GetLoadImageController()->Push(stream_before_opened_.top());
           stream_before_opened_.pop();
         }
-        GetLoadImageController()->Push(event.GetFoundStream());
+        GetLoadImageController()->Push(found_stream.get());
       } else {
-        GetLoadImageController()->Push(event.GetFoundStream());
+        GetLoadImageController()->Push(found_stream.get());
         PushStreamStack();
       }
     } else {
-      stream_before_opened_.push(event.GetFoundStream());
+      stream_before_opened_.push(found_stream.get());
     }
   }
 
-  GetFindController()->AddFoundStream(event.GetSourceStream(),
-                                      event.GetFoundStreamOwnerShip());
+  GetFindController()->AddFoundStream(event.GetItem().GetSourceStream(),
+                                      std::move(found_stream));
 }
 
 void PageLoader::SendOpenedPageInBack() {

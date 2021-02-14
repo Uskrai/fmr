@@ -20,12 +20,18 @@
 
 #include "fmr/bitmap/image_checker.h"
 #include "fmr/handler/abstract_handler.h"
+#include "fmr/queue/event.h"
+#include "fmr/queue/find_handler.h"
 #include "fmr/thread/find_handler_controller.h"
 #include "fmr/thread/load_image_controller.h"
 
 namespace fmr {
 
 namespace bitmap {
+
+wxDEFINE_EVENT(kEventImageFind, ImageFindEvent);
+wxDEFINE_EVENT(kEventImageLoad, ImageLoadEvent);
+wxDEFINE_EVENT(kEventImageLoaded, ImageLoadEvent);
 
 Loader::Loader(wxEvtHandler* parent, int id) {
   parent_ = parent;
@@ -38,11 +44,19 @@ Loader::Loader(wxEvtHandler* parent, int id) {
 
   checker_ = std::make_unique<ImageChecker>();
 
+  find_receiver_ = std::make_unique<queue::ItemReceiverEvent<queue::FindItem>>(
+      this, GetEventId());
+
+  load_receiver_ = std::make_unique<queue::ItemReceiverEvent<queue::LoadItem>>(
+      this, GetEventId());
+
   SetEventId(id);
   GetFindController()->GetQueue()->SetChecker(checker_.get());
+  GetFindController()->GetQueue()->SetReceiver(find_receiver_.get());
 
   GetFindController()->SetAutoRun(true);
   GetLoadImageController()->SetAutoRun(true);
+  GetLoadImageController()->GetQueue()->SetReceiver(load_receiver_.get());
 
   SetControllerId(kFindImageHandlerThreadID, kLoadImageThreadID);
   Bind(kEventThreadCompleted, &Loader::OnThreadCompleted, this);
@@ -52,22 +66,20 @@ void Loader::OnThreadCompleted(wxThreadEvent& event) { event.Skip(); }
 
 void Loader::SetControllerId(int find_controller_id,
                              int load_image_controller_id) {
-  GetFindController()->Unbind(queue::kEventStreamFound, &Loader::OnStreamFound,
-                              this, GetFindController()->GetEventId());
+  Unbind(kEventImageFind, &Loader::OnFindItemFound, this, GetEventId());
+  Unbind(kEventImageLoad, &Loader::OnItemLoaded, this, GetEventId());
 
-  GetLoadImageController()->Unbind(queue::kEventImageLoaded,
-                                   &Loader::OnImageLoaded, this,
-                                   GetLoadImageController()->GetEventId());
+  find_receiver_->SetEventId(GetEventId());
+  find_receiver_->SetEventType(kEventImageFind);
+
+  load_receiver_->SetEventId(GetEventId());
+  load_receiver_->SetEventType(kEventImageLoad);
 
   GetFindController()->SetEventId(find_controller_id);
   GetLoadImageController()->SetEventId(load_image_controller_id);
 
-  GetFindController()->Bind(queue::kEventStreamFound, &Loader::OnStreamFound,
-                            this, GetFindController()->GetEventId());
-
-  GetLoadImageController()->Bind(queue::kEventImageLoaded,
-                                 &Loader::OnImageLoaded, this,
-                                 GetLoadImageController()->GetEventId());
+  Bind(kEventImageFind, &Loader::OnFindItemFound, this, GetEventId());
+  Bind(kEventImageLoad, &Loader::OnItemLoaded, this, GetEventId());
 }
 
 bool Loader::Open(const std::string& path) {
@@ -90,30 +102,37 @@ const SStream* Loader::GetSourceStream(const SStream* found_stream) {
   return GetFindController()->GetSourceStream(found_stream);
 }
 
-void Loader::OnStreamFound(queue::FoundEvent& event) {
-  auto item = event.GetSourceStream();
+void Loader::OnFindItemFound(ImageFindEvent& event) {
+  auto item = event.GetItem().GetSourceStream();
 
-  if (GetFindController()->IsInQueue(item)) {
-    GetLoadImageController()->Push(event.GetFoundStream());
+  if (event.GetItem().GetStatus() == queue::kFindNotFound) return;
 
-    GetFindController()->AddFoundStream(event.GetSourceStream(),
-                                        event.GetFoundStreamOwnerShip());
+  if (GetFindController()->IsInQueue(event.GetItem().GetSourceStream())) {
+    auto found_stream =
+        std::make_unique<SStream>(std::move(event.GetItem().GetFoundStream()));
+
+    GetLoadImageController()->Push(found_stream.get());
+
+    GetFindController()->AddFoundStream(event.GetItem().GetSourceStream(),
+                                        std::move(found_stream));
   }
 }
 
-void Loader::SendImageToParent(const SStream* stream, const SBitmap& bitmap) {
-  auto send_event = std::make_unique<queue::LoadImageEvent>(
-      queue::kEventImageLoaded, GetEventId());
+void Loader::SendImageToParent(const SStream* stream, const wxImage& image) {
+  queue::LoadItem item;
+  item.SetImage(image);
+  item.SetStream(stream);
 
-  send_event->SetStream(stream);
-  send_event->SetBitmap(bitmap);
+  auto send_event = std::make_unique<ImageLoadEvent>(
+      GetEventId(), kEventImageLoaded, std::move(item));
+
   wxQueueEvent(GetParent(), send_event.release());
 }
 
-void Loader::OnImageLoaded(queue::LoadImageEvent& event) {
-  auto source_stream = GetSourceStream(event.GetStream());
-
-  if (source_stream) SendImageToParent(event.GetStream(), event.GetBitmap());
+void Loader::OnItemLoaded(ImageLoadEvent& event) {
+  auto source_stream = GetSourceStream(event.GetItem().GetStream());
+  if (source_stream)
+    SendImageToParent(event.GetItem().GetStream(), event.GetItem().GetImage());
 }
 
 bool Loader::Run() {

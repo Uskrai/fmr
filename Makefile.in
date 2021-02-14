@@ -175,7 +175,7 @@ lib_handler_la_OBJECTS = $(am_lib_handler_la_OBJECTS)
 lib_path_la_LIBADD =
 am_lib_path_la_OBJECTS = $(common)/path.lo
 lib_path_la_OBJECTS = $(am_lib_path_la_OBJECTS)
-lib_queue_la_DEPENDENCIES = lib_handler.la
+lib_queue_la_LIBADD =
 am_lib_queue_la_OBJECTS = $(queue)/load_image.lo \
 	$(queue)/find_handler.lo $(queue)/rescale.lo \
 	$(queue)/factory.lo
@@ -606,7 +606,6 @@ lib_queue_la_SOURCES = $(queue)/load_image.cpp \
 											 $(queue)/rescale.cpp  \
 											 $(queue)/factory.cpp
 
-lib_queue_la_LIBADD = lib_handler.la
 fmr = src/main
 fmr_SOURCES = $(fmr)/app.cpp
 fmr_LDADD = lib_frame.la
