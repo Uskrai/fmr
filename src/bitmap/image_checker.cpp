@@ -17,7 +17,10 @@
 
 #include "fmr/bitmap/image_checker.h"
 
+#include <regex>
+
 #include "fmr/bitmap/image_util.h"
+#include "fmr/common/string.h"
 #include "fmr/handler/stream_util.h"
 #include "fmr/queue/find_handler.h"
 
@@ -28,8 +31,27 @@ namespace bitmap {
 queue::FindReturn ImageChecker::Check(queue::FindHandler &parent,
                                       AbstractHandler &handler,
                                       SStream &stream) {
-  handler.GetStream(stream);
-  if (image_util::CanRead(stream)) return queue::kFindItemFound;
+  std::string ext = String::ToString(wxImage::GetImageExtWildcard());
+  ext = ext.substr(ext.find_first_of('(') + 1, ext.find_last_of(')') - 1);
+  while (ext.size()) {
+    size_t separator = ext.find_first_of(';');
+    // separate extension
+    std::string temp = ext.substr(1, separator - 1);
+
+    try {
+      std::regex re(temp);
+      std::smatch c;
+      bool res = std::regex_search(stream.GetName(), c, re);
+      if (res) return queue::kFindItemFound;
+    } catch (std::regex_error &err) {
+      handler.GetStream(stream);
+      if (image_util::CanRead(stream)) return queue::kFindItemFound;
+      return queue::kFindNotFound;
+    }
+
+    if (separator == std::string::npos) break;
+    ext = ext.substr(separator + 1);
+  }
   return queue::kFindNotFound;
 }
 
