@@ -75,7 +75,6 @@ class BitmapCtrl : public wxEvtHandler {
 
  private:
   void OnWindowSize(wxSizeEvent &event);
-  void OnImageLoaded(queue::LoadImageEvent &event);
   void DoChangeBitmapVector(BitmapVectorEvent &event);
 };
 

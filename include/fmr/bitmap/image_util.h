@@ -34,6 +34,8 @@ namespace image_util {
 
 bool CanRead(const SStream &stream);
 
+bool CanRead(const std::string &name);
+
 /**
  * @brief load image from input stream
  *

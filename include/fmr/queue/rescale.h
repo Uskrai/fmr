@@ -27,36 +27,38 @@ namespace fmr {
 
 namespace queue {
 
-class RescaledEvent : public wxCommandEvent {
- protected:
+enum RescaleStatus { kRescaled, kCannotRescale };
+
+class RescaleItem {
   wxImage *image_ = nullptr;
+  RescaleStatus status_;
 
  public:
-  RescaledEvent(wxEventType type, int id, wxImage *image = nullptr)
-      : wxCommandEvent(type, id) {
-    SetImage(image);
+  RescaleItem(RescaleStatus status, wxImage *image) {
+    status_ = status;
+    image_ = image;
   }
-
-  void SetImage(wxImage *image) { image_ = image; };
+  RescaleItem(const RescaleItem &other) = default;
+  RescaleItem(RescaleItem &&other) = default;
 
   wxImage *GetImage() { return image_; }
+  void SetImage(wxImage *image) { image_ = image; }
+
+  RescaleStatus GetStatus() { return status_; }
+  void SetStatus(RescaleStatus status) { status_ = status; }
 };
 
-wxDECLARE_EVENT(kEventImageRescaled, RescaledEvent);
-
-class Rescale : public Base<wxImage *> {
+class Rescale : public Base<wxImage *, RescaleItem> {
  private:
   bitmap::Rescaler *rescaler_ = nullptr;
 
  public:
-  Rescale(wxEvtHandler *parent, int id = wxID_ANY) : Base(parent, id){};
+  Rescale() {}
+  Rescale(receiver_type *receiver) : Base(receiver){};
 
   void SetRescaler(bitmap::Rescaler *rescaler) { rescaler_ = rescaler; }
 
   bool ProcessTask(value_type &item);
-
- private:
-  void SendEvent(wxImage *image);
 };
 
 }  // namespace queue

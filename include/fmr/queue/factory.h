@@ -26,20 +26,19 @@ namespace fmr {
 
 namespace queue {
 
-class FoundEvent;
-class LoadImageEvent;
-class RescaleEvent;
 class FindHandler;
 class LoadImage;
 class Rescale;
 
-namespace factory {
+class LoadItem;
+class FindItem;
+class RescaleItem;
 
-std::unique_ptr<FindHandler> FindHandler(wxEvtHandler *parent, int id);
-std::unique_ptr<LoadImage> LoadImage(wxEvtHandler *parent, int id);
-std::unique_ptr<Rescale> Rescale(wxEvtHandler *parent, int id);
+template <typename ItemClass>
+class ItemEvent;
 
-}  // namespace factory
+template <typename ItemClass>
+class ItemReceiverEvent;
 
 }  // namespace queue
 

@@ -26,15 +26,19 @@ bool SBitmap::IsOk() const { return m_isOk; }
 bool SBitmap::IsLoaded() const { return m_isLoaded; }
 
 bool SBitmap::IsPointed(const wxPoint& area, const wxPoint& position) const {
+  if (!IsOk()) return false;
+
   int posY = area.y + position.y, posX = area.x + position.x, bmpPosY = GetY(),
       bmpAfterY = bmpPosY + GetHeight(), bmpPosX = GetX(),
       bmpAfterX = bmpPosX + GetWidth();
 
-  return posY >= bmpPosY && posY <= bmpAfterY && posX >= bmpPosX &&
-         posX <= bmpAfterX;
+  return (posY >= bmpPosY && posY <= bmpAfterY && posX >= bmpPosX &&
+          posX <= bmpAfterX);
 }
 
 bool SBitmap::IsShown(const wxPoint& area, const wxSize& size) const {
+  if (!IsOk()) return false;
+
   int top = area.y, bottom = top + size.GetHeight(), left = area.x,
       right = left + size.GetHeight(), bmpPosY = GetY(),
       bmpAfterY = bmpPosY + GetHeight(), bmpPosX = GetX(),
@@ -55,7 +59,7 @@ void SBitmap::Draw(wxDC& dc, const wxPoint& view_start, const wxSize& area) {
 
 wxRect SBitmap::CalcMinimumRect(const wxRect& rect, wxPoint* pos_start) const {
   wxRect ret_rect;
-  if (!IsShown(rect.GetPosition(), rect.GetSize())) return ret_rect;
+  if (!IsOk() && !IsShown(rect.GetPosition(), rect.GetSize())) return ret_rect;
 
   double scale_x, scale_y;
   GetScale(scale_x, scale_y);
@@ -115,6 +119,7 @@ wxRect SBitmap::CalcMinimumRect(const wxRect& rect, wxPoint* pos_start) const {
 }
 
 void SBitmap::Draw(wxDC& dc, const wxRect& rect) {
+  if (!IsOk()) return;
   wxPoint pos;
   wxRect minimum_rect = CalcMinimumRect(visible_area_, &pos);
 

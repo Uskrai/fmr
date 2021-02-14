@@ -17,9 +17,10 @@
 
 #include <fmr/explorer/window_explorer.h>
 #include <wx/filename.h>
-#include <wx/stopwatch.h>
 
+#include "fmr/bitmap/loader.h"
 #include "fmr/handler/handler_factory.h"
+#include "fmr/queue/event.h"
 #include "fmr/thread/find_handler_controller.h"
 #include "fmr/thread/load_image_controller.h"
 #include "fmr/thread/rescale_controller.h"
@@ -45,7 +46,7 @@ void Window::BindEvent() {
   Bind(kEventThreadUpdate, &Window::OnThreadUpdate, this);
   Bind(kEventThreadCompleted, &Window::OnThreadUpdate, this);
   Bind(wxEVT_KEY_DOWN, &Window::OnKeyDown, this);
-  Bind(queue::kEventImageLoaded, &Window::OnImageLoaded, this, kLoaderId);
+  Bind(bitmap::kEventImageLoaded, &Window::OnImageLoaded, this, kLoaderId);
 }
 
 bool Window::Destroy() { return wxWindow::Destroy(); }
@@ -212,11 +213,12 @@ void Window::OnKeyDown(wxKeyEvent &event) {
   event.Skip();
 }
 
-void Window::OnImageLoaded(queue::LoadImageEvent &event) {
-  auto item = map_window_.find(loader_.GetSourceStream(event.GetStream()));
+void Window::OnImageLoaded(bitmap::ImageLoadEvent &event) {
+  auto item =
+      map_window_.find(loader_.GetSourceStream(event.GetItem().GetStream()));
   if (item != map_window_.end()) {
-    item->second->SetBitmap(event.GetBitmap());
     SBitmap &bitmap = item->second->GetBitmap();
+    bitmap.SetImage(event.GetItem().GetImage());
     rescaler_->DoRescale(bitmap);
     Refresh();
   }

@@ -57,7 +57,7 @@ class QueueThreadCtrl : public ThreadController {
   QueueThreadCtrl(wxEvtHandler *parent, int id) : ThreadController() {
     SetParent(parent);
     SetEventId(id);
-    SetQueue(std::make_unique<QueueClass>(this, id));
+    SetQueue(std::make_unique<QueueClass>());
     PrepareThread();
     Bind(kEventThreadUpdate, &QueueThreadCtrl::OnThreadUpdate, this);
     Bind(kEventThreadCompleted, &QueueThreadCtrl::OnThreadCompleted, this);
@@ -124,9 +124,9 @@ class QueueThreadCtrl : public ThreadController {
   int GetEventId() const { return event_id_; }
   virtual void SetEventId(int id) {
     event_id_ = id;
-    if (queue_) {
-      queue_->SetEventId(id);
-    }
+    // if (queue_) {
+    // queue_->SetEventId(id);
+    // }
   }
 
   void Push(value_type item) { DoPush(std::move(item), kQueuePushBack); }
@@ -180,13 +180,13 @@ class QueueThreadCtrl : public ThreadController {
 
   void ClearThread() {
     for (auto &it : thread_list_) {
+      queue_wait_.notify_all();
       auto ret = Delete(it, GetLock());
       if (ret != wxTHREAD_NO_ERROR) it = nullptr;
     }
 
-    queue_wait_.notify_all();
-
     for (auto &it : thread_list_) {
+      queue_wait_.notify_all();
       Wait(it, GetLock());
     }
 

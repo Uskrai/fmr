@@ -46,7 +46,7 @@ class PageLoader : public Loader {
   PageLoader(wxEvtHandler *handler, BitmapPageCtrl *bmp_ctrl, int id);
   virtual ~PageLoader() { Clear(); }
 
-  bool Open(const std::string &path);
+  bool Open(const std::string &path) override;
   AbstractHandler *GetHandler() { return handler_.get(); }
 
   void SetImagePerPage(size_t size) { image_per_page_ = size; }
@@ -58,7 +58,7 @@ class PageLoader : public Loader {
 
   BitmapPageCtrl *GetBitmapCtrl() { return bmp_ctrl_; }
 
-  virtual void Clear();
+  virtual void Clear() override;
 
   size_t CountLoadedImage();
 
@@ -73,7 +73,7 @@ class PageLoader : public Loader {
   const SStream *GetFirstFoundStream(const SStream *source_stream);
 
  private:
-  void OnStreamFound(queue::FoundEvent &event);
+  void OnItemFound(ImageFindEvent &event);
   void OnCompleted(wxThreadEvent &event);
 };
 

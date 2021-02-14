@@ -108,7 +108,7 @@ std::streampos fileSize(const char *filePath) {
 bool STDHandler::GetStream(SStream &stream) {
   if (stream.GetHandlerPath() != GetName()) return false;
 
-  stream.Open(GetItemPath(stream));
+  if (!stream.IsDir()) stream.Open(GetItemPath(stream));
   return true;
 }
 

@@ -25,16 +25,7 @@ namespace fmr {
 
 namespace queue {
 
-namespace factory {
-
-std::unique_ptr<queue::LoadImage> LoadImage(wxEvtHandler *parent, int id) {
-  return std::make_unique<queue::LoadImage>(parent, id);
-}
-std::unique_ptr<queue::FindHandler> FindHandler(wxEvtHandler *parent, int id) {
-  return std::make_unique<queue::FindHandler>(parent, id);
-}
-
-}  // namespace factory
+namespace factory {}  // namespace factory
 
 }  // namespace queue
 

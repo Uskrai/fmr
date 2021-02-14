@@ -22,6 +22,7 @@
 #include <unordered_map>
 
 #include "fmr/handler/abstract_handler.h"
+#include "fmr/queue/factory.h"
 #include "fmr/queue/find_handler.h"
 #include "fmr/thread/queue.h"
 #include "fmr/thread/queue_ctrl.h"
@@ -36,6 +37,8 @@ class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
  protected:
   bool (*stream_checker_)(const SStream &stream);
   std::unique_ptr<AbstractHandler> handler_;
+  std::unique_ptr<queue::ItemReceiverEvent<queue::FindItem>> receiver_;
+
   std::vector<const SStream *> in_queue_vec_;
   // Queue<queue::FindHandler> *thread_ = nullptr;
   // std::unique_ptr<queue::FindHandler> queue_;
@@ -50,10 +53,10 @@ class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
  public:
   FindHandlerController(wxEvtHandler *parent,
                         int id = FindHandlerControllerIdDefault);
-  virtual ~FindHandlerController() { Clear(); }
+  virtual ~FindHandlerController();
   bool Open(const std::string &path);
 
-  wxEvtHandler *GetParent() { return parent_; }
+  wxEvtHandler *GetParent() override { return parent_; }
 
   void SetEventId(int id) override;
 
@@ -71,16 +74,13 @@ class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
 
   bool IsInQueue(const SStream *stream) const;
 
-  void Clear();
+  void Clear() override;
 
  protected:
   void DoPush(value_type item, QueuePushType type) override {
     in_queue_vec_.push_back(item);
     QueueThreadCtrl::DoPush(std::move(item), type);
   }
-
- private:
-  void OnStreamFound(queue::FoundEvent &event);
 };
 
 }  // namespace thread

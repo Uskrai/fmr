@@ -38,64 +38,73 @@ enum FindHandlerFlags {
   kFindHandlerRecursive = 0x01,
   kFindHandlerCheckHandler = 0x02,
   kFindHandlerOnlyFirstItem = 0x08,
-  kFindHandlerDontRecursiveNonOpenable = 0x10
+  kFindHandlerDontRecursiveNonOpenable = 0x10,
+  kFindHandlerCheckFilenameIfOpenable = 0x20
 };
 DEFINE_BITMASK_TYPE(FindHandlerFlags);
 
-class FoundEvent : public wxCommandEvent {
- protected:
-  const SStream *source_stream_ = nullptr;
-  std::unique_ptr<SStream> found_stream_;
-
- public:
-  FoundEvent(wxEventType type, int id) : wxCommandEvent(type, id) {}
-
-  // Copy Construct will copy the whole found stream so be careful using this
-  // event with wxPostEvent
-  FoundEvent(const FoundEvent &event);
-  wxEvent *Clone() const override { return new FoundEvent(*this); }
-
-  std::unique_ptr<SStream> GetFoundStreamOwnerShip() {
-    return std::move(found_stream_);
-  }
-
-  SStream *GetFoundStream() { return found_stream_.get(); }
-  const SStream *GetSourceStream() { return source_stream_; }
-
-  void SetSourceStream(const SStream *stream) { source_stream_ = stream; }
-  void SetFoundStream(std::unique_ptr<SStream> &&stream) {
-    found_stream_ = std::move(stream);
-  }
+enum FindStatus {
+  kFindItemFound = 0,
+  kFindBeingStopped = 1,
+  kFindNotFound = 2
 };
 
-wxDECLARE_EVENT(kEventStreamFound, FoundEvent);
-wxDECLARE_EVENT(kEventStreamNotFound, FoundEvent);
-typedef void (wxEvtHandler::*FoundEventFunction)(FoundEvent &);
-#define FoundEventHandler(func) wxEVENT_HANDLER_CAST(FoundEventFunction, func);
+[[deprecated("Changed to FindStatus")]] typedef FindStatus FindReturn;
 
-enum FindReturn { kFindBeingStopped = 0, kFindSuccess, kFindNotFound };
+class FindHandler;
+class FindHandlerChecker {
+ public:
+  virtual FindStatus Check(FindHandler &parent,
+                           AbstractOpenableHandler &handler, SStream &stream) {
+    return Check(parent, static_cast<AbstractHandler &>(handler), stream);
+  };
+  virtual FindStatus Check(FindHandler &parent, AbstractHandler &handler,
+                           SStream &stream) = 0;
+};
 
-class FindHandler : public Base<const SStream *> {
+class FindItem {
+  SStream found_stream_;
+  const SStream *source_stream_;
+  FindStatus status_;
+
+ public:
+  FindItem(const SStream *source_stream, SStream found_stream) {
+    SetFoundStream(std::move(found_stream));
+    SetSourceStream(source_stream);
+  };
+  FindItem(const FindItem &item) = default;
+  FindItem(FindItem &&item) = default;
+
+  SStream &GetFoundStream() { return found_stream_; }
+  const SStream *GetSourceStream() { return source_stream_; }
+  FindStatus GetStatus() { return status_; }
+
+  void SetFoundStream(SStream stream) { found_stream_ = std::move(stream); }
+  void SetSourceStream(const SStream *stream) { source_stream_ = stream; }
+  void SetStatus(FindStatus status) { status_ = status; }
+};
+
+class FindHandler : public Base<const SStream *, FindItem> {
  private:
   FindHandlerFlags flags_;
 
-  bool (*check_func_)(const SStream &stream);  // function to check if the
-                                               // thread should send FoundEvent
-                                               // FindHandlerFlags flags_;
+  FindHandlerChecker *checker_ = nullptr;
 
  public:
-  FindHandler(wxEvtHandler *parent, int id) : Base(parent, id){};
+  FindHandler() {}
+  FindHandler(receiver_type *receiver) : Base(receiver){};
 
-  FindReturn Find(FoundEvent *event);
-  FindReturn Find(AbstractOpenableHandler *handler, FoundEvent *event);
-  FindReturn Find(AbstractHandler *handler, FoundEvent *event);
+  FindStatus Find(FindItem &item);
+  FindStatus Find(AbstractOpenableHandler *handler, FindItem &item);
+  FindStatus Find(AbstractHandler *handler, FindItem &item);
 
-  void SetChecker(bool (*check_func)(const SStream &stream)) {
-    check_func_ = check_func;
-  }
+  void SetChecker(FindHandlerChecker *checker) { checker_ = checker; }
+  FindHandlerChecker *GetChecker() { return checker_; }
 
-  FindReturn SendIfFound(FoundEvent *event);
-  bool CheckStream(const SStream &stream) { return check_func_(stream); }
+  void SendFoundEvent(FindItem &item);
+
+  // FindStatus CheckAndSendIfFound(AbstractHandler *handler, FoundEvent
+  // *event);
 
   /**
    * @brief: flags for the thread
@@ -110,19 +119,14 @@ class FindHandler : public Base<const SStream *> {
   bool ProcessTask(value_type &item);
 
  private:
-  std::unique_ptr<FoundEvent> MakeEvent(
-      wxEventType type, int id, const SStream *source,
-      std::unique_ptr<SStream> &&found_stream) {
-    auto ret = std::make_unique<FoundEvent>(type, id);
-    ret->SetSourceStream(source);
-    ret->SetFoundStream(std::move(found_stream));
-    return ret;
-  }
   bool Is(FindHandlerFlags flags) { return flags_ & flags; }
 
-  void StreamFound(FoundEvent *stream);
+  // void StreamFound(FoundEvent *stream);
   template <typename T>
-  FindReturn TraverseHandler(T *handler, FoundEvent *stream);
+  FindStatus CheckAndSendIfFound(T *handler, FindItem &item);
+
+  template <typename T>
+  FindStatus TraverseHandler(T *handler, FindItem &item);
 };
 
 };  // namespace queue

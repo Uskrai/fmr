@@ -45,6 +45,7 @@ void PositionCtrl::RecalcPosition(const std::vector<SBitmap *> &page) const {
                            int (SBitmap::*get_size)() const, int start_pos) {
     int pos = start_pos;
     for (auto &it : page) {
+      if (!it->IsOk()) continue;
       (*it.*set_pos)(pos);
       pos += (*it.*get_size)();
     }
@@ -53,6 +54,7 @@ void PositionCtrl::RecalcPosition(const std::vector<SBitmap *> &page) const {
   auto make_centered = [&page](int min_size, void (SBitmap::*set_pos)(int),
                                int (SBitmap::*get_size)() const) {
     for (auto &it : page) {
+      if (!it->IsOk()) continue;
       int pos = min_size / 2 - (*it.*get_size)() / 2;
       if (pos < 0) pos = 0;
       (*it.*set_pos)(pos);
@@ -110,6 +112,7 @@ wxSize PositionCtrl::GetMinimumBitmapSize(
                          void (wxSize::*set_largest)(int)) {
     wxSize size;
     for (const auto &it : page) {
+      if (!it->IsOk()) continue;
       (size.*set_incremented)((*it.*bmp_incrementer)() +
                               (size.*size_incrementer)());
 

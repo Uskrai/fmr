@@ -27,15 +27,12 @@ namespace fmr {
 
 namespace queue {
 
-wxDEFINE_EVENT(kEventImageLoaded, LoadImageEvent);
-
 LoadReturn LoadImage::Load(SStream *stream) {
 #define TEST_DELETED() \
   if (IsBeingStopped()) return kLoadBeingStopped;
 
-  auto event =
-      std::make_unique<LoadImageEvent>(kEventImageLoaded, GetEventId());
-  event->SetStream(stream);
+  auto item = LoadItem();
+  item.SetStream(stream);
 
   TEST_DELETED();
 
@@ -47,15 +44,12 @@ LoadReturn LoadImage::Load(SStream *stream) {
   wxLogMessage("Loading image in %s/%s",
                String::FromString<wxString>(stream->GetHandlerPath()),
                String::FromString<wxString>(stream->GetName()));
-  wxImage image;
-  image_util::Load(image, *stream);
 
-  if (rescaler_) rescaler_->DoRescale(image);
+  image_util::Load(item.GetImage(), *stream);
 
-  event->GetBitmap().SetImage(image);
+  if (rescaler_) rescaler_->DoRescale(item.GetImage());
 
-  wxLogMessage("Sending Image Loaded Event to %p", GetParent());
-  SendEventToParent(event.release());
+  SendItem(std::move(item));
   return kLoadSuccess;
 }
 

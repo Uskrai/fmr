@@ -18,6 +18,7 @@
 #include "fmr/handler/stream_util.h"
 
 #include "fmr/common/string.h"
+#include "fmr/handler/abstract_openable_handler.h"
 #include "fmr/handler/handler_factory.h"
 
 namespace fmr {

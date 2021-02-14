@@ -32,34 +32,32 @@ namespace fmr {
 
 namespace queue {
 
-class LoadImageEvent : public wxCommandEvent {
- protected:
-  SBitmap bitmap_;
-  const SStream *stream_;
+enum LoadReturn { kLoadBeingStopped, kLoadSuccess, kLoadCannotReadStream };
+
+enum LoadImageStatus { kItemLoaded, kCannotLoadItem };
+
+class LoadItem {
+  wxImage image_;
+  const SStream *stream_ = nullptr;
 
  public:
-  LoadImageEvent(wxEventType type, int id) : wxCommandEvent(type, id){};
-  LoadImageEvent(const LoadImageEvent &event) : wxCommandEvent(event) {
-    bitmap_ = event.bitmap_;
-    stream_ = event.stream_;
-  }
+  LoadItem() = default;
+  LoadItem(LoadItem &&move) = default;
+  LoadItem(const LoadItem &other) = default;
 
-  void SetBitmap(const SBitmap &bitmap) { bitmap_ = bitmap; }
+  void SetImage(const wxImage &image) { image_ = image; }
   void SetStream(const SStream *stream) { stream_ = stream; }
 
-  SBitmap &GetBitmap() { return bitmap_; }
+  wxImage &GetImage() { return image_; }
   const SStream *GetStream() { return stream_; }
 };
 
-wxDECLARE_EVENT(kEventImageLoaded, LoadImageEvent);
-
-enum LoadReturn { kLoadBeingStopped, kLoadSuccess, kLoadCannotReadStream };
-
-class LoadImage : public Base<SStream *> {
+class LoadImage : public Base<SStream *, LoadItem> {
   bitmap::Rescaler *rescaler_ = nullptr;
 
  public:
-  LoadImage(wxEvtHandler *parent, int id = wxID_ANY) : Base(parent, id){};
+  LoadImage() {}
+  LoadImage(receiver_type *receiver) : Base(receiver){};
 
   bool ProcessTask(value_type &item) override;
   LoadReturn Load(SStream *stream);
@@ -72,7 +70,5 @@ class LoadImage : public Base<SStream *> {
 };
 
 };  // namespace queue
-
 };  // namespace fmr
-
 #endif

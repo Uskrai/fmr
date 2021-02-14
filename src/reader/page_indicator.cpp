@@ -49,7 +49,7 @@ wxSize PageIndicator::GetSize(wxDC &dc) {
 }
 
 void PageIndicator::OnDraw(wxDC &dc, const wxRect &area) {
-  dc.SetTextForeground(*text_colour_);
+  dc.SetTextForeground(text_colour_);
   dc.SetBrush(wxBrush(background_colour_, wxBRUSHSTYLE_SOLID));
   wxString draw_text = GetString();
 

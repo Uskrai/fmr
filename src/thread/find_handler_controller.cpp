@@ -18,6 +18,7 @@
 #include "fmr/thread/find_handler_controller.h"
 
 #include "fmr/handler/handler_factory.h"
+#include "fmr/queue/event.h"
 
 namespace fmr {
 
@@ -28,6 +29,8 @@ FindHandlerController::FindHandlerController(wxEvtHandler *parent, int id)
   parent_ = parent;
 
   SetEventId(id);
+
+  GetQueue()->SetReceiver(receiver_.get());
 }
 
 bool FindHandlerController::Open(const std::string &path) {
@@ -49,13 +52,7 @@ bool FindHandlerController::Open(const std::string &path) {
 }
 
 void FindHandlerController::SetEventId(int id) {
-  Unbind(queue::kEventStreamFound, &FindHandlerController::OnStreamFound, this,
-         GetEventId());
-
   QueueThreadCtrl::SetEventId(GetEventId());
-
-  Bind(queue::kEventStreamFound, &FindHandlerController::OnStreamFound, this,
-       GetEventId());
 }
 
 void FindHandlerController::AddFoundStream(
@@ -63,10 +60,6 @@ void FindHandlerController::AddFoundStream(
   found_source_map_.insert(std::make_pair(found_stream.get(), source));
 
   loaded_stream_.push_back(std::move(found_stream));
-}
-
-void FindHandlerController::OnStreamFound(queue::FoundEvent &event) {
-  AddFoundStream(event.GetSourceStream(), event.GetFoundStreamOwnerShip());
 }
 
 const SStream *FindHandlerController ::GetSourceStream(const SStream *stream) {
@@ -91,6 +84,8 @@ void FindHandlerController::Clear() {
   loaded_stream_.clear();
   in_queue_vec_.clear();
 }
+
+FindHandlerController::~FindHandlerController() { Clear(); }
 
 }  // namespace thread
 

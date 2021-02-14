@@ -39,14 +39,14 @@ bool App::OnInit() {
   Config::Set(this->config);
 
   wxLocale locale;
-  locale.Init(wxLANGUAGE_ENGLISH);
+  locale.Init(wxLANGUAGE_DEFAULT);
 
   log_stream =
       new std::fstream("log.txt", log_stream->binary | log_stream->app);
   wxLog::SetActiveTarget(new wxLogStream(log_stream));
-  //
+
   try {
-    std::locale::global(std::locale("en_US.UTF-8"));
+    std::locale::global(std::locale(locale.GetSysName().ToStdString()));
   } catch (std::runtime_error &error) {
     wxLogMessage("Can't find user-preferred locale, defaulting to %s",
                  std::locale::classic().name());

@@ -381,7 +381,8 @@ tmtags
 **/nbproject/private/
 **/nbproject/Makefile-*.mk
 **/nbproject/Package-*.bash
-build/
+*build/
+build*/
 nbbuild/
 dist/
 nbdist/
@@ -570,7 +571,7 @@ target_wrapper.*
 # QtCreator CMake
 CMakeLists.txt.user*
 
-# QtCreator 4.8< compilation database 
+# QtCreator 4.8< compilation database
 compile_commands.json
 
 # QtCreator local machine specific files for imported projects

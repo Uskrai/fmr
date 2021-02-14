@@ -18,12 +18,18 @@
 #include <fmr/bitmap/image_util.h>
 #include <wx/log.h>
 
+#include "fmr/common/string.h"
+
 namespace fmr {
 
 namespace image_util {
 
 bool CanRead(const SStream &stream) {
   return stream.IsOk() && wxImage::CanRead(*stream.GetStream());
+}
+
+bool CanRead(const std::string &name) {
+  return wxImage::CanRead(String::FromString<wxString>(name));
 }
 
 bool Load(wxImage &image, wxInputStream &stream) {

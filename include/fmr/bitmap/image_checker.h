@@ -15,25 +15,27 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmr/queue/rescale.h"
+#ifndef FMR_BITMAP_IMAGE_CHECKER
+#define FMR_BITMAP_IMAGE_CHECKER
 
-#include <memory>
+#include <fmr/queue/find_handler.h>
 
 namespace fmr {
 
-namespace queue {
+namespace bitmap {
 
-bool Rescale::ProcessTask(value_type &image) {
-  rescaler_->DoRescale(*image);
-  RescaleStatus status = kRescaled;
-  if (!image->IsOk()) status = kCannotRescale;
-  auto item = RescaleItem(status, image);
+class ImageChecker : public queue::FindHandlerChecker {
+ public:
+  virtual queue::FindStatus Check(queue::FindHandler &parent,
+                                  AbstractOpenableHandler &handler,
+                                  SStream &stream) override;
+  virtual queue::FindStatus Check(queue::FindHandler &parent,
+                                  AbstractHandler &handler,
+                                  SStream &stream) override;
+};
 
-  SendItem(std::move(item));
-
-  return true;
-}
-
-}  // namespace queue
+}  // namespace bitmap
 
 }  // namespace fmr
+
+#endif /* end of include guard: FMR_BITMAP_IMAGE_CHECKER */
