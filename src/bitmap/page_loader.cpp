@@ -126,6 +126,10 @@ bool PageLoader::IsFoundStreamInBack(const SStream *found_stream) {
 }
 
 void PageLoader::OnItemFound(ImageFindEvent &event) {
+  if (event.GetItem().GetStatus() != queue::kFindItemFound) {
+    return;
+  }
+
   if (per_page_stream_.empty() ||
       per_page_stream_.back().size() >= GetImagePerPage()) {
     per_page_stream_.push_back(std::vector<SStream *>());
