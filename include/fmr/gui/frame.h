@@ -18,7 +18,6 @@
 #ifndef FMR_GUI_FRAME
 #define FMR_GUI_FRAME
 
-#include <fmr/gui/panel.h>
 #include <wx/frame.h>
 
 class wxBoxSizer;
@@ -27,6 +26,8 @@ class wxMenu;
 class wxStatusBar;
 
 namespace fmr {
+
+class Panel;
 
 enum {
   kPanel = wxID_HIGHEST + 2001,
