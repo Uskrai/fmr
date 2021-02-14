@@ -73,8 +73,6 @@ class BitmapPageCtrl : public BitmapCtrl {
   void Clear();
 
  private:
-  void OnImageLoaded(queue::LoadImageEvent &event);
-
   void OnBitmapChanging(BitmapVectorEvent &event);
 };
 

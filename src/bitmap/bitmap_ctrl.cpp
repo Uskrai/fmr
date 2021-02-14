@@ -74,8 +74,6 @@ std::vector<SBitmap *> BitmapCtrl::GetVectorPtr() {
   return bmp_ptr;
 }
 
-void BitmapCtrl::OnImageLoaded(queue::LoadImageEvent &event) {}
-
 void BitmapCtrl::OnWindowSize(wxSizeEvent &event) {}
 
 void BitmapCtrl::SetBitmapVec(BitmapVector *bmp_vec) {
