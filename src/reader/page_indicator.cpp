@@ -35,7 +35,9 @@ PageIndicator::PageIndicator()
 }
 
 wxString PageIndicator::GetString() {
-  return wxString::Format("%ld/%ld", page_pos_, page_limit_);
+  std::string string;
+  string += std::to_string(page_pos_) + "/" + std::to_string(page_limit_);
+  return string;
 }
 
 wxSize PageIndicator::GetSize(wxDC &dc) {
