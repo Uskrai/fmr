@@ -130,7 +130,7 @@ void Controller::AdjustBitmap() {
   GetWindow()->Refresh();
 }
 
-void Controller::OnLoadedImage(queue::ItemEvent<queue::LoadItem> &event) {
+void Controller::OnLoadedImage(bitmap::ImageLoadEvent &event) {
   SBitmap bitmap;
   bitmap.SetImage(event.GetItem().GetImage());
   GetBitmapCtrl()->AddBitmap(
