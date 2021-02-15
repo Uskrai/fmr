@@ -27,13 +27,8 @@ class wxScrollBar;
 
 enum ScrollBarId { HorizontalScrollBar = wxID_HIGHEST + 20, VerticalScrollBar };
 
-inline std::vector<wxEventTypeTag<wxScrollWinEvent>> kScrollWinEventAll = {
-    wxEVT_SCROLLWIN_TOP,        wxEVT_SCROLLWIN_BOTTOM,
-    wxEVT_SCROLLWIN_LINEUP,     wxEVT_SCROLLWIN_LINEDOWN,
-    wxEVT_SCROLLWIN_PAGEUP,     wxEVT_SCROLLWIN_PAGEDOWN,
-    wxEVT_SCROLLWIN_THUMBTRACK, wxEVT_SCROLLWIN_THUMBRELEASE};
-
-inline const int ScrolledTimerID = VerticalScrollBar + 1;
+std::vector<wxEventTypeTag<wxScrollWinEvent>> GetAllScrollWinEvent();
+const int ScrolledTimerID = VerticalScrollBar + 1;
 
 class ScrolledWindow : public wxScrolledCanvas {
  public:

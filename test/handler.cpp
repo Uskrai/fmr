@@ -78,8 +78,10 @@ class HandlerTest : public ::testing::Test {
     handler_->Open(test_dir_);
     handler_->CreateDirectories();
     size_t stream_total_size = 0;
+    size_t traverse_total_size = 0;
 
     size_t length = FILE_SIZE_START;
+    size_t total = 0;
     while (length < FILE_COUNT * FILE_SIZE_INTERVAL) {
       SStream item = MakeStream(length);
       std::string name = MakeName(FILENAME_LENGTH);
@@ -88,12 +90,14 @@ class HandlerTest : public ::testing::Test {
       ASSERT_TRUE(handler_->CreateFiles(item, name));
 
       length += FILE_SIZE_INTERVAL;
+      ++total;
     }
 
     length = 0;
     while (length < FOLDER_COUNT) {
       ASSERT_TRUE(handler_->CreateDirectory(MakeName(10)));
-      length++;
+      ++length;
+      ++total;
     }
 
     handler_->CommitWrite();
@@ -101,34 +105,31 @@ class HandlerTest : public ::testing::Test {
     handler_->Clear();
     handler_->Traverse(true);
 
-    size_t traverse_total_size = 0;
-    for (const SStream &it : handler_->GetChild())
+    for (const SStream &it : handler_->GetChild()) {
       traverse_total_size += it.GetSize();
+    }
 
+    ASSERT_EQ(total, handler_->GetChild().size());
     ASSERT_EQ(stream_total_size, traverse_total_size);
 
     handler_->Clear();
   }
 
-  T *CreateHandler() {
-    T *handler = new T();
-    return handler;
-  }
+  std::unique_ptr<T> CreateHandler() { return std::make_unique<T>(); }
 
   static void SetUpTestSuite() {
     TearDownTestSuite();
-    handler_ = new T();
-    test_dir_ = TEST_DIRECTORY + GetExtension(handler_);
+    handler_ = std::make_unique<T>();
+    test_dir_ = TEST_DIRECTORY + GetExtension(handler_.get());
     PrepareHandler();
   }
 
   static void TearDownTestSuite() {
     if (handler_) {
       ASSERT_TRUE(handler_->RemoveAll(test_dir_));
-      ASSERT_TRUE(!std::filesystem::exists(test_dir_));
+      ASSERT_TRUE(!nwd::fs::exists(test_dir_));
 
-      delete handler_;
-      handler_ = NULL;
+      handler_ = nullptr;
     }
   }
 
@@ -136,11 +137,16 @@ class HandlerTest : public ::testing::Test {
 
  protected:
   std::shared_ptr<char[]> buffer_ = NULL;
-  inline static T *handler_ = NULL;
-  inline static std::string test_dir_;
+  static std::unique_ptr<T> handler_;
+  static std::string test_dir_;
 };
 
-typedef testing::Types<STDHandler, WxArchiveHandler, DefaultHandler>
+template <typename T>
+std::unique_ptr<T> HandlerTest<T>::handler_;
+template <typename T>
+std::string HandlerTest<T>::test_dir_;
+
+typedef testing::Types<WxArchiveHandler, DefaultHandler, STDHandler>
     handler_type;
 
 TYPED_TEST_SUITE(HandlerTest, handler_type);
@@ -150,9 +156,10 @@ TYPED_TEST_SUITE(HandlerTest, handler_type);
   void TestName##Function(T *handler, std::string path, \
                           HandlerTest<T> *test_obj)
 
-#define HANDLER_TEST_CALL_FUNC(TestName, Postfix, Func)                     \
-  TYPED_TEST(HandlerTest, TestName##Postfix) {                              \
-    return TestName##Function(this->handler_, Func(this->test_dir_), this); \
+#define HANDLER_TEST_CALL_FUNC(TestName, Postfix, Func)                    \
+  TYPED_TEST(HandlerTest, TestName##Postfix) {                             \
+    return TestName##Function(this->handler_.get(), Func(this->test_dir_), \
+                              this);                                       \
   }
 
 #define HANDLER_TEST(TestName)                                    \
@@ -224,10 +231,10 @@ void TEST_WRITE(T *handler, const std::string path) {
   SStream stream_file("Makefile");
 
   ASSERT_TRUE(handler->RemoveAll());
-  ASSERT_FALSE(std::filesystem::exists(handler->GetName()));
+  ASSERT_FALSE(nwd::fs::exists(handler->GetName()));
   ASSERT_TRUE(handler->CreateDirectories());
 
-  ASSERT_TRUE(std::filesystem::exists(handler->GetName()));
+  ASSERT_TRUE(nwd::fs::exists(handler->GetName()));
   ASSERT_TRUE(handler->CommitWrite());
   handler->CreateDirectory("test1");
   handler->CreateFiles(stream_buffer, "owo");
@@ -251,7 +258,7 @@ void TEST_WRITE(T *handler, const std::string path) {
 
   ASSERT_EQ(handler->Size(), 0);
 
-  ASSERT_FALSE(std::filesystem::exists(path));
+  ASSERT_FALSE(nwd::fs::exists(path));
   delete[] buffer;
 }
 

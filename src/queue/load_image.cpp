@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/bitmap/image_util.h>
-#include <fmr/common/string.h>
-#include <fmr/handler/handler_factory.h>
-#include <fmr/queue/load_image.h>
+#include "fmr/queue/load_image.h"
+
 #include <wx/log.h>
 
+#include "fmr/bitmap/image_util.h"
+#include "fmr/handler/handler_factory.h"
 #include "fmr/handler/stream_util.h"
+#include "fmr/nowide/string.h"
 
 namespace fmr {
 
@@ -41,9 +42,8 @@ LoadReturn LoadImage::Load(SStream *stream) {
 
   TEST_DELETED();
 
-  wxLogMessage("Loading image in %s/%s",
-               String::FromString<wxString>(stream->GetHandlerPath()),
-               String::FromString<wxString>(stream->GetName()));
+  wxLogMessage("Loading image in %s/%s", stream->GetHandlerPath(),
+               stream->GetName());
 
   image_util::Load(item.GetImage(), *stream);
 
@@ -63,9 +63,9 @@ bool LoadImage::ProcessTask(LoadImage::value_type &stream) {
 
   if (!stream->IsOk() || !wxImage::CanRead(*input_stream)) {
     TEST_RETURN();
-    wxLogMessage("Loading Stream in %s/%s",
-                 String::FromString<wxString>(stream->GetHandlerPath())),
-        String::FromString<wxString>(stream->GetName());
+    wxLogMessage("Loading Stream in %s/%s", stream->GetHandlerPath(),
+                 stream->GetName());
+
     stream_util::LoadStream(*stream);
   }
 

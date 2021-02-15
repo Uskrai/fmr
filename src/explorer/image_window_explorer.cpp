@@ -22,6 +22,7 @@
 #include <wx/dcclient.h>
 
 #include "fmr/common/dimension.h"
+#include "fmr/nowide/string.h"
 
 namespace fmr {
 
@@ -64,7 +65,7 @@ void ImageWindow::SetBitmap(const SBitmap &bmp) {
 void ImageWindow::SetStream(SStream *stream) {
   stream_ = stream;
   wxString string;
-  if (stream) String::FromUTF8(stream->GetName(), string);
+  if (stream) string = String::Widen<wxString>(stream->GetName());
 
   if (window_text_) {
     window_text_->SetLabel(string);

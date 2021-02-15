@@ -24,8 +24,10 @@
 #include <wx/window.h>
 
 #include <iostream>
+#include <memory>
 
 #include "fmr/handler/handler_factory.h"
+#include "fmr/nowide/string.h"
 
 namespace fmr {
 
@@ -123,7 +125,7 @@ bool Panel::OpenExplorer() {
 
   if (select_path == "") {
     select_path =
-        String::ToString(Config::Get()->Read("RecentlyOpened", wxString()));
+        String::Narrow(Config::Get()->Read("RecentlyOpened", wxString()));
   }
 
   if (!explorer_) return false;

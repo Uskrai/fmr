@@ -18,7 +18,6 @@
 #ifndef FMR_EXPLORER_IMAGE_WINDOW
 #define FMR_EXPLORER_IMAGE_WINDOW
 
-#include <fmr/common/string.h>
 #include <fmr/explorer/common.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>

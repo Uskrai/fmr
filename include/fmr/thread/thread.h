@@ -21,8 +21,6 @@
 #include <wx/event.h>
 #include <wx/thread.h>
 
-inline wxCriticalSection g_sLock;
-
 namespace fmr {
 
 wxDECLARE_EVENT(kEventThreadUpdate, wxThreadEvent);

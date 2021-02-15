@@ -25,6 +25,8 @@
 
 #include <algorithm>
 
+#include "fmr/nowide/string.h"
+
 namespace fmr {
 
 DefaultHandler::DefaultHandler(const std::string &path) { this->Open(path); }
@@ -151,8 +153,7 @@ bool DefaultHandler::GetFirst(SStream &stream, DirGetFlags flags,
                               bool is_get_stream) {
   if (GetName() == L"") return false;
 
-  wxString name;
-  String::FromUTF8(GetName(), name);
+  wxString name = String::Widen<wxString>(GetName());
   opened_directory_.Open(name);
 
   if (!opened_directory_.IsOpened()) return false;
@@ -168,7 +169,7 @@ bool DefaultHandler::GetFirst(SStream &stream, DirGetFlags flags,
   if (!opened_directory_.GetFirst(&filename, wxEmptyString, flag_dir))
     return false;
 
-  OpenStream(String::ToString(filename), stream, is_get_stream);
+  OpenStream(String::Narrow(filename), stream, is_get_stream);
   return true;
 }
 
@@ -179,7 +180,7 @@ bool DefaultHandler::GetNextStream(SStream &stream, bool is_get_stream) {
 
   if (!opened_directory_.GetNext(&filename)) return false;
 
-  OpenStream(String::ToString(filename), stream, is_get_stream);
+  OpenStream(String::Narrow(filename), stream, is_get_stream);
   return true;
 }
 
@@ -265,14 +266,16 @@ bool DefaultHandler::RemoveAll(const std::string &path) {
 }
 
 void DefaultHandler::DoCreateFile(const SStream &stream) {
-  wxTempFileOutputStream out_stream(stream.GetHandlerPath() + stream.GetName());
-  char *buffer = new char[stream.GetSize()];
+  auto path = String::Widen<wxString>(
+      Path::Append(stream.GetHandlerPath(), stream.GetName()));
 
-  size_t length = stream.CopyTo(buffer, stream.GetSize());
+  wxTempFileOutputStream out_stream(path);
+  auto buffer = std::make_unique<char[]>(stream.GetSize());
 
-  out_stream.Write(buffer, length);
+  size_t length = stream.CopyTo(buffer.get(), stream.GetSize());
+
+  out_stream.Write(buffer.get(), length);
   out_stream.Commit();
-  delete[] buffer;
 }
 
 void DefaultHandler::DoRemove(const SStream &stream) {
@@ -285,8 +288,9 @@ void DefaultHandler::DoRemove(const SStream &stream) {
 void DefaultHandler::DoCreateDirectory(const SStream &stream) {
   int flags = (stream.GetType() & kStreamRecursive) ? wxPATH_MKDIR_FULL : 0;
 
-  wxDir::Make(stream.GetHandlerPath() + stream.GetName(), wxS_DIR_DEFAULT,
-              flags);
+  auto path = String::Widen<wxString>(
+      Path::Append(stream.GetHandlerPath(), stream.GetName()));
+  wxDir::Make(path, wxS_DIR_DEFAULT, flags);
 }
 
 bool DefaultHandler::CommitWrite() {

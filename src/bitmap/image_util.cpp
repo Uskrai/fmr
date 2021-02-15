@@ -18,7 +18,7 @@
 #include <fmr/bitmap/image_util.h>
 #include <wx/log.h>
 
-#include "fmr/common/string.h"
+#include "fmr/nowide/string.h"
 
 namespace fmr {
 
@@ -29,7 +29,7 @@ bool CanRead(const SStream &stream) {
 }
 
 bool CanRead(const std::string &name) {
-  return wxImage::CanRead(String::FromString<wxString>(name));
+  return wxImage::CanRead(String::Widen<wxString>(name));
 }
 
 bool Load(wxImage &image, wxInputStream &stream) {

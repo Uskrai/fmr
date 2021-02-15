@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020-2021 Uskrai
+ *  Copyright (c) 2021 Uskrai
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,33 +15,17 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_COMMON_STRING
-#define FMR_COMMON_STRING
+#ifndef FMR_NOWIDE_FSTREAM
+#define FMR_NOWIDE_FSTREAM
 
-#include <wx/string.h>
+#include <fmr/nowide/include.h>
 
-#include <string>
-
-namespace fmr {
-
-namespace String {
-template <typename T>
-std::string ToString(const T &string) {
-  return std::string(string.ToUTF8());
-}
-
-template <typename T>
-T FromUTF8(const std::string &source, T &dest) {
-  dest = T::FromUTF8(source.c_str());
-  return dest;
-}
-
-template <class T>
-T FromString(const std::string &source) {
-  return T::FromUTF8(source.c_str());
-}
-
-};  // namespace String
-};  // namespace fmr
-
+#if FMR_USE_BOOST_FILESYSTEM
+#include <nowide/fstream.hpp>
+#else
+#include <fstream>
 #endif
+
+#include <fmr/nowide/using-inc.h>
+
+#endif /* end of include guard: FMR_NOWIDE_FSTREAM */

@@ -18,7 +18,6 @@
 #ifndef FMR_GUI_PANEL
 #define FMR_GUI_PANEL
 
-#include <fmr/common/string.h>
 #include <fmr/explorer/window_explorer.h>
 #include <wx/panel.h>
 

@@ -17,11 +17,13 @@
 
 #include "fmr/bitmap/image_checker.h"
 
+#include <wx/log.h>
+
 #include <regex>
 
 #include "fmr/bitmap/image_util.h"
-#include "fmr/common/string.h"
 #include "fmr/handler/stream_util.h"
+#include "fmr/nowide/string.h"
 #include "fmr/queue/find_handler.h"
 
 namespace fmr {
@@ -31,7 +33,7 @@ namespace bitmap {
 queue::FindStatus ImageChecker::Check(queue::FindHandler &parent,
                                       AbstractHandler &handler,
                                       SStream &stream) {
-  std::string ext = String::ToString(wxImage::GetImageExtWildcard());
+  std::string ext = String::Narrow(wxImage::GetImageExtWildcard());
   ext = ext.substr(ext.find_first_of('(') + 1, ext.find_last_of(')') - 1);
   while (ext.size()) {
     size_t separator = ext.find_first_of(';');
@@ -58,10 +60,11 @@ queue::FindStatus ImageChecker::Check(queue::FindHandler &parent,
 queue::FindStatus ImageChecker::Check(queue::FindHandler &parent,
                                       AbstractOpenableHandler &handler,
                                       SStream &stream) {
-  if (image_util::CanRead(stream_util::GetPath(stream)))
+  if (image_util::CanRead(stream_util::GetPath(stream))) {
     return queue::kFindItemFound;
+  }
 
-  return queue::kFindNotFound;
+  return Check(parent, static_cast<AbstractHandler &>(handler), stream);
 }
 
 }  // namespace bitmap

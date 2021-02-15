@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/common/string.h>
 #include <fmr/handler/abstract_handler.h>
 #include <fmr/handler/struct_stream.h>
 #include <wx/filename.h>
@@ -23,8 +22,8 @@
 #include <wx/wfstream.h>
 #include <wx/wxcrtvararg.h>
 
-#include <filesystem>
-#include <fstream>
+#include "fmr/nowide/filesystem.h"
+#include "fmr/nowide/fstream.h"
 
 namespace fmr {
 
@@ -74,20 +73,19 @@ void SStream::Open(void *data, size_t length) {
 }
 
 void SStream::Open(const std::string &name) {
-  Open();
+  Open(nullptr, 0);
 
-  if (std::filesystem::exists(name)) {
+  if (nwd::fs::exists(name) && !Path::IsDirectory(name)) {
     std::uintmax_t fsize = 0;
 
     try {
-      using namespace std::filesystem;
-      fsize = file_size(path(name));
-    } catch (std::filesystem::filesystem_error &err) {
+      fsize = file_size(nwd::fs::path(name));
+    } catch (nwd::fs::filesystem_error &err) {
       printf("%s\n", err.what());
       return;
     }
 
-    auto file = std::ifstream(name.c_str(), std::ios::binary);
+    auto file = nwd::ifstream(name.c_str(), std::ios::binary);
 
     auto buffer = std::make_unique<char[]>(fsize);
     file.read(buffer.get(), fsize);

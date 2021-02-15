@@ -46,7 +46,7 @@ enum ControllerId {
 
 class Window : public FlexGridWindow {
  protected:
-  bitmap::RescaleLoader loader_ = bitmap::RescaleLoader(this, kLoaderId);
+  bitmap::RescaleLoader loader_{this, kLoaderId};
   std::unordered_map<const SStream *, ImageWindow *> map_window_;
   std::shared_ptr<AbstractOpenableHandler> handler_;
   std::vector<std::unique_ptr<SStream>> list_stream_;

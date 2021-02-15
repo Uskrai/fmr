@@ -56,6 +56,11 @@ bool Window::Open(std::shared_ptr<AbstractOpenableHandler> handler) {
 
   handler->Traverse(false);
 
+  if (handler->Size() == 0) return false;
+  if (handler_ && handler->GetName() == handler_->GetName()) {
+    if (handler_->Size() == handler->Size()) return true;
+  }
+
   int column = 5;
   int row = ceil(double(handler->Size()) / double(column));
 

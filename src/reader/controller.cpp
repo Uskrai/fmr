@@ -21,10 +21,11 @@
 #include "fmr/bitmap/rescaler.h"
 #include "fmr/common/dimension.h"
 #include "fmr/common/event.h"
-#include "fmr/common/string.h"
 #include "fmr/handler/handler_factory.h"
+#include "fmr/nowide/string.h"
 #include "fmr/queue/event.h"
 #include "fmr/thread/load_image_controller.h"
+#include "fmr/window/scrolledwindow.h"
 
 namespace fmr {
 
@@ -82,7 +83,7 @@ bool Controller::Open(const std::string &path) {
     GetWindow()->SetVirtualSize(GetWindow()->GetClientSize());
     if (loader_->Run()) {
       auto event = wxCommandEvent(kEventOpenFile, GetWindow()->GetId());
-      event.SetString(String::FromString<wxString>(path).c_str());
+      event.SetString(String::Widen<wxString>(path).c_str());
       wxPostEvent(GetParent(), event);
       return true;
     }
@@ -94,7 +95,7 @@ bool Controller::Open(const std::string &path) {
 void Controller::SetWindow(ScrolledImageWindow *window) {
   ScrollController::SetWindow(window);
   window->SetDecorator(decorator_.get());
-  event::Bind(GetWindow(), kScrollWinEventAll, &Controller::OnWindowScroll,
+  event::Bind(GetWindow(), GetAllScrollWinEvent(), &Controller::OnWindowScroll,
               this);
 }
 

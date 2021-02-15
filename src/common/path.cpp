@@ -15,32 +15,34 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/common/path.h>
+#include "fmr/common/path.h"
 
-#include <filesystem>
+#include <boost/filesystem/file_status.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <iostream>
 
-namespace fs = std::filesystem;
+#include "fmr/nowide/filesystem.h"
 
 namespace fmr {
 
 namespace Path {
 
-std::string MakeString(const fs::path &path) { return path.u8string(); }
+std::string MakeString(const nwd::fs::path &path) { return path.string(); }
 
 std::string MakeString(const wxString &path) {
   return std::string(path.ToUTF8());
 }
 
-fs::path MakePath(const std::string &path) { return fs::u8path(path); }
+auto MakePath(const std::string &path) { return nwd::fs::path(path); }
 
-std::string GetSeparator() { return std::string(1, Separator); }
+char GetSeparator() { return nwd::fs::path::preferred_separator; }
+// std::string GetSeparator() { return std::string(1, Separator); }
 
 std::string GetParent(std::string path) {
   if (!IsRoot(path)) RemoveDirSep(path);
 
-  fs::path temp = MakePath(path);
-  fs::path temp_parent = temp.parent_path();
+  auto temp = MakePath(path);
+  auto temp_parent = temp.parent_path();
 
   return GetDirName(MakeString(temp_parent));
 }
@@ -48,29 +50,60 @@ std::string GetParent(std::string path) {
 std::string GetName(std::string path) {
   RemoveDirSep(path);
 
-  size_t idx = path.rfind(Separator);
+  size_t idx = path.rfind(GetSeparator());
   if (idx != std::string::npos) path = path.substr(idx);
   return path;
 }
 
 std::string GetRootPath(const std::string &path) {
-  return MakeString(fs::path(path).root_path());
+  return MakeString(MakePath(path).root_path());
 }
 
+#ifdef FMR_USE_BOOST_FILESYSTEM
+bool IsDirectory(const std::string &path) {
+  auto temp = MakePath(path);
+  if (nwd::fs::is_directory(temp)) return true;
+
+  auto type = nwd::fs::status(temp).type();
+  if (type == nwd::fs::file_type::reparse_file && path.size() > 8) {
+    // temporary fix, cannot find anything to test reparse file in boost doc
+    try {
+      auto temp_iterator = nwd::fs::directory_iterator(path);
+      return true;
+    } catch (std::exception &err) {
+      return false;
+    }
+  }
+  return false;
+}
+#else
+bool IsDirectory(const std::string &path) {
+  auto temp = MakePath(path);
+
+  return nwd::fs::is_directory(temp);
+}
+#endif
+
 std::string GetDirName(const std::string &path) {
-  fs::path temp = MakePath(path);
+  try {
+    if (IsDirectory(path)) {
+      return path;
+    }
+    nwd::fs::path temp = MakePath(path);
 
-  if (fs::is_directory(temp)) return MakeString(temp);
+    temp.remove_filename();
 
-  temp.remove_filename();
+    if (temp.empty()) return MakeString(nwd::fs::current_path());
 
-  if (temp.empty()) return MakeString(fs::current_path());
-
-  return MakeString(temp);
+    return MakeString(temp);
+  } catch (std::exception &err) {
+    printf("%s\n", err.what());
+  }
+  return path;
 }
 
 void RemoveDirSep(std::string &path) {
-  if (!path.empty() && path.back() == Separator) path.pop_back();
+  if (!path.empty() && path.back() == GetSeparator()) path.pop_back();
 }
 
 bool HasRootPath(const std::string &path) {
@@ -106,24 +139,24 @@ bool IsRelative(const std::string &path) {
 }
 
 std::string Append(const std::string &parent, const std::string &target) {
-  fs::path path = MakePath(parent);
+  nwd::fs::path path = MakePath(parent);
   return MakeString(path / target);
 }
 
 std::string MakeRelative(const std::string &parent, const std::string &target) {
-  return MakeString(fs::relative(MakePath(target), MakePath(parent)));
+  return MakeString(nwd::fs::relative(MakePath(target), MakePath(parent)));
 }
 
 std::string MakeAbsolute(const std::string &path) {
-  return MakeString(fs::absolute(MakePath(path)));
+  return MakeString(nwd::fs::absolute(MakePath(path)));
 }
 
 std::string MakeDirectory(const std::string &path) {
-  fs::path temp = MakePath(path);
+  nwd::fs::path temp = MakePath(path);
 
-  if (fs::is_directory(temp)) return path;
+  if (nwd::fs::is_directory(temp)) return path;
 
-  return Append(path, GetSeparator());
+  return Append(path, std::string(1, GetSeparator()));
 }
 }  // namespace Path
 

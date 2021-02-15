@@ -50,7 +50,7 @@ class WindowDecorator : public wxEvtHandler {
  protected:
   WindowDecoratorList *parent_ = nullptr;
   bool is_shown_ = false;
-  wxTimer hide_timer_ = wxTimer(this);
+  wxTimer hide_timer_{this};
 
   virtual void OnDraw(wxDC &dc, const wxRect &area) = 0;
 
