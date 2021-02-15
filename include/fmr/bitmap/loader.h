@@ -19,6 +19,7 @@
 #define FMR_BITMAP_LOADER
 
 #include <fmr/bitmap/bmp.h>
+#include <fmr/bitmap/inc.h>
 #include <fmr/handler/struct_stream.h>
 #include <fmr/queue/factory.h>
 #include <fmr/thread/controller_factory.h>
@@ -32,9 +33,6 @@
 namespace fmr {
 
 namespace bitmap {
-
-typedef queue::ItemEvent<queue::FindItem> ImageFindEvent;
-typedef queue::ItemEvent<queue::LoadItem> ImageLoadEvent;
 
 /**
  * @brief: Process Item from queue::FindHandler
@@ -66,8 +64,8 @@ class Loader : public wxEvtHandler {
   int event_id_;
 
   std::unique_ptr<ImageChecker> checker_;
-  std::unique_ptr<queue::ItemReceiverEvent<queue::FindItem>> find_receiver_;
-  std::unique_ptr<queue::ItemReceiverEvent<queue::LoadItem>> load_receiver_;
+  std::unique_ptr<ImageFindReceiverEvent> find_receiver_;
+  std::unique_ptr<ImageLoadReceiverEvent> load_receiver_;
   std::unique_ptr<thread::FindHandlerController> find_controller_;
   std::unique_ptr<thread::LoadImageController> load_controller_;
 

@@ -17,11 +17,19 @@
 
 #include "fmr/reader/decorator_ctrl.h"
 
+#include "fmr/bitmap/bitmap_page_ctrl.h"
 #include "fmr/bitmap/bitmap_vector_event.h"
+#include "fmr/reader/page_indicator.h"
 
 namespace fmr {
 
 namespace reader {
+
+DecoratorCtrl::DecoratorCtrl(ScrolledImageWindow *window,
+                             bitmap::BitmapPageCtrl *bmp_page_ctrl) {
+  Create(window, bmp_page_ctrl);
+}
+
 void DecoratorCtrl::Create(ScrolledImageWindow *window,
                            bitmap::BitmapPageCtrl *bmp_page_ctrl) {
   page_indicator_ = std::make_unique<PageIndicator>();
@@ -48,6 +56,8 @@ ScrolledImageWindow *DecoratorCtrl::GetWindow() {
 void DecoratorCtrl::SetWindow(ScrolledImageWindow *window) {
   return WindowDecoratorList::SetWindow(window);
 }
+
+DecoratorCtrl::~DecoratorCtrl() {}
 
 }  // namespace reader
 

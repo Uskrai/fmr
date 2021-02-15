@@ -18,14 +18,22 @@
 #ifndef FMR_GUI_PANEL
 #define FMR_GUI_PANEL
 
-#include <fmr/explorer/window_explorer.h>
 #include <wx/panel.h>
 
-#include "fmr/reader/controller.h"
+#include <memory>
 
 class wxBoxSizer;
 
 namespace fmr {
+
+class StreamEvent;
+
+namespace reader {
+class Controller;
+}
+namespace explorer {
+class Window;
+}
 
 enum WindowID {
   ReaderWindow = wxID_HIGHEST + 1,
@@ -36,11 +44,9 @@ enum WindowID {
 
 class Panel : public wxPanel {
  protected:
-  wxStaticText *reader_info_ = NULL;
-  wxTimer reader_info_timer_;
-
  public:
   Panel(wxWindow *parent, wxWindowID id, wxPoint position, wxSize size);
+  ~Panel();
 
   bool LoadFile(std::string path);
   bool OpenExplorer();
@@ -56,12 +62,10 @@ class Panel : public wxPanel {
   void OnKeyDown(wxKeyEvent &event);
   void OnCharHook(wxKeyEvent &event);
   void OnExplorerOpenFile(StreamEvent &event);
-  void OnReaderChangePage(wxCommandEvent &event);
   void OnReaderOpenFile(wxCommandEvent &event);
-  void OnReaderInfoTimer(wxTimerEvent &event);
-  // reader::Window *reader_ = NULL;
+
   std::unique_ptr<reader::Controller> reader_;
-  explorer::Window *explorer_ = NULL;
+  explorer::Window *explorer_ = nullptr;
   wxBoxSizer *sizer_;
 };
 

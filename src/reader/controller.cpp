@@ -18,6 +18,7 @@
 #include "fmr/reader/controller.h"
 
 #include "fmr/bitmap/bitmap_vector_event.h"
+#include "fmr/bitmap/page_loader.h"
 #include "fmr/bitmap/rescaler.h"
 #include "fmr/common/dimension.h"
 #include "fmr/common/event.h"
@@ -108,6 +109,12 @@ void Controller::SetScaleFlags(bitmap::RescalerFlags flags) {
   rescaler_->SetFlags(flags);
   AdjustBitmap();
 }
+
+void Controller::SetImagePerPage(size_t size) {
+  loader_->SetImagePerPage(size);
+}
+
+AbstractHandler *Controller::GetHandler() { return loader_->GetHandler(); }
 
 void Controller::AdjustBitmap() {
   if (!GetBitmapCtrl()->GetBitmapPage()) return;
@@ -208,6 +215,8 @@ void Controller::Clear() {
   loader_->Clear();
   GetBitmapCtrl()->Clear();
 }
+
+Controller::~Controller() { Clear(); }
 
 }  // namespace reader
 

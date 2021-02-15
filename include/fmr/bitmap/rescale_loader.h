@@ -25,9 +25,6 @@ namespace fmr {
 
 namespace bitmap {
 
-typedef queue::ItemReceiverEvent<queue::RescaleItem> RescaleReceiverEvent;
-typedef queue::ItemEvent<queue::RescaleItem> RescaleEvent;
-
 // Process item from queue::Rescale
 wxDECLARE_EVENT(kEventRescale, RescaleEvent);
 
