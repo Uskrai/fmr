@@ -216,7 +216,10 @@ void Controller::Clear() {
   GetBitmapCtrl()->Clear();
 }
 
-Controller::~Controller() { Clear(); }
+Controller::~Controller() {
+  loader_->Clear();
+  GetBitmapCtrl()->Clear();
+}
 
 }  // namespace reader
 

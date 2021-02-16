@@ -29,7 +29,7 @@ namespace thread {
 
 template <class QueueClass>
 class Queue : public BaseThread {
-  bool is_disable_on_empty_queue_ = false;
+  bool is_disable_on_empty_queue_ = false, disable_queue_wait_ = false;
   bool is_on_task_ = false;
   bool is_waiting_queue_ = false;
 
@@ -89,7 +89,7 @@ class Queue : public BaseThread {
   }
 
   void WaitForQueue() {
-    if (GetQueue()->IsEmpty()) {
+    if (!IsDisableQueueWait() && GetQueue()->IsEmpty()) {
       if (queue_wait_ && queue_mutex_) {
         SetWaitingQueue(true);
         std::unique_lock<std::mutex> locker(*queue_mutex_);
@@ -111,6 +111,9 @@ class Queue : public BaseThread {
   void DisableOnEmptyQueue(bool cond = true) {
     is_disable_on_empty_queue_ = cond;
   }
+
+  bool IsDisableQueueWait() { return disable_queue_wait_; }
+  void SetDisableQueueWait(bool cond = true) { disable_queue_wait_ = cond; }
 
   bool TestDestroy() {
     return BaseThread::TestDestroy() ||
