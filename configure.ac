@@ -47,6 +47,15 @@ AC_ARG_ENABLE([std-filesystem],
               esac ],
               [use_std_filesystem=false])
 
+AC_ARG_ENABLE([static-wxwidgets],
+              AS_HELP_STRING([--enable-static-wxwidgets],
+                             [Use wxWidget static build]),
+              [case "${enableval}" in
+                yes) wx-config-opt="$wx-config-opt --static";;
+                no) ;;
+                *) wx-config-opt="$wx-config-opt --static";;
+              esac], [wx-config-opt="$wx-config-opt"])
+
 AM_CONDITIONAL(USE_STD_FILESYSTEM, test x"$use_std_filesystem" = xtrue )
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
@@ -101,21 +110,14 @@ AM_COND_IF(USE_STD_FILESYSTEM,
   BOOST_FILESYSTEM
   LDFLAGS="-lboost_filesystem $LDFLAGS"
 ])
-#
-# if test "$use_std_filesystem" = "yes"; then
-  # AX_CXX_COMPILE_STDCXX([17],[noext],[mandatory])
-#
-  # if test "$HAVE_CXX17" != 1; then
-    # AC_MSG_ERROR([This Application need c++17 support])
-  # fi
-  # CXXFLAGS="$CXXFLAGS -std=c++17"
-# fi
 
 
-
+if test "x$build_windows" = "xyes"; then
+  LDFLAGS="-no-undefined $LDFLAGS"
+fi
 
 # check for libraries
-AM_OPTIONS_WXCONFIG
+AM_OPTIONS_WXCONFIG($wx-config-opt)
 reqwx=3.0.4
 AM_PATH_WXCONFIG($reqwx, wxWin=1)
 if test "$wxWin" != 1; then

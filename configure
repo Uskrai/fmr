@@ -816,6 +816,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_std_filesystem
+enable_static_wxwidgets
 enable_dependency_tracking
 enable_silent_rules
 enable_shared
@@ -1475,6 +1476,8 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-std-filesystem Use std::filesystem instead of boost::filesystem
+  --enable-static-wxwidgets
+                          Use wxWidget static build
   --enable-dependency-tracking
                           do not reject slow dependency extractors
   --disable-dependency-tracking
@@ -5464,6 +5467,19 @@ then :
               esac
 else $as_nop
   use_std_filesystem=false
+fi
+
+
+# Check whether --enable-static-wxwidgets was given.
+if test ${enable_static_wxwidgets+y}
+then :
+  enableval=$enable_static_wxwidgets; case "${enableval}" in
+                yes) wx-config-opt="$wx-config-opt --static";;
+                no) ;;
+                *) wx-config-opt="$wx-config-opt --static";;
+              esac
+else $as_nop
+  wx-config-opt="$wx-config-opt"
 fi
 
 
@@ -19698,10 +19714,10 @@ then :
   printf %s "(cached) " >&6
 else $as_nop
   boost_cv_lib_system=no
-  case "" in #(
+  case "s" in #(
     (mt | mt-) boost_mt=-mt; boost_rtopt=;; #(
-    (mt* | mt-*) boost_mt=-mt; boost_rtopt=`expr "X" : 'Xmt-*\(.*\)'`;; #(
-    (*) boost_mt=; boost_rtopt=;;
+    (mt* | mt-*) boost_mt=-mt; boost_rtopt=`expr "Xs" : 'Xmt-*\(.*\)'`;; #(
+    (*) boost_mt=; boost_rtopt=s;;
   esac
   if test $enable_static_boost = yes; then
     boost_rtopt="s$boost_rtopt"
@@ -20020,10 +20036,10 @@ then :
   printf %s "(cached) " >&6
 else $as_nop
   boost_cv_lib_filesystem=no
-  case "" in #(
+  case "s" in #(
     (mt | mt-) boost_mt=-mt; boost_rtopt=;; #(
-    (mt* | mt-*) boost_mt=-mt; boost_rtopt=`expr "X" : 'Xmt-*\(.*\)'`;; #(
-    (*) boost_mt=; boost_rtopt=;;
+    (mt* | mt-*) boost_mt=-mt; boost_rtopt=`expr "Xs" : 'Xmt-*\(.*\)'`;; #(
+    (*) boost_mt=; boost_rtopt=s;;
   esac
   if test $enable_static_boost = yes; then
     boost_rtopt="s$boost_rtopt"
@@ -20295,18 +20311,11 @@ LDFLAGS=$boost_filesystem_save_LDFLAGS
   LDFLAGS="-lboost_filesystem $LDFLAGS"
 
 fi
-#
-# if test "$use_std_filesystem" = "yes"; then
-  # AX_CXX_COMPILE_STDCXX([17],[noext],[mandatory])
-#
-  # if test "$HAVE_CXX17" != 1; then
-    # AC_MSG_ERROR([This Application need c++17 support])
-  # fi
-  # CXXFLAGS="$CXXFLAGS -std=c++17"
-# fi
 
 
-
+if test "x$build_windows" = "xyes"; then
+  LDFLAGS="-no-undefined $LDFLAGS"
+fi
 
 # check for libraries
 
