@@ -102,8 +102,7 @@ bool STDHandler::OpenStream(const std::string &path, SStream &stream,
                             bool is_get_stream) {
   stream.SetName(Path::MakeRelative(GetName(), path));
   stream.SetHandlerPath(GetName());
-  stream.SetDir(
-      nwd::fs::is_directory(Path::Append(GetName(), stream.GetName())));
+  stream.SetDir(Path::IsDirectory(path));
   stream.Open();
 
   if (is_get_stream) GetStream(stream);
@@ -138,7 +137,6 @@ bool STDHandler::GetNextStream(SStream &stream, bool is_get_stream) {
   nwd::fs::path path = iterator_->path();
 
   OpenStream(Path::MakeString(path), stream, is_get_stream);
-  stream.SetDir(nwd::fs::is_directory(path));
 
   iterator_++;
   return true;
