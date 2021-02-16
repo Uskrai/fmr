@@ -21,6 +21,7 @@
 #include <fmr/common/vector.h>
 #include <fmr/handler/abstract_openable_handler.h>
 #include <fmr/handler/struct_stream.h>
+#include <fmr/nowide/filesystem.h>
 #include <wx/dir.h>
 #include <wx/filename.h>
 #include <wx/mstream.h>
@@ -90,9 +91,9 @@ class STDHandler : public AbstractOpenableHandler {
  private:
   void TraverseStream();
 
-  std::unique_ptr<std::filesystem::directory_iterator> iterator_item_;
+  std::unique_ptr<nwd::fs::directory_iterator> iterator_item_;
   DirGetFlags iterator_flags_;
-  std::filesystem::directory_iterator iterator_;
+  nwd::fs::directory_iterator iterator_;
 
   std::string name_, filename_;
   bool is_opened_ = false;

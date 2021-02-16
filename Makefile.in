@@ -95,6 +95,9 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/aux-build/wxwin.m4 \
 	$(top_srcdir)/aux-build/ax_cxx_compile_stdcxx.m4 \
 	$(top_srcdir)/aux-build/ax_check_compile_flag.m4 \
+	$(top_srcdir)/aux-build/boost.m4 \
+	$(top_srcdir)/aux-build/ax_cxx_check_lib.m4 \
+	$(top_srcdir)/aux-build/ax_boost_filesystem.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -166,7 +169,9 @@ lib_explorer_la_OBJECTS = $(am_lib_explorer_la_OBJECTS)
 lib_frame_la_DEPENDENCIES = lib_explorer.la lib_reader.la
 am_lib_frame_la_OBJECTS = $(gui)/frame.lo $(gui)/panel.lo
 lib_frame_la_OBJECTS = $(am_lib_frame_la_OBJECTS)
-lib_handler_la_DEPENDENCIES = lib_path.la lib_compare.la
+am__DEPENDENCIES_1 =
+lib_handler_la_DEPENDENCIES = lib_path.la lib_compare.la \
+	$(am__DEPENDENCIES_1)
 am_lib_handler_la_OBJECTS = $(handler)/default_handler.lo \
 	$(handler)/wxarchive_handler.lo $(handler)/handler_factory.lo \
 	$(handler)/struct_stream.lo $(handler)/std_handler.lo \
@@ -388,6 +393,15 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
+BOOST_FILESYSTEM_LDFLAGS = @BOOST_FILESYSTEM_LDFLAGS@
+BOOST_FILESYSTEM_LDPATH = @BOOST_FILESYSTEM_LDPATH@
+BOOST_FILESYSTEM_LIBS = @BOOST_FILESYSTEM_LIBS@
+BOOST_LDPATH = @BOOST_LDPATH@
+BOOST_ROOT = @BOOST_ROOT@
+BOOST_SYSTEM_LDFLAGS = @BOOST_SYSTEM_LDFLAGS@
+BOOST_SYSTEM_LDPATH = @BOOST_SYSTEM_LDPATH@
+BOOST_SYSTEM_LIBS = @BOOST_SYSTEM_LIBS@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -399,6 +413,7 @@ CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DISTCHECK_CONFIGURE_FLAGS = @DISTCHECK_CONFIGURE_FLAGS@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -516,6 +531,10 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -I@srcdir@/include
 SUBDIRS = . test
+#
+# AM_CPPFLAGS += $(BOOST_CPPFLAGS)
+# AM_LDFLAGS = $(BOOST_LDFLAGS) \
+#						 # $(BOOST_FILESYSTEM_LIBS)
 common = src/common
 commondir = @abs_builddir@/common
 common_LTLIBRARIES = lib_compare.la lib_path.la
@@ -532,7 +551,8 @@ lib_handler_la_SOURCES = $(handler)/default_handler.cpp \
 						 $(handler)/stream_util.cpp
 
 lib_handler_la_LIBADD = lib_path.la \
-						lib_compare.la
+						lib_compare.la \
+						$(BOOST_FILESYSTEM_LDFLAGS)
 
 
 # make libraries for bitmap

@@ -20,8 +20,7 @@
 
 #include <memory>
 
-#include "fmr/bitmap/bitmap_page_ctrl.h"
-#include "fmr/reader/page_indicator.h"
+#include "fmr/bitmap/inc.h"
 #include "fmr/window/decorator.h"
 #include "fmr/window/scrolled_image.h"
 
@@ -29,16 +28,17 @@ namespace fmr {
 
 namespace reader {
 
+class PageIndicator;
+
 class DecoratorCtrl : public WindowDecoratorList {
-  std::unique_ptr<PageIndicator> page_indicator_ = nullptr;
+  std::unique_ptr<PageIndicator> page_indicator_;
   bitmap::BitmapPageCtrl *bitmap_page_ctrl_;
 
  public:
   DecoratorCtrl() = delete;
   DecoratorCtrl(ScrolledImageWindow *window,
-                bitmap::BitmapPageCtrl *bmp_page_ctrl) {
-    Create(window, bmp_page_ctrl);
-  };
+                bitmap::BitmapPageCtrl *bmp_page_ctrl);
+  ~DecoratorCtrl();
 
   PageIndicator *GetPageIndicator() { return page_indicator_.get(); }
 

@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include "fmr/nowide/string.h"
+
 namespace fmr {
 
 WxArchiveHandler::WxArchiveHandler(const std::string &path) { Open(path); }
@@ -97,8 +99,8 @@ std::string WxArchiveHandler::GetFromCurrent(int step) const {
 
 bool WxArchiveHandler::GetFirst(SStream &stream, DirGetFlags flags,
                                 bool is_get_stream) {
-  wxString path;
-  String::FromUTF8(GetName(), path);
+  wxString path = String::Widen<wxString>(GetName());
+
   const wxArchiveClassFactory *factory;
 
   if (!Find(GetName(), factory)) return false;
@@ -129,7 +131,7 @@ bool WxArchiveHandler::GetNextStream(SStream &stream, bool is_get_stream) {
   else if (!(iterator_flags_ & kDirFile))
     return GetNextStream(stream, is_get_stream);
 
-  stream.SetName(String::ToString(entry->GetName()));
+  stream.SetName(String::Narrow(entry->GetName()));
   stream.SetDir(entry->IsDir());
   stream.SetHandlerPath(GetName());
 
@@ -176,8 +178,7 @@ void WxArchiveHandler::Traverse(bool GetStream, DirGetFlags flags) {
 
 bool WxArchiveHandler::Find(std::string name,
                             const wxArchiveClassFactory *&factory) {
-  wxString path;
-  String::FromUTF8(name, path);
+  wxString path = String::Widen<wxString>(name);
 
   factory = wxArchiveClassFactory::Find(path, wxSTREAM_FILEEXT);
   if (factory) return true;

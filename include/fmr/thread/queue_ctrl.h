@@ -179,10 +179,17 @@ class QueueThreadCtrl : public ThreadController {
   }
 
   void ClearThread() {
+    for (ThreadClass *&it : thread_list_) {
+      if (it) it->SetDisableQueueWait();
+    }
+
+    queue_wait_.notify_all();
     for (auto &it : thread_list_) {
       queue_wait_.notify_all();
-      auto ret = Delete(it, GetLock());
-      if (ret != wxTHREAD_NO_ERROR) it = nullptr;
+      if (it) {
+        auto ret = Delete(it, GetLock());
+        if (ret != wxTHREAD_NO_ERROR) it = nullptr;
+      }
     }
 
     for (auto &it : thread_list_) {

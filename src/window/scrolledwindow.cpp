@@ -23,6 +23,16 @@
 #include <wx/event.h>
 #include <wx/scrolbar.h>
 
+const std::vector<wxEventTypeTag<wxScrollWinEvent>> kScrollWinEventAll = {
+    wxEVT_SCROLLWIN_TOP,        wxEVT_SCROLLWIN_BOTTOM,
+    wxEVT_SCROLLWIN_LINEUP,     wxEVT_SCROLLWIN_LINEDOWN,
+    wxEVT_SCROLLWIN_PAGEUP,     wxEVT_SCROLLWIN_PAGEDOWN,
+    wxEVT_SCROLLWIN_THUMBTRACK, wxEVT_SCROLLWIN_THUMBRELEASE};
+
+std::vector<wxEventTypeTag<wxScrollWinEvent>> GetAllScrollWinEvent() {
+  return kScrollWinEventAll;
+}
+
 ScrolledWindow::ScrolledWindow(wxWindow *parent, wxWindowID id,
                                const wxPoint &pos, const wxSize &size,
                                long style, const wxString &name)

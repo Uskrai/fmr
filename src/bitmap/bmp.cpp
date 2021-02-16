@@ -22,7 +22,7 @@ namespace fmr {
 
 SBitmap::SBitmap(bool isLoaded) { m_isLoaded = isLoaded; }
 
-bool SBitmap::IsOk() const { return m_isOk; }
+bool SBitmap::IsOk() const { return m_isOk || GetImage().IsOk(); }
 bool SBitmap::IsLoaded() const { return m_isLoaded; }
 
 bool SBitmap::IsPointed(const wxPoint& area, const wxPoint& position) const {
@@ -145,8 +145,14 @@ void SBitmap::GetScale(double& x, double& y) const {
   y = scale_y_;
 }
 double SBitmap::GetScale() { return scale_x_; }
-int SBitmap::GetWidth() const { return GetImage().GetWidth() * scale_x_; }
-int SBitmap::GetHeight() const { return GetImage().GetHeight() * scale_y_; }
+int SBitmap::GetWidth() const {
+  return IsOk() ? GetImage().GetWidth() * scale_x_ : 0;
+}
+
+int SBitmap::GetHeight() const {
+  return IsOk() ? GetImage().GetHeight() * scale_y_ : 0;
+}
+
 int SBitmap::GetY() const { return m_pos.y; }
 int SBitmap::GetX() const { return m_pos.x; }
 

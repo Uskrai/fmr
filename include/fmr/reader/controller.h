@@ -18,10 +18,10 @@
 #ifndef FMR_READER_CONTROLLER
 #define FMR_READER_CONTROLLER
 
-#include "fmr/bitmap/bitmap_page_ctrl.h"
-#include "fmr/bitmap/page_loader.h"
+#include "fmr/bitmap/inc.h"
 #include "fmr/bitmap/position_ctrl.h"
 #include "fmr/bitmap/rescaler.h"
+#include "fmr/handler/handler_factory.h"
 #include "fmr/reader/decorator_ctrl.h"
 #include "fmr/reader/scroll_controller.h"
 #include "fmr/window/scrolled_image.h"
@@ -52,7 +52,7 @@ class Controller : public ScrollController {
              const wxSize &size = wxDefaultSize, long style = 0,
              const wxString &name = wxPanelNameStr);
 
-  virtual ~Controller() { Clear(); }
+  virtual ~Controller();
 
   bool CreateWindow(wxWindow *parent, wxWindowID id,
                     const wxPoint &pos = wxDefaultPosition,
@@ -64,10 +64,10 @@ class Controller : public ScrollController {
   bool Open(const std::string &path);
   void AdjustBitmap();
 
-  AbstractHandler *GetHandler() { return loader_->GetHandler(); }
+  AbstractHandler *GetHandler();
   virtual void Clear();
 
-  void SetImagePerPage(size_t size) { loader_->SetImagePerPage(size); }
+  void SetImagePerPage(size_t size);
   void SetPositionFlags(bitmap::PositionFlags flags);
   void SetScaleFlags(bitmap::RescalerFlags flags);
 
@@ -84,7 +84,7 @@ class Controller : public ScrollController {
   wxWindow *GetParent() { return parent_; }
 
  private:
-  void OnLoadedImage(queue::ItemEvent<queue::LoadItem> &event);
+  void OnLoadedImage(bitmap::ImageLoadEvent &event);
   void OnOpenedStreamFound(wxCommandEvent &event);
   void OnWindowScroll(wxScrollWinEvent &event);
   void OnBitmapChanged(bitmap::BitmapVectorEvent &event);

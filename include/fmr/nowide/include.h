@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020-2021 Uskrai
+ *  Copyright (c) 2021 Uskrai
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,25 +15,28 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <wx/app.h>
+#ifndef FMR_NOWIDE_INCLUDE
+#define FMR_NOWIDE_INCLUDE
 
-#include <iostream>
+#if HAVE_BOOST_FILESYSTEM
 
-class wxFrame;
+#if __has_include(<nowide/filesystem.hpp>)
+#include <nowide/filesystem.hpp>
+const std::locale locale = nowide::nowide_filesystem();
+#else
+#error "Using boost::filesystem but boost::nowide doesnt exist"
+#endif
 
 namespace fmr {
 
-class Config;
+namespace nwd {
 
-class App : public wxApp {
-  wxFrame* frame;
-  Config* config;
-  std::ofstream* log_stream;
-  bool OnInit();
-  int OnExit();
+#include <fmr/nowide/using-inc.h>
 
- public:
-  void OpenFile(wxString Path);
-};
+}  // namespace nwd
 
 }  // namespace fmr
+
+#endif  // end of HAVE BOOST_FILESYSTEM_HPP
+
+#endif /* end of include guard: FMR_NOWIDE_INCLUDE */

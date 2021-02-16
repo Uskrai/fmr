@@ -18,34 +18,19 @@
 #ifndef FMR_COMMON_PATH
 #define FMR_COMMON_PATH
 
-#include <wx/filename.h>
-
-#include <filesystem>
+#include <fmr/nowide/filesystem.h>
+#include <wx/string.h>
 
 namespace fmr {
 
 namespace Path {
 const std::string EmptyString = "";
-const char Separator = std::filesystem::path::preferred_separator;
 
-// // return long path
-// wxString GetFullPath( wxString path );
-// // return directory name
-// wxString GetDirName( wxString path );
-// // return parent's path
-// wxString GetParent( const wxString& path );
-// // strip last separator
-// void RemoveDirSep( wxString& path );
-// // return Name without separator
-// wxString GetName( wxString path );
-// // return name with separator if directory
-// wxString GetNameWithSep( wxString path );
-//
-#define DECLARE_PATH_FUNCTION(Name, ret, args) \
-  ret Name(wxString) = delete;                 \
-  ret Name(args)
+std::string MakeString(const nwd::fs::path &path);
 
-std::string GetSeparator();
+char GetSeparator();
+
+bool IsDirectory(const std::string &path);
 
 wxString GetName(wxString) = delete;
 std::string GetName(std::string path);

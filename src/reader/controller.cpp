@@ -18,13 +18,15 @@
 #include "fmr/reader/controller.h"
 
 #include "fmr/bitmap/bitmap_vector_event.h"
+#include "fmr/bitmap/page_loader.h"
 #include "fmr/bitmap/rescaler.h"
 #include "fmr/common/dimension.h"
 #include "fmr/common/event.h"
-#include "fmr/common/string.h"
 #include "fmr/handler/handler_factory.h"
+#include "fmr/nowide/string.h"
 #include "fmr/queue/event.h"
 #include "fmr/thread/load_image_controller.h"
+#include "fmr/window/scrolledwindow.h"
 
 namespace fmr {
 
@@ -82,7 +84,7 @@ bool Controller::Open(const std::string &path) {
     GetWindow()->SetVirtualSize(GetWindow()->GetClientSize());
     if (loader_->Run()) {
       auto event = wxCommandEvent(kEventOpenFile, GetWindow()->GetId());
-      event.SetString(String::FromString<wxString>(path).c_str());
+      event.SetString(String::Widen<wxString>(path).c_str());
       wxPostEvent(GetParent(), event);
       return true;
     }
@@ -94,7 +96,7 @@ bool Controller::Open(const std::string &path) {
 void Controller::SetWindow(ScrolledImageWindow *window) {
   ScrollController::SetWindow(window);
   window->SetDecorator(decorator_.get());
-  event::Bind(GetWindow(), kScrollWinEventAll, &Controller::OnWindowScroll,
+  event::Bind(GetWindow(), GetAllScrollWinEvent(), &Controller::OnWindowScroll,
               this);
 }
 
@@ -107,6 +109,12 @@ void Controller::SetScaleFlags(bitmap::RescalerFlags flags) {
   rescaler_->SetFlags(flags);
   AdjustBitmap();
 }
+
+void Controller::SetImagePerPage(size_t size) {
+  loader_->SetImagePerPage(size);
+}
+
+AbstractHandler *Controller::GetHandler() { return loader_->GetHandler(); }
 
 void Controller::AdjustBitmap() {
   if (!GetBitmapCtrl()->GetBitmapPage()) return;
@@ -130,7 +138,7 @@ void Controller::AdjustBitmap() {
   GetWindow()->Refresh();
 }
 
-void Controller::OnLoadedImage(queue::ItemEvent<queue::LoadItem> &event) {
+void Controller::OnLoadedImage(bitmap::ImageLoadEvent &event) {
   SBitmap bitmap;
   bitmap.SetImage(event.GetItem().GetImage());
   GetBitmapCtrl()->AddBitmap(
@@ -204,6 +212,11 @@ void Controller::OnBitmapPageNotFound(bitmap::BitmapVectorEvent &event) {
 
 void Controller::Clear() {
   GetWindow()->ClearBitmap();
+  loader_->Clear();
+  GetBitmapCtrl()->Clear();
+}
+
+Controller::~Controller() {
   loader_->Clear();
   GetBitmapCtrl()->Clear();
 }

@@ -42,7 +42,7 @@ bool App::OnInit() {
   locale.Init(wxLANGUAGE_DEFAULT);
 
   log_stream =
-      new std::fstream("log.txt", log_stream->binary | log_stream->app);
+      new std::ofstream("log.txt", log_stream->binary | log_stream->app);
   wxLog::SetActiveTarget(new wxLogStream(log_stream));
 
   try {

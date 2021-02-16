@@ -39,6 +39,8 @@ void ScrollController::Scroll(SBitmap *bitmap, ScrollBitmapFlags flags) {
 
 wxPoint ScrollController::GetPosition(const SBitmap *bitmap,
                                       ScrollBitmapFlags flags) const {
+  if (!bitmap || !bitmap->IsOk()) return wxPoint();
+
   wxPoint pos = bitmap->GetPosition();
 
   if (flags == kScrollToBitmapRightTop || flags == kScrollToBitmapRightBottom) {

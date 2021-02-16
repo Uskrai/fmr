@@ -24,8 +24,6 @@ namespace fmr {
 
 class Config : private wxFileConfig {
  private:
-  inline static Config* global = NULL;
-
  public:
   using wxFileConfig::GetPath;
   using wxFileConfig::wxFileConfig;
@@ -48,9 +46,9 @@ class Config : private wxFileConfig {
   using wxFileConfig::Flush;
   using wxFileConfig::Write;
 
-  static Config* Get() { return Config::global; }
+  static Config* Get() { return static_cast<Config*>(wxFileConfig::Get()); }
 
-  static void Set(Config* pConfig) { Config::global = pConfig; }
+  static void Set(Config* pConfig) { wxFileConfig::Set(pConfig); }
 };
 
 };  // namespace fmr

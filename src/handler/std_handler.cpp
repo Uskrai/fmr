@@ -15,18 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "fmr/handler/std_handler.h"
+
 #include <fmr/common/compare.h>
 #include <fmr/common/path.h>
-#include <fmr/common/string.h>
-#include <fmr/handler/std_handler.h>
-
-namespace fs = std::filesystem;
-
 #include <wx/log.h>
 
 #include <algorithm>
-#include <fstream>
 #include <iostream>
+
+#include "fmr/nowide/fstream.h"
 
 namespace fmr {
 
@@ -93,22 +91,10 @@ bool STDHandler::IsExist(size_t idx) const {
 
 bool STDHandler::CanHandle(const std::string &path) { return true; }
 
-std::streampos fileSize(const char *filePath) {
-  std::streampos fsize = 0;
-  std::ifstream file(filePath, std::ios::binary);
-
-  fsize = file.tellg();
-  file.seekg(0, std::ios::end);
-  fsize = file.tellg() - fsize;
-  file.close();
-
-  return fsize;
-}
-
 bool STDHandler::GetStream(SStream &stream) {
   if (stream.GetHandlerPath() != GetName()) return false;
 
-  if (!stream.IsDir()) stream.Open(GetItemPath(stream));
+  stream.Open(GetItemPath(stream));
   return true;
 }
 
@@ -116,7 +102,9 @@ bool STDHandler::OpenStream(const std::string &path, SStream &stream,
                             bool is_get_stream) {
   stream.SetName(Path::MakeRelative(GetName(), path));
   stream.SetHandlerPath(GetName());
-  stream.SetDir(fs::is_directory(Path::Append(GetName(), stream.GetName())));
+  stream.SetDir(
+      nwd::fs::is_directory(Path::Append(GetName(), stream.GetName())));
+  stream.Open();
 
   if (is_get_stream) GetStream(stream);
 
@@ -125,30 +113,32 @@ bool STDHandler::OpenStream(const std::string &path, SStream &stream,
 
 bool STDHandler::GetFirst(SStream &stream, DirGetFlags flags,
                           bool is_get_stream) {
-  fs::directory_options options;
+  nwd::fs::directory_options options;
 
-  if (!IsOpened()) return false;
+  if (!IsOpened() || !nwd::fs::exists(GetName())) return false;
 
   if (flags & kDirFollowSymLink)
-    options |= fs::directory_options::follow_directory_symlink;
+    options |= nwd::fs::directory_options::follow_directory_symlink;
 
   if (flags & kDirSkipDenied)
-    options |= fs::directory_options::skip_permission_denied;
+    options |= nwd::fs::directory_options::skip_permission_denied;
 
   iterator_flags_ = flags;
-  iterator_item_ = std::unique_ptr<fs::directory_iterator>(
-      new fs::directory_iterator(GetName(), options));
-  iterator_ = fs::begin(*iterator_item_);
+  iterator_item_ = std::unique_ptr<nwd::fs::directory_iterator>(
+      new nwd::fs::directory_iterator(GetName(), options));
+  iterator_ = nwd::fs::begin(*iterator_item_);
   return GetNextStream(stream, is_get_stream);
 }
 
 bool STDHandler::GetNextStream(SStream &stream, bool is_get_stream) {
-  if (!iterator_item_ || iterator_ == fs::end(*iterator_item_)) return false;
+  if (!iterator_item_ || iterator_ == nwd::fs::end(*iterator_item_))
+    return false;
 
-  fs::path path = iterator_->path();
+  stream = SStream();
+  nwd::fs::path path = iterator_->path();
 
-  OpenStream(path.u8string(), stream, is_get_stream);
-  stream.SetDir(fs::is_directory(path));
+  OpenStream(Path::MakeString(path), stream, is_get_stream);
+  stream.SetDir(nwd::fs::is_directory(path));
 
   iterator_++;
   return true;
@@ -207,21 +197,23 @@ bool STDHandler::CreateDirectories() {
 }
 
 bool STDHandler::CreateDirectories(const std::string &path) {
-  return path != "" && (fs::exists(path) || fs::create_directories(path));
+  return path != "" &&
+         (nwd::fs::exists(path) || nwd::fs::create_directories(path));
 }
 
 bool STDHandler::CreateDirectory(std::string directory_name, bool overwrite) {
   if (!IsOpened()) return false;
 
-  std::string path = GetName() + directory_name;
-  if (fs::exists(path) && !overwrite) return false;
+  std::string path = Path::Append(GetName(), directory_name);
+  if (nwd::fs::exists(path) && !overwrite) return false;
 
   SStream stream;
   StreamActionType flags = kStreamWrite;
 
   if (overwrite) flags |= kStreamOverwrite;
 
-  stream.SetName(path);
+  stream.SetHandlerPath(GetName());
+  stream.SetName(directory_name);
   stream.SetType(flags);
   stream.SetDir();
 
@@ -234,14 +226,15 @@ bool STDHandler::CreateFiles(SStream stream, const std::string &file_name,
                              bool overwrite) {
   if (!IsOpened()) return false;
 
-  std::string path = GetName() + file_name;
-  if (fs::exists(path) && !overwrite) return false;
+  std::string path = Path::Append(GetName(), file_name);
+  if (nwd::fs::exists(path) && !overwrite) return false;
 
   StreamActionType flags = kStreamWrite;
 
   if (overwrite) flags |= kStreamOverwrite;
 
-  OpenStream(path, stream);
+  stream.SetHandlerPath(GetName());
+  stream.SetName(file_name);
   stream.SetType(flags);
   list_write_stream_.push_back(std::move(stream));
 
@@ -270,35 +263,34 @@ bool STDHandler::Remove(const std::string &filename, bool recursive) {
 bool STDHandler::RemoveAll() { return IsOpened() && RemoveAll(GetName()); }
 
 bool STDHandler::RemoveAll(const std::string &path) {
-  return !path.empty() && (!fs::exists(path) || fs::remove_all(path));
+  return !path.empty() && (!nwd::fs::exists(path) || nwd::fs::remove_all(path));
 }
 
 bool STDHandler::CommitWrite() {
-  if (!fs::exists(GetName())) return false;
+  if (!nwd::fs::exists(GetName())) return false;
 
   for (auto &it : list_write_stream_) {
-    std::string path = it.GetHandlerPath() + it.GetName();
+    std::string path = Path::Append(it.GetHandlerPath(), it.GetName());
     if (it.GetType() & kStreamRemove) {
       if (it.GetType() & kStreamRecursive)
-        fs::remove_all(path);
+        nwd::fs::remove_all(path);
       else
-        fs::remove(path);
+        nwd::fs::remove(path);
 
       continue;
     } else if (it.GetType() & kStreamWrite) {
       if (it.IsDir()) {
-        fs::create_directories(path);
+        nwd::fs::create_directories(path);
       } else {
-        fs::path temp(path);
-        std::ofstream out_stream;
-        out_stream.open(temp, std::ios_base::binary);
+        nwd::fs::path temp(path);
+        nwd::ofstream out_stream;
+        out_stream.open(Path::MakeString(temp), nwd::ofstream::binary);
 
-        char *buffer = new char[it.GetSize()];
-        size_t length = it.CopyTo(buffer, it.GetSize());
+        auto buffer = std::make_unique<char[]>(it.GetSize());
+        size_t length = it.CopyTo(buffer.get(), it.GetSize());
 
-        out_stream.write(buffer, length);
+        out_stream.write(buffer.get(), length);
         out_stream.close();
-        delete[] buffer;
       }
     }
   }

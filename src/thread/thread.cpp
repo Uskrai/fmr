@@ -59,15 +59,9 @@ BaseThread::BaseThread(ThreadController *parent, wxThreadKind type, int id)
   SetEventId(id);
 }
 
-void BaseThread::SetId(int id) {
-  wxCriticalSectionLocker locker(g_sLock);
-  m_id = id;
-}
+void BaseThread::SetId(int id) { m_id = id; }
 
-void BaseThread::SetEventId(int id) {
-  wxCriticalSectionLocker locker(g_sLock);
-  m_id = id;
-}
+void BaseThread::SetEventId(int id) { m_id = id; }
 
 void BaseThread::QueueEventParent(wxEvent *event) {
   if (disable_event_on_destroy_) {
@@ -101,7 +95,6 @@ void BaseThread::DisableEventOnDestroy(bool disable) {
 }
 
 BaseThread::~BaseThread() {
-  wxCriticalSectionLocker locker(g_sLock);
   if (GetParent()) GetParent()->DoSetNull(this);
 }
 

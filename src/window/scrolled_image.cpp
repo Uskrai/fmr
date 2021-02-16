@@ -20,6 +20,7 @@
 
 #include "fmr/common/dimension.h"
 #include "fmr/common/event.h"
+#include "fmr/window/scrolledwindow.h"
 
 namespace fmr {
 
@@ -29,7 +30,7 @@ bool ScrolledImageWindow::Create(wxWindow *parent, wxWindowID id,
                                  const wxPoint &pos, const wxSize &size,
                                  long style, const wxString &name) {
   bool ret = ScrolledWindow::Create(parent, id, pos, size, style, name);
-  event::Bind(kScrollWinEventAll, &ScrolledImageWindow::OnScroll, this);
+  event::Bind(GetAllScrollWinEvent(), &ScrolledImageWindow::OnScroll, this);
 
   return ret;
 }

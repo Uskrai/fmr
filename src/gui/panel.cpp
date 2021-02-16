@@ -15,17 +15,23 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "fmr/gui/panel.h"
+
 #include <fmr/common/config.h>
 #include <fmr/common/dimension.h>
 #include <fmr/common/path.h>
-#include <fmr/gui/panel.h>
 #include <wx/popupwin.h>
 #include <wx/sizer.h>
 #include <wx/window.h>
 
 #include <iostream>
+#include <memory>
 
+#include "fmr/bitmap/position_ctrl.h"
+#include "fmr/explorer/window_explorer.h"
 #include "fmr/handler/handler_factory.h"
+#include "fmr/nowide/string.h"
+#include "fmr/reader/controller.h"
 
 namespace fmr {
 
@@ -42,7 +48,6 @@ Panel::Panel(wxWindow *parent, wxWindowID id, wxPoint position, wxSize size)
 
 void Panel::BindEvent() {
   Bind(EVT_OPEN_FILE, &Panel::OnExplorerOpenFile, this);
-  Bind(wxEVT_TIMER, &Panel::OnReaderInfoTimer, this, kReaderInfoTimer);
   Bind(reader::kEventOpenFile, &Panel::OnReaderOpenFile, this, ReaderWindow);
 }
 
@@ -123,7 +128,7 @@ bool Panel::OpenExplorer() {
 
   if (select_path == "") {
     select_path =
-        String::ToString(Config::Get()->Read("RecentlyOpened", wxString()));
+        String::Narrow(Config::Get()->Read("RecentlyOpened", wxString()));
   }
 
   if (!explorer_) return false;
@@ -180,33 +185,16 @@ void Panel::OnExplorerOpenFile(StreamEvent &event) {
   }
 }
 
-void Panel::OnReaderChangePage(wxCommandEvent &event) {
-  // TODO: Make this work
-  wxString text = wxString::Format("%d/%d", event.GetSelection(), 23);
-  reader_info_->SetLabelText(text);
-  wxRect rect(reader_->GetWindow()->GetPosition(),
-              reader_->GetWindow()->GetClientSize());
-  wxPoint pos = dimension::AlignPosition(
-      reader_->GetWindow()->GetClientRect(), reader_info_->GetSize(),
-      wxALIGN_TOP | wxALIGN_CENTER_HORIZONTAL);
-
-  reader_info_->SetWindowStyleFlag(wxALIGN_CENTER_HORIZONTAL |
-                                   wxST_NO_AUTORESIZE);
-
-  reader_info_->SetPosition(pos);
-  reader_info_->Show();
-  reader_info_timer_.Start(1000, wxTIMER_ONE_SHOT);
-}
-
 void Panel::OnReaderOpenFile(wxCommandEvent &event) {
   Config::Get()->Write("RecentlyOpened", event.GetString());
 }
-
-void Panel::OnReaderInfoTimer(wxTimerEvent &event) { reader_info_->Hide(); }
 
 bool Panel::Destroy() {
   if (reader_) reader_->GetWindow()->Destroy();
   if (explorer_) explorer_->Destroy();
   return wxWindow::Destroy();
 }
+
+Panel::~Panel() { reader_.reset(); }
+
 };  // namespace fmr

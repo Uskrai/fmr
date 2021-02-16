@@ -2,6 +2,10 @@
 AM_CPPFLAGS = -I@srcdir@/include
 
 SUBDIRS = . test
+#
+# AM_CPPFLAGS += $(BOOST_CPPFLAGS)
+# AM_LDFLAGS = $(BOOST_LDFLAGS) \
+						 # $(BOOST_FILESYSTEM_LIBS)
 
 common = src/common
 commondir = @abs_builddir@/common
@@ -23,7 +27,8 @@ lib_handler_la_SOURCES = $(handler)/default_handler.cpp \
 						 $(handler)/stream_util.cpp
 
 lib_handler_la_LIBADD = lib_path.la \
-						lib_compare.la
+						lib_compare.la \
+						$(BOOST_FILESYSTEM_LDFLAGS)
 
 # make libraries for bitmap
 bitmap = src/bitmap

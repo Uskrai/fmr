@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020-2021 Uskrai
+ *  Copyright (c) 2021 Uskrai
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,25 +15,32 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <wx/app.h>
+#ifndef FMR_NOWIDE_FILESYSTEM
+#define FMR_NOWIDE_FILESYSTEM
 
-#include <iostream>
+#include <fmr/nowide/include.h>
 
-class wxFrame;
+#ifdef FMR_USE_BOOST_FILESYSTEM
+#define BOOST_FILESYSTEM_NO_DEPRECATED
+#include <boost/filesystem.hpp>
+#else
+#include <filesystem>
+#endif
+
+#include <fmr/nowide/using-inc.h>
 
 namespace fmr {
 
-class Config;
+namespace nwd {
 
-class App : public wxApp {
-  wxFrame* frame;
-  Config* config;
-  std::ofstream* log_stream;
-  bool OnInit();
-  int OnExit();
+#ifdef FMR_USE_BOOST_FILESYSTEM
+namespace fs = boost::filesystem;
+#else
+namespace fs = filesystem;
+#endif
 
- public:
-  void OpenFile(wxString Path);
-};
+}  // namespace nwd
 
 }  // namespace fmr
+
+#endif /* end of include guard: FMR_NOWIDE_FILESYSTEM */

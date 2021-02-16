@@ -18,7 +18,6 @@
 #ifndef HANDLER_DEFAULTHANDLER
 #define HANDLER_DEFAULTHANDLER
 
-#include <fmr/common/string.h>
 #include <fmr/common/vector.h>
 #include <fmr/handler/abstract_openable_handler.h>
 #include <wx/dir.h>

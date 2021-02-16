@@ -18,18 +18,12 @@
 #ifndef FMR_EXPLORER_WINDOW
 #define FMR_EXPLORER_WINDOW
 
-#include <fmr/bitmap/rescale_loader.h>
-#include <fmr/common/path.h>
-#include <fmr/explorer/common.h>
-#include <fmr/explorer/image_window_explorer.h>
-#include <fmr/handler/abstract_handler.h>
-#include <fmr/handler/struct_stream.h>
+#include <fmr/bitmap/inc.h>
+#include <fmr/handler/handler_factory.h>
 #include <fmr/window/flex_grid_window.h>
 
-#include <map>
 #include <memory>
-
-#include "fmr/handler/handler_factory.h"
+#include <unordered_map>
 
 class wxPanel;
 
@@ -39,6 +33,8 @@ wxDECLARE_EVENT(EVT_OPEN_FILE, StreamEvent);
 
 namespace explorer {
 
+class ImageWindow;
+
 enum ControllerId {
   kLoaderId = wxID_HIGHEST + 1600
   //
@@ -46,7 +42,7 @@ enum ControllerId {
 
 class Window : public FlexGridWindow {
  protected:
-  bitmap::RescaleLoader loader_ = bitmap::RescaleLoader(this, kLoaderId);
+  std::unique_ptr<bitmap::RescaleLoader> loader_;
   std::unordered_map<const SStream *, ImageWindow *> map_window_;
   std::shared_ptr<AbstractOpenableHandler> handler_;
   std::vector<std::unique_ptr<SStream>> list_stream_;

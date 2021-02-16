@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/common/string.h>
 #include <fmr/handler/abstract_handler.h>
 #include <fmr/handler/handler_factory.h>
 #include <fmr/queue/find_handler.h>
@@ -36,7 +35,8 @@ bool FindHandler::ProcessTask(value_type &stream) {
   auto item = FindItem(stream, *stream);
   if (IsBeingStopped()) return false;
 
-  FindStatus ret = Find(item);
+  FindStatus ret;
+  ret = Find(item);
 
   if (ret == kFindNotFound) {
     item.SetStatus(kFindNotFound);

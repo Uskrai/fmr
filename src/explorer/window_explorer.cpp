@@ -15,10 +15,13 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/explorer/window_explorer.h>
+#include "fmr/explorer/window_explorer.h"
+
 #include <wx/filename.h>
 
 #include "fmr/bitmap/loader.h"
+#include "fmr/bitmap/rescale_loader.h"
+#include "fmr/explorer/image_window_explorer.h"
 #include "fmr/handler/handler_factory.h"
 #include "fmr/queue/event.h"
 #include "fmr/thread/find_handler_controller.h"
@@ -36,10 +39,12 @@ Window::Window(wxWindow *parent, const wxWindowID &id, const wxPoint &pos,
     : FlexGridWindow(parent, id, pos, size, style, name) {
   CreateGrid(0, 0);
   BindEvent();
-  loader_.GetFindController()->GetQueue()->SetFlags(
+
+  loader_ = std::make_unique<bitmap::RescaleLoader>(this, kLoaderId);
+  loader_->GetFindController()->GetQueue()->SetFlags(
       queue::kFindHandlerOnlyFirstItem | queue::kFindHandlerRecursive);
   rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleFitAll);
-  loader_.GetRescaleController()->GetQueue()->SetRescaler(rescaler_.get());
+  loader_->GetRescaleController()->GetQueue()->SetRescaler(rescaler_.get());
 }
 
 void Window::BindEvent() {
@@ -55,6 +60,11 @@ bool Window::Open(std::shared_ptr<AbstractOpenableHandler> handler) {
   if (!handler) return false;
 
   handler->Traverse(false);
+
+  if (handler->Size() == 0) return false;
+  if (handler_ && handler->GetName() == handler_->GetName()) {
+    if (handler_->Size() == handler->Size()) return true;
+  }
 
   int column = 5;
   int row = ceil(double(handler->Size()) / double(column));
@@ -90,7 +100,7 @@ bool Window::Open(std::shared_ptr<AbstractOpenableHandler> handler) {
 
     Add(image_cell_window);
 
-    loader_.PushFind(stream.get());
+    loader_->PushFind(stream.get());
     map_window_.insert(std::make_pair(stream.get(), image_cell_window));
     list_stream_.push_back(std::move(stream));
     idx++;
@@ -193,7 +203,7 @@ bool Window::OpenParent() {
 void Window::Clear() {
   ClearCell(true);
   ResetCellPosition();
-  loader_.Clear();
+  loader_->Clear();
   map_window_.clear();
   list_stream_.clear();
   handler_.reset();
@@ -215,7 +225,7 @@ void Window::OnKeyDown(wxKeyEvent &event) {
 
 void Window::OnImageLoaded(bitmap::ImageLoadEvent &event) {
   auto item =
-      map_window_.find(loader_.GetSourceStream(event.GetItem().GetStream()));
+      map_window_.find(loader_->GetSourceStream(event.GetItem().GetStream()));
   if (item != map_window_.end()) {
     SBitmap &bitmap = item->second->GetBitmap();
     bitmap.SetImage(event.GetItem().GetImage());

@@ -44,11 +44,9 @@ Loader::Loader(wxEvtHandler* parent, int id) {
 
   checker_ = std::make_unique<ImageChecker>();
 
-  find_receiver_ = std::make_unique<queue::ItemReceiverEvent<queue::FindItem>>(
-      this, GetEventId());
+  find_receiver_ = std::make_unique<ImageFindReceiverEvent>(this, GetEventId());
 
-  load_receiver_ = std::make_unique<queue::ItemReceiverEvent<queue::LoadItem>>(
-      this, GetEventId());
+  load_receiver_ = std::make_unique<ImageLoadReceiverEvent>(this, GetEventId());
 
   SetEventId(id);
   GetFindController()->GetQueue()->SetChecker(checker_.get());
