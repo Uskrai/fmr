@@ -132,7 +132,7 @@ void SBitmap::Draw(wxDC& dc, const wxRect& rect) {
 
 void SBitmap::PrepareBitmap() {
   wxRect rect = CalcMinimumRect(visible_area_);
-  if (rect != visible_bitmap_rect_) {
+  if (rect != visible_bitmap_rect_ && !rect.IsEmpty()) {
     visible_bitmap_ = GetImage().GetSubImage(rect);
     visible_bitmap_rect_ = rect;
   }
