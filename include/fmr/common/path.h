@@ -31,6 +31,7 @@ std::string MakeString(const nwd::fs::path &path);
 char GetSeparator();
 
 bool IsDirectory(const std::string &path);
+bool IsDirectory(const nwd::fs::path &path);
 
 wxString GetName(wxString) = delete;
 std::string GetName(std::string path);

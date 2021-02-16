@@ -60,11 +60,10 @@ std::string GetRootPath(const std::string &path) {
 }
 
 #ifdef FMR_USE_BOOST_FILESYSTEM
-bool IsDirectory(const std::string &path) {
-  auto temp = MakePath(path);
-  if (nwd::fs::is_directory(temp)) return true;
+bool IsDirectory(const nwd::fs::path &path) {
+  if (nwd::fs::is_directory(path)) return true;
 
-  auto type = nwd::fs::status(temp).type();
+  auto type = nwd::fs::status(path).type();
   if (type == nwd::fs::file_type::reparse_file && path.size() > 8) {
     // temporary fix, cannot find anything to test reparse file in boost doc
     try {
@@ -76,13 +75,16 @@ bool IsDirectory(const std::string &path) {
   }
   return false;
 }
-#else
-bool IsDirectory(const std::string &path) {
-  auto temp = MakePath(path);
 
-  return nwd::fs::is_directory(temp);
+#else
+bool IsDirectory(const nwd::fs::path &path) {
+  return nwd::fs::is_directory(path);
 }
 #endif
+
+bool IsDirectory(const std::string &path) {
+  return IsDirectory(MakePath(path));
+}
 
 std::string GetDirName(const std::string &path) {
   try {
