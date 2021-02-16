@@ -113,10 +113,23 @@ FindStatus FindHandler::Find(AbstractOpenableHandler *handler, FindItem &item) {
 template <typename T>
 FindStatus FindHandler::TraverseHandler(T *handler, FindItem &item) {
   wxLogMessage("Traversing %s", handler->GetName());
-  handler->Traverse(false);
+
+  SStream stream;
+  std::vector<SStream> vec_stream;
+  bool cont = handler->GetFirst(stream, kDirDefault, false);
+
+  while (cont) {
+    vec_stream.push_back(std::move(stream));
+
+    cont = handler->GetNextStream(stream, false);
+
+    TEST_RETURN();
+  }
+
+  std::sort(vec_stream.begin(), vec_stream.end(), Compare::NaturalSortable);
 
   FindStatus is_found = kFindNotFound;
-  for (const auto &it : handler->GetChild()) {
+  for (const auto &it : vec_stream) {
     TEST_RETURN();
 
     auto child_item = FindItem(item.GetSourceStream(), it);
