@@ -13,8 +13,9 @@ a simple manga reader.
   <ul>
     <li>wxWidgets >= 3.0.4</li>
     <li>c++17</li>
+    <li>Boost.Filesystem and Boost.Nowide ( Disableable )  </li>
   </ul>
-  
+
 
 <h2><b>How to build</b></h2>
 <ol>
@@ -25,6 +26,7 @@ a simple manga reader.
 </ol>
 
 <h2><b>Option</b></h2>
+<span>--enable-std-filesystem                 // disable Boost.Filesystem and Boost.Nowide</span>
 <span>--with-wx-config=/path/to/wx-config     // specify wx-config path</span><br>
 <span>--disable-shared or --enable-shared=no  // make static link</span><br>
 <span>--build=x86_64-w64-mingw32 --host=x86_64-linux // cross-compile</span><br>
