@@ -27,7 +27,7 @@ namespace reader {
 
 PageIndicator::PageIndicator()
     : font_(*wxNORMAL_FONT),
-      background_colour_("DIM GRAY"),
+      background_colour_("WHITE"),
       text_colour_(*wxBLACK) {
   font_.MakeLarger().MakeLarger();
   auto *color = &background_colour_;
