@@ -47,6 +47,8 @@ class RescaleLoader : public Loader {
 
   void Clear();
 
+  void SetRescaler(bitmap::Rescaler *rescaler);
+
  private:
   void OnItemLoaded(ImageLoadEvent &event);
   void OnRescaled(RescaleEvent &event);

@@ -22,6 +22,7 @@
 #include <fmr/bitmap/inc.h>
 #include <fmr/handler/struct_stream.h>
 #include <fmr/queue/factory.h>
+#include <fmr/queue/find_handler.h>
 #include <fmr/thread/controller_factory.h>
 #include <wx/event.h>
 
@@ -93,6 +94,8 @@ class Loader : public wxEvtHandler {
   thread::FindHandlerController *GetFindController();
 
   thread::LoadImageController *GetLoadImageController();
+
+  void SetFindFlags(queue::FindHandlerFlags flags);
 
  private:
   void OnFindItemFound(ImageFindEvent &event);

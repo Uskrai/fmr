@@ -57,6 +57,11 @@ void RescaleLoader::SetControllerId(int find_id, int load_id, int rescale_id) {
   Bind(kEventRescale, &RescaleLoader::OnRescaled, this, GetEventId());
   Bind(kEventImageLoad, &RescaleLoader::OnItemLoaded, this, GetEventId());
 }
+
+void RescaleLoader::SetRescaler(bitmap::Rescaler *rescaler) {
+  GetRescaleController()->GetQueue()->SetRescaler(rescaler);
+}
+
 void RescaleLoader::OnThreadCompleted(wxThreadEvent &event) { event.Skip(); }
 
 void RescaleLoader::OnItemLoaded(ImageLoadEvent &event) {

@@ -100,6 +100,10 @@ const SStream* Loader::GetSourceStream(const SStream* found_stream) {
   return GetFindController()->GetSourceStream(found_stream);
 }
 
+void Loader::SetFindFlags(queue::FindHandlerFlags flags) {
+  GetFindController()->GetQueue()->SetFlags(flags);
+}
+
 void Loader::OnFindItemFound(ImageFindEvent& event) {
   auto item = event.GetItem().GetSourceStream();
 

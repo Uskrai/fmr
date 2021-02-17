@@ -21,12 +21,12 @@
 
 #include "fmr/bitmap/loader.h"
 #include "fmr/bitmap/rescale_loader.h"
+#include "fmr/bitmap/rescaler.h"
 #include "fmr/explorer/image_window_explorer.h"
 #include "fmr/handler/handler_factory.h"
 #include "fmr/queue/event.h"
-#include "fmr/thread/find_handler_controller.h"
-#include "fmr/thread/load_image_controller.h"
-#include "fmr/thread/rescale_controller.h"
+#include "fmr/queue/find_handler.h"
+#include "fmr/queue/load_image.h"
 
 namespace fmr {
 
@@ -41,10 +41,10 @@ Window::Window(wxWindow *parent, const wxWindowID &id, const wxPoint &pos,
   BindEvent();
 
   loader_ = std::make_unique<bitmap::RescaleLoader>(this, kLoaderId);
-  loader_->GetFindController()->GetQueue()->SetFlags(
-      queue::kFindHandlerOnlyFirstItem | queue::kFindHandlerRecursive);
+  loader_->SetFindFlags(queue::kFindHandlerOnlyFirstItem |
+                        queue::kFindHandlerRecursive);
   rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleFitAll);
-  loader_->GetRescaleController()->GetQueue()->SetRescaler(rescaler_.get());
+  loader_->SetRescaler(rescaler_.get());
 }
 
 void Window::BindEvent() {

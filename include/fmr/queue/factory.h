@@ -27,11 +27,13 @@ namespace fmr {
 namespace queue {
 
 class FindHandler;
-class LoadImage;
-class Rescale;
-
-class LoadItem;
 class FindItem;
+class FindHandlerChecker;
+
+class LoadImage;
+class LoadItem;
+
+class Rescale;
 class RescaleItem;
 
 template <typename ItemClass>
