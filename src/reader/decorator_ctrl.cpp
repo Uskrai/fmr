@@ -47,7 +47,7 @@ void DecoratorCtrl::Create(ScrolledImageWindow *window,
 void DecoratorCtrl::OnBitmapChanged(bitmap::BitmapVectorEvent &event) {
   page_indicator_->SetPage(event.GetPagePos() + 1);
   page_indicator_->SetPageLimit(bitmap_page_ctrl_->GetAllPage().size());
-  page_indicator_->ShowOnce(500);
+  page_indicator_->ShowOnce(1500);
   event.Skip();
 }
 
