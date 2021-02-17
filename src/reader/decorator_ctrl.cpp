@@ -37,6 +37,8 @@ void DecoratorCtrl::Create(ScrolledImageWindow *window,
   bitmap_page_ctrl_ = bmp_page_ctrl;
   bitmap_page_ctrl_->Bind(bitmap::kEventBitmapChanged,
                           &DecoratorCtrl::OnBitmapChanged, this);
+  bitmap_page_ctrl_->Bind(bitmap::kEventBitmapVectorPushed,
+                          &DecoratorCtrl::OnBitmapVectorPushed, this);
 
   AddDecorator(page_indicator_.get());
   SetWindow(window);
@@ -46,6 +48,11 @@ void DecoratorCtrl::OnBitmapChanged(bitmap::BitmapVectorEvent &event) {
   page_indicator_->SetPage(event.GetPagePos() + 1);
   page_indicator_->SetPageLimit(bitmap_page_ctrl_->GetAllPage().size());
   page_indicator_->ShowOnce(500);
+  event.Skip();
+}
+
+void DecoratorCtrl::OnBitmapVectorPushed(bitmap::BitmapVectorEvent &event) {
+  page_indicator_->SetPageLimit(bitmap_page_ctrl_->GetAllPage().size());
   event.Skip();
 }
 

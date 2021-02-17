@@ -89,6 +89,7 @@ class Controller : public ScrollController {
   void OnWindowScroll(wxScrollWinEvent &event);
   void OnBitmapChanged(bitmap::BitmapVectorEvent &event);
   void OnBitmapPageNotFound(bitmap::BitmapVectorEvent &event);
+  void OnBitmapVectorPushed(bitmap::BitmapVectorEvent &event);
 };
 
 }  // namespace reader

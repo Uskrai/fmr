@@ -24,6 +24,7 @@ namespace fmr {
 namespace bitmap {
 
 wxDEFINE_EVENT(kEventBitmapPageNotFound, BitmapVectorEvent);
+wxDEFINE_EVENT(kEventBitmapVectorPushed, BitmapVectorEvent);
 
 BitmapPageCtrl::BitmapPageCtrl(ScrolledImageWindow *window,
                                PositionCtrl *pos_ctrl, Rescaler *rescaler,
@@ -52,9 +53,10 @@ void BitmapPageCtrl::AddBitmap(const SBitmap &bitmap, size_t page_pos,
   }
   RecalcPosition(page_ptr);
 
-  if (page_pos == curr_page_) {
-    SetBitmapPage(curr_page_);
-  }
+  BitmapVectorEvent event(kEventBitmapVectorPushed, wxID_ANY);
+  event.SetBitmapVec(page);
+  event.SetPagePos(page_pos);
+  wxPostEvent(this, event);
 }
 
 void BitmapPageCtrl::SetBitmapPage(size_t page) { GoToPage(page); }

@@ -17,6 +17,7 @@
 
 #include "fmr/reader/controller.h"
 
+#include "fmr/bitmap/bitmap_page_ctrl.h"
 #include "fmr/bitmap/bitmap_vector_event.h"
 #include "fmr/bitmap/page_loader.h"
 #include "fmr/bitmap/rescaler.h"
@@ -50,6 +51,8 @@ Controller::Controller() {
                         &Controller::OnBitmapChanged, this);
   GetBitmapCtrl()->Bind(bitmap::kEventBitmapPageNotFound,
                         &Controller::OnBitmapPageNotFound, this);
+  GetBitmapCtrl()->Bind(bitmap::kEventBitmapVectorPushed,
+                        &Controller::OnBitmapVectorPushed, this);
 
   decorator_ = std::make_unique<DecoratorCtrl>(GetWindow(), bitmap_ctrl_.get());
 
@@ -208,6 +211,12 @@ void Controller::OnBitmapChanged(bitmap::BitmapVectorEvent &event) {
 void Controller::OnBitmapPageNotFound(bitmap::BitmapVectorEvent &event) {
   ChangeFolder(event.GetDirection());
   event.Skip();
+}
+
+void Controller::OnBitmapVectorPushed(bitmap::BitmapVectorEvent &event) {
+  if (event.GetPagePos() == GetBitmapCtrl()->GetPagePos()) {
+    GetWindow()->Refresh();
+  }
 }
 
 void Controller::Clear() {

@@ -26,6 +26,7 @@ namespace fmr {
 namespace bitmap {
 
 wxDECLARE_EVENT(kEventBitmapPageNotFound, BitmapVectorEvent);
+wxDECLARE_EVENT(kEventBitmapVectorPushed, BitmapVectorEvent);
 
 class BitmapPageCtrl : public BitmapCtrl {
   std::vector<std::unique_ptr<BitmapPage>> vec_page_;

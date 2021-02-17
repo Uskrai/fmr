@@ -78,17 +78,17 @@ void ScrollController::SetFirstShown(const SBitmap *bitmap,
 
   if (!pos) GetWindow()->Scroll(bitmap->GetPosition());
 
+  wxPoint scroll_pos = window_->GetViewStart();
   for (const auto &it : window_->GetPage()->GetBitmap()) {
     if (&it != bitmap) continue;
     if (it.GetPosition() != *pos) {
-      wxPoint scroll_pos = window_->GetViewStart();
       scroll_pos.x += it.GetX() - pos->x;
       scroll_pos.y += it.GetY() - pos->y;
       GetWindow()->AdjustScrollBar();
-      GetWindow()->Scroll(scroll_pos);
       break;
     }
   }
+  GetWindow()->Scroll(scroll_pos);
 }
 
 int ScrollController::GetStep(wxDirection direction) const {

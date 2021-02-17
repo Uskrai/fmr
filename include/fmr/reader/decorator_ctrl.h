@@ -50,6 +50,7 @@ class DecoratorCtrl : public WindowDecoratorList {
 
  private:
   void OnBitmapChanged(bitmap::BitmapVectorEvent &event);
+  void OnBitmapVectorPushed(bitmap::BitmapVectorEvent &event);
 };
 
 }  // namespace reader

@@ -42,11 +42,8 @@ void ScrolledImageWindow::DrawBitmap(wxDC &dc) {
 }
 
 void ScrolledImageWindow::DoScroll(int x, int y) {
-  wxPoint pos = GetViewStart();
   ScrolledWindow::DoScroll(x, y);
-
-  if (page_ && pos != GetViewStart())
-    page_->SetVisibleArea(GetViewStart(), GetClientSize());
+  if (page_) page_->SetVisibleArea(GetViewStart(), GetClientSize());
 }
 
 void ScrolledImageWindow::OnScroll(wxScrollWinEvent &event) {
