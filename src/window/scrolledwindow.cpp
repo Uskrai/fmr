@@ -230,6 +230,7 @@ void ScrolledWindow::OnMouseWheel(wxMouseEvent &event) {
 void ScrolledWindow::OnMouseMotion(wxMouseEvent &event) {
   // TODO: make this member var
   static wxPoint lastPos;
+  event.Skip();
   // only scroll for default if there is
   // no modifier ( ctrl,alt,shift,etc )
   // is pressed
@@ -244,14 +245,13 @@ void ScrolledWindow::OnMouseMotion(wxMouseEvent &event) {
       view.y -= view_y;
 
       Scroll(view);
-      return;
+      event.Skip(false);
     }
   }
 
   // store last mouse position
   // to track movement
   lastPos = event.GetPosition();
-  event.Skip();
 }
 
 void ScrolledWindow::OnScrollThumbTrack(wxScrollWinEvent &event) {
