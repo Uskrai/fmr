@@ -84,9 +84,10 @@ class ScrolledImageWindow : public ScrolledWindow {
    */
   void DrawBitmap(wxDC &dc);
 
+ private:
   virtual void OnDraw(wxDC &dc) override;
-
   virtual void OnScroll(wxScrollWinEvent &event);
+  virtual void OnSize(wxSizeEvent &event);
 };
 
 }  // namespace fmr

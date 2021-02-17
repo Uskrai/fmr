@@ -31,6 +31,7 @@ bool ScrolledImageWindow::Create(wxWindow *parent, wxWindowID id,
                                  long style, const wxString &name) {
   bool ret = ScrolledWindow::Create(parent, id, pos, size, style, name);
   event::Bind(GetAllScrollWinEvent(), &ScrolledImageWindow::OnScroll, this);
+  Bind(wxEVT_SIZE, &ScrolledImageWindow::OnSize, this);
 
   return ret;
 }
@@ -74,6 +75,13 @@ void ScrolledImageWindow::OnScroll(wxScrollWinEvent &event) {
 void ScrolledImageWindow::OnDraw(wxDC &dc) {
   DrawBitmap(dc);
   if (decorator_) decorator_->Draw(dc);
+}
+
+void ScrolledImageWindow::OnSize(wxSizeEvent &event) {
+  wxRect rect(GetViewStart(), GetClientSize());
+  if (decorator_) decorator_->SetVisibleArea(wxRect(rect));
+  if (page_) page_->SetVisibleArea(rect);
+  event.Skip();
 }
 
 void ScrolledImageWindow::SetBitmapPage(bitmap::BitmapPage *page) {

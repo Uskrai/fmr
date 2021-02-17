@@ -202,7 +202,10 @@ void Controller::OnWindowScroll(wxScrollWinEvent &event) {
   event.Skip();
 }
 
-void Controller::OnWindowSize(wxSizeEvent &event) { AdjustBitmap(); }
+void Controller::OnWindowSize(wxSizeEvent &event) {
+  AdjustBitmap();
+  event.Skip();
+}
 
 void Controller::OnBitmapChanged(bitmap::BitmapVectorEvent &event) {
   AdjustBitmap();
