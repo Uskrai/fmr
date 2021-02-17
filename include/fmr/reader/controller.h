@@ -87,6 +87,7 @@ class Controller : public ScrollController {
   void OnLoadedImage(bitmap::ImageLoadEvent &event);
   void OnOpenedStreamFound(wxCommandEvent &event);
   void OnWindowScroll(wxScrollWinEvent &event);
+  void OnWindowSize(wxSizeEvent &event);
   void OnBitmapChanged(bitmap::BitmapVectorEvent &event);
   void OnBitmapPageNotFound(bitmap::BitmapVectorEvent &event);
   void OnBitmapVectorPushed(bitmap::BitmapVectorEvent &event);

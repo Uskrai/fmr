@@ -101,6 +101,7 @@ void Controller::SetWindow(ScrolledImageWindow *window) {
   window->SetDecorator(decorator_.get());
   event::Bind(GetWindow(), GetAllScrollWinEvent(), &Controller::OnWindowScroll,
               this);
+  GetWindow()->Bind(wxEVT_SIZE, &Controller::OnWindowSize, this);
 }
 
 void Controller::SetPositionFlags(bitmap::PositionFlags flags) {
@@ -201,6 +202,8 @@ void Controller::OnWindowScroll(wxScrollWinEvent &event) {
   GetWindow()->Refresh();
   event.Skip();
 }
+
+void Controller::OnWindowSize(wxSizeEvent &event) { AdjustBitmap(); }
 
 void Controller::OnBitmapChanged(bitmap::BitmapVectorEvent &event) {
   AdjustBitmap();
