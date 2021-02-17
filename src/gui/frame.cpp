@@ -108,8 +108,9 @@ void Frame::OpenFile(wxCommandEvent& event) {
   wxFileDialog* openDialog = new wxFileDialog(
       this, _("Choose a file to open"), wxEmptyString,
       Config::Get()->Read("RecentlyOpened", wxString()),
-      // _("All Files(*)|*|Image File" + wxImage::GetImageExtWildcard() +
-      "|Archive Files (*.zip)|*.zip|", wxFD_OPEN, wxDefaultPosition);
+      "All Files(*)|*|Image File" + wxImage::GetImageExtWildcard() +
+          "|Archive Files (*.zip)|*.zip",
+      wxFD_OPEN, wxDefaultPosition);
 
   if (openDialog->ShowModal() == wxID_OK) {
     m_panel->LoadFile(String::Narrow(openDialog->GetPath()));
