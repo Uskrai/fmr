@@ -31,6 +31,7 @@ class WindowDecoratorList {
  protected:
   std::vector<WindowDecorator *> list_decorator_;
   wxWindow *window_ = nullptr;
+  wxRect area_;
 
  public:
   WindowDecoratorList(){};
@@ -40,7 +41,9 @@ class WindowDecoratorList {
   virtual void SetWindow(wxWindow *window) { window_ = window; }
 
   void AddDecorator(WindowDecorator *decorator);
-  void DrawDecorator(wxDC &dc, const wxRect &area);
+
+  void SetVisibleArea(const wxRect &area) { area_ = area; };
+  void Draw(wxDC &dc);
 
  private:
   void OnDecoratorHide(wxTimerEvent &event);

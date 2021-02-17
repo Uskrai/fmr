@@ -26,6 +26,7 @@
 #include "fmr/handler/handler_factory.h"
 #include "fmr/nowide/string.h"
 #include "fmr/queue/event.h"
+#include "fmr/reader/scroll_controller.h"
 #include "fmr/thread/load_image_controller.h"
 #include "fmr/window/scrolledwindow.h"
 
@@ -75,8 +76,14 @@ Controller::Controller(wxWindow *parent, wxWindowID id, const wxPoint &pos,
 bool Controller::CreateWindow(wxWindow *parent, wxWindowID id,
                               const wxPoint &pos, const wxSize &size,
                               long style, const wxString &name) {
+  GetWindow()->SetDecorator(decorator_.get());
+
   bool ret = GetWindow()->Create(parent, id, pos, size, style, name);
-  SetWindow(GetWindow());
+  ScrollController::SetWindow(GetWindow());
+
+  event::Bind(GetWindow(), GetAllScrollWinEvent(), &Controller::OnWindowScroll,
+              this);
+  GetWindow()->Bind(wxEVT_SIZE, &Controller::OnWindowSize, this);
   return ret;
 }
 
@@ -94,14 +101,6 @@ bool Controller::Open(const std::string &path) {
   }
 
   return false;
-}
-
-void Controller::SetWindow(ScrolledImageWindow *window) {
-  ScrollController::SetWindow(window);
-  window->SetDecorator(decorator_.get());
-  event::Bind(GetWindow(), GetAllScrollWinEvent(), &Controller::OnWindowScroll,
-              this);
-  GetWindow()->Bind(wxEVT_SIZE, &Controller::OnWindowSize, this);
 }
 
 void Controller::SetPositionFlags(bitmap::PositionFlags flags) {

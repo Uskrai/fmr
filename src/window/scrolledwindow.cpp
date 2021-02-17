@@ -86,6 +86,7 @@ void ScrolledWindow::OnPaint(wxPaintEvent &event) {
   wxPaintDC dc(this);
   DoPrepareDC(dc);
   OnDraw(dc);
+  event.Skip();
 }
 
 void ScrolledWindow::OnScroll(wxScrollWinEvent &event) {
@@ -104,6 +105,16 @@ int ScrolledWindow::GetScrollPos(const wxOrientation &orient) const {
 
   int ret = pos < pos_limit ? pos : pos_limit;
   ret = ret > 0 ? ret : 0;
+  return ret;
+}
+
+wxPoint ScrolledWindow::GetScrollIf(const wxPoint &pos) const {
+  wxPoint ret;
+  ret.x = std::max(pos.x, 0);
+  ret.x = std::min(pos.x, GetScrollRangeLimit(wxHORIZONTAL));
+
+  ret.y = std::max(pos.y, 0);
+  ret.y = std::min(pos.y, GetScrollRangeLimit(wxVERTICAL));
   return ret;
 }
 

@@ -59,8 +59,6 @@ class Controller : public ScrollController {
                     const wxSize &size = wxDefaultSize, long style = 0,
                     const wxString &name = wxPanelNameStr);
 
-  void SetWindow(ScrolledImageWindow *window);
-
   bool Open(const std::string &path);
   void AdjustBitmap();
 

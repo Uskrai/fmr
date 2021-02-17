@@ -16,7 +16,6 @@
  */
 
 #include <fmr/window/decorator.h>
-#include <wx/dc.h>
 
 namespace fmr {
 
@@ -25,18 +24,15 @@ void WindowDecoratorList::AddDecorator(WindowDecorator *decorator) {
   list_decorator_.push_back(decorator);
 }
 
-void WindowDecoratorList::DrawDecorator(wxDC &dc, const wxRect &area) {
-  // wxPoint device_origin = dc.GetDeviceOrigin();
-  // dc.SetDeviceOrigin(0, 0);
-  for (auto &it : list_decorator_) {
-    it->Draw(dc, area);
-  }
-  // dc.SetDeviceOrigin(device_origin.x, device_origin.y);
-}
-
 void WindowDecoratorList::OnDecoratorHide(wxTimerEvent &event) {
   GetWindow()->Refresh();
   event.Skip();
+}
+
+void WindowDecoratorList::Draw(wxDC &dc) {
+  for (auto &it : list_decorator_) {
+    it->Draw(dc, area_);
+  }
 }
 
 WindowDecorator::WindowDecorator() {
