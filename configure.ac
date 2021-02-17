@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(fmr,1.2.0-alpha,github.com/Uskrai/fmr)
+AC_INIT(fmr,0.0.3,github.com/Uskrai/fmr)
 
 AC_PREREQ(2.69)
 
