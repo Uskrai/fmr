@@ -27,6 +27,7 @@
 #include "fmr/nowide/string.h"
 #include "fmr/queue/event.h"
 #include "fmr/reader/scroll_controller.h"
+#include "fmr/reader/settings.h"
 #include "fmr/thread/load_image_controller.h"
 #include "fmr/window/scrolledwindow.h"
 
@@ -110,6 +111,14 @@ void Controller::SetPositionFlags(bitmap::PositionFlags flags) {
 
 void Controller::SetScaleFlags(bitmap::RescalerFlags flags) {
   rescaler_->SetFlags(flags);
+  AdjustBitmap();
+}
+
+void Controller::SetSettings(const Settings &setting) {
+  position_ctrl_->SetFlags(setting.position_flags_);
+  rescaler_->SetFlags(setting.rescale_flags_);
+  SetReadFromRight(setting.read_from_right_);
+  SetImagePerPage(setting.image_per_page_);
   AdjustBitmap();
 }
 

@@ -30,7 +30,8 @@ class StreamEvent;
 
 namespace reader {
 class Controller;
-}
+class Settings;
+}  // namespace reader
 namespace explorer {
 class Window;
 }
@@ -52,11 +53,12 @@ class Panel : public wxPanel {
   bool OpenExplorer();
   bool Destroy();
 
+  void SetReaderSettings(const reader::Settings &setting);
+
  private:
   void BindEvent();
 
   void PrepareReader();
-  void SettingReader();
   void PrepareExplorer();
 
   void OnKeyDown(wxKeyEvent &event);

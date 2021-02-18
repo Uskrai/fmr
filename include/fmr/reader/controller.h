@@ -30,6 +30,7 @@ namespace fmr {
 
 namespace reader {
 
+class Settings;
 wxDECLARE_EVENT(kEventOpenFile, wxCommandEvent);
 
 enum ControllerId {
@@ -61,6 +62,8 @@ class Controller : public ScrollController {
 
   bool Open(const std::string &path);
   void AdjustBitmap();
+
+  void SetSettings(const Settings &setting);
 
   AbstractHandler *GetHandler();
   virtual void Clear();

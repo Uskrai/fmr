@@ -61,19 +61,10 @@ void Panel::PrepareReader() {
     window->SetBackgroundColour(*wxBLACK);
 
   sizer_->Add(window, 1, wxALL | wxEXPAND);
-  SettingReader();
 }
 
-void Panel::SettingReader() {
-  reader_->SetImagePerPage(Config::Get()->Read("Reader/ImageShowLimit", 1));
-  reader_->SetPositionFlags(
-      static_cast<bitmap::PositionFlags>(Config::Get()->Read(
-          "Reader/ImagePosition",
-          int(bitmap::kPositionAlignCenter | bitmap::kPositionVertical))));
-
-  reader_->SetReadFromRight(Config::Get()->Read("Reader/ReadFromRight", false));
-  reader_->SetScaleFlags(static_cast<bitmap::RescalerFlags>(
-      Config::Get()->Read("Reader/ImageSize", int(bitmap::kRescaleNone))));
+void Panel::SetReaderSettings(const reader::Settings &setting) {
+  reader_->SetSettings(setting);
 }
 
 void Panel::PrepareExplorer() {
