@@ -24,13 +24,18 @@
 #include <wx/menu.h>
 #include <wx/sizer.h>
 
+#include <sstream>
+
+#include "fmr/bitmap/rescaler.h"
+#include "fmr/gui/accelerator_table.h"
+#include "fmr/gui/menu_item_toggler.h"
 #include "fmr/nowide/string.h"
+#include "fmr/reader/settings.h"
+#include "fmr/window/menu_bar.h"
+#include "wx/accel.h"
+#include "wx/textdlg.h"
 
 namespace fmr {
-
-enum {
-  PANEL = wxID_HIGHEST + 2001,
-};
 
 Frame::Frame(const wxString& title, const wxPoint& pos, const wxSize& size,
              long style)
@@ -43,33 +48,18 @@ Frame::Frame(const wxString& title, const wxPoint& pos, const wxSize& size,
   SetPanel();
   SetSizer(this->sizer);
   BindEvent();
-  SetAccelerator();
+  SettingReader();
 }
 
 void Frame::BindEvent() {
-  Bind(wxEVT_MENU, &Frame::OnAbout, this, wxID_ABOUT);
-  Bind(wxEVT_MENU, &Frame::OpenFile, this, kFrameOpenFile);
   Bind(wxEVT_CLOSE_WINDOW, &Frame::OnClose, this);
+  Bind(wxEVT_MENU, &Frame::OpenFile, this, kFrameOpenFile);
   Bind(wxEVT_MENU, &Frame::OnOpenExplorer, this, kFrameOpenExplorer);
-}
 
-void Frame::SetAccelerator() {
-  constexpr int entry_count = 2;
-  wxAcceleratorEntry entry[entry_count];
-
-  wxMenuBar* bar = GetMenuBar();
-  wxMenu* menu = bar->GetMenu(bar->FindMenu("File"));
-  wxMenuItem* item = menu->FindItem(kFrameOpenFile);
-
-  entry[0].Set(wxACCEL_CTRL, int('O'), kFrameOpenFile, item);
-  if (item) item->SetAccel(&entry[0]);
-
-  item = menu->FindItem(kFrameOpenExplorer);
-  entry[1].Set(wxACCEL_NORMAL, WXK_BACK, kFrameOpenExplorer, item);
-  if (item) item->SetAccel(&entry[1]);
-
-  wxAcceleratorTable table(entry_count, entry);
-  SetAcceleratorTable(table);
+  Bind(gui::kEventMenuItemToggled, &Frame::OnReaderMenuChanged, this,
+       kFrameReaderMenuToggle);
+  Bind(wxEVT_MENU, &Frame::OnReaderChangeImageLimit, this,
+       kFrameReaderChangeImageLimit);
 }
 
 void Frame::OnClose(wxCloseEvent& event) {
@@ -83,25 +73,89 @@ wxStatusBar* Frame::StatusBar() {
   return bar;
 }
 
-wxMenuBar* Frame::MenuBar() {
-  wxMenuBar* menuBar = new wxMenuBar;
-  menuBar->Append(Frame::MenuFile(), "&File");
-  menuBar->Append(Frame::MenuHelp(), "&Help");
+window::MenuBar* Frame::MenuBar() {
+  auto menuBar = new window::MenuBar();
+  gui::AcceleratorTable table;
+
+  item_toggler_ = std::make_unique<gui::MenuItemToggler>();
+  item_toggler_->BindEventMenu(this);
+  item_toggler_->BindEventMenu(menuBar);
+  item_toggler_->SetEventDestination(this);
+  CreateMenuFile(*menuBar, table);
+  CreateMenuReader(*menuBar, table, *item_toggler_);
+
+  SetAcceleratorTable(table.GetTable());
   return menuBar;
 }
 
-wxMenu* Frame::MenuFile() {
-  wxMenu* menuFile = new wxMenu();
+void Frame::CreateMenuFile(window::MenuBar& menu_bar,
+                           gui::AcceleratorTable& table) {
+  int id = kFrameOpenFile;
+  menu_bar.CreateMenuAndGroup(id, "&File", "Open File");
+  table.AddEntry(wxACCEL_CTRL, 'o', id, menu_bar.GetMenuItem(id));
 
-  menuFile->Append(kFrameOpenFile, "&Open File");
-  menuFile->Append(kFrameOpenExplorer, "&Open Explorer\tBACK");
-  return menuFile;
+  id = kFrameOpenExplorer;
+  menu_bar.CreateMenuAndGroup(id, "&File", "Open Explorer");
+  table.AddEntry(wxACCEL_NORMAL, WXK_BACK, id, menu_bar.GetMenuItem(id));
 }
 
-wxMenu* Frame::MenuHelp() {
-  wxMenu* menuHelp = new wxMenu;
-  menuHelp->Append(wxID_ABOUT);
-  return menuHelp;
+void Frame::CreateMenuReader(window::MenuBar& menu_bar,
+                             gui::AcceleratorTable& table,
+                             gui::MenuItemToggler& toggler) {
+  menu_bar.CreateMenuAndGroup(wxID_SEPARATOR, "Reader", "Scaling", "",
+                              wxITEM_SEPARATOR);
+
+  int id = kFrameReaderScaleFitWidth;
+  menu_bar.CreateMenuAndGroup(id, "Reader", "Fit Width", "", wxITEM_CHECK);
+  table.AddEntry(wxACCEL_CTRL, 'w', id, menu_bar.GetMenuItem(id));
+  toggler.AddMenuItem(menu_bar.GetMenuItem(id), id, kFrameReaderMenuToggle);
+
+  id = kFrameReaderScaleFitHeight;
+  menu_bar.CreateMenuAndGroup(id, "Reader", "Fit Height", "", wxITEM_CHECK);
+  table.AddEntry(wxACCEL_CTRL, 'h', id, menu_bar.GetMenuItem(id));
+  toggler.AddMenuItem(menu_bar.GetMenuItem(id), id, kFrameReaderMenuToggle);
+
+  id = kFrameReaderScaleEnlarge;
+  menu_bar.CreateMenu(id, "Reader", "Allow Enlarge Image", "", wxITEM_CHECK);
+  table.AddEntry(wxACCEL_CTRL, 'e', id, menu_bar.GetMenuItem(id));
+  toggler.AddMenuItem(menu_bar.GetMenuItem(id), id, kFrameReaderMenuToggle);
+
+  menu_bar.CreateMenu(wxID_SEPARATOR, "Reader", "", "", wxITEM_SEPARATOR);
+
+  id = kFrameReaderReadFromRight;
+  menu_bar.CreateMenu(id, "Reader", "Read From Right", "", wxITEM_CHECK);
+  table.AddEntry(wxACCEL_CTRL, 'j', id, menu_bar.GetMenuItem(id));
+  toggler.AddMenuItem(menu_bar.GetMenuItem(id), id, kFrameReaderMenuToggle);
+
+  id = kFrameReaderChangeImageLimit;
+  menu_bar.CreateMenu(id, "Reader", "Change Image Limit", "");
+  table.AddEntry(wxACCEL_CTRL, 't', id, menu_bar.GetMenuItem(id));
+}
+
+void Frame::SettingReader() {
+  reader::Settings setting;
+  setting.image_per_page_ =
+      Config::Get()->Read("Reader/ImageLimit", int(setting.image_per_page_));
+
+  setting.position_flags_ =
+      static_cast<bitmap::PositionFlags>(Config::Get()->Read(
+          "Reader/ImagePosition", int(setting.position_flags_)));
+
+  setting.read_from_right_ =
+      Config::Get()->Read("Reader/ReadFromRight", setting.read_from_right_);
+
+  setting.rescale_flags_ = static_cast<bitmap::RescalerFlags>(
+      Config::Get()->Read("Reader/ImageSize", int(setting.rescale_flags_)));
+
+  auto check_scale = [&, this](int id, int flags) {
+    item_toggler_->Check(id, flags & setting.rescale_flags_);
+  };
+
+  check_scale(kFrameReaderScaleFitHeight, bitmap::kRescaleFitHeight);
+  check_scale(kFrameReaderScaleFitWidth, bitmap::kRescaleFitWidth);
+  check_scale(kFrameReaderScaleEnlarge, bitmap::kRescaleEnlarge);
+
+  m_panel->SetReaderSettings(setting);
 }
 
 void Frame::OpenFile(wxCommandEvent& event) {
@@ -121,6 +175,33 @@ void Frame::OpenFile(wxCommandEvent& event) {
 void Frame::OnOpenExplorer(wxCommandEvent& event) {
   m_panel->OpenExplorer();
   event.Skip();
+}
+
+void Frame::OnReaderMenuChanged(wxCommandEvent& event) {
+  bitmap::RescalerFlags flags;
+  auto check_and_add = [&, this](int id, bitmap::RescalerFlags value) {
+    if (item_toggler_->IsChecked(id)) flags |= value;
+  };
+
+  check_and_add(kFrameReaderScaleFitHeight, bitmap::kRescaleFitHeight);
+  check_and_add(kFrameReaderScaleFitWidth, bitmap::kRescaleFitWidth);
+  check_and_add(kFrameReaderScaleEnlarge, bitmap::kRescaleEnlarge);
+
+  Config::Get()->Write("Reader/ImageSize", int(flags));
+
+  bool read_from_right = item_toggler_->IsChecked(kFrameReaderReadFromRight);
+  Config::Get()->Write("Reader/ReadFromRight", read_from_right);
+  SettingReader();
+}
+
+void Frame::OnReaderChangeImageLimit(wxCommandEvent& event) {
+  auto text_ctrl = new wxTextEntryDialog(
+      this, "Input Image Limit Number (Negative show all image)", "");
+  text_ctrl->SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
+  if (text_ctrl->ShowModal() == wxID_OK) {
+    Config::Get()->Write("Reader/ImageLimit", text_ctrl->GetValue());
+    SettingReader();
+  }
 }
 
 void Frame::SetPanel() {

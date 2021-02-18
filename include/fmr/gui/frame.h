@@ -20,6 +20,8 @@
 
 #include <wx/frame.h>
 
+#include <memory>
+
 class wxBoxSizer;
 class wxMenuBar;
 class wxMenu;
@@ -27,18 +29,34 @@ class wxStatusBar;
 
 namespace fmr {
 
+namespace window {
+class MenuBar;
+}
+
+namespace gui {
+class MenuItemToggler;
+class AcceleratorTable;
+}  // namespace gui
+
 class Panel;
 
 enum {
   kPanel = wxID_HIGHEST + 2001,
-  kFrameOpenFile,
   kFrameOpenExplorer,
+  kFrameOpenFile,
+  kFrameReaderScaleFitWidth,
+  kFrameReaderScaleFitHeight,
+  kFrameReaderScaleEnlarge,
+  kFrameReaderReadFromRight,
+  kFrameReaderChangeImageLimit,
+  kFrameReaderMenuToggle
 };
 
 class Frame : public wxFrame {
  public:
   Frame(const wxString& title, const wxPoint& pos, const wxSize& size,
         long style);
+  std::unique_ptr<gui::MenuItemToggler> item_toggler_;
 
   Panel* m_panel = NULL;
   wxBoxSizer* sizer;
@@ -46,7 +64,6 @@ class Frame : public wxFrame {
  private:
   void BindEvent();
   void SetPanel();
-  void SetAccelerator();
 
   // event
   void OnHello(wxCommandEvent& event);
@@ -59,9 +76,14 @@ class Frame : public wxFrame {
 
   wxStatusBar* StatusBar();
 
-  wxMenuBar* MenuBar();
-  wxMenu* MenuFile();
-  wxMenu* MenuHelp();
+  window::MenuBar* MenuBar();
+  void CreateMenuFile(window::MenuBar& menu_bar, gui::AcceleratorTable& table);
+  void CreateMenuReader(window::MenuBar& menu_bar, gui::AcceleratorTable& table,
+                        gui::MenuItemToggler& toggler);
+  void SettingReader();
+
+  void OnReaderMenuChanged(wxCommandEvent& event);
+  void OnReaderChangeImageLimit(wxCommandEvent& event);
 };
 
 };  // namespace fmr

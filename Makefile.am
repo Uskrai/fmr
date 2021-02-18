@@ -72,7 +72,9 @@ gui = src/gui
 guidir = @abs_builddir@/gui
 gui_LTLIBRARIES = lib_frame.la
 lib_frame_la_SOURCES = $(gui)/frame.cpp \
-						 $(gui)/panel.cpp
+						 $(gui)/panel.cpp \
+						 $(gui)/menu_item_toggler.cpp \
+						 $(gui)/accelerator_table.cpp
 
 lib_frame_la_LIBADD = lib_explorer.la \
 						lib_reader.la
@@ -85,6 +87,7 @@ lib_window_la_SOURCES = $(window)/scrolledwindow.cpp \
 												$(window)/flex_grid_window.cpp \
 												$(window)/flex_grid_cell_window.cpp \
 												$(window)/scrolled_image.cpp \
+												$(window)/menu_bar.cpp \
 												$(window)/decorator.cpp
 
 thread = src/thread

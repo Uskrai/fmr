@@ -149,10 +149,10 @@ LTLIBRARIES = $(bitmap_LTLIBRARIES) $(common_LTLIBRARIES) \
 lib_bitmap_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am_lib_bitmap_la_OBJECTS = $(bitmap)/bmp.lo $(bitmap)/image_util.lo \
-	$(bitmap)/loader.lo $(bitmap)/bitmap_ctrl.lo \
-	$(bitmap)/position_ctrl.lo $(bitmap)/bitmap_page_ctrl.lo \
-	$(bitmap)/page_loader.lo $(bitmap)/rescale_loader.lo \
-	$(bitmap)/image_checker.lo
+	$(bitmap)/loader.lo $(bitmap)/rescaler.lo \
+	$(bitmap)/bitmap_ctrl.lo $(bitmap)/position_ctrl.lo \
+	$(bitmap)/bitmap_page_ctrl.lo $(bitmap)/page_loader.lo \
+	$(bitmap)/rescale_loader.lo $(bitmap)/image_checker.lo
 lib_bitmap_la_OBJECTS = $(am_lib_bitmap_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -167,7 +167,8 @@ am_lib_explorer_la_OBJECTS = $(explorer)/window_explorer.lo \
 	$(explorer)/image_window_explorer.lo
 lib_explorer_la_OBJECTS = $(am_lib_explorer_la_OBJECTS)
 lib_frame_la_DEPENDENCIES = lib_explorer.la lib_reader.la
-am_lib_frame_la_OBJECTS = $(gui)/frame.lo $(gui)/panel.lo
+am_lib_frame_la_OBJECTS = $(gui)/frame.lo $(gui)/panel.lo \
+	$(gui)/menu_item_toggler.lo $(gui)/accelerator_table.lo
 lib_frame_la_OBJECTS = $(am_lib_frame_la_OBJECTS)
 am__DEPENDENCIES_1 =
 lib_handler_la_DEPENDENCIES = lib_path.la lib_compare.la \
@@ -200,7 +201,7 @@ lib_window_la_LIBADD =
 am_lib_window_la_OBJECTS = $(window)/scrolledwindow.lo \
 	$(window)/flex_grid_window.lo \
 	$(window)/flex_grid_cell_window.lo $(window)/scrolled_image.lo \
-	$(window)/decorator.lo
+	$(window)/menu_bar.lo $(window)/decorator.lo
 lib_window_la_OBJECTS = $(am_lib_window_la_OBJECTS)
 am_fmr_OBJECTS = $(fmr)/app.$(OBJEXT)
 fmr_OBJECTS = $(am_fmr_OBJECTS)
@@ -229,10 +230,13 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(bitmap)/$(DEPDIR)/page_loader.Plo \
 	$(bitmap)/$(DEPDIR)/position_ctrl.Plo \
 	$(bitmap)/$(DEPDIR)/rescale_loader.Plo \
+	$(bitmap)/$(DEPDIR)/rescaler.Plo \
 	$(common)/$(DEPDIR)/compare.Plo $(common)/$(DEPDIR)/path.Plo \
 	$(explorer)/$(DEPDIR)/image_window_explorer.Plo \
 	$(explorer)/$(DEPDIR)/window_explorer.Plo \
-	$(fmr)/$(DEPDIR)/app.Po $(gui)/$(DEPDIR)/frame.Plo \
+	$(fmr)/$(DEPDIR)/app.Po $(gui)/$(DEPDIR)/accelerator_table.Plo \
+	$(gui)/$(DEPDIR)/frame.Plo \
+	$(gui)/$(DEPDIR)/menu_item_toggler.Plo \
 	$(gui)/$(DEPDIR)/panel.Plo \
 	$(handler)/$(DEPDIR)/default_handler.Plo \
 	$(handler)/$(DEPDIR)/handler_factory.Plo \
@@ -254,6 +258,7 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(window)/$(DEPDIR)/decorator.Plo \
 	$(window)/$(DEPDIR)/flex_grid_cell_window.Plo \
 	$(window)/$(DEPDIR)/flex_grid_window.Plo \
+	$(window)/$(DEPDIR)/menu_bar.Plo \
 	$(window)/$(DEPDIR)/scrolled_image.Plo \
 	$(window)/$(DEPDIR)/scrolledwindow.Plo
 am__mv = mv -f
@@ -562,6 +567,7 @@ bitmap_LTLIBRARIES = lib_bitmap.la
 lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/image_util.cpp \
 						$(bitmap)/loader.cpp \
+						$(bitmap)/rescaler.cpp \
 						$(bitmap)/bitmap_ctrl.cpp \
 						$(bitmap)/position_ctrl.cpp \
 						$(bitmap)/bitmap_page_ctrl.cpp \
@@ -596,7 +602,9 @@ gui = src/gui
 guidir = @abs_builddir@/gui
 gui_LTLIBRARIES = lib_frame.la
 lib_frame_la_SOURCES = $(gui)/frame.cpp \
-						 $(gui)/panel.cpp
+						 $(gui)/panel.cpp \
+						 $(gui)/menu_item_toggler.cpp \
+						 $(gui)/accelerator_table.cpp
 
 lib_frame_la_LIBADD = lib_explorer.la \
 						lib_reader.la
@@ -608,6 +616,7 @@ lib_window_la_SOURCES = $(window)/scrolledwindow.cpp \
 												$(window)/flex_grid_window.cpp \
 												$(window)/flex_grid_cell_window.cpp \
 												$(window)/scrolled_image.cpp \
+												$(window)/menu_bar.cpp \
 												$(window)/decorator.cpp
 
 thread = src/thread
@@ -1042,6 +1051,8 @@ $(bitmap)/image_util.lo: $(bitmap)/$(am__dirstamp) \
 	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
 $(bitmap)/loader.lo: $(bitmap)/$(am__dirstamp) \
 	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
+$(bitmap)/rescaler.lo: $(bitmap)/$(am__dirstamp) \
+	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
 $(bitmap)/bitmap_ctrl.lo: $(bitmap)/$(am__dirstamp) \
 	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
 $(bitmap)/position_ctrl.lo: $(bitmap)/$(am__dirstamp) \
@@ -1090,6 +1101,10 @@ $(gui)/$(DEPDIR)/$(am__dirstamp):
 $(gui)/frame.lo: $(gui)/$(am__dirstamp) \
 	$(gui)/$(DEPDIR)/$(am__dirstamp)
 $(gui)/panel.lo: $(gui)/$(am__dirstamp) \
+	$(gui)/$(DEPDIR)/$(am__dirstamp)
+$(gui)/menu_item_toggler.lo: $(gui)/$(am__dirstamp) \
+	$(gui)/$(DEPDIR)/$(am__dirstamp)
+$(gui)/accelerator_table.lo: $(gui)/$(am__dirstamp) \
 	$(gui)/$(DEPDIR)/$(am__dirstamp)
 
 lib_frame.la: $(lib_frame_la_OBJECTS) $(lib_frame_la_DEPENDENCIES) $(EXTRA_lib_frame_la_DEPENDENCIES) 
@@ -1183,6 +1198,8 @@ $(window)/flex_grid_cell_window.lo: $(window)/$(am__dirstamp) \
 	$(window)/$(DEPDIR)/$(am__dirstamp)
 $(window)/scrolled_image.lo: $(window)/$(am__dirstamp) \
 	$(window)/$(DEPDIR)/$(am__dirstamp)
+$(window)/menu_bar.lo: $(window)/$(am__dirstamp) \
+	$(window)/$(DEPDIR)/$(am__dirstamp)
 $(window)/decorator.lo: $(window)/$(am__dirstamp) \
 	$(window)/$(DEPDIR)/$(am__dirstamp)
 
@@ -1235,12 +1252,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/page_loader.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/position_ctrl.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/rescale_loader.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/rescaler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(common)/$(DEPDIR)/compare.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(common)/$(DEPDIR)/path.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/image_window_explorer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/window_explorer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(fmr)/$(DEPDIR)/app.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(gui)/$(DEPDIR)/accelerator_table.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(gui)/$(DEPDIR)/frame.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(gui)/$(DEPDIR)/menu_item_toggler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(gui)/$(DEPDIR)/panel.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/default_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/handler_factory.Plo@am__quote@ # am--include-marker
@@ -1262,6 +1282,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/decorator.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/flex_grid_cell_window.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/flex_grid_window.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/menu_bar.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/scrolled_image.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/scrolledwindow.Plo@am__quote@ # am--include-marker
 
@@ -1693,12 +1714,15 @@ distclean: distclean-recursive
 	-rm -f $(bitmap)/$(DEPDIR)/page_loader.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/position_ctrl.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/rescale_loader.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/rescaler.Plo
 	-rm -f $(common)/$(DEPDIR)/compare.Plo
 	-rm -f $(common)/$(DEPDIR)/path.Plo
 	-rm -f $(explorer)/$(DEPDIR)/image_window_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/window_explorer.Plo
 	-rm -f $(fmr)/$(DEPDIR)/app.Po
+	-rm -f $(gui)/$(DEPDIR)/accelerator_table.Plo
 	-rm -f $(gui)/$(DEPDIR)/frame.Plo
+	-rm -f $(gui)/$(DEPDIR)/menu_item_toggler.Plo
 	-rm -f $(gui)/$(DEPDIR)/panel.Plo
 	-rm -f $(handler)/$(DEPDIR)/default_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/handler_factory.Plo
@@ -1720,6 +1744,7 @@ distclean: distclean-recursive
 	-rm -f $(window)/$(DEPDIR)/decorator.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_window.Plo
+	-rm -f $(window)/$(DEPDIR)/menu_bar.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolled_image.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolledwindow.Plo
 	-rm -f Makefile
@@ -1782,12 +1807,15 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(bitmap)/$(DEPDIR)/page_loader.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/position_ctrl.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/rescale_loader.Plo
+	-rm -f $(bitmap)/$(DEPDIR)/rescaler.Plo
 	-rm -f $(common)/$(DEPDIR)/compare.Plo
 	-rm -f $(common)/$(DEPDIR)/path.Plo
 	-rm -f $(explorer)/$(DEPDIR)/image_window_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/window_explorer.Plo
 	-rm -f $(fmr)/$(DEPDIR)/app.Po
+	-rm -f $(gui)/$(DEPDIR)/accelerator_table.Plo
 	-rm -f $(gui)/$(DEPDIR)/frame.Plo
+	-rm -f $(gui)/$(DEPDIR)/menu_item_toggler.Plo
 	-rm -f $(gui)/$(DEPDIR)/panel.Plo
 	-rm -f $(handler)/$(DEPDIR)/default_handler.Plo
 	-rm -f $(handler)/$(DEPDIR)/handler_factory.Plo
@@ -1809,6 +1837,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(window)/$(DEPDIR)/decorator.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_window.Plo
+	-rm -f $(window)/$(DEPDIR)/menu_bar.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolled_image.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolledwindow.Plo
 	-rm -f Makefile
