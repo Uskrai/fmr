@@ -79,7 +79,7 @@ class ScrolledWindow : public wxScrolledCanvas {
   void OnKey(wxKeyEvent &event);
   wxTimer m_timer;
 
-  wxPoint GetScrollIf(const wxPoint &pos) const;
+  wxPoint GetScrollIf(wxPoint pos) const;
 
  private:
   void BindEvent();

@@ -108,14 +108,13 @@ int ScrolledWindow::GetScrollPos(const wxOrientation &orient) const {
   return ret;
 }
 
-wxPoint ScrolledWindow::GetScrollIf(const wxPoint &pos) const {
-  wxPoint ret;
-  ret.x = std::max(pos.x, 0);
-  ret.x = std::min(pos.x, GetScrollRangeLimit(wxHORIZONTAL));
+wxPoint ScrolledWindow::GetScrollIf(wxPoint pos) const {
+  pos.x = std::min(pos.x, GetScrollRangeLimit(wxHORIZONTAL));
+  pos.x = std::max(pos.x, 0);
 
-  ret.y = std::max(pos.y, 0);
-  ret.y = std::min(pos.y, GetScrollRangeLimit(wxVERTICAL));
-  return ret;
+  pos.y = std::min(pos.y, GetScrollRangeLimit(wxVERTICAL));
+  pos.y = std::max(pos.y, 0);
+  return pos;
 }
 
 int ScrolledWindow::GetScrollRangeLimit(const wxOrientation &orient) const {
