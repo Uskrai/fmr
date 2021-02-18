@@ -37,6 +37,7 @@ bitmap_LTLIBRARIES = lib_bitmap.la
 lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/image_util.cpp \
 						$(bitmap)/loader.cpp \
+						$(bitmap)/rescaler.cpp \
 						$(bitmap)/bitmap_ctrl.cpp \
 						$(bitmap)/position_ctrl.cpp \
 						$(bitmap)/bitmap_page_ctrl.cpp \

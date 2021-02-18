@@ -55,60 +55,14 @@ class Rescaler {
     return float(after) / float(before);
   }
 
-  void DoRescale(wxSize &size) {
-    double scale_x = 1, scale_y = 1;
-    GetScale(size, scale_x, scale_y);
-    size.Scale(scale_x, scale_y);
-  }
+  void DoRescale(wxSize &size);
+  void DoRescale(SBitmap &bitmap);
+  void DoRescale(wxImage &image);
 
-  void DoRescale(SBitmap &bitmap) {
-    double scale_x, scale_y;
-    bitmap.GetScale(scale_x, scale_y);
-    GetScale(bitmap, scale_x, scale_y);
-    bitmap.SetScale(scale_x, scale_y);
-  };
+  void GetScale(const wxSize &size, double &x, double &y);
 
-  void DoRescale(wxImage &image) {
-    if (!image.IsOk()) return;
-
-    double x = 1, y = 1;
-    GetScale(image, x, y);
-    wxSize size = image.GetSize();
-    size.Scale(x, y);
-    image.Rescale(size.GetWidth(), size.GetHeight());
-  }
-
-  void GetScale(const wxSize &size, double &x, double &y) {
-    if (Is(kRescaleFitWidth)) {
-      if (size.GetWidth() > fit_size_.GetWidth() || Is(kRescaleEnlarge)) {
-        x = CalcScale(size.GetWidth(), fit_size_.GetWidth());
-        if (!Is(kRescaleFitHeight)) y = x;
-      }
-    }
-
-    if (Is(kRescaleFitHeight)) {
-      if (size.GetHeight() > fit_size_.GetHeight() || Is(kRescaleEnlarge)) {
-        y = CalcScale(size.GetHeight(), fit_size_.GetHeight());
-        if (!Is(kRescaleFitWidth)) x = y;
-      }
-    }
-
-    if (Is(kRescaleFitAll)) {
-      if (x < y) {
-        y = x;
-      } else {
-        x = y;
-      }
-    }
-  }
-
-  void GetScale(const SBitmap &bitmap, double &x, double &y) {
-    if (bitmap.IsOk()) GetScale(bitmap.GetImage().GetSize(), x, y);
-  }
-
-  void GetScale(const wxImage &image, double &x, double &y) {
-    if (image.IsOk()) GetScale(image.GetSize(), x, y);
-  }
+  void GetScale(const SBitmap &bitmap, double &x, double &y);
+  void GetScale(const wxImage &image, double &x, double &y);
 
   [[deprecated("Use SetFitSize instead")]] void SetMaximumSize(
       const wxSize &size) {
