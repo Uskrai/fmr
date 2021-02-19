@@ -17,7 +17,10 @@
 #ifndef FMR_COMMON_DIMENSION
 #define FMR_COMMON_DIMENSION
 
+#include <wx/gdicmn.h>
 #include <wx/position.h>
+
+#include "wx/defs.h"
 
 namespace dimension {
 inline int Get(const wxPoint &pos, const wxOrientation &orient) {
@@ -30,10 +33,50 @@ inline int Get(const wxPoint &pos, const wxOrientation &orient) {
 }
 
 inline void Set(wxPoint &pt, int orientation, int pos) {
-  if (pos == wxDefaultCoord) return;
-
   if (orientation == wxVERTICAL) pt.y = pos;
   if (orientation == wxHORIZONTAL) pt.x = pos;
+}
+
+inline void SetPoint(wxPoint &pt, wxOrientation orientation, int pos) {
+  if (orientation == wxVERTICAL) pt.y = pos;
+  if (orientation == wxHORIZONTAL) pt.x = pos;
+}
+
+template <typename T>
+inline void SetPoint(T &pt, wxOrientation orientation, int pos) {
+  if (orientation == wxVERTICAL) pt.SetY(pos);
+  if (orientation == wxHORIZONTAL) pt.SetX(pos);
+}
+
+inline void SetSize(wxSize &size, wxOrientation orient, int val) {
+  if (orient == wxVERTICAL) size.SetHeight(val);
+  if (orient == wxHORIZONTAL) size.SetWidth(val);
+};
+
+template <typename T>
+inline void SetSize(T &size, wxOrientation orient, int val) {
+  if (orient == wxVERTICAL) size.SetHeight(val);
+  if (orient == wxHORIZONTAL) size.SetWidth(val);
+}
+
+inline int GetPoint(const wxPoint &pt, wxOrientation orient) {
+  if (orient == wxVERTICAL) return pt.y;
+  if (orient == wxHORIZONTAL) return pt.x;
+  return wxDefaultCoord;
+}
+
+template <typename T>
+inline int GetPoint(const T &pt, wxOrientation orient) {
+  if (orient == wxVERTICAL) return pt.GetHeight();
+  if (orient == wxHORIZONTAL) return pt.GetWidth();
+  return wxDefaultCoord;
+}
+
+template <typename T>
+inline int GetSize(const T &size, wxOrientation orient) {
+  if (orient == wxVERTICAL) return size.GetHeight();
+  if (orient == wxHORIZONTAL) return size.GetWidth();
+  return wxDefaultCoord;
 }
 
 inline int Get(const wxSize &size, const wxOrientation &orient) {

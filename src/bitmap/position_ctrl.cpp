@@ -17,6 +17,8 @@
 
 #include "fmr/bitmap/position_ctrl.h"
 
+#include "fmr/common/dimension.h"
+
 namespace fmr {
 
 namespace bitmap {
@@ -41,40 +43,38 @@ void PositionCtrl::RecalcPosition(const std::vector<SBitmap *> &page) const {
     return 0;
   };
 
-  auto make_line = [&page](void (SBitmap::*set_pos)(int),
-                           int (SBitmap::*get_size)() const, int start_pos) {
+  auto make_line = [&page](int start_pos, wxOrientation orient) {
     int pos = start_pos;
     for (auto &it : page) {
       if (!it->IsOk()) continue;
-      (*it.*set_pos)(pos);
-      pos += (*it.*get_size)();
+      dimension::SetPoint(*it, orient, pos);
+      pos += dimension::GetSize(*it, orient);
     }
   };
 
-  auto make_centered = [&page](int min_size, void (SBitmap::*set_pos)(int),
-                               int (SBitmap::*get_size)() const) {
+  auto make_centered = [&page](int min_size, wxOrientation orient) {
     for (auto &it : page) {
       if (!it->IsOk()) continue;
-      int pos = min_size / 2 - (*it.*get_size)() / 2;
-      if (pos < 0) pos = 0;
-      (*it.*set_pos)(pos);
+      int pos = min_size / 2 - dimension::GetSize(*it, orient) / 2;
+      pos = std::max(0, pos);
+      dimension::SetPoint(*it, orient, pos);
     }
   };
 
   if (flags_ & kPositionHorizontal) {
     int start_pos =
         get_start_position(page_size.GetWidth(), GetMinimumSize().GetWidth());
-    make_line(&SBitmap::SetX, &SBitmap::GetWidth, start_pos);
+    make_line(start_pos, wxHORIZONTAL);
     if (flags_ & kPositionAlignCenter)
-      make_centered(win_size.GetHeight(), &SBitmap::SetY, &SBitmap::GetHeight);
+      make_centered(win_size.GetHeight(), wxVERTICAL);
   }
 
   if (flags_ & kPositionVertical) {
     int start_pos =
         get_start_position(page_size.GetHeight(), GetMinimumSize().GetHeight());
-    make_line(&SBitmap::SetY, &SBitmap::GetHeight, start_pos);
+    make_line(start_pos, wxVERTICAL);
     if (flags_ & kPositionAlignCenter)
-      make_centered(win_size.GetWidth(), &SBitmap::SetX, &SBitmap::GetWidth);
+      make_centered(win_size.GetWidth(), wxHORIZONTAL);
   }
 }
 
@@ -104,33 +104,26 @@ wxSize PositionCtrl::GetMinimumBitmapSize(
     const std::vector<const SBitmap *> &page) const {
   wxSize size;
 
-  auto iterate = [&page](int (SBitmap::*bmp_incrementer)() const,
-                         int (wxSize::*size_incrementer)() const,
-                         void (wxSize::*set_incremented)(int),
-                         int (SBitmap::*search_largest)() const,
-                         int (wxSize::*get_largest)() const,
-                         void (wxSize::*set_largest)(int)) {
+  auto iterate_page = [&page](wxOrientation increment, wxOrientation largest) {
     wxSize size;
     for (const auto &it : page) {
       if (!it->IsOk()) continue;
-      (size.*set_incremented)((*it.*bmp_incrementer)() +
-                              (size.*size_incrementer)());
+      dimension::SetSize(size, increment,
+                         dimension::GetSize(*it, increment) +
+                             dimension::GetSize(size, increment));
 
-      if ((*it.*search_largest)() > (size.*get_largest)()) {
-        (size.*set_largest)((*it.*search_largest)());
-      }
+      if (dimension::GetSize(*it, largest) > dimension::GetSize(size, largest))
+        dimension::SetSize(size, largest, dimension::GetSize(*it, largest));
     }
     return size;
   };
 
   if (flags_ & kPositionVertical) {
-    size = iterate(&SBitmap::GetHeight, &wxSize::GetHeight, &wxSize::SetHeight,
-                   &SBitmap::GetWidth, &wxSize::GetWidth, &wxSize::SetWidth);
+    size = iterate_page(wxVERTICAL, wxHORIZONTAL);
   }
 
   if (flags_ & kPositionHorizontal) {
-    size = iterate(&SBitmap::GetWidth, &wxSize::GetWidth, &wxSize::SetWidth,
-                   &SBitmap::GetHeight, &wxSize::GetHeight, &wxSize::SetWidth);
+    size = iterate_page(wxHORIZONTAL, wxVERTICAL);
   }
 
   return size;

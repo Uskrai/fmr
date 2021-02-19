@@ -18,10 +18,10 @@
 #ifndef FMR_BITMAP_POSITION_CTRL
 #define FMR_BITMAP_POSITION_CTRL
 
-#include <vector>
+#include <fmr/bitmap/bmp.h>
+#include <fmr/common/bitmask.h>
 
-#include "fmr/bitmap/bmp.h"
-#include "fmr/common/bitmask.h"
+#include <vector>
 
 namespace fmr {
 
