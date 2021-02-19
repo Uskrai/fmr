@@ -30,7 +30,7 @@
 #include "fmr/gui/accelerator_table.h"
 #include "fmr/gui/menu_item_toggler.h"
 #include "fmr/nowide/string.h"
-#include "fmr/position/box_ctrl.h"
+#include "fmr/position/box_ctrl_flags.h"
 #include "fmr/reader/settings.h"
 #include "fmr/window/menu_bar.h"
 #include "wx/accel.h"

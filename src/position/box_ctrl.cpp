@@ -25,7 +25,8 @@ namespace position {
 
 BoxCtrl::BoxCtrl(BoxFlags flags) { flags_ = flags; }
 
-void BoxCtrl::RecalcPosition(const PositionVector &page) const {
+void BoxCtrl::CalculatePosition(const PositionVector &page) const {
+  using dimension::Orientation;
   wxSize win_size = GetWindowSize();
   wxSize page_size =
       GetMinimumItemSize(PositionVectorConst(page.begin(), page.end()));
@@ -37,7 +38,7 @@ void BoxCtrl::RecalcPosition(const PositionVector &page) const {
     return 0;
   };
 
-  auto make_line = [&page](int start_pos, wxOrientation orient) {
+  auto make_line = [&page](int start_pos, Orientation orient) {
     int pos = start_pos;
     for (auto &it : page) {
       dimension::SetPoint(*it, orient, pos);
@@ -45,7 +46,7 @@ void BoxCtrl::RecalcPosition(const PositionVector &page) const {
     }
   };
 
-  auto make_centered = [&page](int min_size, wxOrientation orient) {
+  auto make_centered = [&page](int min_size, Orientation orient) {
     for (auto &it : page) {
       int pos = min_size / 2 - dimension::GetSize(*it, orient) / 2;
       pos = std::max(0, pos);
@@ -56,37 +57,25 @@ void BoxCtrl::RecalcPosition(const PositionVector &page) const {
   if (flags_ & kBoxHorizontal) {
     int start_pos =
         get_start_position(page_size.GetWidth(), GetMinimumSize().GetWidth());
-    make_line(start_pos, wxHORIZONTAL);
+    make_line(start_pos, dimension::kHorizontal);
     if (flags_ & kBoxAlignCenter)
-      make_centered(win_size.GetHeight(), wxVERTICAL);
+      make_centered(win_size.GetHeight(), dimension::kVertical);
   }
 
   if (flags_ & kBoxVertical) {
     int start_pos =
         get_start_position(page_size.GetHeight(), GetMinimumSize().GetHeight());
-    make_line(start_pos, wxVERTICAL);
+    make_line(start_pos, dimension::kVertical);
     if (flags_ & kBoxAlignCenter)
-      make_centered(win_size.GetWidth(), wxHORIZONTAL);
+      make_centered(win_size.GetWidth(), dimension::kHorizontal);
   }
-}
-
-wxSize BoxCtrl::GetSize(const PositionVectorConst &vec_item) const {
-  wxSize size = GetMinimumItemSize(vec_item);
-
-  if (size.GetHeight() < GetMinimumSize().GetHeight()) {
-    size.SetHeight(GetMinimumSize().GetHeight());
-  }
-  if (size.GetWidth() < GetMinimumSize().GetWidth()) {
-    size.SetWidth(GetMinimumSize().GetWidth());
-  }
-
-  return size;
 }
 
 wxSize BoxCtrl::GetMinimumItemSize(const PositionVectorConst &page) const {
   wxSize size;
 
-  auto iterate_page = [&page](wxOrientation increment, wxOrientation largest) {
+  using dimension::Orientation;
+  auto iterate_page = [&page](Orientation increment, Orientation largest) {
     wxSize size;
     for (const auto &it : page) {
       dimension::SetSize(size, increment,
@@ -100,11 +89,11 @@ wxSize BoxCtrl::GetMinimumItemSize(const PositionVectorConst &page) const {
   };
 
   if (flags_ & kBoxHorizontal) {
-    size = iterate_page(wxHORIZONTAL, wxVERTICAL);
+    size = iterate_page(dimension::kHorizontal, dimension::kVertical);
   }
 
   if (flags_ & kBoxVertical) {
-    size = iterate_page(wxVERTICAL, wxHORIZONTAL);
+    size = iterate_page(dimension::kVertical, dimension::kHorizontal);
   }
 
   return size;

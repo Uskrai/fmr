@@ -115,7 +115,7 @@ void BitmapCtrl::DoChangeBitmapVector(BitmapVectorEvent &event) {
 }
 
 void BitmapCtrl::RecalcPosition(std::vector<SBitmap> &bitmap) const {
-  return pos_ctrl_->RecalcPosition(bitmap);
+  return pos_ctrl_->CalculatePosition(bitmap);
 }
 
 wxSize BitmapCtrl::GetSize(const std::vector<SBitmap> &bitmap) const {

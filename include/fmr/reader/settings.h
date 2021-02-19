@@ -16,7 +16,7 @@
  */
 
 #include "fmr/bitmap/rescaler.h"
-#include "fmr/position/box_ctrl.h"
+#include "fmr/position/box_ctrl_flags.h"
 
 namespace fmr {
 

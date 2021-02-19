@@ -23,8 +23,6 @@
 #include <fmr/position/inc.h>
 #include <wx/window.h>
 
-#include "fmr/position/box_ctrl.h"
-
 namespace fmr {
 
 class ScrolledImageWindow;

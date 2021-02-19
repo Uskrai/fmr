@@ -15,39 +15,25 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_BITMAP_POSITION_BOX_CTRL
-#define FMR_BITMAP_POSITION_BOX_CTRL
+#ifndef FMR_POSITION_BOX_CTRL_FLAG
+#define FMR_POSITION_BOX_CTRL_FLAG
 
-#include <fmr/common/vector.h>
-#include <fmr/position/box_ctrl_flags.h>
-#include <fmr/position/ctrl_base.h>
-#include <fmr/position/item.h>
-#include <wx/gdicmn.h>
+#include <fmr/common/bitmask.h>
 
 namespace fmr {
 
 namespace position {
 
-class BoxCtrl : public CtrlBase {
- private:
-  BoxFlags flags_;
-
- public:
-  BoxCtrl() {}
-  BoxCtrl(BoxFlags flags);
-
-  void SetFlags(BoxFlags flags) { flags_ = flags; }
-  BoxFlags GetFlags() const { return flags_; }
-
-  void CalculatePosition(const PositionVector &vec_item) const override;
-  using CtrlBase::CalculatePosition;
-
-  wxSize GetMinimumItemSize(const PositionVectorConst &vec_item) const override;
-  using CtrlBase::GetMinimumItemSize;
+enum BoxFlags {
+  kBoxVertical = 0x01,
+  kBoxHorizontal = 0x02,
+  kBoxAlignCenter = 0x04
 };
+
+DEFINE_BITMASK_TYPE(BoxFlags);
 
 }  // namespace position
 
 }  // namespace fmr
 
-#endif /* end of include guard: FMR_BITMAP_POSITION_BOX_CTRL */
+#endif /* end of include guard: FMR_POSITION_BOX_CTRL_FLAG */
