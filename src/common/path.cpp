@@ -146,6 +146,10 @@ std::string Append(const std::string &parent, const std::string &target) {
 }
 
 std::string MakeRelative(const std::string &parent, const std::string &target) {
+  if (IsAbsolute(parent) && IsAbsolute(target) && IsChild(parent, target)) {
+    std::string path = target.substr(parent.size() + 1, std::string::npos);
+    return path;
+  }
   return MakeString(nwd::fs::relative(MakePath(target), MakePath(parent)));
 }
 
