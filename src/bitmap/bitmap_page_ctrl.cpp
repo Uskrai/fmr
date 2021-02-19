@@ -47,11 +47,7 @@ void BitmapPageCtrl::AddBitmap(const SBitmap &bitmap, size_t page_pos,
 
   page->GetBitmap().at(bitmap_pos) = bitmap;
 
-  std::vector<SBitmap *> page_ptr;
-  for (auto &it : page->GetBitmap()) {
-    page_ptr.push_back(&it);
-  }
-  RecalcPosition(page_ptr);
+  RecalcPosition(page->GetBitmap());
 
   BitmapVectorEvent event(kEventBitmapVectorPushed, wxID_ANY);
   event.SetBitmapVec(page);
@@ -69,7 +65,7 @@ BitmapPage *BitmapPageCtrl::GetBitmapPage() {
 }
 
 void BitmapPageCtrl::RecalcPosition(BitmapPage *page) {
-  return RecalcPosition(BitmapPageToBitmapPtr(page));
+  return RecalcPosition(page->GetBitmap());
 }
 
 void BitmapPageCtrl::EnlargePage(size_t size) {
@@ -86,9 +82,7 @@ void BitmapPageCtrl::EnlargeBitmapPage(size_t page_pos, size_t size) {
   if (page->GetBitmap().size() < size) page->GetBitmap().resize(size);
 }
 
-wxSize BitmapPageCtrl::GetSize(BitmapPage *page) {
-  return GetSize(BitmapPageToBitmapPtr(page));
-}
+wxSize BitmapPageCtrl::GetSize(BitmapPage *page) { return GetSize(page); }
 
 bool BitmapPageCtrl::GoToPage(size_t idx, wxDirection direction) {
   BitmapVectorEvent event(kEventBitmapChanging, wxID_ANY);

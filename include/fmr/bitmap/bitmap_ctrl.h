@@ -61,10 +61,10 @@ class BitmapCtrl : public wxEvtHandler {
 
   void AdjustBitmap();
 
-  void RecalcPosition(const std::vector<SBitmap *> &bitmap) const;
+  void RecalcPosition(std::vector<SBitmap> &bitmap) const;
   void RecalcPosition();
   wxSize GetSize() const;
-  wxSize GetSize(const std::vector<SBitmap *> &bitmap) const;
+  wxSize GetSize(const std::vector<SBitmap> &bitmap) const;
 
   void Clear();
 

@@ -18,6 +18,8 @@
 #ifndef FMR_COMMON_VECTOR
 #define FMR_COMMON_VECTOR
 
+#include <vector>
+
 #include "stddef.h"
 
 namespace fmr {
@@ -32,6 +34,25 @@ template <typename T>
 void Push(const T& source, T& destination) {
   for (const auto& it : source) destination.push_back(it);
 }
+
+template <typename T>
+auto ConvertToPtr(std::vector<T>& vec) {
+  std::vector<T*> ret;
+  for (auto& it : vec) {
+    ret.push_back(&it);
+  }
+  return ret;
+}
+
+template <typename T>
+auto ConvertToPtr(const std::vector<T>& vec) {
+  std::vector<const T*> ret;
+  for (auto& it : vec) {
+    ret.push_back(&it);
+  }
+  return ret;
+}
+
 };  // namespace Vector
 
 };  // namespace fmr
