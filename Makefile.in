@@ -183,7 +183,8 @@ lib_path_la_LIBADD =
 am_lib_path_la_OBJECTS = $(common)/path.lo
 lib_path_la_OBJECTS = $(am_lib_path_la_OBJECTS)
 lib_position_la_LIBADD =
-am_lib_position_la_OBJECTS = $(position)/box_ctrl.lo
+am_lib_position_la_OBJECTS = $(position)/box_ctrl.lo \
+	$(position)/grid_ctrl.lo
 lib_position_la_OBJECTS = $(am_lib_position_la_OBJECTS)
 lib_queue_la_LIBADD =
 am_lib_queue_la_OBJECTS = $(queue)/load_image.lo \
@@ -248,6 +249,7 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(handler)/$(DEPDIR)/struct_stream.Plo \
 	$(handler)/$(DEPDIR)/wxarchive_handler.Plo \
 	$(position)/$(DEPDIR)/box_ctrl.Plo \
+	$(position)/$(DEPDIR)/grid_ctrl.Plo \
 	$(queue)/$(DEPDIR)/factory.Plo \
 	$(queue)/$(DEPDIR)/find_handler.Plo \
 	$(queue)/$(DEPDIR)/load_image.Plo \
@@ -582,7 +584,9 @@ lib_bitmap_la_LIBADD = lib_position.la
 position = src/position
 positiondir = @abs_builddir@/position
 position_LTLIBRARIES = lib_position.la
-lib_position_la_SOURCES = $(position)/box_ctrl.cpp
+lib_position_la_SOURCES = $(position)/box_ctrl.cpp \
+													$(position)/grid_ctrl.cpp
+
 reader = src/reader
 readerdir = @abs_builddir@/reader
 reader_LTLIBRARIES = lib_reader.la
@@ -1184,6 +1188,8 @@ $(position)/$(DEPDIR)/$(am__dirstamp):
 	@: > $(position)/$(DEPDIR)/$(am__dirstamp)
 $(position)/box_ctrl.lo: $(position)/$(am__dirstamp) \
 	$(position)/$(DEPDIR)/$(am__dirstamp)
+$(position)/grid_ctrl.lo: $(position)/$(am__dirstamp) \
+	$(position)/$(DEPDIR)/$(am__dirstamp)
 
 lib_position.la: $(lib_position_la_OBJECTS) $(lib_position_la_DEPENDENCIES) $(EXTRA_lib_position_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(positiondir) $(lib_position_la_OBJECTS) $(lib_position_la_LIBADD) $(LIBS)
@@ -1322,6 +1328,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/struct_stream.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/wxarchive_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(position)/$(DEPDIR)/box_ctrl.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(position)/$(DEPDIR)/grid_ctrl.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/factory.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/find_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/load_image.Plo@am__quote@ # am--include-marker
@@ -1788,6 +1795,7 @@ distclean: distclean-recursive
 	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
 	-rm -f $(position)/$(DEPDIR)/box_ctrl.Plo
+	-rm -f $(position)/$(DEPDIR)/grid_ctrl.Plo
 	-rm -f $(queue)/$(DEPDIR)/factory.Plo
 	-rm -f $(queue)/$(DEPDIR)/find_handler.Plo
 	-rm -f $(queue)/$(DEPDIR)/load_image.Plo
@@ -1881,6 +1889,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
 	-rm -f $(position)/$(DEPDIR)/box_ctrl.Plo
+	-rm -f $(position)/$(DEPDIR)/grid_ctrl.Plo
 	-rm -f $(queue)/$(DEPDIR)/factory.Plo
 	-rm -f $(queue)/$(DEPDIR)/find_handler.Plo
 	-rm -f $(queue)/$(DEPDIR)/load_image.Plo

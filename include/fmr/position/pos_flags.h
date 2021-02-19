@@ -14,19 +14,25 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef FMR_POSITION_POS_FLAGS
+#define FMR_POSITION_POS_FLAGS
 
-#ifndef FMR_POSITION_INC_H
-#define FMR_POSITION_INC_H
+#include <fmr/common/bitmask.h>
 
 namespace fmr {
 
 namespace position {
 
-class BoxCtrl;
-class GridCtrl;
+enum PosFlags {
+  kPositionVertical = 0x01,
+  kPositionHorizontal = 0x2,
+  kPositionAlignCenter = 0x04
+};
+
+DEFINE_BITMASK_TYPE(PosFlags);
 
 }  // namespace position
 
 }  // namespace fmr
 
-#endif /* end of include guard: FMR_POSITION_INC_H */
+#endif /* end of include guard: FMR_POSITION_POS_FLAGS */

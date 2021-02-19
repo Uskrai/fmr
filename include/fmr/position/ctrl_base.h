@@ -43,6 +43,11 @@ class CtrlBase {
    * @param: vec_item vector of object to calculate
    */
   virtual void CalculatePosition(const PositionVector &vec) const = 0;
+
+  void CalculatePosition(PositionVector &vec) const {
+    const PositionVector &vec_const = vec;
+    return CalculatePosition(vec_const);
+  }
   /**
    * @brief: overload template method to automatically convert to PositionVector
    * @param: vec PositionItemRef must be constructable from T
@@ -77,6 +82,10 @@ class CtrlBase {
     dimension::SetSize(size, orient, max);
     return size;
   }
+  wxSize GetSize(PositionVector &vec) const {
+    const PositionVectorConst vec_item(vec.begin(), vec.end());
+    return GetSize(vec_item);
+  }
   /**
    * @brief: overload template method to automatically convert to
    * PositionVectorConst
@@ -99,6 +108,14 @@ class CtrlBase {
    * if empty
    */
   virtual wxSize GetMinimumItemSize(const PositionVectorConst &vec) const = 0;
+  wxSize GetMinimumItemSize(PositionVector &vec) const {
+    const PositionVectorConst vec_item(vec.begin(), vec.end());
+    return GetMinimumItemSize(vec_item);
+  }
+  wxSize GetMinimumItemSize(const PositionVector &vec) const {
+    const PositionVectorConst vec_item(vec.begin(), vec.end());
+    return GetMinimumItemSize(vec_item);
+  }
 
   /**
    * @brief: overload template Method to automatically convert to

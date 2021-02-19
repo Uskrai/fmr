@@ -48,7 +48,8 @@ lib_bitmap_la_LIBADD = lib_position.la
 position = src/position
 positiondir = @abs_builddir@/position
 position_LTLIBRARIES = lib_position.la
-lib_position_la_SOURCES = $(position)/box_ctrl.cpp
+lib_position_la_SOURCES = $(position)/box_ctrl.cpp \
+													$(position)/grid_ctrl.cpp
 
 reader = src/reader
 readerdir = @abs_builddir@/reader
