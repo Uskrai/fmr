@@ -19,6 +19,7 @@
 
 #include "fmr/bitmap/bitmap_vector_event.h"
 #include "fmr/bitmap/rescaler.h"
+#include "fmr/common/vector.h"
 #include "fmr/window/scrolled_image.h"
 
 namespace fmr {
@@ -39,7 +40,17 @@ std::vector<SBitmap *> BitmapPageToBitmapPtr(BitmapVector *vec) {
   }
   return vec_ptr;
 }
-
+//
+// PositionVector MakePositionVector(const std::vector<SBitmap> &page) {
+// std::vector<PositionItemRef<SBitmap>> vec(page.begin(), page.end());
+// return PositionVector(vec.begin(), vec.end());
+// }
+//
+// PositionVectorConst MakePositionVectorConst(const std::vector<SBitmap> &page)
+// { std::vector<PositionItemConstRef<SBitmap>> vec(page.begin(), page.end());
+// return PositionVectorConst(vec.begin(), vec.end());
+// }
+//
 BitmapCtrl::BitmapCtrl(ScrolledImageWindow *window, PositionCtrl *pos_ctrl,
                        Rescaler *rescaler) {
   window_ = window;
@@ -48,10 +59,18 @@ BitmapCtrl::BitmapCtrl(ScrolledImageWindow *window, PositionCtrl *pos_ctrl,
   Bind(kEventBitmapChanging, &BitmapCtrl::DoChangeBitmapVector, this);
 }
 
-void BitmapCtrl::RecalcPosition() { pos_ctrl_->RecalcPosition(GetVectorPtr()); }
+void BitmapCtrl::RecalcPosition() {
+  return RecalcPosition(GetBitmapVec()->GetBitmap());
+  // std::vector<PositionItemRef<SBitmap>>
+  // vec(GetBitmapVec()->GetBitmap().begin(),
+  // GetBitmapVec()->GetBitmap().end());
+  // std::vector<PositionItemRef<SBitmap> *> vec_ptr =
+  // Vector::ConvertToPtr(vec); std::vector<PositionItem *>
+  // vec_item(vec_ptr.begin(), vec_ptr.end());
+}
 
 wxSize BitmapCtrl::GetSize() const {
-  return pos_ctrl_->GetSize(GetVectorPtr());
+  return pos_ctrl_->GetSize(GetBitmapVec()->GetBitmap());
 }
 
 std::vector<const SBitmap *> BitmapCtrl::GetVectorPtr() const {
@@ -99,12 +118,13 @@ void BitmapCtrl::DoChangeBitmapVector(BitmapVectorEvent &event) {
   }
 }
 
-void BitmapCtrl::RecalcPosition(const std::vector<SBitmap *> &bitmap) const {
-  pos_ctrl_->RecalcPosition(bitmap);
+void BitmapCtrl::RecalcPosition(std::vector<SBitmap> &bitmap) const {
+  // pos_ctrl_->RecalcPosition(bitmap);
 }
 
-wxSize BitmapCtrl::GetSize(const std::vector<SBitmap *> &bitmap) const {
-  return pos_ctrl_->GetSize(bitmap);
+wxSize BitmapCtrl::GetSize(const std::vector<SBitmap> &bitmap) const {
+  return wxSize();
+  // return pos_ctrl_->GetSize(bitmap);
 }
 
 void BitmapCtrl::AdjustBitmap() {
