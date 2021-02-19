@@ -27,7 +27,6 @@
 #include <iostream>
 #include <memory>
 
-#include "fmr/bitmap/position_ctrl.h"
 #include "fmr/explorer/window_explorer.h"
 #include "fmr/handler/handler_factory.h"
 #include "fmr/nowide/string.h"

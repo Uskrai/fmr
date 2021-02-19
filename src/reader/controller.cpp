@@ -25,6 +25,7 @@
 #include "fmr/common/event.h"
 #include "fmr/handler/handler_factory.h"
 #include "fmr/nowide/string.h"
+#include "fmr/position/box_ctrl.h"
 #include "fmr/queue/event.h"
 #include "fmr/reader/scroll_controller.h"
 #include "fmr/reader/settings.h"
@@ -41,8 +42,8 @@ Controller::Controller() {
   auto window = new ScrolledImageWindow();
   SetWindow(window);
 
-  position_ctrl_ = std::make_unique<bitmap::PositionCtrl>(
-      bitmap::kPositionAlignCenter | bitmap::kPositionVertical);
+  position_ctrl_ = std::make_unique<position::BoxCtrl>(
+      position::kBoxAlignCenter | position::kBoxVertical);
 
   rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleNone);
 
@@ -102,16 +103,6 @@ bool Controller::Open(const std::string &path) {
   }
 
   return false;
-}
-
-void Controller::SetPositionFlags(bitmap::PositionFlags flags) {
-  position_ctrl_->SetFlags(flags);
-  AdjustBitmap();
-}
-
-void Controller::SetScaleFlags(bitmap::RescalerFlags flags) {
-  rescaler_->SetFlags(flags);
-  AdjustBitmap();
 }
 
 void Controller::SetSettings(const Settings &setting) {

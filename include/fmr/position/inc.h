@@ -15,22 +15,17 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmr/bitmap/rescaler.h"
-#include "fmr/position/box_ctrl.h"
+#ifndef FMR_POSITION_INC_H
+#define FMR_POSITION_INC_H
 
 namespace fmr {
 
-namespace reader {
+namespace position {
 
-class Settings {
- public:
-  bool read_from_right_ = false;
-  size_t image_per_page_ = 1;
-  bitmap::RescalerFlags rescale_flags_ = bitmap::kRescaleNone;
-  position::BoxFlags position_flags_ =
-      position::kBoxAlignCenter | position::kBoxVertical;
-};
+class BoxCtrl;
 
-}  // namespace reader
+}  // namespace position
 
 }  // namespace fmr
+
+#endif /* end of include guard: FMR_POSITION_INC_H */

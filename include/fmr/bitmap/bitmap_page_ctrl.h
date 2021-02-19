@@ -34,7 +34,7 @@ class BitmapPageCtrl : public BitmapCtrl {
   size_t curr_page_ = -1;
 
  public:
-  BitmapPageCtrl(ScrolledImageWindow *window, PositionCtrl *pos_ctrl,
+  BitmapPageCtrl(ScrolledImageWindow *window, position::BoxCtrl *pos_ctrl,
                  Rescaler *rescaler, size_t bitmap_per_page = -1);
 
   void SetBitmapPerPage(size_t size) { bitmap_per_page_ = size; };

@@ -39,11 +39,16 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/loader.cpp \
 						$(bitmap)/rescaler.cpp \
 						$(bitmap)/bitmap_ctrl.cpp \
-						$(bitmap)/position_ctrl.cpp \
 						$(bitmap)/bitmap_page_ctrl.cpp \
 						$(bitmap)/page_loader.cpp \
 						$(bitmap)/rescale_loader.cpp \
 						$(bitmap)/image_checker.cpp
+lib_bitmap_la_LIBADD = lib_position.la
+
+position = src/position
+positiondir = @abs_builddir@/position
+position_LTLIBRARIES = lib_position.la
+lib_position_la_SOURCES = $(position)/box_ctrl.cpp
 
 reader = src/reader
 readerdir = @abs_builddir@/reader

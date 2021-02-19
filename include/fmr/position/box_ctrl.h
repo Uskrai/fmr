@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_BITMAP_POSITION_CTRL
-#define FMR_BITMAP_POSITION_CTRL
+#ifndef FMR_BITMAP_POSITION_BOX_CTRL
+#define FMR_BITMAP_POSITION_BOX_CTRL
 
 #include <fmr/common/bitmask.h>
 #include <fmr/common/vector.h>
@@ -24,15 +24,16 @@
 
 namespace fmr {
 
-namespace bitmap {
+namespace position {
 
-enum PositionFlags {
-  kPositionAlignCenter = 0x01,
-  kPositionVertical = 0x02,
-  kPositionHorizontal = 0x04
+enum BoxFlags {
+  kBoxVertical = 0x01,
+  kBoxHorizontal = 0x02,
+  kBoxAlignCenter = 0x04
 };
 
-DEFINE_BITMASK_TYPE(PositionFlags);
+DEFINE_BITMASK_TYPE(BoxFlags);
+
 class PositionItemConst {
  public:
   virtual int GetWidth() const = 0;
@@ -94,17 +95,18 @@ class PositionItemRef : public PositionItemRefBase<PositionItem, T> {
 typedef std::vector<PositionItem *> PositionVector;
 typedef std::vector<PositionItemConst *> PositionVectorConst;
 
-class PositionCtrl {
+class BoxCtrl {
  private:
   wxSize window_size_;
   wxSize minimum_size_;
-  PositionFlags flags_;
+  BoxFlags flags_;
 
  public:
-  PositionCtrl(PositionFlags flags);
+  BoxCtrl() {}
+  BoxCtrl(BoxFlags flags);
 
-  void SetFlags(PositionFlags flags) { flags_ = flags; }
-  PositionFlags GetFlags() const { return flags_; }
+  void SetFlags(BoxFlags flags) { flags_ = flags; }
+  BoxFlags GetFlags() const { return flags_; }
 
   void SetMinimumSize(const wxSize &size) { minimum_size_ = size; }
   const wxSize &GetMinimumSize() const { return minimum_size_; }
@@ -176,8 +178,8 @@ class PositionCtrl {
   const wxSize &GetWindowSize() const { return window_size_; }
 };
 
-}  // namespace bitmap
+}  // namespace position
 
 }  // namespace fmr
 
-#endif /* end of include guard: FMR_BITMAP_POSITION_CTRL */
+#endif /* end of include guard: FMR_BITMAP_POSITION_BOX_CTRL */

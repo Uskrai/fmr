@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmr/bitmap/position_ctrl.h"
+#include "fmr/position/box_ctrl.h"
 
 #include "fmr/common/dimension.h"
 
 namespace fmr {
 
-namespace bitmap {
+namespace position {
 
-PositionCtrl::PositionCtrl(PositionFlags flags) { flags_ = flags; }
+BoxCtrl::BoxCtrl(BoxFlags flags) { flags_ = flags; }
 
-void PositionCtrl::RecalcPosition(const PositionVector &page) const {
+void BoxCtrl::RecalcPosition(const PositionVector &page) const {
   wxSize win_size = GetWindowSize();
   wxSize page_size =
       GetMinimumItemSize(PositionVectorConst(page.begin(), page.end()));
@@ -53,24 +53,24 @@ void PositionCtrl::RecalcPosition(const PositionVector &page) const {
     }
   };
 
-  if (flags_ & kPositionHorizontal) {
+  if (flags_ & kBoxHorizontal) {
     int start_pos =
         get_start_position(page_size.GetWidth(), GetMinimumSize().GetWidth());
     make_line(start_pos, wxHORIZONTAL);
-    if (flags_ & kPositionAlignCenter)
+    if (flags_ & kBoxAlignCenter)
       make_centered(win_size.GetHeight(), wxVERTICAL);
   }
 
-  if (flags_ & kPositionVertical) {
+  if (flags_ & kBoxVertical) {
     int start_pos =
         get_start_position(page_size.GetHeight(), GetMinimumSize().GetHeight());
     make_line(start_pos, wxVERTICAL);
-    if (flags_ & kPositionAlignCenter)
+    if (flags_ & kBoxAlignCenter)
       make_centered(win_size.GetWidth(), wxHORIZONTAL);
   }
 }
 
-wxSize PositionCtrl::GetSize(const PositionVectorConst &vec_item) const {
+wxSize BoxCtrl::GetSize(const PositionVectorConst &vec_item) const {
   wxSize size = GetMinimumItemSize(vec_item);
 
   if (size.GetHeight() < GetMinimumSize().GetHeight()) {
@@ -83,7 +83,7 @@ wxSize PositionCtrl::GetSize(const PositionVectorConst &vec_item) const {
   return size;
 }
 
-wxSize PositionCtrl::GetMinimumItemSize(const PositionVectorConst &page) const {
+wxSize BoxCtrl::GetMinimumItemSize(const PositionVectorConst &page) const {
   wxSize size;
 
   auto iterate_page = [&page](wxOrientation increment, wxOrientation largest) {
@@ -99,17 +99,17 @@ wxSize PositionCtrl::GetMinimumItemSize(const PositionVectorConst &page) const {
     return size;
   };
 
-  if (flags_ & kPositionVertical) {
-    size = iterate_page(wxVERTICAL, wxHORIZONTAL);
+  if (flags_ & kBoxHorizontal) {
+    size = iterate_page(wxHORIZONTAL, wxVERTICAL);
   }
 
-  if (flags_ & kPositionHorizontal) {
-    size = iterate_page(wxHORIZONTAL, wxVERTICAL);
+  if (flags_ & kBoxVertical) {
+    size = iterate_page(wxVERTICAL, wxHORIZONTAL);
   }
 
   return size;
 }
 
-}  // namespace bitmap
+}  // namespace position
 
 }  // namespace fmr

@@ -20,6 +20,7 @@
 #include "fmr/bitmap/bitmap_vector_event.h"
 #include "fmr/bitmap/rescaler.h"
 #include "fmr/common/vector.h"
+#include "fmr/position/box_ctrl.h"
 #include "fmr/window/scrolled_image.h"
 
 namespace fmr {
@@ -51,7 +52,7 @@ std::vector<SBitmap *> BitmapPageToBitmapPtr(BitmapVector *vec) {
 // return PositionVectorConst(vec.begin(), vec.end());
 // }
 //
-BitmapCtrl::BitmapCtrl(ScrolledImageWindow *window, PositionCtrl *pos_ctrl,
+BitmapCtrl::BitmapCtrl(ScrolledImageWindow *window, position::BoxCtrl *pos_ctrl,
                        Rescaler *rescaler) {
   window_ = window;
   pos_ctrl_ = pos_ctrl;
