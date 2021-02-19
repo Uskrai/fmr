@@ -93,6 +93,11 @@ inline void print(const T &dimension, const char *text) {
   printf("%s %dx%d\n", text, dimension.x, dimension.y);
 }
 
+inline void print(const char *text, wxRect rect) {
+  printf("%s pos:%dx%d\tsize:%dx%d\n", text, rect.x, rect.y, rect.width,
+         rect.height);
+}
+
 inline wxDirection GetDirection(const wxOrientation &orient, int pos) {
   if (pos == 0) return wxALL;
 
