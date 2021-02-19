@@ -180,15 +180,8 @@ bool Window::OpenParent(const std::string &path) {
 
   if (!Open(parent_path)) return false;
 
-  std::shared_ptr<AbstractOpenableHandler> handler(
-      HandlerFactory::NewOpenableHandler(parent_path));
-
-  if (!handler) return false;
-
-  handler->Traverse();
-
-  size_t idx = handler->Index(path);
-  if (handler->IsExist(idx)) Select(handler->Item(idx).GetName());
+  size_t idx = handler_->Index(path);
+  if (handler_->IsExist(idx)) Select(handler_->Item(idx).GetName());
 
   return true;
 }
