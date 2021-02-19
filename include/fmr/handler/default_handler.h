@@ -68,6 +68,7 @@ class DefaultHandler : public AbstractOpenableHandler {
   size_t Size() const;
 
   bool IsExist(size_t index) const;
+  bool IsDirectory(const SStream &stream) const;
   bool IsOpened() const;
 
   void Reset();

@@ -81,6 +81,7 @@ class AbstractHandler {
                         DirGetFlags flags = kDirDefault) = 0;
 
   virtual bool IsExist(size_t index) const = 0;
+  virtual bool IsDirectory(const SStream &stream) const = 0;
 
   // search from filename
   virtual size_t Index(const std::string &name) const = 0;

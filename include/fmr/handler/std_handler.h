@@ -56,6 +56,7 @@ class STDHandler : public AbstractOpenableHandler {
   void Traverse(bool GetStream = false, DirGetFlags flags = kDirDefault);
 
   bool IsExist(size_t idx) const;
+  bool IsDirectory(const SStream &stream) const;
 
   std::string GetItemPath(const SStream &stream) const;
   std::string GetItemPath(size_t idx) const;

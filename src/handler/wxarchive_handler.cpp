@@ -77,6 +77,10 @@ bool WxArchiveHandler::IsExist(size_t index) const {
   return Vector::IsExist(GetChild(), index);
 }
 
+bool WxArchiveHandler::IsDirectory(const SStream &stream) const {
+  return stream.IsDir();
+}
+
 bool WxArchiveHandler::IsOpened() const { return is_opened_; }
 
 std::string WxArchiveHandler::GetNext() const { return GetFromCurrent(1); }

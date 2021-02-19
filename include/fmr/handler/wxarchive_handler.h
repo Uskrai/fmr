@@ -47,6 +47,7 @@ class WxArchiveHandler : public AbstractHandler {
   std::string GetPrev() const;
 
   bool IsExist(size_t index) const;
+  bool IsDirectory(const SStream &stream) const;
   bool IsOpened() const;
 
   bool GetFirst(SStream &stream, DirGetFlags flags = kDirDefault,

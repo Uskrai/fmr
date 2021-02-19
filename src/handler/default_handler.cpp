@@ -82,6 +82,10 @@ bool DefaultHandler::IsExist(size_t idx) const {
   return Vector::IsExist(GetChild(), idx);
 }
 
+bool DefaultHandler::IsDirectory(const SStream &stream) const {
+  return Path::IsDirectory(GetItemPath(stream));
+}
+
 bool DefaultHandler::IsOpened() const { return is_opened_; }
 
 std::string DefaultHandler::GetNext() const { return GetFromCurrent(1); }

@@ -89,6 +89,10 @@ bool STDHandler::IsExist(size_t idx) const {
   return Vector::IsExist(list_stream_, idx);
 }
 
+bool STDHandler::IsDirectory(const SStream &stream) const {
+  return Path::IsDirectory(GetItemPath(stream));
+}
+
 bool STDHandler::CanHandle(const std::string &path) { return true; }
 
 bool STDHandler::GetStream(SStream &stream) {
@@ -102,7 +106,6 @@ bool STDHandler::OpenStream(const std::string &path, SStream &stream,
                             bool is_get_stream) {
   stream.SetName(Path::MakeRelative(GetName(), path));
   stream.SetHandlerPath(GetName());
-  stream.SetDir(Path::IsDirectory(path));
   stream.Open();
 
   if (is_get_stream) GetStream(stream);
