@@ -33,7 +33,7 @@ class Controller;
 class Settings;
 }  // namespace reader
 namespace explorer {
-class Window;
+class Controller;
 }
 
 enum WindowID {
@@ -63,11 +63,11 @@ class Panel : public wxPanel {
 
   void OnKeyDown(wxKeyEvent &event);
   void OnCharHook(wxKeyEvent &event);
-  void OnExplorerOpenFile(StreamEvent &event);
+  void OnExplorerOpenFile(wxCommandEvent &event);
   void OnReaderOpenFile(wxCommandEvent &event);
 
   std::unique_ptr<reader::Controller> reader_;
-  explorer::Window *explorer_ = nullptr;
+  std::unique_ptr<explorer::Controller> explorer_;
   wxBoxSizer *sizer_;
 };
 
