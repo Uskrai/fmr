@@ -77,7 +77,9 @@ bool Controller::Open(std::unique_ptr<AbstractOpenableHandler> handler) {
 
     auto temp = std::make_unique<ImageCell>();
     auto cell = temp.get();
-    // cell->SetSize(child_size);
+
+    cell->SetString(stream->GetName());
+    cell->SetStringFlags(wxALIGN_CENTER_HORIZONTAL, wxALIGN_CENTER_VERTICAL);
     window_->AddCell(std::move(temp));
 
     loader_->PushFind(stream.get());
@@ -188,7 +190,7 @@ void Controller::AdjustCell() {
   double both_size = max_size / double(column_);
 
   wxSize child_size = wxSize(both_size, both_size);
-  wxSize best_bitmap_size = wxSize(300, 300);
+  wxSize best_bitmap_size = ImageCell::GetBestBitmapSize(child_size);
   rescaler_->SetFitSize(best_bitmap_size);
 
   GetWindow()->SetTableSize(GetWindow()->GetClientSize());
