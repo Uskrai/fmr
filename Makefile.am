@@ -70,7 +70,8 @@ explorer_LTLIBRARIES = lib_explorer.la
 lib_explorer_la_SOURCES = $(explorer)/window_explorer.cpp \
 													$(explorer)/image_window_explorer.cpp \
 													$(explorer)/controller.cpp \
-													$(explorer)/image_cell_explorer.cpp
+													$(explorer)/image_cell_explorer.cpp \
+													$(explorer)/string_draw.cpp
 
 lib_explorer_la_LIBADD = lib_handler.la \
 						 lib_thread.la \

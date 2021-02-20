@@ -18,20 +18,39 @@
 #ifndef FMR_EXPLORER_IMAGE_CELL_EXPLORER
 #define FMR_EXPLORER_IMAGE_CELL_EXPLORER
 
+#include <fmr/bitmap/bmp.h>
 #include <fmr/window/grid_cell.h>
 
-#include "fmr/bitmap/bmp.h"
+#include <memory>
 
 namespace fmr {
 
 namespace explorer {
 
+class StringDraw;
+
 class ImageCell : public window::GridCell {
   SBitmap bmp_;
+  std::unique_ptr<StringDraw> string_;
+  wxRect bmp_rect_, self_rect_on_bmp_;
 
  public:
+  ImageCell();
+  virtual ~ImageCell();
   SBitmap &GetBitmap() { return bmp_; }
+  void SetString(const std::string &string);
 
+  wxRect GetBitmapArea() const;
+
+  void PrepareBitmap();
+  void PrepareString();
+
+  void SetStringFlags(int horizontal, int vertical);
+
+  static wxSize GetBestBitmapSize(wxSize size);
+
+  void DrawBitmap(wxDC &dc);
+  void DrawString(wxDC &dc);
   void Draw(wxDC &dc) override;
 };
 
