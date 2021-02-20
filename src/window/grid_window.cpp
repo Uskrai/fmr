@@ -114,7 +114,7 @@ bool GridWindow::IsExist(size_t index) const {
 }
 
 GridCellCoords GridWindow::IndexToCell(size_t index) const {
-  if (index < 0) return GridCellCoords(-1, -1);
+  if (index < 0 || GetCols() == 0) return GridCellCoords(-1, -1);
 
   int col = index / GetCols();
   int row = index - GetCols() * col;
