@@ -159,21 +159,21 @@ inline wxDirection GetDirection(int key_code) {
 
 inline wxPoint AlignPosition(const wxRect &rect, const wxSize &size,
                              int flags) {
-  wxPoint pos;
+  wxPoint pos = rect.GetPosition();
 
   if (flags & wxALIGN_LEFT) {
     pos.x = rect.GetLeft();
   } else if (flags & wxALIGN_RIGHT) {
     pos.x = rect.GetRight() - size.GetWidth();
   } else if (flags & wxALIGN_CENTER_HORIZONTAL) {
-    pos.x = rect.GetWidth() / 2 - size.GetHeight() / 2;
+    pos.x = rect.GetX() + rect.GetWidth() / 2 - size.GetWidth() / 2;
   }
   if (flags & wxALIGN_TOP)
     pos.y = rect.GetTop();
   else if (flags & wxALIGN_BOTTOM)
     pos.y = rect.GetBottom() - size.GetHeight();
   else if (flags & wxALIGN_CENTER_VERTICAL)
-    pos.y = rect.GetHeight() / 2 - size.GetHeight() / 2;
+    pos.y = rect.GetY() + rect.GetHeight() / 2 - size.GetHeight() / 2;
 
   return pos;
 }
