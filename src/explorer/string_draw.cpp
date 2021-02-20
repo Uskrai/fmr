@@ -20,6 +20,7 @@
 #include <wx/dc.h>
 
 #include "fmr/common/dimension.h"
+#include "fmr/nowide/string.h"
 
 namespace fmr {
 
@@ -40,7 +41,7 @@ std::vector<StringRect> StringDraw::SplitString(wxDC &dc) {
   std::string string_space;
 
   auto push_string = [&, this](std::string &&text) {
-    wxSize text_extent = dc.GetTextExtent(text);
+    wxSize text_extent = dc.GetTextExtent(String::Widen<wxString>(text));
     StringRect str;
     str.SetString(std::move(text));
     str.SetSize(text_extent);
@@ -62,7 +63,8 @@ std::vector<StringRect> StringDraw::SplitString(wxDC &dc) {
       continue;
     }
 
-    wxSize text_extent = dc.GetTextExtent(string_line + string_space);
+    wxSize text_extent =
+        dc.GetTextExtent(String::Widen<wxString>(string_line + string_space));
     if (text_extent.GetWidth() > GetRect().GetWidth()) {
       push_string(std::move(string_line));
       string_line = "";
@@ -107,12 +109,18 @@ void StringRect::PrepareString(wxDC &dc) {
   //
 
   wxRect rect = GetRect();
-  wxSize text_extent_ = dc.GetTextExtent(text_);
+  wxSize text_extent_ = dc.GetTextExtent(string_);
 }
+
+void StringRect::SetString(const std::string &string) {
+  string_ = String::Widen<wxString>(string);
+}
+
+std::string StringRect::GetString() const { return String::Narrow(string_); }
 
 void StringRect::Draw(wxDC &dc) {
   PrepareString(dc);
-  dc.DrawText(text_, GetRect().GetPosition());
+  dc.DrawText(string_, GetRect().GetPosition());
   ;
 }
 

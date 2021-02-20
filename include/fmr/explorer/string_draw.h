@@ -31,15 +31,15 @@ namespace fmr {
 namespace explorer {
 
 class StringRect : public Rectangle {
-  std::string text_;
+  wxString string_;
   wxPoint text_pos_;
 
  public:
   StringRect() {}
-  StringRect(const std::string &string) { SetString(text_); }
+  StringRect(const std::string &string) { SetString(string); }
 
-  void SetString(const std::string &string) { text_ = string; }
-  std::string GetString() const { return text_; }
+  void SetString(const std::string &string);
+  std::string GetString() const;
 
   void PrepareString(wxDC &dc);
   void Draw(wxDC &dc);
