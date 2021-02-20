@@ -36,6 +36,7 @@ class GridWindow : public ScrolledWindow {
   size_t selected_index_ = -1;
   wxSize border_size_, table_size_;
   int cell_highlight_width_ = 0;
+  size_t row_count_ = 0, col_count_ = 0;
 
  public:
   GridWindow();
@@ -108,6 +109,9 @@ class GridWindow : public ScrolledWindow {
   }
   int CellToIndex(int row, int col, bool no_continous = false) const;
 
+  GridCellCoords CellFromSelected(wxDirection direction,
+                                  bool no_continous = false);
+
   wxSize GetBorderSize() const;
   void SetBorderSize(const wxSize &size);
 
@@ -116,11 +120,12 @@ class GridWindow : public ScrolledWindow {
 
   int GetCellHighlightPenWidth() const { return cell_highlight_width_; }
 
-  int GetCols() const { return -1; }
-  int GetRows() const { return -1; }
+  int GetCols() const { return col_count_; }
+  int GetRows() const { return row_count_; }
 
  protected:
   void OnDraw(wxDC &dc) override;
+  void OnKeyDown(wxKeyEvent &event);
 };
 
 }  // namespace window

@@ -39,7 +39,9 @@ bool GridWindow::Create(wxWindow *parent, int id, const wxPoint &pos,
                         const wxSize &size, long style,
                         const wxString &panel_name) {
   pos_ctrl_ = std::make_unique<position::GridCtrl>();
-  return ScrolledWindow::Create(parent, id, pos, size, style, panel_name);
+  bool ret = ScrolledWindow::Create(parent, id, pos, size, style, panel_name);
+  Bind(wxEVT_KEY_DOWN, &GridWindow::OnKeyDown, this);
+  return ret;
 }
 
 void GridWindow::AddCell(std::unique_ptr<GridCell> cell) {
@@ -64,6 +66,13 @@ void GridWindow::AdjustCell() {
 
   wxSize size = pos_ctrl_->GetSize(vec);
   SetVirtualSize(size);
+
+  const position::PositionVectorConst const_vec(vec.begin(), vec.end());
+  auto cell = pos_ctrl_->CountCell(const_vec);
+
+  row_count_ = cell.row;
+  col_count_ = cell.col;
+
   AdjustScrollbars();
 }
 
@@ -136,19 +145,21 @@ void GridWindow::MakeCellVisible(size_t index) {
   if (!IsExist(index)) return;
 
   wxRect rect = cell_vec_.at(index)->GetRect();
+  wxRect scroll_rect(GetViewStart(), GetClientSize());
   wxSize size = GetClientSize();
   wxPoint scroll_to = GetViewStart();
 
-  if (rect.GetLeft() < 0) {
-    scroll_to.x += rect.GetLeft();
-  } else if (rect.GetRight() > size.GetWidth()) {
-    scroll_to.x += rect.GetRight() - size.GetWidth();
+  if (rect.GetLeft() < scroll_rect.GetLeft()) {
+    scroll_to.x = rect.GetLeft();
   }
-
-  if (rect.GetTop() < 0) {
-    scroll_to.y += rect.GetTop();
-  } else if (rect.GetBottom() > size.GetHeight()) {
-    scroll_to.y += rect.GetBottom() - size.GetHeight();
+  if (rect.GetRight() > scroll_rect.GetRight()) {
+    scroll_to.x = rect.GetRight() - scroll_rect.GetWidth();
+  }
+  if (rect.GetTop() < scroll_rect.GetTop()) {
+    scroll_to.y = rect.GetTop();
+  }
+  if ((rect.GetBottom() > scroll_rect.GetBottom())) {
+    scroll_to.y = rect.GetBottom() - scroll_rect.GetHeight();
   }
 
   Scroll(scroll_to);
@@ -163,6 +174,48 @@ void GridWindow::OnDraw(wxDC &dc) {
   for (auto &it : cell_vec_) {
     if (it) it->Draw(dc);
   }
+}
+
+GridCellCoords GridWindow::CellFromSelected(wxDirection direction,
+                                            bool no_continous) {
+  GridCellCoords cell = IndexToCell(selected_index_);
+
+  if (direction == wxUP) {
+    cell.SetCol(cell.GetCol() - 1);
+  } else if (direction == wxDOWN) {
+    cell.SetCol(cell.GetCol() + 1);
+  }
+
+  if (direction == wxLEFT) {
+    cell.SetRow(cell.GetRow() - 1);
+  } else if (direction == wxRIGHT) {
+    cell.SetRow(cell.GetRow() + 1);
+  }
+
+  if (!no_continous) return cell;
+
+  size_t index = CellToIndex(cell, false);
+
+  return IndexToCell(index);
+}
+
+void GridWindow::OnKeyDown(wxKeyEvent &event) {
+  GridCellCoords cell = IndexToCell(selected_index_);
+
+  wxDirection direction = dimension::GetDirection(event.GetKeyCode());
+
+  if (!IsExist(selected_index_))
+    cell = IndexToCell(0);
+  else if (direction != wxALL) {
+    cell = CellFromSelected(direction);
+  }
+
+  if (direction != wxALL && IsExist(cell)) {
+    GoToCell(cell);
+    Refresh();
+    return;
+  }
+  event.Skip();
 }
 
 }  // namespace window
