@@ -22,6 +22,7 @@
 #include "fmr/common/dimension.h"
 #include "fmr/explorer/image_cell_explorer.h"
 #include "fmr/handler/handler_factory.h"
+#include "fmr/nowide/string.h"
 #include "fmr/queue/event.h"
 #include "fmr/queue/find_handler.h"
 #include "fmr/queue/load_image.h"
@@ -135,7 +136,7 @@ bool Controller::OpenCell(size_t index) {
   }
 
   auto event = new wxCommandEvent(kEventOpenFile, window_->GetId());
-  event->SetString(path);
+  event->SetString(String::Widen<wxString>(path));
   wxQueueEvent(this, event);
 
   return true;
