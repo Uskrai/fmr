@@ -20,6 +20,7 @@
 #include <wx/gdicmn.h>
 
 #include "fmr/common/dimension.h"
+#include "fmr/position/ctrl_base.h"
 
 namespace fmr {
 
@@ -31,17 +32,22 @@ TEST(GridCtrlTest, Position) {
   ctrl.SetMinimumSize(wxSize(300, 300));
   ctrl.CalculatePosition(rect);
 
-  EXPECT_EQ(rect[1].GetPosition(), wxPoint(200, 0));
-  EXPECT_EQ(rect[4].GetPosition(), wxPoint(0, 400));
-  EXPECT_EQ(rect[6].GetPosition(), wxPoint(0, 600));
-  EXPECT_EQ(rect[7].GetPosition(), wxPoint(200, 600));
+  EXPECT_EQ(rect[1].GetPosition(), wxPoint(0, 200));
+  EXPECT_EQ(rect[4].GetPosition(), wxPoint(0, 800));
+  EXPECT_EQ(rect[6].GetPosition(), wxPoint(0, 1200));
+  EXPECT_EQ(rect[7].GetPosition(), wxPoint(0, 1400));
+
+  EXPECT_EQ(ctrl.GetMinimumItemSize(rect), wxSize(200, 1600));
 
   ctrl.SetBorderSize(wxSize(30, 5));
+  ctrl.SetMinimumSize(wxSize(500, 500));
   ctrl.CalculatePosition(rect);
 
   EXPECT_EQ(rect[3].GetPosition(), wxPoint(230, 205));
   EXPECT_EQ(rect[4].GetPosition(), wxPoint(0, 410));
   EXPECT_EQ(rect[5].GetPosition(), wxPoint(230, 410));
+
+  EXPECT_EQ(ctrl.GetMinimumItemSize(rect), wxSize(460, 815));
 
   ctrl.SetBorderSize(wxSize(300, 0));
   ctrl.CalculatePosition(rect);
@@ -51,11 +57,12 @@ TEST(GridCtrlTest, Position) {
   ctrl.SetMinimumSize(wxSize(200, 200));
   ctrl.CalculatePosition(rect);
 
-  int val = 0;
+  int val = 300;
   for (const auto &it : rect) {
     EXPECT_EQ(it.GetPosition().y, val);
     val += it.GetHeight() + ctrl.GetBorderSize(dimension::kVertical);
   }
+  EXPECT_EQ(ctrl.GetMinimumItemSize(rect), wxSize(200, 4000));
 }
 
 }  // namespace fmr
