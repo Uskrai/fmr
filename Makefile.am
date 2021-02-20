@@ -93,8 +93,10 @@ lib_window_la_SOURCES = $(window)/scrolledwindow.cpp \
 												$(window)/flex_grid_window.cpp \
 												$(window)/flex_grid_cell_window.cpp \
 												$(window)/scrolled_image.cpp \
+												$(window)/grid_window.cpp \
 												$(window)/menu_bar.cpp \
 												$(window)/decorator.cpp
+lib_window_la_LIBADD = lib_position.la
 
 thread = src/thread
 threaddir = @abs_builddir@/thread
