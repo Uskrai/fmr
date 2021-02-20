@@ -26,6 +26,11 @@ namespace fmr {
 
 namespace position {
 
+class GridCellCount {
+ public:
+  int row = 0, col = 0;
+};
+
 class GridCtrl : public CtrlBase {
   wxSize border_size_{0, 0};
   PosFlags flags_;
@@ -44,6 +49,8 @@ class GridCtrl : public CtrlBase {
   int GetBorderSize(dimension::Orientation orient) const {
     return dimension::GetSize(GetBorderSize(), orient);
   }
+
+  GridCellCount CountCell(const PositionVectorConst &vector) const;
 
   void SetFlags(position::PosFlags flags) { flags_ = flags; }
   bool CheckFlags(position::PosFlags flags) const { return flags_ & flags; }

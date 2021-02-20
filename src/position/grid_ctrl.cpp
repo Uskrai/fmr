@@ -23,80 +23,125 @@ namespace fmr {
 
 namespace position {
 
+class GridCtrlItemHelper {
+ public:
+  GridCtrlItemHelper(const GridCtrl *parent) {
+    min_size = parent->GetMinimumSize();
+    border_size = parent->GetBorderSize();
+  }
+
+  dimension::Orientation direction, non_direction;
+  int direction_pos = 0, direction_max = 0, non_direction_pos = 0,
+      non_direction_max = 0, current_direction_pos = 0;
+  int start_pos = 0;
+  wxSize min_size, min_item_size, border_size;
+
+  void NextItem(PositionItemConst *item);
+
+  bool IsPastSize(PositionItemConst *item);
+};
+
+bool GridCtrlItemHelper::IsPastSize(PositionItemConst *item) {
+  int curr_direction_size = dimension::GetSize(*item, direction) +
+                            dimension::GetSize(border_size, direction);
+  return direction_pos + curr_direction_size >=
+         dimension::GetSize(min_size, direction);
+}
+
+void GridCtrlItemHelper::NextItem(PositionItemConst *item) {
+  int curr_direction_size = dimension::GetSize(*item, direction) +
+                            dimension::GetSize(border_size, direction);
+
+  if (IsPastSize(item)) {
+    non_direction_pos +=
+        non_direction_max + dimension::GetSize(border_size, non_direction);
+
+    non_direction_max = 0;
+
+    direction_max = std::max(direction_max, direction_pos);
+    direction_pos = start_pos;
+  }
+
+  non_direction_max =
+      std::max(dimension::GetSize(*item, non_direction), non_direction_max);
+}
+
 GridCtrl::GridCtrl() {}
 
 void GridCtrl::CalculatePosition(const PositionVector &vec_item) const {
-  dimension::Orientation direction = dimension::kHorizontal;
-  dimension::Orientation non_direction = dimension::kVertical;
-
-  auto min_item_size = GetMinimumItemSize(vec_item);
-
-  int direction_pos = 0;
-  int direction_largest = 0;
-  int non_direction_pos = 0;
-  int non_direction_max = 0;
-  int min_size = dimension::GetSize(GetMinimumSize(), direction);
-  int start_pos = 0;
+  GridCtrlItemHelper helper(this);
+  helper.direction = dimension::kHorizontal;
+  helper.non_direction = dimension::kVertical;
+  helper.min_item_size = GetMinimumItemSize(vec_item);
 
   if (CheckFlags(kPositionAlignCenter)) {
     auto min_item_size =
-        dimension::GetSize(GetMinimumItemSize(vec_item), direction);
+        dimension::GetSize(GetMinimumItemSize(vec_item), helper.direction);
+
+    int min_size = dimension::GetSize(helper.min_size, helper.direction);
 
     if (min_item_size < min_size) {
-      start_pos = min_size / 2 - min_item_size / 2;
+      helper.start_pos = min_size / 2 - min_item_size / 2;
     }
   }
 
   for (auto &it : vec_item) {
-    int curr_direction_size =
-        dimension::GetSize(*it, direction) + GetBorderSize(direction);
+    helper.NextItem(it);
+    dimension::SetPoint(*it, helper.direction, helper.direction_pos);
+    dimension::SetPoint(*it, helper.non_direction, helper.non_direction_pos);
 
-    if (direction_pos + curr_direction_size >= min_size) {
-      non_direction_pos += non_direction_max + GetBorderSize(non_direction);
-      non_direction_max = 0;
-      direction_pos = start_pos;
-    }
-
-    dimension::SetPoint(*it, direction, direction_pos);
-    dimension::SetPoint(*it, non_direction, non_direction_pos);
-
-    direction_pos +=
-        dimension::GetSize(*it, direction) + GetBorderSize(direction);
-
-    non_direction_max =
-        std::max(dimension::GetSize(*it, non_direction), non_direction_max);
+    helper.direction_pos +=
+        dimension::GetSize(*it, helper.direction) +
+        dimension::GetSize(helper.border_size, helper.direction);
   }
 }
 
 wxSize GridCtrl::GetMinimumItemSize(const PositionVectorConst &vec_item) const {
   wxSize size;
-  dimension::Orientation direction = dimension::kHorizontal,
-                         non_direction = dimension::kVertical;
 
-  int direction_pos = 0, direction_max = 0;
-  int non_direction_pos = 0, non_direction_max = 0;
-  int min_size = dimension::GetSize(GetMinimumSize(), direction);
+  GridCtrlItemHelper helper(this);
+  helper.direction = dimension::kHorizontal;
+  helper.non_direction = dimension::kVertical;
 
   for (auto &it : vec_item) {
-    int curr_direction_size =
-        dimension::GetSize(*it, direction) + GetBorderSize(direction);
+    helper.NextItem(it);
 
-    if (direction_pos + curr_direction_size >= min_size) {
-      non_direction_pos += non_direction_max + GetBorderSize(non_direction);
-      non_direction_max = 0;
-      direction_max = std::max(direction_pos, direction_max);
-      direction_pos = 0;
-    }
-
-    direction_pos +=
-        dimension::GetSize(*it, direction) + GetBorderSize(direction);
-    non_direction_max =
-        std::max(dimension::GetSize(*it, non_direction), non_direction_max);
+    helper.direction_pos +=
+        dimension::GetSize(*it, helper.direction) +
+        dimension::GetSize(helper.border_size, helper.direction);
   }
 
-  dimension::SetSize(size, direction, direction_max);
-  dimension::SetSize(size, non_direction, non_direction_pos);
+  dimension::SetSize(size, helper.direction, helper.direction_max);
+  dimension::SetSize(size, helper.non_direction,
+                     helper.non_direction_pos + helper.non_direction_max);
   return size;
+}
+
+GridCellCount GridCtrl::CountCell(const PositionVectorConst &vector) const {
+  GridCellCount count;
+  GridCtrlItemHelper helper(this);
+  helper.direction = dimension::kHorizontal;
+  helper.non_direction = dimension::kVertical;
+
+  int non_direction_pos = 0;
+  int count_col = 0;
+  for (const auto &it : vector) {
+    helper.NextItem(it);
+
+    if (non_direction_pos != helper.non_direction_pos) {
+      ++count.row;
+      non_direction_pos = helper.non_direction_pos;
+      count.col = std::max(count.col, count_col);
+      count_col = 0;
+    }
+
+    helper.direction_pos +=
+        dimension::GetSize(*it, helper.direction) +
+        dimension::GetSize(helper.border_size, helper.direction);
+
+    ++count_col;
+  }
+  return count;
 }
 
 }  // namespace position
