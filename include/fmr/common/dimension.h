@@ -71,8 +71,8 @@ inline int GetPoint(const wxPoint &pt, Orientation orient) {
 
 template <typename T>
 inline int GetPoint(const T &pt, Orientation orient) {
-  if (orient == kVertical) return pt.GetHeight();
-  if (orient == kHorizontal) return pt.GetWidth();
+  if (orient == kVertical) return pt.GetY();
+  if (orient == kHorizontal) return pt.GetX();
   return wxDefaultCoord;
 }
 
