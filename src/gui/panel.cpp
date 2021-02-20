@@ -47,7 +47,7 @@ Panel::Panel(wxWindow *parent, wxWindowID id, wxPoint position, wxSize size)
 };
 
 void Panel::BindEvent() {
-  Bind(explorer::kEventOpenFile, &Panel::OnExplorerOpenFile, this);
+  explorer_->Bind(explorer::kEventOpenFile, &Panel::OnExplorerOpenFile, this);
   Bind(reader::kEventOpenFile, &Panel::OnReaderOpenFile, this, ReaderWindow);
 }
 
