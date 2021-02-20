@@ -123,11 +123,12 @@ GridCellCount GridCtrl::CountCell(const PositionVectorConst &vector) const {
   helper.direction = dimension::kHorizontal;
   helper.non_direction = dimension::kVertical;
 
-  int non_direction_pos = 0;
+  int non_direction_pos = -1;
   int count_col = 0;
   for (const auto &it : vector) {
     helper.NextItem(it);
 
+    ++count_col;
     if (non_direction_pos != helper.non_direction_pos) {
       ++count.row;
       non_direction_pos = helper.non_direction_pos;
@@ -138,8 +139,6 @@ GridCellCount GridCtrl::CountCell(const PositionVectorConst &vector) const {
     helper.direction_pos +=
         dimension::GetSize(*it, helper.direction) +
         dimension::GetSize(helper.border_size, helper.direction);
-
-    ++count_col;
   }
   return count;
 }
