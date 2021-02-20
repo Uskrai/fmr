@@ -126,9 +126,9 @@ class CtrlBase {
   template <typename T>
   wxSize GetMinimumItemSize(const std::vector<T> &vec) const {
     std::vector<PositionItemRefConst<T>> vec_ref(vec.begin(), vec.end());
-    std::vector<PositionItemRefConst<T>> vec_ptr =
+    std::vector<PositionItemRefConst<T> *> vec_ptr =
         Vector::ConvertToPtr(vec_ref);
-    PositionVectorConst vec_item(vec_ptr.begin(), vec_ptr.end());
+    const PositionVectorConst vec_item(vec_ptr.begin(), vec_ptr.end());
     return GetMinimumItemSize(vec_item);
   }
 
