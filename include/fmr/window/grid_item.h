@@ -33,6 +33,8 @@ class GridItem {
   std::unique_ptr<GridCell> cell_;
   wxSize border_size_{0, 0};
   wxPoint pos_;
+  size_t highlight_width_ = 5;
+  int highlight_offset_ = 10;
 
  public:
   GridItem(const wxSize &border_size) {
@@ -77,7 +79,8 @@ class GridItem {
   void SetSelected(bool selected = true) { GetCell()->SetSelected(selected); }
   bool IsSelected() const { return GetCell()->IsSelected(); }
 
-  void Draw(wxDC &dc) { return GetCell()->Draw(dc); }
+  void DrawHighlight(wxDC &dc);
+  void Draw(wxDC &dc);
 };
 
 }  // namespace window
