@@ -79,6 +79,8 @@ class GridItem {
   void SetSelected(bool selected = true) { GetCell()->SetSelected(selected); }
   bool IsSelected() const { return GetCell()->IsSelected(); }
 
+  bool IsShown(const wxRect &rect);
+
   void DrawHighlight(wxDC &dc);
   void Draw(wxDC &dc);
 };

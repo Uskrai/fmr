@@ -23,6 +23,7 @@
 #include "fmr/position/item.h"
 #include "fmr/window/grid_cell.h"
 #include "fmr/window/grid_item.h"
+
 namespace fmr {
 
 namespace window {
@@ -171,8 +172,9 @@ void GridWindow::GoToCell(size_t index) {
 }
 
 void GridWindow::OnDraw(wxDC &dc) {
+  wxRect rect(GetViewStart(), GetClientSize());
   for (auto &it : cell_vec_) {
-    if (it) it->Draw(dc);
+    if (it && it->IsShown(rect)) it->Draw(dc);
   }
 }
 

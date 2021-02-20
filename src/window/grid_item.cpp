@@ -50,6 +50,17 @@ void GridItem::DrawHighlight(wxDC &dc) {
   }
 }
 
+bool GridItem::IsShown(const wxRect &rect) {
+  wxRect self_rect = GetRect();
+
+  bool ret = self_rect.GetRight() > rect.GetLeft();
+  ret = ret && self_rect.GetTop() < rect.GetBottom();
+
+  ret = ret && self_rect.GetLeft() < rect.GetRight();
+  ret = ret && self_rect.GetBottom() > rect.GetTop();
+  return ret;
+}
+
 void GridItem::Draw(wxDC &dc) {
   if (IsSelected()) {
     DrawHighlight(dc);
