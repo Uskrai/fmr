@@ -72,6 +72,7 @@ std::vector<StringRect> StringDraw::SplitString(wxDC &dc) {
     string_space = "";
   }
 
+  string_line += string_space;
   if (!string_line.empty()) push_string(std::move(string_line));
 
   return vec;
