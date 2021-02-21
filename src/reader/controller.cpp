@@ -135,7 +135,7 @@ void Controller::AdjustBitmap() {
 
   SetFirstShown(first_shown, &first_shown_pos);
 
-  if (rescaler_->GetFitSise() != GetWindow()->GetClientSize())
+  if (rescaler_->GetFitSize() != GetWindow()->GetClientSize())
     return AdjustBitmap();
 
   GetWindow()->Refresh();
