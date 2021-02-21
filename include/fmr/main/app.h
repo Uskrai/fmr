@@ -18,6 +18,7 @@
 #include <wx/app.h>
 
 #include <iostream>
+#include <memory>
 
 class wxFrame;
 
@@ -27,10 +28,12 @@ class Config;
 
 class App : public wxApp {
   wxFrame* frame;
-  Config* config;
+  std::unique_ptr<Config> config_;
   std::ofstream* log_stream;
   bool OnInit();
   int OnExit();
+
+  void PrepareConfig();
 
  public:
   void OpenFile(wxString Path);

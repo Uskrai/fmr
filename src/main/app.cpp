@@ -26,6 +26,11 @@
 
 #include <fstream>
 
+#include "fmr/common/path.h"
+#include "fmr/nowide/string.h"
+#include "wx/dir.h"
+#include "wx/filename.h"
+
 wxIMPLEMENT_APP(fmr::App);
 
 namespace fmr {
@@ -34,9 +39,7 @@ bool App::OnInit() {
   SetAppName(PACKAGE_NAME);
   wxInitAllImageHandlers();
 
-  this->config = new Config(wxEmptyString, wxEmptyString,
-                            wxStandardPaths::Get().GetUserDataDir());
-  Config::Set(this->config);
+  PrepareConfig();
 
   wxLocale locale;
   locale.Init(wxLANGUAGE_DEFAULT);
@@ -66,8 +69,36 @@ bool App::OnInit() {
   return true;
 }
 
+void App::PrepareConfig() {
+  wxString path = wxStandardPaths::Get().GetUserDataDir();
+  auto fs_path = Path::MakePath(String::Narrow(path));
+
+  wxString config_path =
+      String::Widen<wxString>(Path::MakeString(fs_path / "config"));
+
+  if (Path::Exist(Path::MakeString(fs_path))) {
+    if (!Path::IsDirectory(Path::MakeString(fs_path))) {
+      auto bak_path = path + ".bak";
+      if (wxCopyFile(path, bak_path)) {
+        wxRemoveFile(path);
+        wxDir::Make(path);
+      } else {
+        wxLogError("Cannot create config file in %s", path);
+        config_path = wxFileName::CreateTempFileName(path);
+      }
+    }
+  } else {
+    if (!wxDir::Make(path)) {
+      wxLogError("Cannot Makedir : %s", path);
+      config_path = wxFileName::CreateTempFileName(path);
+    }
+  }
+
+  config_ = std::make_unique<Config>(wxEmptyString, wxEmptyString, config_path);
+  Config::Set(config_.get());
+}
+
 int App::OnExit() {
-  delete this->config;
   log_stream->close();
   delete log_stream;
 

@@ -33,7 +33,7 @@ std::string MakeString(const wxString &path) {
   return std::string(path.ToUTF8());
 }
 
-auto MakePath(const std::string &path) { return nwd::fs::path(path); }
+nwd::fs::path MakePath(const std::string &path) { return nwd::fs::path(path); }
 
 char GetSeparator() { return nwd::fs::path::preferred_separator; }
 // std::string GetSeparator() { return std::string(1, Separator); }
@@ -85,6 +85,8 @@ bool IsDirectory(const nwd::fs::path &path) {
 bool IsDirectory(const std::string &path) {
   return IsDirectory(MakePath(path));
 }
+
+bool Exist(const std::string &path) { return nwd::fs::exists(path); }
 
 std::string GetDirName(const std::string &path) {
   try {

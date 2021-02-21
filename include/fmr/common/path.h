@@ -27,11 +27,14 @@ namespace Path {
 const std::string EmptyString = "";
 
 std::string MakeString(const nwd::fs::path &path);
+nwd::fs::path MakePath(const std::string &path);
 
 char GetSeparator();
 
 bool IsDirectory(const std::string &path);
 bool IsDirectory(const nwd::fs::path &path);
+
+bool Exist(const std::string &path);
 
 wxString GetName(wxString) = delete;
 std::string GetName(std::string path);
