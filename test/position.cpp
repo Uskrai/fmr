@@ -57,12 +57,12 @@ TEST(GridCtrlTest, Position) {
   ctrl.SetMinimumSize(wxSize(200, 200));
   ctrl.CalculatePosition(rect);
 
-  int val = 300;
+  int val = 0;
   for (const auto &it : rect) {
     EXPECT_EQ(it.GetPosition().y, val);
     val += it.GetHeight() + ctrl.GetBorderSize(dimension::kVertical);
   }
-  EXPECT_EQ(ctrl.GetMinimumItemSize(rect), wxSize(200, 4000));
+  EXPECT_EQ(ctrl.GetMinimumItemSize(rect), wxSize(200, 3700));
 }
 
 }  // namespace fmr
