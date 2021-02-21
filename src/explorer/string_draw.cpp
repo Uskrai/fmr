@@ -105,25 +105,6 @@ void StringDraw::PrepareString(wxDC &dc) {
   Prepare(false);
 }
 
-void StringRect::PrepareString(wxDC &dc) {
-  //
-
-  wxRect rect = GetRect();
-  wxSize text_extent_ = dc.GetTextExtent(string_);
-}
-
-void StringRect::SetString(const std::string &string) {
-  string_ = String::Widen<wxString>(string);
-}
-
-std::string StringRect::GetString() const { return String::Narrow(string_); }
-
-void StringRect::Draw(wxDC &dc) {
-  PrepareString(dc);
-  dc.DrawText(string_, GetRect().GetPosition());
-  ;
-}
-
 }  // namespace explorer
 
 }  // namespace fmr

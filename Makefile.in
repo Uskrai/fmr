@@ -166,7 +166,8 @@ lib_explorer_la_DEPENDENCIES = lib_handler.la lib_thread.la \
 	lib_window.la
 am_lib_explorer_la_OBJECTS = $(explorer)/window_explorer.lo \
 	$(explorer)/image_window_explorer.lo $(explorer)/controller.lo \
-	$(explorer)/image_cell_explorer.lo $(explorer)/string_draw.lo
+	$(explorer)/image_cell_explorer.lo $(explorer)/string_draw.lo \
+	$(explorer)/string_rect.lo
 lib_explorer_la_OBJECTS = $(am_lib_explorer_la_OBJECTS)
 lib_frame_la_DEPENDENCIES = lib_explorer.la lib_reader.la
 am_lib_frame_la_OBJECTS = $(gui)/frame.lo $(gui)/panel.lo \
@@ -242,6 +243,7 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(explorer)/$(DEPDIR)/image_cell_explorer.Plo \
 	$(explorer)/$(DEPDIR)/image_window_explorer.Plo \
 	$(explorer)/$(DEPDIR)/string_draw.Plo \
+	$(explorer)/$(DEPDIR)/string_rect.Plo \
 	$(explorer)/$(DEPDIR)/window_explorer.Plo \
 	$(fmr)/$(DEPDIR)/app.Po $(gui)/$(DEPDIR)/accelerator_table.Plo \
 	$(gui)/$(DEPDIR)/frame.Plo \
@@ -614,7 +616,8 @@ lib_explorer_la_SOURCES = $(explorer)/window_explorer.cpp \
 													$(explorer)/image_window_explorer.cpp \
 													$(explorer)/controller.cpp \
 													$(explorer)/image_cell_explorer.cpp \
-													$(explorer)/string_draw.cpp
+													$(explorer)/string_draw.cpp \
+													$(explorer)/string_rect.cpp
 
 lib_explorer_la_LIBADD = lib_handler.la \
 						 lib_thread.la \
@@ -1153,6 +1156,8 @@ $(explorer)/image_cell_explorer.lo: $(explorer)/$(am__dirstamp) \
 	$(explorer)/$(DEPDIR)/$(am__dirstamp)
 $(explorer)/string_draw.lo: $(explorer)/$(am__dirstamp) \
 	$(explorer)/$(DEPDIR)/$(am__dirstamp)
+$(explorer)/string_rect.lo: $(explorer)/$(am__dirstamp) \
+	$(explorer)/$(DEPDIR)/$(am__dirstamp)
 
 lib_explorer.la: $(lib_explorer_la_OBJECTS) $(lib_explorer_la_DEPENDENCIES) $(EXTRA_lib_explorer_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(explorerdir) $(lib_explorer_la_OBJECTS) $(lib_explorer_la_LIBADD) $(LIBS)
@@ -1341,6 +1346,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/image_cell_explorer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/image_window_explorer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/string_draw.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/string_rect.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/window_explorer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(fmr)/$(DEPDIR)/app.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(gui)/$(DEPDIR)/accelerator_table.Plo@am__quote@ # am--include-marker
@@ -1813,6 +1819,7 @@ distclean: distclean-recursive
 	-rm -f $(explorer)/$(DEPDIR)/image_cell_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/image_window_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/string_draw.Plo
+	-rm -f $(explorer)/$(DEPDIR)/string_rect.Plo
 	-rm -f $(explorer)/$(DEPDIR)/window_explorer.Plo
 	-rm -f $(fmr)/$(DEPDIR)/app.Po
 	-rm -f $(gui)/$(DEPDIR)/accelerator_table.Plo
@@ -1912,6 +1919,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(explorer)/$(DEPDIR)/image_cell_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/image_window_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/string_draw.Plo
+	-rm -f $(explorer)/$(DEPDIR)/string_rect.Plo
 	-rm -f $(explorer)/$(DEPDIR)/window_explorer.Plo
 	-rm -f $(fmr)/$(DEPDIR)/app.Po
 	-rm -f $(gui)/$(DEPDIR)/accelerator_table.Plo

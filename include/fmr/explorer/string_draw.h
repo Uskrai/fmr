@@ -19,6 +19,7 @@
 #define FMR_EXPLORER_STRING_DRAW
 
 #include <fmr/common/rect.h>
+#include <fmr/explorer/string_rect.h>
 #include <wx/gdicmn.h>
 
 #include <string>
@@ -29,21 +30,6 @@ class wxDC;
 namespace fmr {
 
 namespace explorer {
-
-class StringRect : public Rectangle {
-  wxString string_;
-  wxPoint text_pos_;
-
- public:
-  StringRect() {}
-  StringRect(const std::string &string) { SetString(string); }
-
-  void SetString(const std::string &string);
-  std::string GetString() const;
-
-  void PrepareString(wxDC &dc);
-  void Draw(wxDC &dc);
-};
 
 class StringDraw : public Rectangle {
   std::string text_;
