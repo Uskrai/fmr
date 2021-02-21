@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef FMR_COMMON_RECT
+#define FMR_COMMON_RECT
+
 #include <wx/gdicmn.h>
 
 namespace fmr {
@@ -51,3 +54,5 @@ class Rectangle {
 }  // namespace explorer
 
 }  // namespace fmr
+
+#endif /* end of include guard: FMR_COMMON_RECT */
