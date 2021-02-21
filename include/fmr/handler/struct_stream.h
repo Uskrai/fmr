@@ -127,6 +127,6 @@ typedef void (wxEvtHandler::*StreamEventFunction)(StreamEvent &);
 #define EVT_STREAM(id, type, func) \
   wx__DECLARE_EVT1(type, id, StreamEventHandler(func))
 
-};  // namespace fmr
+}  // namespace fmr
 
 #endif

@@ -29,7 +29,7 @@ namespace fmr {
 #define DefineStringCompareFunction(name)                       \
   bool name##Sortable(const Sortable &s1, const Sortable &s2) { \
     return name##String(s1.GetString(), s2.GetString());        \
-  };                                                            \
+  }                                                             \
   bool name##String(const String &s1, const String &s2)
 
 namespace Compare {
@@ -48,5 +48,5 @@ String GetNonZero(const String &str, size_t &idx, Char &chr);
 DeclareStringCompareFunction(Natural);
 }  // namespace Compare
 
-};  // namespace fmr
+}  // namespace fmr
 #endif

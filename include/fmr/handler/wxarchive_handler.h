@@ -99,5 +99,5 @@ class WxArchiveHandler : public AbstractHandler {
   std::vector<SStream> m_all, list_write_stream_;
 };
 
-};  // namespace fmr
+}  // namespace fmr
 #endif

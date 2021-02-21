@@ -147,7 +147,6 @@ void GridWindow::MakeCellVisible(size_t index) {
 
   wxRect rect = cell_vec_.at(index)->GetRect();
   wxRect scroll_rect(GetViewStart(), GetClientSize());
-  wxSize size = GetClientSize();
   wxPoint scroll_to = GetViewStart();
 
   if (rect.GetLeft() < scroll_rect.GetLeft()) {

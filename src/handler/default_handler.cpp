@@ -345,4 +345,4 @@ void DefaultHandler::Close() {
 
 DefaultHandler::~DefaultHandler() { Close(); }
 
-};  // namespace fmr
+}  // namespace fmr

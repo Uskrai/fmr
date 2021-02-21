@@ -195,4 +195,4 @@ void SBitmap::SetPosition(const wxPoint& pos) {
 void SBitmap::SetY(int PosY) { m_pos.y = PosY; }
 void SBitmap::SetX(int PosX) { m_pos.x = PosX; }
 
-};  // namespace fmr
+}  // namespace fmr

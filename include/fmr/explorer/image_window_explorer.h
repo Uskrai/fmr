@@ -78,8 +78,8 @@ class ImageWindow : public wxWindow {
   void OnSize(wxSizeEvent &event);
 };
 
-};  // namespace explorer
+}  // namespace explorer
 
-};  // namespace fmr
+}  // namespace fmr
 
 #endif

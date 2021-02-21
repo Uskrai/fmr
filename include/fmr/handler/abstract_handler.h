@@ -96,6 +96,6 @@ class AbstractHandler {
   // bool is_get_stream = false ) = 0;
 };
 
-};  // namespace fmr
+}  // namespace fmr
 
 #endif

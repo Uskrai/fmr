@@ -125,6 +125,6 @@ class FlexGridWindow : public ScrolledWindow {
   void OnKeyDown(wxKeyEvent &event);
 };
 
-};  // namespace fmr
+}  // namespace fmr
 
 #endif

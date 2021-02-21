@@ -53,8 +53,8 @@ auto ConvertToPtr(const std::vector<T>& vec) {
   return ret;
 }
 
-};  // namespace Vector
+}  // namespace Vector
 
-};  // namespace fmr
+}  // namespace fmr
 
 #endif

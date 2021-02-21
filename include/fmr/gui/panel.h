@@ -71,6 +71,6 @@ class Panel : public wxPanel {
   wxBoxSizer *sizer_;
 };
 
-};  // namespace fmr
+}  // namespace fmr
 
 #endif

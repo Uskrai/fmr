@@ -63,7 +63,7 @@ class ThreadController : public wxEvtHandler {
       return Wait(thread, lock);
     }
     return false;
-  };
+  }
 
   [[deprecated]] bool Delete(int thread_id, wxCriticalSection &lock) = delete;
   [[deprecated]] bool Wait(int thread_id, wxCriticalSection &lock) = delete;
@@ -110,6 +110,6 @@ class BaseThread : public wxThread, public wxObject {
   int m_id;
 };
 
-};  // namespace fmr
+}  // namespace fmr
 
 #endif

@@ -148,7 +148,7 @@ FindStatus FindHandler::TraverseHandler(T *handler, FindItem &item) {
 
 FindStatus FindHandler::Find(AbstractHandler *handler, FindItem &item) {
   return CheckAndSendIfFound(handler, item);
-};
+}
 
 template <typename T>
 FindStatus FindHandler::CheckAndSendIfFound(T *handler, FindItem &item) {
@@ -163,6 +163,6 @@ FindStatus FindHandler::CheckAndSendIfFound(T *handler, FindItem &item) {
   return status;
 }
 
-};  // namespace queue
+}  // namespace queue
 
-};  // namespace fmr
+}  // namespace fmr

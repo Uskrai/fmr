@@ -132,6 +132,6 @@ void ImageWindow::OnPaint(wxPaintEvent &event) {
 
 void ImageWindow::OnSize(wxSizeEvent &event) { refresh_scheduled_ = true; }
 
-};  // namespace explorer
+}  // namespace explorer
 
-};  // namespace fmr
+}  // namespace fmr

@@ -66,8 +66,8 @@ typedef void (wxEvtHandler::*StreamBitmapEventFunction)(StreamBitmapEvent &);
 #define EVT_STREAM_BITMAP(id, type, func) \
   wx__DECLARE_EVT1(type, id, StreamBitmapEventHandler(func))
 
-};  // namespace explorer
+}  // namespace explorer
 
-};  // namespace fmr
+}  // namespace fmr
 
 #endif

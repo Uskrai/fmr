@@ -388,4 +388,4 @@ void WxArchiveHandler::Close() {
 
 WxArchiveHandler::~WxArchiveHandler() { Clear(); }
 
-};  // namespace fmr
+}  // namespace fmr

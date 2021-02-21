@@ -106,6 +106,6 @@ class STDHandler : public AbstractOpenableHandler {
                   bool is_get_stream = false);
 };
 
-};  // namespace fmr
+}  // namespace fmr
 
 #endif

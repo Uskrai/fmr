@@ -29,7 +29,7 @@ enum PosFlags {
   kPositionAlignCenter = 0x04
 };
 
-DEFINE_BITMASK_TYPE(PosFlags);
+DEFINE_BITMASK_TYPE(PosFlags)
 
 }  // namespace position
 

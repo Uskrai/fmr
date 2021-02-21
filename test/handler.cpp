@@ -162,10 +162,10 @@ TYPED_TEST_SUITE(HandlerTest, handler_type);
                               this);                                       \
   }
 
-#define HANDLER_TEST(TestName)                                    \
-  HANDLER_TEST_FUNC(TestName);                                    \
-  HANDLER_TEST_CALL_FUNC(TestName, Absolute, Path::MakeAbsolute); \
-  HANDLER_TEST_CALL_FUNC(TestName, Relative, std::string);        \
+#define HANDLER_TEST(TestName)                                   \
+  HANDLER_TEST_FUNC(TestName);                                   \
+  HANDLER_TEST_CALL_FUNC(TestName, Absolute, Path::MakeAbsolute) \
+  HANDLER_TEST_CALL_FUNC(TestName, Relative, std::string)        \
   HANDLER_TEST_FUNC(TestName)
 
 void TestSizeHandler(AbstractHandler *handler, const std::string &path) {

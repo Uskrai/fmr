@@ -55,7 +55,7 @@ inline void SetPoint(T &pt, Orientation orientation, int pos) {
 inline void SetSize(wxSize &size, Orientation orient, int val) {
   if (orient == kVertical) size.SetHeight(val);
   if (orient == kHorizontal) size.SetWidth(val);
-};
+}
 
 template <typename T>
 inline void SetSize(T &size, Orientation orient, int val) {

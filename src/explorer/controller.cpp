@@ -64,14 +64,10 @@ bool Controller::Open(std::unique_ptr<AbstractOpenableHandler> handler) {
     if (handler_->Size() == handler->Size()) return true;
   }
 
-  int column = 5;
-  int row = ceil(double(handler->Size()) / double(column));
-
   Clear();
 
   // wxSize best_bitmap_size = ImageWindow::GetBestBitmapSize(child_size);
 
-  size_t idx = 0;
   for (auto &it : handler->GetChild()) {
     auto stream = std::make_unique<SStream>(it);
     auto bitmap = std::make_unique<SBitmap>();

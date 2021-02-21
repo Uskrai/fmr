@@ -105,8 +105,6 @@ void Loader::SetFindFlags(queue::FindHandlerFlags flags) {
 }
 
 void Loader::OnFindItemFound(ImageFindEvent& event) {
-  auto item = event.GetItem().GetSourceStream();
-
   if (event.GetItem().GetStatus() == queue::kFindNotFound) return;
 
   if (GetFindController()->IsInQueue(event.GetItem().GetSourceStream())) {

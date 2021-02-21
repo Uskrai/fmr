@@ -76,4 +76,4 @@ bool LoadImage::ProcessTask(LoadImage::value_type &stream) {
 
 }  // namespace queue
 
-};  // namespace fmr
+}  // namespace fmr

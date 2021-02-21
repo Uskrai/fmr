@@ -81,6 +81,6 @@ struct SBitmap {
   void SetX(int PosX);
 };
 
-};  // namespace fmr
+}  // namespace fmr
 
 #endif

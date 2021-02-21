@@ -41,7 +41,7 @@ enum FindHandlerFlags {
   kFindHandlerDontRecursiveNonOpenable = 0x10,
   kFindHandlerCheckFilenameIfOpenable = 0x20
 };
-DEFINE_BITMASK_TYPE(FindHandlerFlags);
+DEFINE_BITMASK_TYPE(FindHandlerFlags)
 
 enum FindStatus {
   kFindItemFound = 0,
@@ -129,8 +129,8 @@ class FindHandler : public Base<const SStream *, FindItem> {
   FindStatus TraverseHandler(T *handler, FindItem &item);
 };
 
-};  // namespace queue
+}  // namespace queue
 
-};  // namespace fmr
+}  // namespace fmr
 
 #endif

@@ -183,4 +183,4 @@ std::shared_ptr<SStream> StreamEvent::GetStream() { return stream_; }
 
 size_t StreamEvent::GetIndex() { return index_; }
 
-};  // namespace fmr
+}  // namespace fmr

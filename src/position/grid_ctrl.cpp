@@ -49,9 +49,6 @@ bool GridCtrlItemHelper::IsPastSize(PositionItemConst *item) {
 }
 
 void GridCtrlItemHelper::NextItem(PositionItemConst *item) {
-  int curr_direction_size = dimension::GetSize(*item, direction) +
-                            dimension::GetSize(border_size, direction);
-
   if (IsPastSize(item)) {
     non_direction_pos +=
         non_direction_max + dimension::GetSize(border_size, non_direction);

@@ -37,7 +37,7 @@ std::unique_ptr<FindHandlerController> NewFindHandler(wxEvtHandler *parent,
                                                       int id);
 std::unique_ptr<RescaleController> NewRescale(wxEvtHandler *parent, int id);
 
-};  // namespace controller_factory
+}  // namespace controller_factory
 
 }  // namespace thread
 

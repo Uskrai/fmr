@@ -246,6 +246,6 @@ void Window::Select(std::string name) {
 
 Window::~Window() { Clear(); }
 
-};  // namespace explorer
+}  // namespace explorer
 
-};  // namespace fmr
+}  // namespace fmr

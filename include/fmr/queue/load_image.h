@@ -69,6 +69,6 @@ class LoadImage : public Base<SStream *, LoadItem> {
   void SetRescaler(bitmap::Rescaler *rescaler) { rescaler_ = rescaler; }
 };
 
-};  // namespace queue
-};  // namespace fmr
+}  // namespace queue
+}  // namespace fmr
 #endif

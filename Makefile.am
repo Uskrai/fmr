@@ -2,10 +2,6 @@
 AM_CPPFLAGS = -I@srcdir@/include
 
 SUBDIRS = . test
-#
-# AM_CPPFLAGS += $(BOOST_CPPFLAGS)
-# AM_LDFLAGS = $(BOOST_LDFLAGS) \
-						 # $(BOOST_FILESYSTEM_LIBS)
 
 common = src/common
 commondir = @abs_builddir@/common

@@ -98,4 +98,4 @@ BaseThread::~BaseThread() {
   if (GetParent()) GetParent()->DoSetNull(this);
 }
 
-};  // namespace fmr
+}  // namespace fmr

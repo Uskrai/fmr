@@ -51,5 +51,5 @@ class HandlerFactory {
   HandlerType m_type;
 };
 
-};  // namespace fmr
+}  // namespace fmr
 #endif

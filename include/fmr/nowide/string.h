@@ -78,7 +78,7 @@ inline std::string Narrow<wxString>(const wxString &string) {
 
 #endif  // end of ifde FMR_USE_WXWIDGETS
 
-};  // namespace String
-};  // namespace fmr
+}  // namespace String
+}  // namespace fmr
 
 #endif

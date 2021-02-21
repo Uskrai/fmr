@@ -86,6 +86,6 @@ class Frame : public wxFrame {
   void OnReaderChangeImageLimit(wxCommandEvent& event);
 };
 
-};  // namespace fmr
+}  // namespace fmr
 
 #endif

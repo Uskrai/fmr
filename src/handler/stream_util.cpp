@@ -48,7 +48,7 @@ std::unique_ptr<AbstractHandler> MakeHandler(const SStream &stream) {
 bool LoadStream(SStream &stream) {
   auto handler = MakeParentHandler(stream);
   return handler && handler->GetStream(stream);
-};
+}
 
 }  // namespace stream_util
 

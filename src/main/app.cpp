@@ -74,4 +74,4 @@ int App::OnExit() {
   return 0;
 }
 
-};  // namespace fmr
+}  // namespace fmr

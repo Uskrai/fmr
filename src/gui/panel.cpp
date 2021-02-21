@@ -44,7 +44,7 @@ Panel::Panel(wxWindow *parent, wxWindowID id, wxPoint position, wxSize size)
   SetSizer(sizer_);
   Layout();
   BindEvent();
-};
+}
 
 void Panel::BindEvent() {
   explorer_->Bind(explorer::kEventOpenFile, &Panel::OnExplorerOpenFile, this);
@@ -134,7 +134,6 @@ bool Panel::OpenExplorer() {
     explorer_->GetWindow()->SetFocus();
     explorer_->GetWindow()->Show();
     Layout();
-    wxSize size = explorer_->GetWindow()->GetClientSize();
     if (explorer_->OpenParent(select_path)) {
       explorer_->GetWindow()->Show();
       explorer_->GetWindow()->SetFocus();
@@ -181,4 +180,4 @@ bool Panel::Destroy() {
 
 Panel::~Panel() { reader_.reset(); }
 
-};  // namespace fmr
+}  // namespace fmr

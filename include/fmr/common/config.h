@@ -51,6 +51,6 @@ class Config : private wxFileConfig {
   static void Set(Config* pConfig) { wxFileConfig::Set(pConfig); }
 };
 
-};  // namespace fmr
+}  // namespace fmr
 
 #endif

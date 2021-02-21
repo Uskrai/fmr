@@ -80,7 +80,7 @@ class Window : public FlexGridWindow {
   void OnImageLoaded(bitmap::ImageLoadEvent &event);
 };
 
-};  // namespace explorer
+}  // namespace explorer
 
-};  // namespace fmr
+}  // namespace fmr
 #endif

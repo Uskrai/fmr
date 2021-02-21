@@ -108,5 +108,5 @@ class DefaultHandler : public AbstractOpenableHandler {
   void DoCreateFile(const SStream &stream);
 };
 
-};  // namespace fmr
+}  // namespace fmr
 #endif

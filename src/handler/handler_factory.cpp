@@ -121,4 +121,4 @@ bool HandlerFactory::IsOpenable(const std::string& path) {
   return type == openable_type;
 }
 
-};  // namespace fmr
+}  // namespace fmr

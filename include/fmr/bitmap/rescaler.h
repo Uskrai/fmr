@@ -33,7 +33,7 @@ enum RescalerFlags {
   kRescaleEnlarge = 0x04
 };
 
-DEFINE_BITMASK_TYPE(RescalerFlags);
+DEFINE_BITMASK_TYPE(RescalerFlags)
 
 class Rescaler {
  protected:

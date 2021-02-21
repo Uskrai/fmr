@@ -104,4 +104,4 @@ bool Rescale(wxImage &image, wxSize max_size,
 
 }  // namespace image_util
 
-};  // namespace fmr
+}  // namespace fmr
