@@ -16,7 +16,7 @@
  */
 
 #include "fmr/bitmap/rescaler.h"
-#include "fmr/position/box_ctrl_flags.h"
+#include "fmr/position/pos_flags.h"
 
 namespace fmr {
 
@@ -27,8 +27,8 @@ class Settings {
   bool read_from_right_ = false;
   size_t image_per_page_ = 1;
   bitmap::RescalerFlags rescale_flags_ = bitmap::kRescaleNone;
-  position::BoxFlags position_flags_ =
-      position::kBoxAlignCenter | position::kBoxVertical;
+  position::PosFlags position_flags_ =
+      position::kPositionAlignCenter | position::kPositionVertical;
 };
 
 }  // namespace reader

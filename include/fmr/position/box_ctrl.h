@@ -19,9 +19,9 @@
 #define FMR_BITMAP_POSITION_BOX_CTRL
 
 #include <fmr/common/vector.h>
-#include <fmr/position/box_ctrl_flags.h>
 #include <fmr/position/ctrl_base.h>
 #include <fmr/position/item.h>
+#include <fmr/position/pos_flags.h>
 #include <wx/gdicmn.h>
 
 namespace fmr {
@@ -30,14 +30,15 @@ namespace position {
 
 class BoxCtrl : public CtrlBase {
  private:
-  BoxFlags flags_;
+  PosFlags flags_;
 
  public:
   BoxCtrl() {}
-  BoxCtrl(BoxFlags flags);
+  BoxCtrl(PosFlags flags);
 
-  void SetFlags(BoxFlags flags) { flags_ = flags; }
-  BoxFlags GetFlags() const { return flags_; }
+  void SetFlags(PosFlags flags) { flags_ = flags; }
+  PosFlags GetFlags() const { return flags_; }
+  bool CheckFlags(PosFlags flags) const { return flags_ & flags; }
 
   void CalculatePosition(const PositionVector &vec_item) const override;
   using CtrlBase::CalculatePosition;

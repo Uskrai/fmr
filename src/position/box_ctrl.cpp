@@ -18,12 +18,13 @@
 #include "fmr/position/box_ctrl.h"
 
 #include "fmr/common/dimension.h"
+#include "fmr/position/pos_flags.h"
 
 namespace fmr {
 
 namespace position {
 
-BoxCtrl::BoxCtrl(BoxFlags flags) { flags_ = flags; }
+BoxCtrl::BoxCtrl(PosFlags flags) { flags_ = flags; }
 
 void BoxCtrl::CalculatePosition(const PositionVector &page) const {
   using dimension::Orientation;
@@ -54,19 +55,19 @@ void BoxCtrl::CalculatePosition(const PositionVector &page) const {
     }
   };
 
-  if (flags_ & kBoxHorizontal) {
+  if (CheckFlags(kPositionHorizontal)) {
     int start_pos =
         get_start_position(page_size.GetWidth(), GetMinimumSize().GetWidth());
     make_line(start_pos, dimension::kHorizontal);
-    if (flags_ & kBoxAlignCenter)
+    if (CheckFlags(kPositionAlignCenter))
       make_centered(win_size.GetHeight(), dimension::kVertical);
   }
 
-  if (flags_ & kBoxVertical) {
+  if (CheckFlags(kPositionVertical)) {
     int start_pos =
         get_start_position(page_size.GetHeight(), GetMinimumSize().GetHeight());
     make_line(start_pos, dimension::kVertical);
-    if (flags_ & kBoxAlignCenter)
+    if (CheckFlags(kPositionAlignCenter))
       make_centered(win_size.GetWidth(), dimension::kHorizontal);
   }
 }
@@ -88,11 +89,11 @@ wxSize BoxCtrl::GetMinimumItemSize(const PositionVectorConst &page) const {
     return size;
   };
 
-  if (flags_ & kBoxHorizontal) {
+  if (CheckFlags(kPositionHorizontal)) {
     size = iterate_page(dimension::kHorizontal, dimension::kVertical);
   }
 
-  if (flags_ & kBoxVertical) {
+  if (CheckFlags(kPositionVertical)) {
     size = iterate_page(dimension::kVertical, dimension::kHorizontal);
   }
 

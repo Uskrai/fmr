@@ -30,7 +30,6 @@
 #include "fmr/gui/accelerator_table.h"
 #include "fmr/gui/menu_item_toggler.h"
 #include "fmr/nowide/string.h"
-#include "fmr/position/box_ctrl_flags.h"
 #include "fmr/reader/settings.h"
 #include "fmr/window/menu_bar.h"
 #include "wx/accel.h"
@@ -138,7 +137,7 @@ void Frame::SettingReader() {
   setting.image_per_page_ =
       Config::Get()->Read("Reader/ImageLimit", int(setting.image_per_page_));
 
-  setting.position_flags_ = static_cast<position::BoxFlags>(Config::Get()->Read(
+  setting.position_flags_ = static_cast<position::PosFlags>(Config::Get()->Read(
       "Reader/ImagePosition", int(setting.position_flags_)));
 
   setting.read_from_right_ =

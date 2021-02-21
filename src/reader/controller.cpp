@@ -42,8 +42,7 @@ Controller::Controller() {
   auto window = new ScrolledImageWindow();
   SetWindow(window);
 
-  position_ctrl_ = std::make_unique<position::BoxCtrl>(
-      position::kBoxAlignCenter | position::kBoxVertical);
+  position_ctrl_ = std::make_unique<position::BoxCtrl>();
 
   rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleNone);
 
