@@ -33,7 +33,7 @@ class GridWindow;
 
 namespace explorer {
 
-wxDECLARE_EVENT(kEventOpenFile, wxCommandEvent);
+wxDECLARE_EVENT(kEventOpenCell, wxNotifyEvent);
 
 enum ExplorerId { kLoaderId = wxID_HIGHEST + 130 };
 class ImageCell;
@@ -74,6 +74,7 @@ class Controller : public wxEvtHandler {
 
  private:
   void OnKeyDown(wxKeyEvent &event);
+  void OnOpenCell(wxNotifyEvent &event);
   void OnImageLoaded(bitmap::ImageLoadEvent &event);
 };
 

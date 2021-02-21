@@ -33,7 +33,7 @@ namespace fmr {
 
 namespace explorer {
 
-wxDEFINE_EVENT(kEventOpenFile, wxCommandEvent);
+wxDEFINE_EVENT(kEventOpenCell, wxNotifyEvent);
 
 Controller::Controller() {
   window_ = new window::GridWindow();
@@ -46,6 +46,7 @@ Controller::Controller() {
 
   window_->Bind(wxEVT_KEY_DOWN, &Controller::OnKeyDown, this);
   Bind(bitmap::kEventImageLoaded, &Controller::OnImageLoaded, this, kLoaderId);
+  Bind(kEventOpenCell, &Controller::OnOpenCell, this);
 }
 
 bool Controller::CreateWindow(wxWindow *parent, int id, const wxPoint &pos,
@@ -111,29 +112,11 @@ bool Controller::OpenCell(size_t index) {
   }
   if (!stream) return false;
 
-  std::string path = handler_->GetItemPath(*stream);
+  wxString path = String::Widen<wxString>(handler_->GetItemPath(*stream));
 
-  auto handler = std::shared_ptr<AbstractOpenableHandler>(
-      HandlerFactory::NewOpenableHandler(path));
-
-  if (handler) {
-    handler->Traverse();
-
-    for (const auto &it : handler->GetChild()) {
-      auto child_path = handler->GetItemPath(it);
-
-      auto child_handler = std::unique_ptr<AbstractHandler>(
-          HandlerFactory::NewHandler(child_path));
-
-      if (child_handler)
-        if (child_handler->GetName() == child_path) return Open(path);
-    }
-  }
-
-  auto event = new wxCommandEvent(kEventOpenFile, window_->GetId());
-  event->SetString(String::Widen<wxString>(path));
-  wxQueueEvent(this, event);
-
+  auto event = wxNotifyEvent(kEventOpenCell, GetWindow()->GetId());
+  event.SetString(path);
+  wxPostEvent(this, event);
   return true;
 }
 
@@ -196,6 +179,14 @@ void Controller::AdjustCell() {
 
   if (GetWindow()->GetClientSize() != GetWindow()->GetTableSize())
     return AdjustCell();
+}
+
+void Controller::OnOpenCell(wxNotifyEvent &event) {
+  if (event.IsAllowed()) {
+    std::string path = String::Narrow(event.GetString());
+
+    Open(path);
+  }
 }
 
 void Controller::OnKeyDown(wxKeyEvent &event) {

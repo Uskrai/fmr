@@ -32,6 +32,7 @@
 #include "fmr/nowide/string.h"
 #include "fmr/reader/controller.h"
 #include "fmr/window/grid_window.h"
+#include "wx/log.h"
 
 namespace fmr {
 
@@ -47,7 +48,7 @@ Panel::Panel(wxWindow *parent, wxWindowID id, wxPoint position, wxSize size)
 }
 
 void Panel::BindEvent() {
-  explorer_->Bind(explorer::kEventOpenFile, &Panel::OnExplorerOpenFile, this);
+  explorer_->Bind(explorer::kEventOpenCell, &Panel::OnExplorerOpenFile, this);
   Bind(reader::kEventOpenFile, &Panel::OnReaderOpenFile, this, ReaderWindow);
 }
 
@@ -154,18 +155,36 @@ void Panel::OnKeyDown(wxKeyEvent &event) {
   event.Skip();
 }
 
-void Panel::OnExplorerOpenFile(wxCommandEvent &event) {
+void Panel::OnExplorerOpenFile(wxNotifyEvent &event) {
+  std::string path = String::Narrow(event.GetString());
+  if (HandlerFactory::IsOpenable(path)) {
+    auto handler = HandlerFactory::NewOpenableHandler(path);
+    handler->Traverse();
+
+    for (auto &it : handler->GetChild()) {
+      auto child_path = handler->GetItemPath(it);
+      auto child_handler = HandlerFactory::NewHandler(child_path);
+      if (child_handler && child_handler->GetName() == child_path) {
+        event.Skip();
+        return;
+      }
+    }
+  }
+
   explorer_->GetWindow()->Hide();
 
   if (event.GetString().empty()) return;
 
-  if (LoadFile(String::Narrow(event.GetString())))
+  if (LoadFile(String::Narrow(event.GetString()))) {
     explorer_->Clear();
-  else {
+    return;
+  } else {
     explorer_->GetWindow()->Show();
     explorer_->GetWindow()->SetFocus();
     explorer_->Open(String::Narrow(event.GetString()));
   }
+
+  wxLogError("Cannot open:%s", event.GetString());
 }
 
 void Panel::OnReaderOpenFile(wxCommandEvent &event) {
