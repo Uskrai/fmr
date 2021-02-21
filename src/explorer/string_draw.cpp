@@ -74,6 +74,12 @@ std::vector<StringRect> StringDraw::SplitString(wxDC &dc) {
     string_space = "";
   }
 
+  if (dc.GetTextExtent(String::Widen<wxString>(string_line + string_space))
+          .GetWidth() > GetWidth()) {
+    push_string(std::move(string_line));
+    string_line = "";
+  }
+
   string_line += string_space;
   if (!string_line.empty()) push_string(std::move(string_line));
 
