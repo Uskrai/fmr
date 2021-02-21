@@ -154,6 +154,8 @@ void Frame::SettingReader() {
   check_scale(kFrameReaderScaleFitWidth, bitmap::kRescaleFitWidth);
   check_scale(kFrameReaderScaleEnlarge, bitmap::kRescaleEnlarge);
 
+  item_toggler_->Check(kFrameReaderReadFromRight, setting.read_from_right_);
+
   m_panel->SetReaderSettings(setting);
 }
 
