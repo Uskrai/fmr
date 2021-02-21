@@ -38,7 +38,7 @@ queue::FindStatus ImageChecker::Check(queue::FindHandler &parent,
   while (ext.size()) {
     size_t separator = ext.find_first_of(';');
     // separate extension
-    std::string temp = ext.substr(1, separator - 1);
+    std::string temp = ext.substr(1, separator - 1) + "$";
 
     try {
       std::regex re(temp);
