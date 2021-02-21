@@ -20,6 +20,7 @@
 #include "fmr/bitmap/bitmap_vector_event.h"
 #include "fmr/bitmap/rescaler.h"
 #include "fmr/common/vector.h"
+#include "fmr/position/box_ctrl.h"
 #include "fmr/window/scrolled_image.h"
 
 namespace fmr {
@@ -51,7 +52,7 @@ std::vector<SBitmap *> BitmapPageToBitmapPtr(BitmapVector *vec) {
 // return PositionVectorConst(vec.begin(), vec.end());
 // }
 //
-BitmapCtrl::BitmapCtrl(ScrolledImageWindow *window, PositionCtrl *pos_ctrl,
+BitmapCtrl::BitmapCtrl(ScrolledImageWindow *window, position::BoxCtrl *pos_ctrl,
                        Rescaler *rescaler) {
   window_ = window;
   pos_ctrl_ = pos_ctrl;
@@ -60,17 +61,12 @@ BitmapCtrl::BitmapCtrl(ScrolledImageWindow *window, PositionCtrl *pos_ctrl,
 }
 
 void BitmapCtrl::RecalcPosition() {
-  return RecalcPosition(GetBitmapVec()->GetBitmap());
-  // std::vector<PositionItemRef<SBitmap>>
-  // vec(GetBitmapVec()->GetBitmap().begin(),
-  // GetBitmapVec()->GetBitmap().end());
-  // std::vector<PositionItemRef<SBitmap> *> vec_ptr =
-  // Vector::ConvertToPtr(vec); std::vector<PositionItem *>
-  // vec_item(vec_ptr.begin(), vec_ptr.end());
+  if (GetBitmapVec()) return RecalcPosition(GetBitmapVec()->GetBitmap());
 }
 
 wxSize BitmapCtrl::GetSize() const {
-  return pos_ctrl_->GetSize(GetBitmapVec()->GetBitmap());
+  if (GetBitmapVec()) return GetSize(GetBitmapVec()->GetBitmap());
+  return wxDefaultSize;
 }
 
 std::vector<const SBitmap *> BitmapCtrl::GetVectorPtr() const {
@@ -119,24 +115,21 @@ void BitmapCtrl::DoChangeBitmapVector(BitmapVectorEvent &event) {
 }
 
 void BitmapCtrl::RecalcPosition(std::vector<SBitmap> &bitmap) const {
-  // pos_ctrl_->RecalcPosition(bitmap);
+  return pos_ctrl_->CalculatePosition(bitmap);
 }
 
 wxSize BitmapCtrl::GetSize(const std::vector<SBitmap> &bitmap) const {
-  return wxSize();
-  // return pos_ctrl_->GetSize(bitmap);
+  return pos_ctrl_->GetSize(bitmap);
 }
 
 void BitmapCtrl::AdjustBitmap() {
   if (GetBitmapVec()) {
-    GetPosCtrl()->SetMinimumSize(GetWindow()->GetClientSize());
-    GetRescaler()->SetFitSize(GetWindow()->GetClientSize());
-
     for (auto &it : GetBitmapVec()->GetBitmap()) {
       GetRescaler()->DoRescale(it);
     }
 
     RecalcPosition();
+    GetPosCtrl()->SetMinimumSize(GetWindow()->GetClientSize());
     GetPosCtrl()->SetWindowSize(GetSize());
     RecalcPosition();
   }

@@ -15,22 +15,34 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmr/bitmap/rescaler.h"
-#include "fmr/position/pos_flags.h"
+#ifndef FMR_EXPLORER_STRING_RECT
+#define FMR_EXPLORER_STRING_RECT
+
+#include <fmr/common/rect.h>
+
+class wxDC;
 
 namespace fmr {
 
-namespace reader {
+namespace explorer {
 
-class Settings {
+class StringRect : public Rectangle {
+  wxString string_;
+  wxPoint text_pos_;
+
  public:
-  bool read_from_right_ = false;
-  size_t image_per_page_ = 1;
-  bitmap::RescalerFlags rescale_flags_ = bitmap::kRescaleNone;
-  position::PosFlags position_flags_ =
-      position::kPositionAlignCenter | position::kPositionVertical;
+  StringRect() {}
+  StringRect(const std::string &string) { SetString(string); }
+
+  void SetString(const std::string &string);
+  std::string GetString() const;
+
+  void PrepareString(wxDC &dc);
+  void Draw(wxDC &dc);
 };
 
-}  // namespace reader
+}  // namespace explorer
 
 }  // namespace fmr
+
+#endif /* end of include guard: FMR_EXPLORER_STRING_RECT */

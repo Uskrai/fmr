@@ -137,9 +137,8 @@ void Frame::SettingReader() {
   setting.image_per_page_ =
       Config::Get()->Read("Reader/ImageLimit", int(setting.image_per_page_));
 
-  setting.position_flags_ =
-      static_cast<bitmap::PositionFlags>(Config::Get()->Read(
-          "Reader/ImagePosition", int(setting.position_flags_)));
+  setting.position_flags_ = static_cast<position::PosFlags>(Config::Get()->Read(
+      "Reader/ImagePosition", int(setting.position_flags_)));
 
   setting.read_from_right_ =
       Config::Get()->Read("Reader/ReadFromRight", setting.read_from_right_);

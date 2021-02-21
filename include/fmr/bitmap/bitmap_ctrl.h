@@ -18,11 +18,10 @@
 #ifndef FMR_BITMAP_BITMAP_CTRL
 #define FMR_BITMAP_BITMAP_CTRL
 
+#include <fmr/bitmap/bitmap_page.h>
+#include <fmr/bitmap/loader.h>
+#include <fmr/position/inc.h>
 #include <wx/window.h>
-
-#include "fmr/bitmap/bitmap_page.h"
-#include "fmr/bitmap/loader.h"
-#include "fmr/bitmap/position_ctrl.h"
 
 namespace fmr {
 
@@ -42,13 +41,13 @@ std::vector<SBitmap *> BitmapPageToBitmapPtr(BitmapVector *page);
 class BitmapCtrl : public wxEvtHandler {
  private:
   std::vector<SBitmap *> vec_bitmap_;
-  PositionCtrl *pos_ctrl_ = nullptr;
+  position::BoxCtrl *pos_ctrl_ = nullptr;
   Rescaler *rescaler_ = nullptr;
   ScrolledImageWindow *window_ = nullptr;
   BitmapVector *bmp_vec_;
 
  public:
-  BitmapCtrl(ScrolledImageWindow *window, PositionCtrl *position,
+  BitmapCtrl(ScrolledImageWindow *window, position::BoxCtrl *position,
              Rescaler *rescaler);
 
   BitmapVector *GetBitmapVec() { return bmp_vec_; }
@@ -71,7 +70,7 @@ class BitmapCtrl : public wxEvtHandler {
  protected:
   ScrolledImageWindow *GetWindow() { return window_; };
   Rescaler *GetRescaler() { return rescaler_; }
-  PositionCtrl *GetPosCtrl() { return pos_ctrl_; }
+  position::BoxCtrl *GetPosCtrl() { return pos_ctrl_; }
 
  private:
   void OnWindowSize(wxSizeEvent &event);

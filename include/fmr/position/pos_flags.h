@@ -14,23 +14,25 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef FMR_POSITION_POS_FLAGS
+#define FMR_POSITION_POS_FLAGS
 
-#include "fmr/bitmap/rescaler.h"
-#include "fmr/position/pos_flags.h"
+#include <fmr/common/bitmask.h>
 
 namespace fmr {
 
-namespace reader {
+namespace position {
 
-class Settings {
- public:
-  bool read_from_right_ = false;
-  size_t image_per_page_ = 1;
-  bitmap::RescalerFlags rescale_flags_ = bitmap::kRescaleNone;
-  position::PosFlags position_flags_ =
-      position::kPositionAlignCenter | position::kPositionVertical;
+enum PosFlags {
+  kPositionVertical = 0x01,
+  kPositionHorizontal = 0x2,
+  kPositionAlignCenter = 0x04
 };
 
-}  // namespace reader
+DEFINE_BITMASK_TYPE(PosFlags);
+
+}  // namespace position
 
 }  // namespace fmr
+
+#endif /* end of include guard: FMR_POSITION_POS_FLAGS */

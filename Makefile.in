@@ -111,8 +111,9 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bitmapdir)" \
 	"$(DESTDIR)$(commondir)" "$(DESTDIR)$(explorerdir)" \
 	"$(DESTDIR)$(guidir)" "$(DESTDIR)$(handlerdir)" \
-	"$(DESTDIR)$(queuedir)" "$(DESTDIR)$(readerdir)" \
-	"$(DESTDIR)$(threaddir)" "$(DESTDIR)$(windowdir)"
+	"$(DESTDIR)$(positiondir)" "$(DESTDIR)$(queuedir)" \
+	"$(DESTDIR)$(readerdir)" "$(DESTDIR)$(threaddir)" \
+	"$(DESTDIR)$(windowdir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -143,16 +144,16 @@ am__uninstall_files_from_dir = { \
   }
 LTLIBRARIES = $(bitmap_LTLIBRARIES) $(common_LTLIBRARIES) \
 	$(explorer_LTLIBRARIES) $(gui_LTLIBRARIES) \
-	$(handler_LTLIBRARIES) $(queue_LTLIBRARIES) \
-	$(reader_LTLIBRARIES) $(thread_LTLIBRARIES) \
-	$(window_LTLIBRARIES)
-lib_bitmap_la_LIBADD =
+	$(handler_LTLIBRARIES) $(position_LTLIBRARIES) \
+	$(queue_LTLIBRARIES) $(reader_LTLIBRARIES) \
+	$(thread_LTLIBRARIES) $(window_LTLIBRARIES)
+lib_bitmap_la_DEPENDENCIES = lib_position.la
 am__dirstamp = $(am__leading_dot)dirstamp
 am_lib_bitmap_la_OBJECTS = $(bitmap)/bmp.lo $(bitmap)/image_util.lo \
 	$(bitmap)/loader.lo $(bitmap)/rescaler.lo \
-	$(bitmap)/bitmap_ctrl.lo $(bitmap)/position_ctrl.lo \
-	$(bitmap)/bitmap_page_ctrl.lo $(bitmap)/page_loader.lo \
-	$(bitmap)/rescale_loader.lo $(bitmap)/image_checker.lo
+	$(bitmap)/bitmap_ctrl.lo $(bitmap)/bitmap_page_ctrl.lo \
+	$(bitmap)/page_loader.lo $(bitmap)/rescale_loader.lo \
+	$(bitmap)/image_checker.lo
 lib_bitmap_la_OBJECTS = $(am_lib_bitmap_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -164,7 +165,9 @@ lib_compare_la_OBJECTS = $(am_lib_compare_la_OBJECTS)
 lib_explorer_la_DEPENDENCIES = lib_handler.la lib_thread.la \
 	lib_window.la
 am_lib_explorer_la_OBJECTS = $(explorer)/window_explorer.lo \
-	$(explorer)/image_window_explorer.lo
+	$(explorer)/image_window_explorer.lo $(explorer)/controller.lo \
+	$(explorer)/image_cell_explorer.lo $(explorer)/string_draw.lo \
+	$(explorer)/string_rect.lo
 lib_explorer_la_OBJECTS = $(am_lib_explorer_la_OBJECTS)
 lib_frame_la_DEPENDENCIES = lib_explorer.la lib_reader.la
 am_lib_frame_la_OBJECTS = $(gui)/frame.lo $(gui)/panel.lo \
@@ -181,6 +184,10 @@ lib_handler_la_OBJECTS = $(am_lib_handler_la_OBJECTS)
 lib_path_la_LIBADD =
 am_lib_path_la_OBJECTS = $(common)/path.lo
 lib_path_la_OBJECTS = $(am_lib_path_la_OBJECTS)
+lib_position_la_LIBADD =
+am_lib_position_la_OBJECTS = $(position)/box_ctrl.lo \
+	$(position)/grid_ctrl.lo
+lib_position_la_OBJECTS = $(am_lib_position_la_OBJECTS)
 lib_queue_la_LIBADD =
 am_lib_queue_la_OBJECTS = $(queue)/load_image.lo \
 	$(queue)/find_handler.lo $(queue)/rescale.lo \
@@ -197,10 +204,11 @@ am_lib_thread_la_OBJECTS = $(thread)/thread.lo \
 	$(thread)/find_handler_controller.lo \
 	$(thread)/controller_factory.lo
 lib_thread_la_OBJECTS = $(am_lib_thread_la_OBJECTS)
-lib_window_la_LIBADD =
+lib_window_la_DEPENDENCIES = lib_position.la
 am_lib_window_la_OBJECTS = $(window)/scrolledwindow.lo \
 	$(window)/flex_grid_window.lo \
 	$(window)/flex_grid_cell_window.lo $(window)/scrolled_image.lo \
+	$(window)/grid_window.lo $(window)/grid_item.lo \
 	$(window)/menu_bar.lo $(window)/decorator.lo
 lib_window_la_OBJECTS = $(am_lib_window_la_OBJECTS)
 am_fmr_OBJECTS = $(fmr)/app.$(OBJEXT)
@@ -228,11 +236,14 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(bitmap)/$(DEPDIR)/image_util.Plo \
 	$(bitmap)/$(DEPDIR)/loader.Plo \
 	$(bitmap)/$(DEPDIR)/page_loader.Plo \
-	$(bitmap)/$(DEPDIR)/position_ctrl.Plo \
 	$(bitmap)/$(DEPDIR)/rescale_loader.Plo \
 	$(bitmap)/$(DEPDIR)/rescaler.Plo \
 	$(common)/$(DEPDIR)/compare.Plo $(common)/$(DEPDIR)/path.Plo \
+	$(explorer)/$(DEPDIR)/controller.Plo \
+	$(explorer)/$(DEPDIR)/image_cell_explorer.Plo \
 	$(explorer)/$(DEPDIR)/image_window_explorer.Plo \
+	$(explorer)/$(DEPDIR)/string_draw.Plo \
+	$(explorer)/$(DEPDIR)/string_rect.Plo \
 	$(explorer)/$(DEPDIR)/window_explorer.Plo \
 	$(fmr)/$(DEPDIR)/app.Po $(gui)/$(DEPDIR)/accelerator_table.Plo \
 	$(gui)/$(DEPDIR)/frame.Plo \
@@ -244,6 +255,8 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(handler)/$(DEPDIR)/stream_util.Plo \
 	$(handler)/$(DEPDIR)/struct_stream.Plo \
 	$(handler)/$(DEPDIR)/wxarchive_handler.Plo \
+	$(position)/$(DEPDIR)/box_ctrl.Plo \
+	$(position)/$(DEPDIR)/grid_ctrl.Plo \
 	$(queue)/$(DEPDIR)/factory.Plo \
 	$(queue)/$(DEPDIR)/find_handler.Plo \
 	$(queue)/$(DEPDIR)/load_image.Plo \
@@ -258,6 +271,8 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(window)/$(DEPDIR)/decorator.Plo \
 	$(window)/$(DEPDIR)/flex_grid_cell_window.Plo \
 	$(window)/$(DEPDIR)/flex_grid_window.Plo \
+	$(window)/$(DEPDIR)/grid_item.Plo \
+	$(window)/$(DEPDIR)/grid_window.Plo \
 	$(window)/$(DEPDIR)/menu_bar.Plo \
 	$(window)/$(DEPDIR)/scrolled_image.Plo \
 	$(window)/$(DEPDIR)/scrolledwindow.Plo
@@ -283,15 +298,15 @@ am__v_CXXLD_1 =
 SOURCES = $(lib_bitmap_la_SOURCES) $(lib_compare_la_SOURCES) \
 	$(lib_explorer_la_SOURCES) $(lib_frame_la_SOURCES) \
 	$(lib_handler_la_SOURCES) $(lib_path_la_SOURCES) \
-	$(lib_queue_la_SOURCES) $(lib_reader_la_SOURCES) \
-	$(lib_thread_la_SOURCES) $(lib_window_la_SOURCES) \
-	$(fmr_SOURCES)
+	$(lib_position_la_SOURCES) $(lib_queue_la_SOURCES) \
+	$(lib_reader_la_SOURCES) $(lib_thread_la_SOURCES) \
+	$(lib_window_la_SOURCES) $(fmr_SOURCES)
 DIST_SOURCES = $(lib_bitmap_la_SOURCES) $(lib_compare_la_SOURCES) \
 	$(lib_explorer_la_SOURCES) $(lib_frame_la_SOURCES) \
 	$(lib_handler_la_SOURCES) $(lib_path_la_SOURCES) \
-	$(lib_queue_la_SOURCES) $(lib_reader_la_SOURCES) \
-	$(lib_thread_la_SOURCES) $(lib_window_la_SOURCES) \
-	$(fmr_SOURCES)
+	$(lib_position_la_SOURCES) $(lib_queue_la_SOURCES) \
+	$(lib_reader_la_SOURCES) $(lib_thread_la_SOURCES) \
+	$(lib_window_la_SOURCES) $(fmr_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -569,11 +584,17 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/loader.cpp \
 						$(bitmap)/rescaler.cpp \
 						$(bitmap)/bitmap_ctrl.cpp \
-						$(bitmap)/position_ctrl.cpp \
 						$(bitmap)/bitmap_page_ctrl.cpp \
 						$(bitmap)/page_loader.cpp \
 						$(bitmap)/rescale_loader.cpp \
 						$(bitmap)/image_checker.cpp
+
+lib_bitmap_la_LIBADD = lib_position.la
+position = src/position
+positiondir = @abs_builddir@/position
+position_LTLIBRARIES = lib_position.la
+lib_position_la_SOURCES = $(position)/box_ctrl.cpp \
+													$(position)/grid_ctrl.cpp
 
 reader = src/reader
 readerdir = @abs_builddir@/reader
@@ -592,7 +613,11 @@ explorer = src/explorer
 explorerdir = @abs_builddir@/explorer
 explorer_LTLIBRARIES = lib_explorer.la
 lib_explorer_la_SOURCES = $(explorer)/window_explorer.cpp \
-													$(explorer)/image_window_explorer.cpp
+													$(explorer)/image_window_explorer.cpp \
+													$(explorer)/controller.cpp \
+													$(explorer)/image_cell_explorer.cpp \
+													$(explorer)/string_draw.cpp \
+													$(explorer)/string_rect.cpp
 
 lib_explorer_la_LIBADD = lib_handler.la \
 						 lib_thread.la \
@@ -616,9 +641,12 @@ lib_window_la_SOURCES = $(window)/scrolledwindow.cpp \
 												$(window)/flex_grid_window.cpp \
 												$(window)/flex_grid_cell_window.cpp \
 												$(window)/scrolled_image.cpp \
+												$(window)/grid_window.cpp \
+												$(window)/grid_item.cpp \
 												$(window)/menu_bar.cpp \
 												$(window)/decorator.cpp
 
+lib_window_la_LIBADD = lib_position.la
 thread = src/thread
 threaddir = @abs_builddir@/thread
 thread_LTLIBRARIES = lib_thread.la
@@ -900,6 +928,41 @@ clean-handlerLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
+install-positionLTLIBRARIES: $(position_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	@list='$(position_LTLIBRARIES)'; test -n "$(positiondir)" || list=; \
+	list2=; for p in $$list; do \
+	  if test -f $$p; then \
+	    list2="$$list2 $$p"; \
+	  else :; fi; \
+	done; \
+	test -z "$$list2" || { \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(positiondir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(positiondir)" || exit 1; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(positiondir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(positiondir)"; \
+	}
+
+uninstall-positionLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(position_LTLIBRARIES)'; test -n "$(positiondir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(positiondir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(positiondir)/$$f"; \
+	done
+
+clean-positionLTLIBRARIES:
+	-test -z "$(position_LTLIBRARIES)" || rm -f $(position_LTLIBRARIES)
+	@list='$(position_LTLIBRARIES)'; \
+	locs=`for p in $$list; do echo $$p; done | \
+	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
+	      sort -u`; \
+	test -z "$$locs" || { \
+	  echo rm -f $${locs}; \
+	  rm -f $${locs}; \
+	}
+
 install-queueLTLIBRARIES: $(queue_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
 	@list='$(queue_LTLIBRARIES)'; test -n "$(queuedir)" || list=; \
@@ -1055,8 +1118,6 @@ $(bitmap)/rescaler.lo: $(bitmap)/$(am__dirstamp) \
 	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
 $(bitmap)/bitmap_ctrl.lo: $(bitmap)/$(am__dirstamp) \
 	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
-$(bitmap)/position_ctrl.lo: $(bitmap)/$(am__dirstamp) \
-	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
 $(bitmap)/bitmap_page_ctrl.lo: $(bitmap)/$(am__dirstamp) \
 	$(bitmap)/$(DEPDIR)/$(am__dirstamp)
 $(bitmap)/page_loader.lo: $(bitmap)/$(am__dirstamp) \
@@ -1088,6 +1149,14 @@ $(explorer)/$(DEPDIR)/$(am__dirstamp):
 $(explorer)/window_explorer.lo: $(explorer)/$(am__dirstamp) \
 	$(explorer)/$(DEPDIR)/$(am__dirstamp)
 $(explorer)/image_window_explorer.lo: $(explorer)/$(am__dirstamp) \
+	$(explorer)/$(DEPDIR)/$(am__dirstamp)
+$(explorer)/controller.lo: $(explorer)/$(am__dirstamp) \
+	$(explorer)/$(DEPDIR)/$(am__dirstamp)
+$(explorer)/image_cell_explorer.lo: $(explorer)/$(am__dirstamp) \
+	$(explorer)/$(DEPDIR)/$(am__dirstamp)
+$(explorer)/string_draw.lo: $(explorer)/$(am__dirstamp) \
+	$(explorer)/$(DEPDIR)/$(am__dirstamp)
+$(explorer)/string_rect.lo: $(explorer)/$(am__dirstamp) \
 	$(explorer)/$(DEPDIR)/$(am__dirstamp)
 
 lib_explorer.la: $(lib_explorer_la_OBJECTS) $(lib_explorer_la_DEPENDENCIES) $(EXTRA_lib_explorer_la_DEPENDENCIES) 
@@ -1135,6 +1204,19 @@ $(common)/path.lo: $(common)/$(am__dirstamp) \
 
 lib_path.la: $(lib_path_la_OBJECTS) $(lib_path_la_DEPENDENCIES) $(EXTRA_lib_path_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(commondir) $(lib_path_la_OBJECTS) $(lib_path_la_LIBADD) $(LIBS)
+$(position)/$(am__dirstamp):
+	@$(MKDIR_P) $(position)
+	@: > $(position)/$(am__dirstamp)
+$(position)/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) $(position)/$(DEPDIR)
+	@: > $(position)/$(DEPDIR)/$(am__dirstamp)
+$(position)/box_ctrl.lo: $(position)/$(am__dirstamp) \
+	$(position)/$(DEPDIR)/$(am__dirstamp)
+$(position)/grid_ctrl.lo: $(position)/$(am__dirstamp) \
+	$(position)/$(DEPDIR)/$(am__dirstamp)
+
+lib_position.la: $(lib_position_la_OBJECTS) $(lib_position_la_DEPENDENCIES) $(EXTRA_lib_position_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(positiondir) $(lib_position_la_OBJECTS) $(lib_position_la_LIBADD) $(LIBS)
 $(queue)/$(am__dirstamp):
 	@$(MKDIR_P) $(queue)
 	@: > $(queue)/$(am__dirstamp)
@@ -1198,6 +1280,10 @@ $(window)/flex_grid_cell_window.lo: $(window)/$(am__dirstamp) \
 	$(window)/$(DEPDIR)/$(am__dirstamp)
 $(window)/scrolled_image.lo: $(window)/$(am__dirstamp) \
 	$(window)/$(DEPDIR)/$(am__dirstamp)
+$(window)/grid_window.lo: $(window)/$(am__dirstamp) \
+	$(window)/$(DEPDIR)/$(am__dirstamp)
+$(window)/grid_item.lo: $(window)/$(am__dirstamp) \
+	$(window)/$(DEPDIR)/$(am__dirstamp)
 $(window)/menu_bar.lo: $(window)/$(am__dirstamp) \
 	$(window)/$(DEPDIR)/$(am__dirstamp)
 $(window)/decorator.lo: $(window)/$(am__dirstamp) \
@@ -1231,6 +1317,8 @@ mostlyclean-compile:
 	-rm -f $(gui)/*.lo
 	-rm -f $(handler)/*.$(OBJEXT)
 	-rm -f $(handler)/*.lo
+	-rm -f $(position)/*.$(OBJEXT)
+	-rm -f $(position)/*.lo
 	-rm -f $(queue)/*.$(OBJEXT)
 	-rm -f $(queue)/*.lo
 	-rm -f $(reader)/*.$(OBJEXT)
@@ -1250,12 +1338,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/image_util.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/loader.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/page_loader.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/position_ctrl.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/rescale_loader.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(bitmap)/$(DEPDIR)/rescaler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(common)/$(DEPDIR)/compare.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(common)/$(DEPDIR)/path.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/controller.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/image_cell_explorer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/image_window_explorer.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/string_draw.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/string_rect.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/window_explorer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(fmr)/$(DEPDIR)/app.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(gui)/$(DEPDIR)/accelerator_table.Plo@am__quote@ # am--include-marker
@@ -1268,6 +1359,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/stream_util.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/struct_stream.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(handler)/$(DEPDIR)/wxarchive_handler.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(position)/$(DEPDIR)/box_ctrl.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(position)/$(DEPDIR)/grid_ctrl.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/factory.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/find_handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(queue)/$(DEPDIR)/load_image.Plo@am__quote@ # am--include-marker
@@ -1282,6 +1375,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/decorator.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/flex_grid_cell_window.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/flex_grid_window.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/grid_item.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/grid_window.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/menu_bar.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/scrolled_image.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/scrolledwindow.Plo@am__quote@ # am--include-marker
@@ -1325,6 +1420,7 @@ clean-libtool:
 	-rm -rf $(explorer)/.libs $(explorer)/_libs
 	-rm -rf $(gui)/.libs $(gui)/_libs
 	-rm -rf $(handler)/.libs $(handler)/_libs
+	-rm -rf $(position)/.libs $(position)/_libs
 	-rm -rf $(queue)/.libs $(queue)/_libs
 	-rm -rf $(reader)/.libs $(reader)/_libs
 	-rm -rf $(thread)/.libs $(thread)/_libs
@@ -1642,7 +1738,7 @@ check: check-recursive
 all-am: Makefile $(PROGRAMS) $(LTLIBRARIES)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bitmapdir)" "$(DESTDIR)$(commondir)" "$(DESTDIR)$(explorerdir)" "$(DESTDIR)$(guidir)" "$(DESTDIR)$(handlerdir)" "$(DESTDIR)$(queuedir)" "$(DESTDIR)$(readerdir)" "$(DESTDIR)$(threaddir)" "$(DESTDIR)$(windowdir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bitmapdir)" "$(DESTDIR)$(commondir)" "$(DESTDIR)$(explorerdir)" "$(DESTDIR)$(guidir)" "$(DESTDIR)$(handlerdir)" "$(DESTDIR)$(positiondir)" "$(DESTDIR)$(queuedir)" "$(DESTDIR)$(readerdir)" "$(DESTDIR)$(threaddir)" "$(DESTDIR)$(windowdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -1683,6 +1779,8 @@ distclean-generic:
 	-test -z "$(gui)/$(am__dirstamp)" || rm -f $(gui)/$(am__dirstamp)
 	-test -z "$(handler)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(handler)/$(DEPDIR)/$(am__dirstamp)
 	-test -z "$(handler)/$(am__dirstamp)" || rm -f $(handler)/$(am__dirstamp)
+	-test -z "$(position)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(position)/$(DEPDIR)/$(am__dirstamp)
+	-test -z "$(position)/$(am__dirstamp)" || rm -f $(position)/$(am__dirstamp)
 	-test -z "$(queue)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(queue)/$(DEPDIR)/$(am__dirstamp)
 	-test -z "$(queue)/$(am__dirstamp)" || rm -f $(queue)/$(am__dirstamp)
 	-test -z "$(reader)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(reader)/$(DEPDIR)/$(am__dirstamp)
@@ -1700,8 +1798,9 @@ clean: clean-recursive
 clean-am: clean-binPROGRAMS clean-bitmapLTLIBRARIES \
 	clean-commonLTLIBRARIES clean-explorerLTLIBRARIES \
 	clean-generic clean-guiLTLIBRARIES clean-handlerLTLIBRARIES \
-	clean-libtool clean-queueLTLIBRARIES clean-readerLTLIBRARIES \
-	clean-threadLTLIBRARIES clean-windowLTLIBRARIES mostlyclean-am
+	clean-libtool clean-positionLTLIBRARIES clean-queueLTLIBRARIES \
+	clean-readerLTLIBRARIES clean-threadLTLIBRARIES \
+	clean-windowLTLIBRARIES mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -1712,12 +1811,15 @@ distclean: distclean-recursive
 	-rm -f $(bitmap)/$(DEPDIR)/image_util.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/loader.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/page_loader.Plo
-	-rm -f $(bitmap)/$(DEPDIR)/position_ctrl.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/rescale_loader.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/rescaler.Plo
 	-rm -f $(common)/$(DEPDIR)/compare.Plo
 	-rm -f $(common)/$(DEPDIR)/path.Plo
+	-rm -f $(explorer)/$(DEPDIR)/controller.Plo
+	-rm -f $(explorer)/$(DEPDIR)/image_cell_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/image_window_explorer.Plo
+	-rm -f $(explorer)/$(DEPDIR)/string_draw.Plo
+	-rm -f $(explorer)/$(DEPDIR)/string_rect.Plo
 	-rm -f $(explorer)/$(DEPDIR)/window_explorer.Plo
 	-rm -f $(fmr)/$(DEPDIR)/app.Po
 	-rm -f $(gui)/$(DEPDIR)/accelerator_table.Plo
@@ -1730,6 +1832,8 @@ distclean: distclean-recursive
 	-rm -f $(handler)/$(DEPDIR)/stream_util.Plo
 	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
+	-rm -f $(position)/$(DEPDIR)/box_ctrl.Plo
+	-rm -f $(position)/$(DEPDIR)/grid_ctrl.Plo
 	-rm -f $(queue)/$(DEPDIR)/factory.Plo
 	-rm -f $(queue)/$(DEPDIR)/find_handler.Plo
 	-rm -f $(queue)/$(DEPDIR)/load_image.Plo
@@ -1744,6 +1848,8 @@ distclean: distclean-recursive
 	-rm -f $(window)/$(DEPDIR)/decorator.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_window.Plo
+	-rm -f $(window)/$(DEPDIR)/grid_item.Plo
+	-rm -f $(window)/$(DEPDIR)/grid_window.Plo
 	-rm -f $(window)/$(DEPDIR)/menu_bar.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolled_image.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolledwindow.Plo
@@ -1765,9 +1871,9 @@ info-am:
 
 install-data-am: install-bitmapLTLIBRARIES install-commonLTLIBRARIES \
 	install-explorerLTLIBRARIES install-guiLTLIBRARIES \
-	install-handlerLTLIBRARIES install-queueLTLIBRARIES \
-	install-readerLTLIBRARIES install-threadLTLIBRARIES \
-	install-windowLTLIBRARIES
+	install-handlerLTLIBRARIES install-positionLTLIBRARIES \
+	install-queueLTLIBRARIES install-readerLTLIBRARIES \
+	install-threadLTLIBRARIES install-windowLTLIBRARIES
 
 install-dvi: install-dvi-recursive
 
@@ -1805,12 +1911,15 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(bitmap)/$(DEPDIR)/image_util.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/loader.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/page_loader.Plo
-	-rm -f $(bitmap)/$(DEPDIR)/position_ctrl.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/rescale_loader.Plo
 	-rm -f $(bitmap)/$(DEPDIR)/rescaler.Plo
 	-rm -f $(common)/$(DEPDIR)/compare.Plo
 	-rm -f $(common)/$(DEPDIR)/path.Plo
+	-rm -f $(explorer)/$(DEPDIR)/controller.Plo
+	-rm -f $(explorer)/$(DEPDIR)/image_cell_explorer.Plo
 	-rm -f $(explorer)/$(DEPDIR)/image_window_explorer.Plo
+	-rm -f $(explorer)/$(DEPDIR)/string_draw.Plo
+	-rm -f $(explorer)/$(DEPDIR)/string_rect.Plo
 	-rm -f $(explorer)/$(DEPDIR)/window_explorer.Plo
 	-rm -f $(fmr)/$(DEPDIR)/app.Po
 	-rm -f $(gui)/$(DEPDIR)/accelerator_table.Plo
@@ -1823,6 +1932,8 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(handler)/$(DEPDIR)/stream_util.Plo
 	-rm -f $(handler)/$(DEPDIR)/struct_stream.Plo
 	-rm -f $(handler)/$(DEPDIR)/wxarchive_handler.Plo
+	-rm -f $(position)/$(DEPDIR)/box_ctrl.Plo
+	-rm -f $(position)/$(DEPDIR)/grid_ctrl.Plo
 	-rm -f $(queue)/$(DEPDIR)/factory.Plo
 	-rm -f $(queue)/$(DEPDIR)/find_handler.Plo
 	-rm -f $(queue)/$(DEPDIR)/load_image.Plo
@@ -1837,6 +1948,8 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(window)/$(DEPDIR)/decorator.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_window.Plo
+	-rm -f $(window)/$(DEPDIR)/grid_item.Plo
+	-rm -f $(window)/$(DEPDIR)/grid_window.Plo
 	-rm -f $(window)/$(DEPDIR)/menu_bar.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolled_image.Plo
 	-rm -f $(window)/$(DEPDIR)/scrolledwindow.Plo
@@ -1859,8 +1972,9 @@ ps-am:
 uninstall-am: uninstall-binPROGRAMS uninstall-bitmapLTLIBRARIES \
 	uninstall-commonLTLIBRARIES uninstall-explorerLTLIBRARIES \
 	uninstall-guiLTLIBRARIES uninstall-handlerLTLIBRARIES \
-	uninstall-queueLTLIBRARIES uninstall-readerLTLIBRARIES \
-	uninstall-threadLTLIBRARIES uninstall-windowLTLIBRARIES
+	uninstall-positionLTLIBRARIES uninstall-queueLTLIBRARIES \
+	uninstall-readerLTLIBRARIES uninstall-threadLTLIBRARIES \
+	uninstall-windowLTLIBRARIES
 
 .MAKE: $(am__recursive_targets) install-am install-strip
 
@@ -1869,30 +1983,32 @@ uninstall-am: uninstall-binPROGRAMS uninstall-bitmapLTLIBRARIES \
 	clean-binPROGRAMS clean-bitmapLTLIBRARIES \
 	clean-commonLTLIBRARIES clean-cscope clean-explorerLTLIBRARIES \
 	clean-generic clean-guiLTLIBRARIES clean-handlerLTLIBRARIES \
-	clean-libtool clean-queueLTLIBRARIES clean-readerLTLIBRARIES \
-	clean-threadLTLIBRARIES clean-windowLTLIBRARIES cscope \
-	cscopelist-am ctags ctags-am dist dist-all dist-bzip2 \
-	dist-gzip dist-lzip dist-shar dist-tarZ dist-xz dist-zip \
-	dist-zstd distcheck distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-tags \
-	distcleancheck distdir distuninstallcheck dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
-	install-bitmapLTLIBRARIES install-commonLTLIBRARIES \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-explorerLTLIBRARIES \
-	install-guiLTLIBRARIES install-handlerLTLIBRARIES install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-queueLTLIBRARIES install-readerLTLIBRARIES \
-	install-strip install-threadLTLIBRARIES \
-	install-windowLTLIBRARIES installcheck installcheck-am \
-	installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-bitmapLTLIBRARIES uninstall-commonLTLIBRARIES \
-	uninstall-explorerLTLIBRARIES uninstall-guiLTLIBRARIES \
-	uninstall-handlerLTLIBRARIES uninstall-queueLTLIBRARIES \
+	clean-libtool clean-positionLTLIBRARIES clean-queueLTLIBRARIES \
+	clean-readerLTLIBRARIES clean-threadLTLIBRARIES \
+	clean-windowLTLIBRARIES cscope cscopelist-am ctags ctags-am \
+	dist dist-all dist-bzip2 dist-gzip dist-lzip dist-shar \
+	dist-tarZ dist-xz dist-zip dist-zstd distcheck distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distcleancheck distdir distuninstallcheck dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-binPROGRAMS install-bitmapLTLIBRARIES \
+	install-commonLTLIBRARIES install-data install-data-am \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-explorerLTLIBRARIES install-guiLTLIBRARIES \
+	install-handlerLTLIBRARIES install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-positionLTLIBRARIES install-ps \
+	install-ps-am install-queueLTLIBRARIES \
+	install-readerLTLIBRARIES install-strip \
+	install-threadLTLIBRARIES install-windowLTLIBRARIES \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-bitmapLTLIBRARIES \
+	uninstall-commonLTLIBRARIES uninstall-explorerLTLIBRARIES \
+	uninstall-guiLTLIBRARIES uninstall-handlerLTLIBRARIES \
+	uninstall-positionLTLIBRARIES uninstall-queueLTLIBRARIES \
 	uninstall-readerLTLIBRARIES uninstall-threadLTLIBRARIES \
 	uninstall-windowLTLIBRARIES
 

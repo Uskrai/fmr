@@ -33,7 +33,6 @@ typedef queue::ItemReceiverEvent<queue::RescaleItem> RescaleReceiverEvent;
 
 class PageLoader;
 class Rescaler;
-class PositionCtrl;
 
 class BitmapCtrl;
 class BitmapPageCtrl;

@@ -18,13 +18,13 @@
 #ifndef FMR_READER_CONTROLLER
 #define FMR_READER_CONTROLLER
 
-#include "fmr/bitmap/inc.h"
-#include "fmr/bitmap/position_ctrl.h"
-#include "fmr/bitmap/rescaler.h"
-#include "fmr/handler/handler_factory.h"
-#include "fmr/reader/decorator_ctrl.h"
-#include "fmr/reader/scroll_controller.h"
-#include "fmr/window/scrolled_image.h"
+#include <fmr/bitmap/inc.h>
+#include <fmr/bitmap/rescaler.h>
+#include <fmr/handler/handler_factory.h>
+#include <fmr/position/inc.h>
+#include <fmr/reader/decorator_ctrl.h>
+#include <fmr/reader/scroll_controller.h>
+#include <fmr/window/scrolled_image.h>
 
 namespace fmr {
 
@@ -39,7 +39,7 @@ enum ControllerId {
 
 class Controller : public ScrollController {
   std::unique_ptr<bitmap::PageLoader> loader_;
-  std::unique_ptr<bitmap::PositionCtrl> position_ctrl_;
+  std::unique_ptr<position::BoxCtrl> position_ctrl_;
   std::unique_ptr<bitmap::BitmapPageCtrl> bitmap_ctrl_;
   std::unique_ptr<bitmap::Rescaler> rescaler_;
   std::unique_ptr<DecoratorCtrl> decorator_;
@@ -69,8 +69,6 @@ class Controller : public ScrollController {
   virtual void Clear();
 
   void SetImagePerPage(size_t size);
-  void SetPositionFlags(bitmap::PositionFlags flags);
-  void SetScaleFlags(bitmap::RescalerFlags flags);
 
   bitmap::BitmapPageCtrl *GetBitmapCtrl() { return bitmap_ctrl_.get(); }
   const bitmap::BitmapPageCtrl *GetBitmapCtrl() const {

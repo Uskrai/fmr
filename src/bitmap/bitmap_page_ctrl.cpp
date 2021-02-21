@@ -27,7 +27,7 @@ wxDEFINE_EVENT(kEventBitmapPageNotFound, BitmapVectorEvent);
 wxDEFINE_EVENT(kEventBitmapVectorPushed, BitmapVectorEvent);
 
 BitmapPageCtrl::BitmapPageCtrl(ScrolledImageWindow *window,
-                               PositionCtrl *pos_ctrl, Rescaler *rescaler,
+                               position::BoxCtrl *pos_ctrl, Rescaler *rescaler,
                                size_t bitmap_per_page)
     : BitmapCtrl(window, pos_ctrl, rescaler) {
   SetBitmapPerPage(bitmap_per_page);

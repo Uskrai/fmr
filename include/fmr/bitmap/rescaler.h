@@ -69,7 +69,8 @@ class Rescaler {
     fit_size_ = size;
   }
   void SetFitSize(const wxSize &size) { fit_size_ = size; }
-  wxSize GetFitSise() const { return fit_size_; }
+  [[deprecated("Typo")]] wxSize GetFitSise() const { return fit_size_; }
+  wxSize GetFitSize() const { return fit_size_; }
 
   virtual ~Rescaler(){};
 };

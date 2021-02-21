@@ -27,11 +27,11 @@
 #include <iostream>
 #include <memory>
 
-#include "fmr/bitmap/position_ctrl.h"
-#include "fmr/explorer/window_explorer.h"
+#include "fmr/explorer/controller.h"
 #include "fmr/handler/handler_factory.h"
 #include "fmr/nowide/string.h"
 #include "fmr/reader/controller.h"
+#include "fmr/window/grid_window.h"
 
 namespace fmr {
 
@@ -47,7 +47,7 @@ Panel::Panel(wxWindow *parent, wxWindowID id, wxPoint position, wxSize size)
 };
 
 void Panel::BindEvent() {
-  Bind(EVT_OPEN_FILE, &Panel::OnExplorerOpenFile, this);
+  explorer_->Bind(explorer::kEventOpenFile, &Panel::OnExplorerOpenFile, this);
   Bind(reader::kEventOpenFile, &Panel::OnReaderOpenFile, this, ReaderWindow);
 }
 
@@ -68,13 +68,14 @@ void Panel::SetReaderSettings(const reader::Settings &setting) {
 }
 
 void Panel::PrepareExplorer() {
-  explorer_ = new explorer::Window(this, ExplorerWindow, wxDefaultPosition,
-                                   GetClientSize(), wxWANTS_CHARS, "Explorer");
+  explorer_ = std::make_unique<explorer::Controller>();
+  explorer_->CreateWindow(this, ExplorerWindow, wxDefaultPosition,
+                          GetClientSize(), wxWANTS_CHARS, "Explorer");
 
-  explorer_->SetBackgroundColour(*wxBLACK);
-  explorer_->Hide();
+  explorer_->GetWindow()->SetBackgroundColour(*wxBLACK);
+  explorer_->GetWindow()->Hide();
 
-  sizer_->Add(explorer_, 1, wxALL | wxEXPAND);
+  sizer_->Add(explorer_->GetWindow(), 1, wxALL | wxEXPAND);
 }
 
 bool Panel::LoadFile(std::string path) {
@@ -82,10 +83,10 @@ bool Panel::LoadFile(std::string path) {
   if (reader_) {
     bool is_reader_shown = reader_->GetWindow()->IsShown();
     bool is_reader_focus = reader_->GetWindow()->HasFocus();
-    bool is_explorer_shown = explorer_->IsShown();
-    bool is_explorer_focus = explorer_->HasFocus();
+    bool is_explorer_shown = explorer_->GetWindow()->IsShown();
+    bool is_explorer_focus = explorer_->GetWindow()->HasFocus();
 
-    explorer_->Hide();
+    explorer_->GetWindow()->Hide();
     reader_->GetWindow()->Show();
     reader_->GetWindow()->SetFocus();
     Layout();
@@ -95,12 +96,12 @@ bool Panel::LoadFile(std::string path) {
       return ret;
     else {
       reader_->GetWindow()->Show(is_reader_shown);
-      explorer_->Show(is_explorer_shown);
+      explorer_->GetWindow()->Show(is_explorer_shown);
 
       if (is_reader_focus) {
         reader_->GetWindow()->SetFocus();
       } else if (is_explorer_focus) {
-        explorer_->SetFocus();
+        explorer_->GetWindow()->SetFocus();
       }
     }
   }
@@ -124,18 +125,19 @@ bool Panel::OpenExplorer() {
 
   if (!explorer_) return false;
 
-  if (explorer_->HasFocus()) {
+  if (explorer_->GetWindow()->HasFocus()) {
     return explorer_->OpenParent();
   } else {
     if (reader_) {
       reader_->GetWindow()->Hide();
     }
-    explorer_->SetFocus();
-    explorer_->Show();
+    explorer_->GetWindow()->SetFocus();
+    explorer_->GetWindow()->Show();
     Layout();
+    wxSize size = explorer_->GetWindow()->GetClientSize();
     if (explorer_->OpenParent(select_path)) {
-      explorer_->Show();
-      explorer_->SetFocus();
+      explorer_->GetWindow()->Show();
+      explorer_->GetWindow()->SetFocus();
       if (reader_) reader_->Clear();
       return true;
     } else {
@@ -153,26 +155,17 @@ void Panel::OnKeyDown(wxKeyEvent &event) {
   event.Skip();
 }
 
-void Panel::OnExplorerOpenFile(StreamEvent &event) {
-  explorer_->Hide();
+void Panel::OnExplorerOpenFile(wxCommandEvent &event) {
+  explorer_->GetWindow()->Hide();
 
-  if (!event.GetStream()) return;
+  if (event.GetString().empty()) return;
 
-  auto stream = event.GetStream();
-
-  auto handler = std::unique_ptr<AbstractOpenableHandler>(
-      HandlerFactory::NewOpenableHandler(stream->GetHandlerPath()));
-
-  if (!handler) return;
-
-  std::string path = handler->GetItemPath(*stream);
-
-  if (LoadFile(path))
+  if (LoadFile(String::Narrow(event.GetString())))
     explorer_->Clear();
   else {
-    explorer_->Show();
-    explorer_->SetFocus();
-    explorer_->Open(path);
+    explorer_->GetWindow()->Show();
+    explorer_->GetWindow()->SetFocus();
+    explorer_->Open(String::Narrow(event.GetString()));
   }
 }
 
@@ -182,7 +175,7 @@ void Panel::OnReaderOpenFile(wxCommandEvent &event) {
 
 bool Panel::Destroy() {
   if (reader_) reader_->GetWindow()->Destroy();
-  if (explorer_) explorer_->Destroy();
+  if (explorer_) explorer_->GetWindow()->Destroy();
   return wxWindow::Destroy();
 }
 

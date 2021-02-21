@@ -17,12 +17,16 @@
 #ifndef FMR_COMMON_DIMENSION
 #define FMR_COMMON_DIMENSION
 
+#include <fmr/common/bitmask.h>
 #include <wx/gdicmn.h>
 #include <wx/position.h>
 
 #include "wx/defs.h"
 
 namespace dimension {
+
+enum Orientation { kVertical = 0x01, kHorizontal = 0x02 };
+
 inline int Get(const wxPoint &pos, const wxOrientation &orient) {
   if (orient == wxVERTICAL)
     return pos.y;
@@ -37,45 +41,45 @@ inline void Set(wxPoint &pt, int orientation, int pos) {
   if (orientation == wxHORIZONTAL) pt.x = pos;
 }
 
-inline void SetPoint(wxPoint &pt, wxOrientation orientation, int pos) {
-  if (orientation == wxVERTICAL) pt.y = pos;
-  if (orientation == wxHORIZONTAL) pt.x = pos;
+inline void SetPoint(wxPoint &pt, Orientation orientation, int pos) {
+  if (orientation == kHorizontal) pt.y = pos;
+  if (orientation == kHorizontal) pt.x = pos;
 }
 
 template <typename T>
-inline void SetPoint(T &pt, wxOrientation orientation, int pos) {
-  if (orientation == wxVERTICAL) pt.SetY(pos);
-  if (orientation == wxHORIZONTAL) pt.SetX(pos);
+inline void SetPoint(T &pt, Orientation orientation, int pos) {
+  if (orientation == kVertical) pt.SetY(pos);
+  if (orientation == kHorizontal) pt.SetX(pos);
 }
 
-inline void SetSize(wxSize &size, wxOrientation orient, int val) {
-  if (orient == wxVERTICAL) size.SetHeight(val);
-  if (orient == wxHORIZONTAL) size.SetWidth(val);
+inline void SetSize(wxSize &size, Orientation orient, int val) {
+  if (orient == kVertical) size.SetHeight(val);
+  if (orient == kHorizontal) size.SetWidth(val);
 };
 
 template <typename T>
-inline void SetSize(T &size, wxOrientation orient, int val) {
-  if (orient == wxVERTICAL) size.SetHeight(val);
-  if (orient == wxHORIZONTAL) size.SetWidth(val);
+inline void SetSize(T &size, Orientation orient, int val) {
+  if (orient == kVertical) size.SetHeight(val);
+  if (orient == kHorizontal) size.SetWidth(val);
 }
 
-inline int GetPoint(const wxPoint &pt, wxOrientation orient) {
-  if (orient == wxVERTICAL) return pt.y;
-  if (orient == wxHORIZONTAL) return pt.x;
+inline int GetPoint(const wxPoint &pt, Orientation orient) {
+  if (orient == kVertical) return pt.y;
+  if (orient == kHorizontal) return pt.x;
   return wxDefaultCoord;
 }
 
 template <typename T>
-inline int GetPoint(const T &pt, wxOrientation orient) {
-  if (orient == wxVERTICAL) return pt.GetHeight();
-  if (orient == wxHORIZONTAL) return pt.GetWidth();
+inline int GetPoint(const T &pt, Orientation orient) {
+  if (orient == kVertical) return pt.GetY();
+  if (orient == kHorizontal) return pt.GetX();
   return wxDefaultCoord;
 }
 
 template <typename T>
-inline int GetSize(const T &size, wxOrientation orient) {
-  if (orient == wxVERTICAL) return size.GetHeight();
-  if (orient == wxHORIZONTAL) return size.GetWidth();
+inline int GetSize(const T &size, Orientation orient) {
+  if (orient == kVertical) return size.GetHeight();
+  if (orient == kHorizontal) return size.GetWidth();
   return wxDefaultCoord;
 }
 
@@ -87,6 +91,11 @@ inline int Get(const wxSize &size, const wxOrientation &orient) {
 template <class T>
 inline void print(const T &dimension, const char *text) {
   printf("%s %dx%d\n", text, dimension.x, dimension.y);
+}
+
+inline void print(const char *text, wxRect rect) {
+  printf("%s pos:%dx%d\tsize:%dx%d\n", text, rect.x, rect.y, rect.width,
+         rect.height);
 }
 
 inline wxDirection GetDirection(const wxOrientation &orient, int pos) {
@@ -150,21 +159,21 @@ inline wxDirection GetDirection(int key_code) {
 
 inline wxPoint AlignPosition(const wxRect &rect, const wxSize &size,
                              int flags) {
-  wxPoint pos;
+  wxPoint pos = rect.GetPosition();
 
   if (flags & wxALIGN_LEFT) {
     pos.x = rect.GetLeft();
   } else if (flags & wxALIGN_RIGHT) {
     pos.x = rect.GetRight() - size.GetWidth();
   } else if (flags & wxALIGN_CENTER_HORIZONTAL) {
-    pos.x = rect.GetWidth() / 2 - size.GetHeight() / 2;
+    pos.x = rect.GetX() + rect.GetWidth() / 2 - size.GetWidth() / 2;
   }
   if (flags & wxALIGN_TOP)
     pos.y = rect.GetTop();
   else if (flags & wxALIGN_BOTTOM)
     pos.y = rect.GetBottom() - size.GetHeight();
   else if (flags & wxALIGN_CENTER_VERTICAL)
-    pos.y = rect.GetHeight() / 2 - size.GetHeight() / 2;
+    pos.y = rect.GetY() + rect.GetHeight() / 2 - size.GetHeight() / 2;
 
   return pos;
 }

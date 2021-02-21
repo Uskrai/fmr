@@ -15,22 +15,26 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmr/bitmap/rescaler.h"
-#include "fmr/position/pos_flags.h"
+#include "fmr/explorer/string_rect.h"
+
+#include <wx/dc.h>
+
+#include "fmr/nowide/string.h"
 
 namespace fmr {
 
-namespace reader {
+namespace explorer {
+void StringRect::SetString(const std::string &string) {
+  string_ = String::Widen<wxString>(string);
+}
 
-class Settings {
- public:
-  bool read_from_right_ = false;
-  size_t image_per_page_ = 1;
-  bitmap::RescalerFlags rescale_flags_ = bitmap::kRescaleNone;
-  position::PosFlags position_flags_ =
-      position::kPositionAlignCenter | position::kPositionVertical;
-};
+std::string StringRect::GetString() const { return String::Narrow(string_); }
 
-}  // namespace reader
+void StringRect::Draw(wxDC &dc) {
+  dc.DrawText(string_, GetRect().GetPosition());
+  ;
+}
+
+}  // namespace explorer
 
 }  // namespace fmr

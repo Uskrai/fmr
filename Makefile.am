@@ -39,11 +39,17 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/loader.cpp \
 						$(bitmap)/rescaler.cpp \
 						$(bitmap)/bitmap_ctrl.cpp \
-						$(bitmap)/position_ctrl.cpp \
 						$(bitmap)/bitmap_page_ctrl.cpp \
 						$(bitmap)/page_loader.cpp \
 						$(bitmap)/rescale_loader.cpp \
 						$(bitmap)/image_checker.cpp
+lib_bitmap_la_LIBADD = lib_position.la
+
+position = src/position
+positiondir = @abs_builddir@/position
+position_LTLIBRARIES = lib_position.la
+lib_position_la_SOURCES = $(position)/box_ctrl.cpp \
+													$(position)/grid_ctrl.cpp
 
 reader = src/reader
 readerdir = @abs_builddir@/reader
@@ -62,7 +68,11 @@ explorer = src/explorer
 explorerdir = @abs_builddir@/explorer
 explorer_LTLIBRARIES = lib_explorer.la
 lib_explorer_la_SOURCES = $(explorer)/window_explorer.cpp \
-													$(explorer)/image_window_explorer.cpp
+													$(explorer)/image_window_explorer.cpp \
+													$(explorer)/controller.cpp \
+													$(explorer)/image_cell_explorer.cpp \
+													$(explorer)/string_draw.cpp \
+													$(explorer)/string_rect.cpp
 
 lib_explorer_la_LIBADD = lib_handler.la \
 						 lib_thread.la \
@@ -87,8 +97,11 @@ lib_window_la_SOURCES = $(window)/scrolledwindow.cpp \
 												$(window)/flex_grid_window.cpp \
 												$(window)/flex_grid_cell_window.cpp \
 												$(window)/scrolled_image.cpp \
+												$(window)/grid_window.cpp \
+												$(window)/grid_item.cpp \
 												$(window)/menu_bar.cpp \
 												$(window)/decorator.cpp
+lib_window_la_LIBADD = lib_position.la
 
 thread = src/thread
 threaddir = @abs_builddir@/thread
