@@ -64,6 +64,8 @@ class Controller : public wxEvtHandler {
   bool OpenParent(const std::string &name);
   bool OpenParent();
 
+  void PushCell(const SStream &stream);
+
   void Select(std::string name);
 
   void AdjustCell();

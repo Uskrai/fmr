@@ -66,29 +66,28 @@ bool Controller::Open(std::unique_ptr<AbstractOpenableHandler> handler) {
 
   Clear();
 
-  // wxSize best_bitmap_size = ImageWindow::GetBestBitmapSize(child_size);
-
   for (auto &it : handler->GetChild()) {
-    auto stream = std::make_unique<SStream>(it);
-    auto bitmap = std::make_unique<SBitmap>();
-
-    auto temp = std::make_unique<ImageCell>();
-    auto cell = temp.get();
-
-    cell->SetString(stream->GetName());
-    cell->SetStringFlags(wxALIGN_CENTER_HORIZONTAL, wxALIGN_CENTER_VERTICAL);
-    window_->AddCell(std::move(temp));
-
-    loader_->PushFind(stream.get());
-
-    stream_to_cell_.insert(std::make_pair(stream.get(), cell));
-    stream_vec_.push_back(std::move(stream));
+    PushCell(it);
   }
 
   handler_ = std::move(handler);
   AdjustCell();
   window_->GoToCell(0);
   return true;
+}
+
+void Controller::PushCell(const SStream &item) {
+  auto stream = std::make_unique<SStream>(item);
+
+  auto cell = std::make_unique<ImageCell>();
+  cell->SetString(stream->GetName());
+  cell->SetStringFlags(wxALIGN_CENTER_HORIZONTAL, wxALIGN_CENTER_VERTICAL);
+  auto temp = cell.get();
+  window_->AddCell(std::move(cell));
+
+  loader_->PushFind(stream.get());
+  stream_to_cell_.insert(std::make_pair(stream.get(), temp));
+  stream_vec_.push_back(std::move(stream));
 }
 
 bool Controller::Open(const std::string &path) {
