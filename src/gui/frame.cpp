@@ -177,7 +177,7 @@ void Frame::OnOpenExplorer(wxCommandEvent& event) {
 }
 
 void Frame::OnReaderMenuChanged(wxCommandEvent& event) {
-  bitmap::RescalerFlags flags;
+  bitmap::RescalerFlags flags = reader::Settings().rescale_flags_;
   auto check_and_add = [&, this](int id, bitmap::RescalerFlags value) {
     if (item_toggler_->IsChecked(id)) flags |= value;
   };
