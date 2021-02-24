@@ -128,7 +128,6 @@ void BitmapCtrl::AdjustBitmap() {
       GetRescaler()->DoRescale(it);
     }
 
-    RecalcPosition();
     GetPosCtrl()->SetMinimumSize(GetWindow()->GetClientSize());
     GetPosCtrl()->SetWindowSize(GetSize());
     RecalcPosition();

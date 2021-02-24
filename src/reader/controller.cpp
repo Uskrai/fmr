@@ -152,12 +152,19 @@ void Controller::AdjustBitmap() {
 }
 
 void Controller::OnLoadedImage(bitmap::ImageLoadEvent &event) {
+  bool should_reset = true;
+  for (const auto &it : GetBitmapCtrl()->GetBitmapVec()->GetBitmap()) {
+    should_reset = !it.IsOk() && should_reset;
+  }
+
   SBitmap bitmap;
   bitmap.SetImage(event.GetItem().GetImage());
   GetBitmapCtrl()->AddBitmap(
       bitmap, loader_->GetStreamPage(event.GetItem().GetStream()),
       loader_->GetStreamPosInPage(event.GetItem().GetStream()));
+
   AdjustBitmap();
+  if (should_reset) ResetScroll(wxDOWN);
   event.Skip();
 }
 
