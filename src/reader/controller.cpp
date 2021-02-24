@@ -113,6 +113,7 @@ void Controller::SetSettings(const Settings &setting) {
   rescaler_->SetFlags(setting.rescale_flags_);
   SetReadFromRight(setting.read_from_right_);
   SetImagePerPage(setting.image_per_page_);
+  window_fit_size_ = setting.window_fit_size;
   AdjustBitmap();
 }
 
@@ -122,6 +123,12 @@ void Controller::SetImagePerPage(size_t size) {
 
 AbstractHandler *Controller::GetHandler() { return loader_->GetHandler(); }
 
+wxSize Controller::GetFitSize() {
+  wxSize client_size = GetWindow()->GetClientSize();
+  client_size.Scale(window_fit_size_, window_fit_size_);
+  return client_size;
+}
+
 void Controller::AdjustBitmap() {
   if (!GetBitmapCtrl()->GetBitmapPage()) return;
 
@@ -129,7 +136,8 @@ void Controller::AdjustBitmap() {
   const SBitmap *first_shown = nullptr;
   GetFirstShown(first_shown, &first_shown_pos);
 
-  rescaler_->SetFitSize(GetWindow()->GetClientSize());
+  wxSize fit_size = GetWindow()->GetClientSize();
+  rescaler_->SetFitSize(GetFitSize());
 
   GetBitmapCtrl()->AdjustBitmap();
 
@@ -138,8 +146,7 @@ void Controller::AdjustBitmap() {
 
   SetFirstShown(first_shown, &first_shown_pos);
 
-  if (rescaler_->GetFitSize() != GetWindow()->GetClientSize())
-    return AdjustBitmap();
+  if (fit_size != GetWindow()->GetClientSize()) return AdjustBitmap();
 
   GetWindow()->Refresh();
 }

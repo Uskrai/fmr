@@ -47,6 +47,7 @@ class Controller : public ScrollController {
   wxTimer opened_timer_{this, kOpenedTimer};
   bool is_opened_ = false;
   int opened_delay_;
+  float window_fit_size_ = 1;
 
  public:
   Controller();
@@ -82,6 +83,7 @@ class Controller : public ScrollController {
 
   bool ChangeFolder(wxDirection direction);
 
+  wxSize GetFitSize();
   wxWindow *GetParent() { return parent_; }
 
  private:

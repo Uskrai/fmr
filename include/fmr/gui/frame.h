@@ -49,6 +49,7 @@ enum {
   kFrameReaderScaleEnlarge,
   kFrameReaderReadFromRight,
   kFrameReaderChangeImageLimit,
+  kFrameReaderChangeWindowFitSize,
   kFrameReaderMenuToggle
 };
 
@@ -83,6 +84,7 @@ class Frame : public wxFrame {
   void SettingReader();
 
   void OnReaderMenuChanged(wxCommandEvent& event);
+  void OnReaderChangeWindowFitSize(wxCommandEvent& event);
   void OnReaderChangeImageLimit(wxCommandEvent& event);
 };
 

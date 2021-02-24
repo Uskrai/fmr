@@ -60,6 +60,8 @@ void Frame::BindEvent() {
        kFrameReaderMenuToggle);
   Bind(wxEVT_MENU, &Frame::OnReaderChangeImageLimit, this,
        kFrameReaderChangeImageLimit);
+  Bind(wxEVT_MENU, &Frame::OnReaderChangeWindowFitSize, this,
+       kFrameReaderChangeWindowFitSize);
 }
 
 void Frame::OnClose(wxCloseEvent& event) {
@@ -130,6 +132,10 @@ void Frame::CreateMenuReader(window::MenuBar& menu_bar,
   id = kFrameReaderChangeImageLimit;
   menu_bar.CreateMenu(id, "Reader", "Change Image Limit", "");
   table.AddEntry(wxACCEL_CTRL, 't', id, menu_bar.GetMenuItem(id));
+
+  id = kFrameReaderChangeWindowFitSize;
+  menu_bar.CreateMenu(id, "Reader", "Change window fit size", "");
+  table.AddEntry(wxACCEL_CTRL, 'f', id, menu_bar.GetMenuItem(id));
 }
 
 void Frame::SettingReader() {
@@ -145,6 +151,10 @@ void Frame::SettingReader() {
 
   setting.rescale_flags_ = static_cast<bitmap::RescalerFlags>(
       Config::Get()->Read("Reader/ImageSize", int(setting.rescale_flags_)));
+
+  float win_fit_dev_val = 100;
+  setting.window_fit_size =
+      Config::Get()->Read("Reader/WindowFitSize", win_fit_dev_val) / 100;
 
   auto check_scale = [&, this](int id, int flags) {
     item_toggler_->Check(id, flags & setting.rescale_flags_);
@@ -201,6 +211,15 @@ void Frame::OnReaderChangeImageLimit(wxCommandEvent& event) {
   text_ctrl->SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
   if (text_ctrl->ShowModal() == wxID_OK) {
     Config::Get()->Write("Reader/ImageLimit", text_ctrl->GetValue());
+    SettingReader();
+  }
+}
+
+void Frame::OnReaderChangeWindowFitSize(wxCommandEvent& event) {
+  auto text_ctrl = new wxTextEntryDialog(this, "Input Window Fit Size (%)", "");
+  text_ctrl->SetTextValidator(wxTextValidator(wxFILTER_DIGITS));
+  if (text_ctrl->ShowModal() == wxID_OK) {
+    Config::Get()->Write("Reader/WindowFitSize", text_ctrl->GetValue());
     SettingReader();
   }
 }

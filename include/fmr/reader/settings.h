@@ -29,6 +29,8 @@ class Settings {
   bitmap::RescalerFlags rescale_flags_ = bitmap::kRescaleNone;
   position::PosFlags position_flags_ =
       position::kPositionAlignCenter | position::kPositionVertical;
+
+  float window_fit_size = 1;
 };
 
 }  // namespace reader
