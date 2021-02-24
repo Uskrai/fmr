@@ -33,9 +33,7 @@ namespace reader {
 class Settings;
 wxDECLARE_EVENT(kEventOpenFile, wxCommandEvent);
 
-enum ControllerId {
-  kLoaderId = wxID_HIGHEST + 1500,
-};
+enum ControllerId { kLoaderId = wxID_HIGHEST + 1500, kOpenedTimer };
 
 class Controller : public ScrollController {
   std::unique_ptr<bitmap::PageLoader> loader_;
@@ -45,6 +43,10 @@ class Controller : public ScrollController {
   std::unique_ptr<DecoratorCtrl> decorator_;
   bool is_read_from_right_ = false;
   wxWindow *parent_ = nullptr;
+
+  wxTimer opened_timer_{this, kOpenedTimer};
+  bool is_opened_ = false;
+  int opened_delay_;
 
  public:
   Controller();
@@ -90,6 +92,8 @@ class Controller : public ScrollController {
   void OnBitmapChanged(bitmap::BitmapVectorEvent &event);
   void OnBitmapPageNotFound(bitmap::BitmapVectorEvent &event);
   void OnBitmapVectorPushed(bitmap::BitmapVectorEvent &event);
+
+  void OnOpenedTimer(wxTimerEvent &event);
 };
 
 }  // namespace reader

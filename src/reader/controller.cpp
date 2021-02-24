@@ -49,6 +49,8 @@ Controller::Controller() {
   bitmap_ctrl_ = std::make_unique<bitmap::BitmapPageCtrl>(
       GetWindow(), position_ctrl_.get(), rescaler_.get());
 
+  opened_delay_ = 500;
+
   GetBitmapCtrl()->Bind(bitmap::kEventBitmapChanged,
                         &Controller::OnBitmapChanged, this);
   GetBitmapCtrl()->Bind(bitmap::kEventBitmapPageNotFound,
@@ -82,6 +84,7 @@ bool Controller::CreateWindow(wxWindow *parent, wxWindowID id,
   bool ret = GetWindow()->Create(parent, id, pos, size, style, name);
   ScrollController::SetWindow(GetWindow());
 
+  Bind(wxEVT_TIMER, &Controller::OnOpenedTimer, this, kOpenedTimer);
   event::Bind(GetWindow(), GetAllScrollWinEvent(), &Controller::OnWindowScroll,
               this);
   GetWindow()->Bind(wxEVT_SIZE, &Controller::OnWindowSize, this);
@@ -97,6 +100,7 @@ bool Controller::Open(const std::string &path) {
       auto event = wxCommandEvent(kEventOpenFile, GetWindow()->GetId());
       event.SetString(String::Widen<wxString>(path).c_str());
       wxPostEvent(GetParent(), event);
+      opened_timer_.StartOnce(opened_delay_);
       return true;
     }
   }
@@ -164,10 +168,8 @@ void Controller::ChangePage(wxDirection direction) {
   int step = GetStep(direction);
 
   size_t idx = GetBitmapCtrl()->GetPagePos() + step;
-  //
-  // for (const auto &it : GetBitmapCtrl()->GetVectorPtr()) {
-  // if (!it->IsLoaded()) return;
-  // }
+
+  if (!is_opened_) return;
 
   return GoToPage(idx, direction);
 }
@@ -223,10 +225,13 @@ void Controller::OnBitmapVectorPushed(bitmap::BitmapVectorEvent &event) {
   }
 }
 
+void Controller::OnOpenedTimer(wxTimerEvent &event) { is_opened_ = true; }
+
 void Controller::Clear() {
   GetWindow()->ClearBitmap();
   loader_->Clear();
   GetBitmapCtrl()->Clear();
+  is_opened_ = false;
 }
 
 Controller::~Controller() {
