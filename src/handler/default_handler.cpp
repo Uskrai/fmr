@@ -155,7 +155,7 @@ void DefaultHandler::OpenStream(const std::string &filename, SStream &stream,
 
 bool DefaultHandler::GetFirst(SStream &stream, DirGetFlags flags,
                               bool is_get_stream) {
-  if (GetName() == L"") return false;
+  if (GetName() == "") return false;
 
   wxString name = String::Widen<wxString>(GetName());
   opened_directory_.Open(name);
