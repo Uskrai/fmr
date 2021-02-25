@@ -38,7 +38,7 @@ wxDEFINE_EVENT(kEventOpenCell, wxNotifyEvent);
 Controller::Controller() {
   window_ = new window::GridWindow();
   rescaler_ = std::make_unique<bitmap::Rescaler>();
-  rescaler_->SetFlags(bitmap::kRescaleFitAll);
+  rescaler_->SetFlags(bitmap::kRescaleFitAll | bitmap::kRescaleShrink);
   loader_ = std::make_unique<bitmap::RescaleLoader>(this, kLoaderId);
   loader_->SetRescaler(rescaler_.get());
   loader_->SetFindFlags(queue::kFindHandlerOnlyFirstItem |

@@ -30,7 +30,8 @@ enum RescalerFlags {
   kRescaleFitWidth = 0x01,
   kRescaleFitHeight = 0x02,
   kRescaleFitAll = kRescaleFitWidth | kRescaleFitHeight,
-  kRescaleEnlarge = 0x04
+  kRescaleEnlarge = 0x04,
+  kRescaleShrink = 0x08
 };
 
 DEFINE_BITMASK_TYPE(RescalerFlags)
@@ -71,6 +72,8 @@ class Rescaler {
   void SetFitSize(const wxSize &size) { fit_size_ = size; }
   [[deprecated("Typo")]] wxSize GetFitSise() const { return fit_size_; }
   wxSize GetFitSize() const { return fit_size_; }
+
+  bool ShouldRescale(const wxSize &size, RescalerFlags flags);
 
   virtual ~Rescaler(){};
 };
