@@ -46,7 +46,7 @@ class Controller : public wxEvtHandler {
   std::vector<std::unique_ptr<SStream>> stream_vec_;
   std::unique_ptr<AbstractOpenableHandler> handler_;
   std::unique_ptr<bitmap::Rescaler> rescaler_;
-  std::unique_ptr<bitmap::RescaleLoader> loader_;
+  std::unique_ptr<bitmap::loader::Rescale> loader_;
 
  public:
   Controller();
@@ -75,7 +75,7 @@ class Controller : public wxEvtHandler {
  private:
   void OnKeyDown(wxKeyEvent &event);
   void OnOpenCell(wxNotifyEvent &event);
-  void OnImageLoaded(bitmap::ImageLoadEvent &event);
+  void OnImageLoaded(bitmap::loader::LoadEvent &event);
 };
 
 }  // namespace explorer

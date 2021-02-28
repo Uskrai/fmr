@@ -72,6 +72,10 @@ class FindItem {
     SetFoundStream(std::move(found_stream));
     SetSourceStream(source_stream);
   };
+  FindItem(const SStream *source_stream) {
+    SetFoundStream(*source_stream);
+    SetSourceStream(source_stream);
+  }
   FindItem(const FindItem &item) = default;
   FindItem(FindItem &&item) = default;
 
@@ -82,9 +86,13 @@ class FindItem {
   void SetFoundStream(SStream stream) { found_stream_ = std::move(stream); }
   void SetSourceStream(const SStream *stream) { source_stream_ = stream; }
   void SetStatus(FindStatus status) { status_ = status; }
+
+  bool operator==(const FindItem &other) const {
+    return other.source_stream_ == source_stream_;
+  }
 };
 
-class FindHandler : public Base<const SStream *, FindItem> {
+class FindHandler : public Base<FindItem, FindItem> {
  private:
   FindHandlerFlags flags_;
 

@@ -19,7 +19,7 @@
 
 #include "fmr/bitmap/bitmap_page_ctrl.h"
 #include "fmr/bitmap/bitmap_vector_event.h"
-#include "fmr/bitmap/page_loader.h"
+#include "fmr/bitmap/loader/page.h"
 #include "fmr/bitmap/rescaler.h"
 #include "fmr/common/dimension.h"
 #include "fmr/common/event.h"
@@ -60,13 +60,13 @@ Controller::Controller() {
 
   decorator_ = std::make_unique<DecoratorCtrl>(GetWindow(), bitmap_ctrl_.get());
 
-  loader_ =
-      std::make_unique<bitmap::PageLoader>(this, GetBitmapCtrl(), kLoaderId);
+  loader_ = std::make_unique<bitmap::loader::Page>(kLoaderId, GetBitmapCtrl());
 
-  Bind(bitmap::kEventImageLoaded, &Controller::OnLoadedImage, this, kLoaderId);
+  loader_->Bind(bitmap::loader::kEventImageLoaded, &Controller::OnLoadedImage,
+                this, kLoaderId);
 
-  Bind(bitmap::kEventOpenedStreamFound, &Controller::OnOpenedStreamFound, this,
-       kLoaderId);
+  loader_->Bind(bitmap::loader::kEventOpenedStreamFound,
+                &Controller::OnOpenedStreamFound, this, kLoaderId);
 }
 
 Controller::Controller(wxWindow *parent, wxWindowID id, const wxPoint &pos,
@@ -96,13 +96,11 @@ bool Controller::Open(const std::string &path) {
   if (loader_->Open(path)) {
     GetWindow()->Scroll(0, 0);
     GetWindow()->SetVirtualSize(GetWindow()->GetClientSize());
-    if (loader_->Run()) {
-      auto event = wxCommandEvent(kEventOpenFile, GetWindow()->GetId());
-      event.SetString(String::Widen<wxString>(path).c_str());
-      wxPostEvent(GetParent(), event);
-      opened_timer_.StartOnce(opened_delay_);
-      return true;
-    }
+    auto event = wxCommandEvent(kEventOpenFile, GetWindow()->GetId());
+    event.SetString(String::Widen<wxString>(path).c_str());
+    wxPostEvent(GetParent(), event);
+    opened_timer_.StartOnce(opened_delay_);
+    return true;
   }
 
   return false;
@@ -117,9 +115,7 @@ void Controller::SetSettings(const Settings &setting) {
   AdjustBitmap();
 }
 
-void Controller::SetImagePerPage(size_t size) {
-  loader_->SetImagePerPage(size);
-}
+void Controller::SetImagePerPage(size_t size) { loader_->SetItemPerPage(size); }
 
 AbstractHandler *Controller::GetHandler() { return loader_->GetHandler(); }
 
@@ -151,20 +147,30 @@ void Controller::AdjustBitmap() {
   GetWindow()->Refresh();
 }
 
-void Controller::OnLoadedImage(bitmap::ImageLoadEvent &event) {
+void Controller::OnLoadedImage(bitmap::loader::LoadEvent &event) {
+  auto stream_page = loader_->GetStreamPage(event.GetFoundStream());
+  auto stream_pos_in_page = loader_->GetStreamPosInPage(event.GetFoundStream());
+
+  bool is_current_page = stream_page == GetBitmapCtrl()->GetPagePos();
   bool should_reset = true;
-  for (const auto &it : GetBitmapCtrl()->GetBitmapVec()->GetBitmap()) {
-    should_reset = !it.IsOk() && should_reset;
+
+  if (GetBitmapCtrl()->GetBitmapVec()) {
+    for (const auto &it : GetBitmapCtrl()->GetBitmapVec()->GetBitmap()) {
+      should_reset = !it.IsOk() && should_reset;
+    }
   }
 
-  SBitmap bitmap;
-  bitmap.SetImage(event.GetItem().GetImage());
-  GetBitmapCtrl()->AddBitmap(
-      bitmap, loader_->GetStreamPage(event.GetItem().GetStream()),
-      loader_->GetStreamPosInPage(event.GetItem().GetStream()));
+  should_reset = should_reset && stream_page == GetBitmapCtrl()->GetPagePos();
 
-  AdjustBitmap();
-  if (should_reset) ResetScroll(wxDOWN);
+  if (stream_page != size_t(-1) && stream_pos_in_page != size_t(-1)) {
+    GetBitmapCtrl()->AddBitmap(event.GetBitmap(), stream_page,
+                               stream_pos_in_page);
+  }
+
+  if (is_current_page) {
+    AdjustBitmap();
+    if (should_reset) ResetScroll(wxDOWN);
+  }
   event.Skip();
 }
 

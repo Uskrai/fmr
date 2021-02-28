@@ -31,8 +31,7 @@ namespace fmr {
 
 namespace queue {
 
-bool FindHandler::ProcessTask(value_type &stream) {
-  auto item = FindItem(stream, *stream);
+bool FindHandler::ProcessTask(value_type &item) {
   if (IsBeingStopped()) return false;
 
   FindStatus ret;

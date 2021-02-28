@@ -19,8 +19,7 @@
 
 #include <wx/filename.h>
 
-#include "fmr/bitmap/loader.h"
-#include "fmr/bitmap/rescale_loader.h"
+#include "fmr/bitmap/loader/rescale.h"
 #include "fmr/bitmap/rescaler.h"
 #include "fmr/explorer/image_window_explorer.h"
 #include "fmr/handler/handler_factory.h"
@@ -40,7 +39,7 @@ Window::Window(wxWindow *parent, const wxWindowID &id, const wxPoint &pos,
   CreateGrid(0, 0);
   BindEvent();
 
-  loader_ = std::make_unique<bitmap::RescaleLoader>(this, kLoaderId);
+  loader_ = std::make_unique<bitmap::loader::Rescale>(this, kLoaderId);
   loader_->SetFindFlags(queue::kFindHandlerOnlyFirstItem |
                         queue::kFindHandlerRecursive);
   rescaler_ = std::make_unique<bitmap::Rescaler>(bitmap::kRescaleFitAll);

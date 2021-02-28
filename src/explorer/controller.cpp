@@ -17,7 +17,7 @@
 
 #include "fmr/explorer/controller.h"
 
-#include "fmr/bitmap/rescale_loader.h"
+#include "fmr/bitmap/loader/rescale.h"
 #include "fmr/bitmap/rescaler.h"
 #include "fmr/common/dimension.h"
 #include "fmr/explorer/image_cell_explorer.h"
@@ -39,13 +39,15 @@ Controller::Controller() {
   window_ = new window::GridWindow();
   rescaler_ = std::make_unique<bitmap::Rescaler>();
   rescaler_->SetFlags(bitmap::kRescaleFitAll);
-  loader_ = std::make_unique<bitmap::RescaleLoader>(this, kLoaderId);
+  loader_ = std::make_unique<bitmap::loader::Rescale>(kLoaderId);
   loader_->SetRescaler(rescaler_.get());
   loader_->SetFindFlags(queue::kFindHandlerOnlyFirstItem |
                         queue::kFindHandlerRecursive);
 
   window_->Bind(wxEVT_KEY_DOWN, &Controller::OnKeyDown, this);
-  Bind(bitmap::kEventImageLoaded, &Controller::OnImageLoaded, this, kLoaderId);
+  loader_->Bind(bitmap::loader::kEventImageLoaded, &Controller::OnImageLoaded,
+                this, kLoaderId);
+
   Bind(kEventOpenCell, &Controller::OnOpenCell, this);
 }
 
@@ -198,12 +200,12 @@ void Controller::OnKeyDown(wxKeyEvent &event) {
   event.Skip();
 }
 
-void Controller::OnImageLoaded(bitmap::ImageLoadEvent &event) {
-  auto item = stream_to_cell_.find(
-      loader_->GetSourceStream(event.GetItem().GetStream()));
+void Controller::OnImageLoaded(bitmap::loader::LoadEvent &event) {
+  auto item =
+      stream_to_cell_.find(loader_->GetSourceStream(event.GetFoundStream()));
   if (item != stream_to_cell_.end()) {
     SBitmap &bitmap = item->second->GetBitmap();
-    bitmap.SetImage(event.GetItem().GetImage());
+    bitmap = event.GetBitmap();
     rescaler_->DoRescale(bitmap);
     GetWindow()->Refresh();
   }

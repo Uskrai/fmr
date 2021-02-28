@@ -18,8 +18,11 @@
 #ifndef FMR_BITMAP_PAGED_BITMAP_CTRL
 #define FMR_BITMAP_PAGED_BITMAP_CTRL
 
-#include "fmr/bitmap/bitmap_ctrl.h"
-#include "fmr/bitmap/bitmap_page.h"
+#include <fmr/bitmap/bitmap_ctrl.h>
+#include <fmr/bitmap/bitmap_page.h>
+
+#include <memory>
+#include <vector>
 
 namespace fmr {
 

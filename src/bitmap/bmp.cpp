@@ -21,6 +21,7 @@
 namespace fmr {
 
 SBitmap::SBitmap(bool isLoaded) { m_isLoaded = isLoaded; }
+SBitmap::SBitmap(const wxImage& image) { SetImage(image); }
 
 bool SBitmap::IsOk() const { return m_isOk || GetImage().IsOk(); }
 bool SBitmap::IsLoaded() const { return m_isLoaded; }

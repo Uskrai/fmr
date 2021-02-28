@@ -15,40 +15,35 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/queue/factory.h>
+#include <fmr/handler/struct_stream.h>
+#include <wx/event.h>
 
 namespace fmr {
 
 namespace bitmap {
 
-class Loader;
-typedef queue::ItemEvent<queue::FindItem> ImageFindEvent;
-typedef queue::ItemEvent<queue::LoadItem> ImageLoadEvent;
-typedef queue::ItemReceiverEvent<queue::LoadItem> ImageLoadReceiverEvent;
-typedef queue::ItemReceiverEvent<queue::FindItem> ImageFindReceiverEvent;
-
-class RescaleLoader;
-typedef queue::ItemEvent<queue::RescaleItem> RescaleEvent;
-typedef queue::ItemReceiverEvent<queue::RescaleItem> RescaleReceiverEvent;
-
 namespace loader {
 
-class Base;
-class Page;
-class Rescale;
+class FindEvent : public wxEvent {
+  const SStream *source_stream_ = nullptr;
+  SStream *found_stream_ = nullptr;
 
-class LoadEvent;
-class FindEvent;
+ public:
+  FindEvent(int id, wxEventType type) : wxEvent(id, type) {}
+
+  FindEvent *Clone() const override { return new FindEvent(*this); }
+
+  void SetStream(const SStream *source_stream, SStream *found_stream) {
+    source_stream_ = source_stream;
+    found_stream_ = found_stream;
+  }
+
+  const SStream *GetSourceStream() const { return source_stream_; }
+  const SStream *GetFoundStream() const { return found_stream_; }
+  SStream *GetFoundStream() { return found_stream_; }
+};
 
 }  // namespace loader
-
-class PageLoader;
-class Rescaler;
-
-class BitmapCtrl;
-class BitmapPageCtrl;
-class BitmapVectorEvent;
-class BitmapVector;
 
 }  // namespace bitmap
 

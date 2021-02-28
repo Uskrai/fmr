@@ -122,18 +122,13 @@ class QueueThreadCtrl : public ThreadController {
   wxCriticalSection &GetLock() const { return lock_; }
 
   int GetEventId() const { return event_id_; }
-  virtual void SetEventId(int id) {
-    event_id_ = id;
-    // if (queue_) {
-    // queue_->SetEventId(id);
-    // }
-  }
+  virtual void SetEventId(int id) { event_id_ = id; }
 
   void Push(value_type item) { DoPush(std::move(item), kQueuePushBack); }
 
   void PushFront(value_type item) { DoPush(std::move(item), kQueuePushFront); }
 
-  void MakeFront(const value_type &item) {
+  bool MakeFront(const value_type &item) {
     std::scoped_lock locker(GetQueueMutex());
     return GetQueue()->MakeFront(item);
   }

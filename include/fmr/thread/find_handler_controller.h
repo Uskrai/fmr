@@ -39,7 +39,7 @@ class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
   std::unique_ptr<AbstractHandler> handler_;
   std::unique_ptr<queue::ItemReceiverEvent<queue::FindItem>> receiver_;
 
-  std::vector<const SStream *> in_queue_vec_;
+  std::vector<queue::FindItem> in_queue_vec_;
   // Queue<queue::FindHandler> *thread_ = nullptr;
   // std::unique_ptr<queue::FindHandler> queue_;
   queue::FindHandlerFlags thread_flags_ = queue::kFindHandlerDefault;

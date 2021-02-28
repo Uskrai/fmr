@@ -182,7 +182,7 @@ class Base {
   }
 
   iterator FindIterator(const value_type &item) {
-    return std::find(
+    return std::find_if(
         GetContainer().begin(), GetContainer().end(),
         [&](const value_type &compare) { return Compare(compare, item); });
   }

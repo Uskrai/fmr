@@ -69,6 +69,12 @@ class BitmapVector {
   void Draw(wxDC &dc, const wxPoint &view_start, const wxSize &size) {
     return Draw(dc, wxRect(view_start, size));
   }
+
+  void ClearImage() {
+    for (auto &it : GetBitmap()) {
+      it.SetImage(wxImage());
+    }
+  }
 };
 
 typedef BitmapVector BitmapPage;

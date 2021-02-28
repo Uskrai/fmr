@@ -19,7 +19,6 @@
 #define FMR_BITMAP_BITMAP_CTRL
 
 #include <fmr/bitmap/bitmap_page.h>
-#include <fmr/bitmap/loader.h>
 #include <fmr/position/inc.h>
 #include <wx/window.h>
 

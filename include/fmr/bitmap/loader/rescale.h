@@ -15,48 +15,48 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_BITMAP_RESCALE_LOADER
-#define FMR_BITMAP_RESCALE_LOADER
+#ifndef FMR_BITMAP_LOADER_RESCALE
+#define FMR_BITMAP_LOADER_RESCALE
 
-#include "fmr/bitmap/loader.h"
-#include "fmr/queue/rescale.h"
+#include <fmr/bitmap/loader/base.h>
+#include <fmr/bitmap/loader/rescale_container.h>
 
 namespace fmr {
 
 namespace bitmap {
 
-// Process item from queue::Rescale
-wxDECLARE_EVENT(kEventRescale, RescaleEvent);
+namespace loader {
 
-class RescaleLoader : public Loader {
+class RescaleContainer;
+
+class Rescale : public Base {
   std::unique_ptr<thread::RescaleController> rescale_controller_;
   std::unique_ptr<RescaleReceiverEvent> rescale_receiver_;
-  std::unordered_map<const SStream *, wxImage> stream_bmp_;
-  std::unordered_map<const wxImage *, const SStream *> img_stream_;
 
  public:
-  RescaleLoader(wxEvtHandler *parent, int id);
-  virtual ~RescaleLoader();
+  Rescale(int event_id);
+  virtual ~Rescale();
 
-  using Loader::SetControllerId;
-  void SetControllerId(int find_id, int load_id, int rescale_id);
+  virtual RescaleContainer *GetContainer() override;
+  virtual const RescaleContainer *GetContainer() const override;
 
-  thread::RescaleController *GetRescaleController() {
-    return rescale_controller_.get();
-  };
+  void SetRescaler(Rescaler *rescaler);
+
+  void PushRescale(const SStream *found_stream, const wxImage &img);
 
   void Clear();
 
-  void SetRescaler(bitmap::Rescaler *rescaler);
+ protected:
+  virtual void OnImageLoaded(ImageLoadEvent &event) override;
+  virtual void OnImageRescaled(RescaleEvent &event);
 
- private:
-  void OnItemLoaded(ImageLoadEvent &event);
-  void OnRescaled(RescaleEvent &event);
-  void OnThreadCompleted(wxThreadEvent &event);
+  virtual void SetContainer(std::unique_ptr<RescaleContainer> container);
 };
+
+}  // namespace loader
 
 }  // namespace bitmap
 
 }  // namespace fmr
 
-#endif /* end of include guard: FMR_BITMAP_RESCALE_LOADER */
+#endif /* end of include guard: FMR_BITMAP_LOADER_RESCALE */

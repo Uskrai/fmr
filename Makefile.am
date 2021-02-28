@@ -29,17 +29,25 @@ lib_handler_la_LIBADD = lib_path.la \
 # make libraries for bitmap
 bitmap = src/bitmap
 bitmapdir = @abs_builddir@/bitmap
-bitmap_LTLIBRARIES = lib_bitmap.la
+bitmap_LTLIBRARIES = lib_bitmap.la lib_bitmap_loader.la
 lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/image_util.cpp \
-						$(bitmap)/loader.cpp \
 						$(bitmap)/rescaler.cpp \
 						$(bitmap)/bitmap_ctrl.cpp \
 						$(bitmap)/bitmap_page_ctrl.cpp \
-						$(bitmap)/page_loader.cpp \
-						$(bitmap)/rescale_loader.cpp \
 						$(bitmap)/image_checker.cpp
 lib_bitmap_la_LIBADD = lib_position.la
+
+bitmap_loader = src/bitmap/loader
+lib_bitmap_loader_la_SOURCES = $(bitmap_loader)/base.cpp \
+															 $(bitmap_loader)/page.cpp \
+															 $(bitmap_loader)/rescale.cpp \
+															 $(bitmap_loader)/container.cpp \
+															 $(bitmap_loader)/rescale_container.cpp
+lib_bitmap_loader_la_LIBADD = lib_queue.la \
+															lib_bitmap.la \
+															lib_thread.la
+
 
 position = src/position
 positiondir = @abs_builddir@/position
@@ -56,23 +64,23 @@ lib_reader_la_SOURCES = $(reader)/controller.cpp \
 												$(reader)/page_indicator.cpp
 
 lib_reader_la_LIBADD = lib_bitmap.la \
-						 lib_handler.la \
-						 lib_window.la \
-						 lib_thread.la
+											 lib_handler.la \
+											 lib_window.la \
+											 lib_thread.la \
+											 lib_bitmap_loader.la
 
 explorer = src/explorer
 explorerdir = @abs_builddir@/explorer
 explorer_LTLIBRARIES = lib_explorer.la
-lib_explorer_la_SOURCES = $(explorer)/window_explorer.cpp \
-													$(explorer)/image_window_explorer.cpp \
-													$(explorer)/controller.cpp \
+lib_explorer_la_SOURCES = $(explorer)/controller.cpp \
 													$(explorer)/image_cell_explorer.cpp \
 													$(explorer)/string_draw.cpp \
 													$(explorer)/string_rect.cpp
 
 lib_explorer_la_LIBADD = lib_handler.la \
-						 lib_thread.la \
-						 lib_window.la
+												 lib_thread.la \
+												 lib_window.la \
+												 lib_bitmap_loader.la
 
 gui = src/gui
 guidir = @abs_builddir@/gui
@@ -115,6 +123,7 @@ lib_queue_la_SOURCES = $(queue)/load_image.cpp \
 											 $(queue)/find_handler.cpp \
 											 $(queue)/rescale.cpp  \
 											 $(queue)/factory.cpp
+lib_queue_la_LIBADD = lib_handler.la
 
 
 fmr = src/main

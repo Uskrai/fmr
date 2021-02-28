@@ -15,41 +15,38 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/queue/factory.h>
+#ifndef FMR_BITMAP_LOADER_RESCALE_CONTAINER
+#define FMR_BITMAP_LOADER_RESCALE_CONTAINER
+
+#include <fmr/bitmap/bmp.h>
+#include <fmr/bitmap/loader/container.h>
 
 namespace fmr {
 
 namespace bitmap {
 
-class Loader;
-typedef queue::ItemEvent<queue::FindItem> ImageFindEvent;
-typedef queue::ItemEvent<queue::LoadItem> ImageLoadEvent;
-typedef queue::ItemReceiverEvent<queue::LoadItem> ImageLoadReceiverEvent;
-typedef queue::ItemReceiverEvent<queue::FindItem> ImageFindReceiverEvent;
-
-class RescaleLoader;
-typedef queue::ItemEvent<queue::RescaleItem> RescaleEvent;
-typedef queue::ItemReceiverEvent<queue::RescaleItem> RescaleReceiverEvent;
-
 namespace loader {
 
-class Base;
-class Page;
-class Rescale;
+class RescaleContainer : public Container {
+  std::unordered_map<const SStream *, wxImage> stream_to_img_;
+  std::unordered_map<const wxImage *, const SStream *> img_to_stream_;
 
-class LoadEvent;
-class FindEvent;
+ public:
+  wxImage *AddImage(const SStream *found_stream, const wxImage &img);
+
+  wxImage *GetImage(const SStream *found_stream);
+  const wxImage *GetImage(const SStream *found_stream) const;
+
+  using Container::GetFoundStream;
+  const SStream *GetFoundStream(const wxImage *bmp) const;
+
+  virtual void Clear() override;
+};
 
 }  // namespace loader
-
-class PageLoader;
-class Rescaler;
-
-class BitmapCtrl;
-class BitmapPageCtrl;
-class BitmapVectorEvent;
-class BitmapVector;
 
 }  // namespace bitmap
 
 }  // namespace fmr
+
+#endif /* end of include guard: FMR_BITMAP_LOADER_RESCALE_CONTAINER */

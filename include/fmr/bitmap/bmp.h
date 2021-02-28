@@ -36,6 +36,7 @@ struct SBitmap {
 
   SBitmap() {}
   SBitmap(bool isLoaded);
+  SBitmap(const wxImage& image);
 
   const wxImage& GetImage() const { return image_; }
   wxImage& GetImage() { return image_; }
