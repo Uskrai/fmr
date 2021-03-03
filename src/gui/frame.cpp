@@ -122,6 +122,11 @@ void Frame::CreateMenuReader(window::MenuBar& menu_bar,
   table.AddEntry(wxACCEL_CTRL, 'e', id, menu_bar.GetMenuItem(id));
   toggler.AddMenuItem(menu_bar.GetMenuItem(id), id, kFrameReaderMenuToggle);
 
+  id = kFrameReaderScaleShrink;
+  menu_bar.CreateMenu(id, "Reader", "Allow Shrink Image", "", wxITEM_CHECK);
+  table.AddEntry(wxACCEL_CTRL, 's', id, menu_bar.GetMenuItem(id));
+  toggler.AddMenuItem(menu_bar.GetMenuItem(id), id, kFrameReaderMenuToggle);
+
   menu_bar.CreateMenu(wxID_SEPARATOR, "Reader", "", "", wxITEM_SEPARATOR);
 
   id = kFrameReaderReadFromRight;
@@ -163,6 +168,7 @@ void Frame::SettingReader() {
   check_scale(kFrameReaderScaleFitHeight, bitmap::kRescaleFitHeight);
   check_scale(kFrameReaderScaleFitWidth, bitmap::kRescaleFitWidth);
   check_scale(kFrameReaderScaleEnlarge, bitmap::kRescaleEnlarge);
+  check_scale(kFrameReaderScaleShrink, bitmap::kRescaleShrink);
 
   item_toggler_->Check(kFrameReaderReadFromRight, setting.read_from_right_);
 
@@ -197,6 +203,7 @@ void Frame::OnReaderMenuChanged(wxCommandEvent& event) {
   check_and_add(kFrameReaderScaleFitHeight, bitmap::kRescaleFitHeight);
   check_and_add(kFrameReaderScaleFitWidth, bitmap::kRescaleFitWidth);
   check_and_add(kFrameReaderScaleEnlarge, bitmap::kRescaleEnlarge);
+  check_and_add(kFrameReaderScaleShrink, bitmap::kRescaleShrink);
 
   Config::Get()->Write("Reader/ImageSize", int(flags));
 

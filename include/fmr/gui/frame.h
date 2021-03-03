@@ -47,6 +47,7 @@ enum {
   kFrameReaderScaleFitWidth,
   kFrameReaderScaleFitHeight,
   kFrameReaderScaleEnlarge,
+  kFrameReaderScaleShrink,
   kFrameReaderReadFromRight,
   kFrameReaderChangeImageLimit,
   kFrameReaderChangeWindowFitSize,
