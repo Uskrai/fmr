@@ -15,6 +15,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef FMR_COMMON_BITMASK
+#define FMR_COMMON_BITMASK
+
+#include <type_traits>
+
 #define DEFINE_BITMASK_TYPE(T)                                             \
   constexpr inline T operator~(T a) {                                      \
     return static_cast<T>(~static_cast<std::underlying_type<T>::type>(a)); \
@@ -52,3 +57,5 @@
         reinterpret_cast<std::underlying_type<T>::type&>(a) ^=             \
         static_cast<std::underlying_type<T>::type>(b));                    \
   }
+
+#endif /* end of include guard: FMR_COMMON_BITMASK */
