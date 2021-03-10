@@ -15,35 +15,36 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_QUEUE_FACTORY
-#define FMR_QUEUE_FACTORY
+#ifndef FMR_QUEUE_FIND_HANDLER_FLAGS
+#define FMR_QUEUE_FIND_HANDLER_FLAGS
 
-#include <memory>
-
-class wxEvtHandler;
+#include <fmr/common/bitmask.h>
 
 namespace fmr {
 
 namespace queue {
 
-class FindHandler;
-class FindItem;
-class FindHandlerChecker;
+enum FindHandlerFlags {
+  kFindHandlerDefault = 0x00,
+  kFindHandlerRecursive = 0x01,
+  kFindHandlerCheckHandler = 0x02,
+  kFindHandlerOnlyFirstItem = 0x08,
+  kFindHandlerDontRecursiveNonOpenable = 0x10,
+  kFindHandlerCheckFilenameIfOpenable = 0x20
+};
+DEFINE_BITMASK_TYPE(FindHandlerFlags)
 
-class LoadImage;
-class LoadImageItem;
+enum FindStatus {
+  kFindItemFound = 0,
+  kFindBeingStopped = 1,
+  kFindNotFound = 2
+};
 
-class Rescale;
-class RescaleItem;
-
-template <typename ItemClass>
-class ItemEvent;
-
-template <typename ItemClass>
-class ItemReceiverEvent;
+[[deprecated("Changed to FindStatus")]] typedef FindStatus FindReturn;
 
 }  // namespace queue
 
 }  // namespace fmr
+/// flags used by FindHandler
 
-#endif /* end of include guard: FMR_QUEUE_FACTORY */
+#endif /* end of include guard: FMR_QUEUE_FIND_HANDLER_FLAGS */

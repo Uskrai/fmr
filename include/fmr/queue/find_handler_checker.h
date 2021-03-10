@@ -15,35 +15,29 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_QUEUE_FACTORY
-#define FMR_QUEUE_FACTORY
+#ifndef FMR_QUEUE_FIND_HANDLER_CHECKER
+#define FMR_QUEUE_FIND_HANDLER_CHECKER
 
-#include <memory>
-
-class wxEvtHandler;
+#include <fmr/handler/handler_factory.h>
+#include <fmr/queue/find_handler_flags.h>
 
 namespace fmr {
 
 namespace queue {
 
 class FindHandler;
-class FindItem;
-class FindHandlerChecker;
-
-class LoadImage;
-class LoadImageItem;
-
-class Rescale;
-class RescaleItem;
-
-template <typename ItemClass>
-class ItemEvent;
-
-template <typename ItemClass>
-class ItemReceiverEvent;
+class FindHandlerChecker {
+ public:
+  virtual FindStatus Check(FindHandler &parent,
+                           AbstractOpenableHandler &handler, SStream &stream) {
+    return Check(parent, static_cast<AbstractHandler &>(handler), stream);
+  };
+  virtual FindStatus Check(FindHandler &parent, AbstractHandler &handler,
+                           SStream &stream) = 0;
+};
 
 }  // namespace queue
 
 }  // namespace fmr
 
-#endif /* end of include guard: FMR_QUEUE_FACTORY */
+#endif /* end of include guard: FMR_QUEUE_FIND_HANDLER_CHECKER */

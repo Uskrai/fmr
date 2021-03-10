@@ -23,8 +23,8 @@ namespace bitmap {
 
 class Loader;
 typedef queue::ItemEvent<queue::FindItem> ImageFindEvent;
-typedef queue::ItemEvent<queue::LoadItem> ImageLoadEvent;
-typedef queue::ItemReceiverEvent<queue::LoadItem> ImageLoadReceiverEvent;
+typedef queue::ItemEvent<queue::LoadImageItem> ImageLoadEvent;
+typedef queue::ItemReceiverEvent<queue::LoadImageItem> ImageLoadReceiverEvent;
 typedef queue::ItemReceiverEvent<queue::FindItem> ImageFindReceiverEvent;
 
 class RescaleLoader;

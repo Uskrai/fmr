@@ -22,6 +22,9 @@
 #include <fmr/handler/abstract_handler.h>
 #include <fmr/handler/handler_factory.h>
 #include <fmr/handler/struct_stream.h>
+#include <fmr/queue/find_handler_checker.h>
+#include <fmr/queue/find_handler_flags.h>
+#include <fmr/queue/find_handler_item.h>
 #include <fmr/thread/thread.h>
 
 #include <queue>
@@ -31,66 +34,6 @@
 namespace fmr {
 
 namespace queue {
-
-/// flags used by FindHandler
-enum FindHandlerFlags {
-  kFindHandlerDefault = 0x00,
-  kFindHandlerRecursive = 0x01,
-  kFindHandlerCheckHandler = 0x02,
-  kFindHandlerOnlyFirstItem = 0x08,
-  kFindHandlerDontRecursiveNonOpenable = 0x10,
-  kFindHandlerCheckFilenameIfOpenable = 0x20
-};
-DEFINE_BITMASK_TYPE(FindHandlerFlags)
-
-enum FindStatus {
-  kFindItemFound = 0,
-  kFindBeingStopped = 1,
-  kFindNotFound = 2
-};
-
-[[deprecated("Changed to FindStatus")]] typedef FindStatus FindReturn;
-
-class FindHandler;
-class FindHandlerChecker {
- public:
-  virtual FindStatus Check(FindHandler &parent,
-                           AbstractOpenableHandler &handler, SStream &stream) {
-    return Check(parent, static_cast<AbstractHandler &>(handler), stream);
-  };
-  virtual FindStatus Check(FindHandler &parent, AbstractHandler &handler,
-                           SStream &stream) = 0;
-};
-
-class FindItem {
-  SStream found_stream_;
-  const SStream *source_stream_;
-  FindStatus status_;
-
- public:
-  FindItem(const SStream *source_stream, SStream found_stream) {
-    SetFoundStream(std::move(found_stream));
-    SetSourceStream(source_stream);
-  };
-  FindItem(const SStream *source_stream) {
-    SetFoundStream(*source_stream);
-    SetSourceStream(source_stream);
-  }
-  FindItem(const FindItem &item) = default;
-  FindItem(FindItem &&item) = default;
-
-  SStream &GetFoundStream() { return found_stream_; }
-  const SStream *GetSourceStream() { return source_stream_; }
-  FindStatus GetStatus() { return status_; }
-
-  void SetFoundStream(SStream stream) { found_stream_ = std::move(stream); }
-  void SetSourceStream(const SStream *stream) { source_stream_ = stream; }
-  void SetStatus(FindStatus status) { status_ = status; }
-
-  bool operator==(const FindItem &other) const {
-    return other.source_stream_ == source_stream_;
-  }
-};
 
 class FindHandler : public Base<FindItem, FindItem> {
  private:

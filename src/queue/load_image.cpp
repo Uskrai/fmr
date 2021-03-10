@@ -28,24 +28,23 @@ namespace fmr {
 
 namespace queue {
 
-LoadReturn LoadImage::Load(SStream *stream) {
+LoadReturn LoadImage::Load(LoadImage::value_type &item) {
 #define TEST_DELETED() \
   if (IsBeingStopped()) return kLoadBeingStopped;
 
-  auto item = LoadItem();
-  item.SetStream(stream);
+  auto &stream = item.GetLoadedStream();
 
   TEST_DELETED();
 
-  auto input_stream = stream->GetStream();
+  auto input_stream = stream.GetStream();
   if (!wxImage::CanRead(*input_stream)) return kLoadCannotReadStream;
 
   TEST_DELETED();
 
-  wxLogMessage("Loading image in %s/%s", stream->GetHandlerPath(),
-               stream->GetName());
+  wxLogMessage("Loading image in %s/%s", stream.GetHandlerPath(),
+               stream.GetName());
 
-  image_util::Load(item.GetImage(), *stream);
+  image_util::Load(item.GetImage(), stream);
 
   if (rescaler_) rescaler_->DoRescale(item.GetImage());
 
@@ -53,25 +52,26 @@ LoadReturn LoadImage::Load(SStream *stream) {
   return kLoadSuccess;
 }
 
-bool LoadImage::ProcessTask(LoadImage::value_type &stream) {
+bool LoadImage::ProcessTask(LoadImage::value_type &item) {
 #define TEST_RETURN() \
   if (IsBeingStopped()) return false;
 
-  std::shared_ptr<wxInputStream> input_stream = stream->GetStream();
+  auto &stream = item.GetLoadedStream();
+  std::shared_ptr<wxInputStream> input_stream = stream.GetStream();
 
   TEST_RETURN();
 
-  if (!stream->IsOk() || !wxImage::CanRead(*input_stream)) {
+  if (!stream.IsOk() || !wxImage::CanRead(*input_stream)) {
     TEST_RETURN();
-    wxLogMessage("Loading Stream in %s/%s", stream->GetHandlerPath(),
-                 stream->GetName());
+    wxLogMessage("Loading Stream in %s/%s", stream.GetHandlerPath(),
+                 stream.GetName());
 
-    stream_util::LoadStream(*stream);
+    stream_util::LoadStream(stream);
   }
 
   TEST_RETURN();
 
-  return Load(stream) != kLoadBeingStopped;
+  return Load(item) != kLoadBeingStopped;
 }
 
 }  // namespace queue

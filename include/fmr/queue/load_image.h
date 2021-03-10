@@ -19,6 +19,7 @@
 #define FMR_EXPLORER_LOAD_EXPLORER
 
 #include <fmr/handler/struct_stream.h>
+#include <fmr/queue/load_image_item.h>
 #include <fmr/thread/thread.h>
 #include <wx/event.h>
 
@@ -36,23 +37,7 @@ enum LoadReturn { kLoadBeingStopped, kLoadSuccess, kLoadCannotReadStream };
 
 enum LoadImageStatus { kItemLoaded, kCannotLoadItem };
 
-class LoadItem {
-  wxImage image_;
-  const SStream *stream_ = nullptr;
-
- public:
-  LoadItem() = default;
-  LoadItem(LoadItem &&move) = default;
-  LoadItem(const LoadItem &other) = default;
-
-  void SetImage(const wxImage &image) { image_ = image; }
-  void SetStream(const SStream *stream) { stream_ = stream; }
-
-  wxImage &GetImage() { return image_; }
-  const SStream *GetStream() { return stream_; }
-};
-
-class LoadImage : public Base<SStream *, LoadItem> {
+class LoadImage : public Base<LoadImageItem, LoadImageItem> {
   bitmap::Rescaler *rescaler_ = nullptr;
 
  public:
@@ -60,7 +45,7 @@ class LoadImage : public Base<SStream *, LoadItem> {
   LoadImage(receiver_type *receiver) : Base(receiver){};
 
   bool ProcessTask(value_type &item) override;
-  LoadReturn Load(SStream *stream);
+  LoadReturn Load(value_type &stream);
 
   /**
    * @brief: Rescaller to use after load image physically ( if any )
