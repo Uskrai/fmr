@@ -19,6 +19,7 @@
 #define FMR_QUEUE_BASE
 
 #include <algorithm>
+#include <memory>
 #include <queue>
 
 namespace fmr {
@@ -37,14 +38,15 @@ enum EventType { kEventUsePost, kEventUseQueue };
 template <typename T, typename SendItemClass>
 class Base {
  public:
-  using Container = typename std::deque<T>;
-  using value_type = typename Container::value_type;
+  using value_type = T;
+  using pointer_type = std::unique_ptr<value_type>;
+  using Container = typename std::deque<pointer_type>;
   using iterator = typename Container::iterator;
   using send_type = SendItemClass;
   using receiver_type = ItemReceiver<send_type>;
 
  private:
-  std::deque<T> queue_item_;
+  Container queue_item_;
   receiver_type *receiver_ = nullptr;
   bool is_being_deleted_ = false;
 
@@ -87,18 +89,25 @@ class Base {
   /**
    * @brief: push item to the queue
    */
-  void Push(value_type item) {
+  template <typename... U>
+  void Push(U &&...item) {
+    Push(std::make_unique<value_type>(std::forward<U>(item)...));
+  }
+
+  void Push(std::unique_ptr<T> item) {
     return GetContainer().push_back(std::move(item));
   }
 
   /**
    * @brief: Push Item to the front of the queue
    */
-  void PushFront(value_type &&item) {
-    return GetContainer().push_front(std::move(item));
+  template <typename... U>
+  void PushFront(U &&...item) {
+    return PushFront(std::make_unique<value_type>(std::forward<U>(item)...));
   }
-  void PushFront(const value_type &item) {
-    return GetContainer().push_front(item);
+
+  void PushFront(std::unique_ptr<T> item) {
+    return GetContainer().push_front(std::move(item));
   }
 
   /**
@@ -110,19 +119,18 @@ class Base {
    */
   bool MakeFront(const value_type &item) {
     auto it = FindIterator(item);
-    if (it != GetContainer().end()) {
-      PushFront(*it);
-      GetContainer().erase(it);
-      return true;
-    }
-    return false;
+    if (it == GetContainer().end()) return false;
+
+    PushFront(std::move(*it));
+    GetContainer().erase(it);
+    return true;
   }
 
   /**
    * @brief: access the first element
    * @return: reference to the first element in the container
    */
-  value_type &Front() { return GetContainer().front(); }
+  pointer_type &Front() { return GetContainer().front(); }
   /**
    * @brief: remove the first elemt
    */
@@ -148,7 +156,7 @@ class Base {
    * @return: @see ProcessTask
    */
   virtual bool PopTask() {
-    if (ProcessTask(Front())) {
+    if (ProcessTask(*Front())) {
       Pop();
       return true;
     }
@@ -167,8 +175,8 @@ class Base {
   virtual void ClearTask() { GetContainer().clear(); }
 
  protected:
-  const std::deque<T> &GetContainer() const { return queue_item_; }
-  std::deque<T> &GetContainer() { return queue_item_; }
+  const Container &GetContainer() const { return queue_item_; }
+  Container &GetContainer() { return queue_item_; }
 
   /**
    * @brief: Compare function to compare value_type
@@ -184,7 +192,7 @@ class Base {
   iterator FindIterator(const value_type &item) {
     return std::find_if(
         GetContainer().begin(), GetContainer().end(),
-        [&](const value_type &compare) { return Compare(compare, item); });
+        [&](const pointer_type &compare) { return Compare(*compare, item); });
   }
 };
 

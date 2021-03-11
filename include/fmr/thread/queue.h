@@ -46,26 +46,49 @@ class Queue : public BaseThread {
     while (!TestDestroy()) {
       WaitForQueue();
 
-      Lock();
+      using pointer_type = typename QueueClass::pointer_type;
+      pointer_type item;
 
-      if (!GetQueue()->IsEmpty() && !TestDestroy()) {
-        value_type item = std::move(GetQueue()->Front());
-        GetQueue()->Pop();
+      {
+        std::scoped_lock locker(*queue_mutex_);
+        while (!item && !TestDestroy() && !GetQueue()->IsEmpty()) {
+          item = std::move(GetQueue()->Front());
+          GetQueue()->Pop();
+          break;
+        }
+      }
 
-        Unlock();
-
+      if (item && !TestDestroy()) {
         SetOnTask(true);
-        GetQueue()->ProcessTask(item);
+        GetQueue()->ProcessTask(*item);
         SetOnTask(false);
 
         Update();
-
-        // make sure current thread not leave critical section from another
-        // thread
-        Lock();
       }
-      Unlock();
     }
+    //
+    //
+    // Lock();
+    //
+    // if (!GetQueue()->IsEmpty() && !TestDestroy()) {
+    // auto item = std::move(GetQueue()->Front());
+    // GetQueue()->Pop();
+    // printf("Unlocking\n");
+    //
+    // Unlock();
+    //
+    // SetOnTask(true);
+    // GetQueue()->ProcessTask(*item);
+    // SetOnTask(false);
+    //
+    // Update();
+    //
+    // // make sure current thread not leave critical section from another
+    // // thread
+    // Lock();
+    // }
+    // Unlock();
+    // }
     Completed();
 
     return (wxThread::ExitCode)0;
@@ -102,11 +125,6 @@ class Queue : public BaseThread {
   bool IsOnTask() const { return is_on_task_; }
   bool IsEmpty() { return GetQueue()->IsEmpty() && !IsOnTask(); }
   bool IsWaitingQueue() const { return is_waiting_queue_; }
-
-  using value_type = typename QueueClass::value_type;
-
-  void Push(const value_type &item) { GetQueue()->Push(item); }
-  void Push(value_type &&item) { GetQueue()->Push(std::move(item)); }
 
   void DisableOnEmptyQueue(bool cond = true) {
     is_disable_on_empty_queue_ = cond;
