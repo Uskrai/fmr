@@ -60,7 +60,7 @@ void SBitmap::Draw(wxDC& dc, const wxPoint& view_start, const wxSize& area) {
 
 wxRect SBitmap::CalcMinimumRect(const wxRect& rect, wxPoint* pos_start) const {
   wxRect ret_rect;
-  if (!IsOk() && !IsShown(rect.GetPosition(), rect.GetSize())) return ret_rect;
+  if (!IsOk() || !IsShown(rect.GetPosition(), rect.GetSize())) return ret_rect;
 
   double scale_x, scale_y;
   GetScale(scale_x, scale_y);
