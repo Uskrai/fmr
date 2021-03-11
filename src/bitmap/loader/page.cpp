@@ -105,7 +105,7 @@ bool Page::ShouldLoad(size_t page_pos, size_t img_pos) {
     if (is_img_exist) {
       bool is_img_not_ok = !vec[page_pos]->GetBitmap()[img_pos].IsOk();
 
-      return is_img_not_ok && !IsInLoadQueue(stream_page_[page_pos][img_pos]);
+      return is_img_not_ok;
     }
   }
   return false;
@@ -119,11 +119,10 @@ void Page::AdjustLoad() {
 void Page::LoadImageIfNeeded(size_t page_pos, size_t img_pos, bool make_front) {
   if (ShouldLoad(page_pos, img_pos)) {
     auto found_stream = stream_page_[page_pos][img_pos];
-    auto source_stream = GetSourceStream(found_stream);
     if (make_front) {
-      MakeFrontLoad(source_stream, found_stream);
-    } else
-      PushLoad(source_stream, found_stream);
+      if (!MakeFrontLoad(found_stream)) PushFrontLoad(found_stream);
+    } else if (!IsInLoadQueue(found_stream))
+      PushLoad(found_stream);
   }
 }
 

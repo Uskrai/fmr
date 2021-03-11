@@ -53,7 +53,7 @@ class Page : public Base {
   void ClearUnused();
 
   bool ItemExist(size_t page_pos, size_t img_pos);
-  bool ShouldLoad(size_t page_pos, size_t img_pos, bool make_front);
+  bool ShouldLoad(size_t page_pos, size_t img_pos);
 
   void ClearPage(size_t page_pos);
   void LoadImageIfNeeded(size_t page_pos, size_t img_pos, bool make_front);

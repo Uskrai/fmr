@@ -84,19 +84,30 @@ void Base::SendImage(const SStream *source_stream, const SStream *found_stream,
 
 void Base::PushFind(const SStream *stream) {
   GetContainer()->InsertFind(stream);
-  find_controller_->Push(stream);
+  GetFindController()->Push(stream);
 }
 
-void Base::PushLoad(const SStream *source_stream, SStream *stream) {
+void Base::PushFrontFind(const SStream *stream) {
+  GetContainer()->InsertFind(stream);
+  GetFindController()->PushFront(stream);
+}
+
+bool Base::MakeFrontFind(const SStream *stream) {
+  return GetFindController()->MakeFront(stream);
+}
+
+void Base::PushLoad(SStream *stream) {
   GetContainer()->InsertLoad(stream);
-  load_controller_->Push(stream);
+  GetLoadController()->Push(stream);
 }
 
-void Base::MakeFrontLoad(const SStream *source_stream, SStream *found_stream) {
-  if (!IsInLoadQueue(found_stream)) {
-    PushLoad(source_stream, found_stream);
-  }
-  load_controller_->MakeFront(found_stream);
+void Base::PushFrontLoad(SStream *found_stream) {
+  GetContainer()->InsertLoad(found_stream);
+  GetLoadController()->PushFront(found_stream);
+}
+
+bool Base::MakeFrontLoad(SStream *found_stream) {
+  return GetLoadController()->MakeFront(found_stream);
 }
 
 void Base::LoadFoundStream(const SStream *found_stream) {
@@ -104,13 +115,13 @@ void Base::LoadFoundStream(const SStream *found_stream) {
     auto source_stream = GetContainer()->GetSourceStream(found_stream);
     auto item = GetContainer()->GetFoundStream(source_stream);
     auto stream = std::find(item.begin(), item.end(), found_stream);
-    if (stream != item.end()) PushLoad(GetSourceStream(found_stream), *stream);
+    if (stream != item.end()) PushLoad(*stream);
   }
 }
 
 void Base::LoadSourceStream(const SStream *source_stream) {
   auto item = GetContainer()->GetFoundStream(source_stream);
-  for (auto &it : item) PushLoad(source_stream, it);
+  for (auto &it : item) PushLoad(it);
 }
 
 bool Base::IsFound(const SStream *found_stream) const {
@@ -166,8 +177,23 @@ void Base::OnImageLoad(ImageLoadEvent &event) {
   OnImageLoaded(event);
 }
 
+const thread::FindHandlerController *Base::GetFindController() const {
+  return find_controller_.get();
+}
+
+thread::FindHandlerController *Base::GetFindController() {
+  return find_controller_.get();
+}
+
+const thread::LoadImageController *Base::GetLoadController() const {
+  return load_controller_.get();
+}
+thread::LoadImageController *Base::GetLoadController() {
+  return load_controller_.get();
+}
+
 void Base::OnFindItemPush(FindEvent &event) {
-  if (!IsLazyLoad()) PushLoad(event.GetSourceStream(), event.GetFoundStream());
+  if (!IsLazyLoad()) PushLoad(event.GetFoundStream());
 }
 
 void Base::Clear() {

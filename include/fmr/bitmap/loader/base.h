@@ -62,9 +62,12 @@ class Base : public wxEvtHandler {
   virtual ~Base();
 
   void PushFind(const SStream *stream);
+  void PushFrontFind(const SStream *stream);
+  bool MakeFrontFind(const SStream *stream);
 
-  void PushLoad(const SStream *source_stream, SStream *stream);
-  void MakeFrontLoad(const SStream *source_stream, SStream *found_stream);
+  void PushLoad(SStream *found_stream);
+  void PushFrontLoad(SStream *found_stream);
+  bool MakeFrontLoad(SStream *found_stream);
 
   void LoadSourceStream(const SStream *source_stream);
   void LoadFoundStream(const SStream *found_stream);
