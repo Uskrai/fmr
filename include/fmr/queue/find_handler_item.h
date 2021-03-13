@@ -25,7 +25,7 @@ namespace queue {
 class FindItem {
   SStream found_stream_;
   const SStream *source_stream_;
-  FindStatus status_;
+  FindStatus status_ = kFindNotFound;
 
  public:
   FindItem(const SStream *source_stream, SStream found_stream) {

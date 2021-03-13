@@ -24,6 +24,7 @@ namespace fmr {
 namespace position {
 
 enum PosFlags {
+  kPositionNone = 0x00,
   kPositionVertical = 0x01,
   kPositionHorizontal = 0x2,
   kPositionAlignCenter = 0x04

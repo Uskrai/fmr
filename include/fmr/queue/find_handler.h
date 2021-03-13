@@ -37,7 +37,7 @@ namespace queue {
 
 class FindHandler : public Base<FindItem, FindItem> {
  private:
-  FindHandlerFlags flags_;
+  FindHandlerFlags flags_ = kFindHandlerDefault;
 
   FindHandlerChecker *checker_ = nullptr;
 

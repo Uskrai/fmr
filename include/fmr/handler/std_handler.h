@@ -93,7 +93,7 @@ class STDHandler : public AbstractOpenableHandler {
   void TraverseStream();
 
   std::unique_ptr<nwd::fs::directory_iterator> iterator_item_;
-  DirGetFlags iterator_flags_;
+  DirGetFlags iterator_flags_ = kDirNone;
   nwd::fs::directory_iterator iterator_;
 
   std::string name_, filename_;

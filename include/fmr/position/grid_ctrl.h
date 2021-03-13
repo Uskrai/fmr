@@ -33,7 +33,7 @@ class GridCellCount {
 
 class GridCtrl : public CtrlBase {
   wxSize border_size_{0, 0};
-  PosFlags flags_;
+  PosFlags flags_ = kPositionNone;
 
  public:
   GridCtrl();
