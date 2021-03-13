@@ -121,8 +121,9 @@ class Base {
     auto it = FindIterator(item);
     if (it == GetContainer().end()) return false;
 
-    PushFront(std::move(*it));
+    pointer_type ptr = std::move(*it);
     GetContainer().erase(it);
+    PushFront(std::move(ptr));
     return true;
   }
 
