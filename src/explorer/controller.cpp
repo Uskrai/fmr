@@ -24,8 +24,7 @@
 #include "fmr/handler/handler_factory.h"
 #include "fmr/nowide/string.h"
 #include "fmr/queue/event.h"
-#include "fmr/queue/find_handler.h"
-#include "fmr/queue/load_image.h"
+#include "fmr/queue/load_image_item.h"
 #include "fmr/window/grid_window.h"
 #include "wx/event.h"
 

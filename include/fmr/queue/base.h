@@ -18,6 +18,8 @@
 #ifndef FMR_QUEUE_BASE
 #define FMR_QUEUE_BASE
 
+#include <fmr/queue/item_receiver.h>
+
 #include <algorithm>
 #include <memory>
 #include <queue>
@@ -25,14 +27,6 @@
 namespace fmr {
 
 namespace queue {
-
-template <typename T>
-class ItemReceiver {
- public:
-  using value_type = T;
-  virtual void TakeItem(T &&item) = 0;
-};
-
 enum EventType { kEventUsePost, kEventUseQueue };
 
 template <typename T, typename SendItemClass>

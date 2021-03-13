@@ -15,27 +15,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_BITMAP_IMAGE_CHECKER
-#define FMR_BITMAP_IMAGE_CHECKER
+#ifndef FMR_QUEUE_ITEM_RECEIVER
+#define FMR_QUEUE_ITEM_RECEIVER
 
-#include <fmr/queue/find_handler_checker.h>
-
-namespace fmr {
-
-namespace bitmap {
-
-class ImageChecker : public queue::FindHandlerChecker {
+template <typename T>
+class ItemReceiver {
  public:
-  virtual queue::FindStatus Check(queue::FindHandler &parent,
-                                  AbstractOpenableHandler &handler,
-                                  SStream &stream) override;
-  virtual queue::FindStatus Check(queue::FindHandler &parent,
-                                  AbstractHandler &handler,
-                                  SStream &stream) override;
+  using value_type = T;
+  virtual void TakeItem(T &&item) = 0;
 };
 
-}  // namespace bitmap
-
-}  // namespace fmr
-
-#endif /* end of include guard: FMR_BITMAP_IMAGE_CHECKER */
+#endif /* end of include guard: FMR_QUEUE_ITEM_RECEIVER */

@@ -18,7 +18,7 @@
 #ifndef FMR_QUEUE_EVENT
 #define FMR_QUEUE_EVENT
 
-#include <fmr/queue/base.h>
+#include <fmr/queue/item_receiver.h>
 #include <wx/event.h>
 
 #include <memory>

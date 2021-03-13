@@ -23,7 +23,6 @@
 #include <fmr/bitmap/loader/container.h>
 #include <fmr/bitmap/loader/find_event.h>
 #include <fmr/bitmap/loader/load_event.h>
-#include <fmr/queue/find_handler.h>
 #include <fmr/thread/controller_factory.h>
 
 #include <unordered_map>
