@@ -57,6 +57,8 @@ struct SStream : public Compare::Sortable {
   SStream(const SStream &copy);
   SStream(SStream &&move);
 
+  virtual ~SStream() = default;
+
   SStream &operator=(const SStream &copy);
 
   void Open(void *data = NULL, size_t length = 0);

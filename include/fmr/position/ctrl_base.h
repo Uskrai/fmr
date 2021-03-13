@@ -37,6 +37,7 @@ class CtrlBase {
 
  public:
   CtrlBase() {}
+  virtual ~CtrlBase() = default;
 
   /**
    * @brief: Recalculating the position of the vec_item

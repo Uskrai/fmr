@@ -41,6 +41,7 @@ class ScrollController : public wxEvtHandler {
  public:
   ScrollController(){};
   ScrollController(ScrolledImageWindow *window) { SetWindow(window); };
+  virtual ~ScrollController() = default;
 
   void SetWindow(ScrolledImageWindow *window);
   ScrolledImageWindow *GetWindow() { return window_; }

@@ -39,6 +39,8 @@ class FindItem {
   FindItem(const FindItem &item) = default;
   FindItem(FindItem &&item) = default;
 
+  virtual ~FindItem() = default;
+
   SStream &GetFoundStream() { return found_stream_; }
   const SStream *GetSourceStream() { return source_stream_; }
   FindStatus GetStatus() { return status_; }

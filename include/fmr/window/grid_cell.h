@@ -30,6 +30,7 @@ class GridCell {
   bool is_selected_ = false;
 
  public:
+  virtual ~GridCell() {}
   int GetX() const { return rect_.GetX(); }
   int GetY() const { return rect_.GetY(); }
   int GetWidth() const { return rect_.GetWidth(); }

@@ -39,6 +39,8 @@ class LoadImageItem {
   LoadImageItem(LoadImageItem &&move) = default;
   LoadImageItem(const LoadImageItem &other) = default;
 
+  virtual ~LoadImageItem() = default;
+
   LoadImageItem &operator=(const LoadImageItem &other) = default;
   LoadImageItem &operator=(LoadImageItem &&other) = default;
 

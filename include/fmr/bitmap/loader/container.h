@@ -135,6 +135,8 @@ class Container {
   std::vector<std::unique_ptr<SStream>> loaded_stream_;
 
  public:
+  virtual ~Container() = default;
+
   SStream *AddFoundStream(const SStream *source_stream,
                           const SStream &found_stream);
 

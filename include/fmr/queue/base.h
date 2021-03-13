@@ -55,6 +55,7 @@ class Base {
  public:
   Base() {}
   Base(receiver_type *receiver) { SetReceiver(receiver); };
+  virtual ~Base() = default;
 
   void SetReceiver(receiver_type *receiver) { receiver_ = receiver; };
   receiver_type *GetReceiver() { return receiver_; }

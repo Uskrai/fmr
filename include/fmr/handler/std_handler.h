@@ -36,7 +36,7 @@ class STDHandler : public AbstractOpenableHandler {
   STDHandler(){};
   STDHandler(STDHandler &&move);
   STDHandler(const std::string &path);
-  ~STDHandler() {}
+  virtual ~STDHandler() = default;
 
   const std::shared_ptr<AbstractHandler> GetParent() const;
   std::shared_ptr<AbstractHandler> GetParent();
