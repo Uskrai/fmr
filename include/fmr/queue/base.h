@@ -94,7 +94,7 @@ class Base {
     Push(std::make_unique<value_type>(std::forward<U>(item)...));
   }
 
-  void Push(std::unique_ptr<T> item) {
+  void Push(pointer_type item) {
     return GetContainer().push_back(std::move(item));
   }
 
@@ -106,7 +106,7 @@ class Base {
     return PushFront(std::make_unique<value_type>(std::forward<U>(item)...));
   }
 
-  void PushFront(std::unique_ptr<T> item) {
+  void PushFront(pointer_type item) {
     return GetContainer().push_front(std::move(item));
   }
 
