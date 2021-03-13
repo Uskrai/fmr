@@ -155,8 +155,8 @@ bool ScrollController::IsOnEdge(wxOrientation &orient, int position) const {
       is_bottom || GetWindow()->GetScrollRange(orient) <
                        dimension::Get(GetWindow()->GetClientSize(), orient);
 
-  bool is_below_bottom = is_bottom && position >= bottom_edge;
-  bool is_over_top = is_top && position <= 0;
+  bool is_below_bottom = is_bottom && position > bottom_edge;
+  bool is_over_top = is_top && position < 0;
   bool is_edge = (is_top && is_over_top) || (is_bottom && is_below_bottom);
 
   return is_edge;
