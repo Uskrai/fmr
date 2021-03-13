@@ -189,6 +189,7 @@ void Panel::OnExplorerOpenFile(wxNotifyEvent &event) {
 
 void Panel::OnReaderOpenFile(wxCommandEvent &event) {
   Config::Get()->Write("RecentlyOpened", event.GetString());
+  Config::Get()->Flush();
 }
 
 bool Panel::Destroy() {
