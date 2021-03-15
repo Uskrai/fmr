@@ -23,11 +23,12 @@ namespace fmr {
 
 namespace queue {
 
-bool Rescale::ProcessTask(value_type &image) {
+bool Rescale::ProcessItem(value_type &item) {
+  auto image = item.GetImage();
   rescaler_->DoRescale(*image);
   RescaleStatus status = kRescaled;
   if (!image->IsOk()) status = kCannotRescale;
-  auto item = RescaleItem(status, image);
+  item.SetStatus(status);
 
   SendItem(std::move(item));
 

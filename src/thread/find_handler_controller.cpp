@@ -26,11 +26,7 @@ namespace thread {
 
 FindHandlerController::FindHandlerController(wxEvtHandler *parent, int id)
     : QueueThreadCtrl(parent, id) {
-  parent_ = parent;
-
   SetEventId(id);
-
-  GetQueue()->SetReceiver(receiver_.get());
 }
 
 bool FindHandlerController::Open(const std::string &path) {
@@ -49,10 +45,6 @@ bool FindHandlerController::Open(const std::string &path) {
   }
 
   return false;
-}
-
-void FindHandlerController::SetEventId(int id) {
-  QueueThreadCtrl::SetEventId(GetEventId());
 }
 
 void FindHandlerController::AddFoundStream(

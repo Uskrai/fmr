@@ -33,13 +33,15 @@ namespace loader {
 wxDEFINE_EVENT(kOnImageRescaled, RescaleEvent);
 
 Rescale::Rescale(int event_id) : Base(event_id) {
-  rescale_controller_ =
-      std::make_unique<thread::RescaleController>(this, event_id);
-
   rescale_receiver_ = std::make_unique<RescaleReceiverEvent>(this, event_id);
   rescale_receiver_->SetEventType(kOnImageRescaled);
 
-  rescale_controller_->GetQueue()->SetReceiver(rescale_receiver_.get());
+  rescale_controller_ =
+      std::make_unique<thread::RescaleController>(this, event_id);
+  rescale_task_ =
+      rescale_controller_->CreateTask<queue::Rescale>(rescale_receiver_.get());
+
+  rescale_controller_->Run();
 
   SetContainer(std::make_unique<RescaleContainer>());
 
@@ -59,7 +61,7 @@ void Rescale::SetContainer(std::unique_ptr<RescaleContainer> container) {
 }
 
 void Rescale::SetRescaler(Rescaler *rescaler) {
-  rescale_controller_->GetQueue()->SetRescaler(rescaler);
+  rescale_task_->SetRescaler(rescaler);
 }
 
 void Rescale::OnImageLoaded(ImageLoadEvent &event) {

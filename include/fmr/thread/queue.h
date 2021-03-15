@@ -18,6 +18,9 @@
 #ifndef FMR_THREAD_QUEUE
 #define FMR_THREAD_QUEUE
 
+#include <fmr/queue/base.h>
+#include <fmr/queue/task.h>
+
 #include <condition_variable>
 #include <mutex>
 
@@ -27,13 +30,20 @@ namespace fmr {
 
 namespace thread {
 
-template <class QueueClass>
+template <class ItemType>
 class Queue : public BaseThread {
+ public:
+  using QueueClass = queue::Base<ItemType>;
+  using TaskClass = queue::Task<ItemType>;
+  using pointer_type = typename QueueClass::pointer_type;
+
+ private:
   bool is_disable_on_empty_queue_ = false, disable_queue_wait_ = false;
   bool is_on_task_ = false;
   bool is_waiting_queue_ = false;
 
   QueueClass *queue_ = nullptr;
+  TaskClass *task_ = nullptr;
 
   std::condition_variable *queue_wait_ = nullptr;
   std::mutex *queue_mutex_ = nullptr;
@@ -46,58 +56,43 @@ class Queue : public BaseThread {
     while (!TestDestroy()) {
       WaitForQueue();
 
-      using pointer_type = typename QueueClass::pointer_type;
-      pointer_type item;
-
-      {
-        std::scoped_lock locker(*queue_mutex_);
-        while (!item && !TestDestroy() && !GetQueue()->IsEmpty()) {
-          item = std::move(GetQueue()->Front());
-          GetQueue()->Pop();
-          break;
-        }
-      }
+      pointer_type item = PopItem();
 
       if (item && !TestDestroy()) {
         SetOnTask(true);
-        GetQueue()->ProcessTask(*item);
+        task_->ProcessItem(*item);
         SetOnTask(false);
 
         Update();
       }
     }
-    //
-    //
-    // Lock();
-    //
-    // if (!GetQueue()->IsEmpty() && !TestDestroy()) {
-    // auto item = std::move(GetQueue()->Front());
-    // GetQueue()->Pop();
-    // printf("Unlocking\n");
-    //
-    // Unlock();
-    //
-    // SetOnTask(true);
-    // GetQueue()->ProcessTask(*item);
-    // SetOnTask(false);
-    //
-    // Update();
-    //
-    // // make sure current thread not leave critical section from another
-    // // thread
-    // Lock();
-    // }
-    // Unlock();
-    // }
+
     Completed();
 
     return (wxThread::ExitCode)0;
+  }
+
+  pointer_type PopItem() {
+    pointer_type item;
+    {
+      std::scoped_lock locker(*queue_mutex_);
+      if (!GetQueue()->IsEmpty()) {
+        item = std::move(GetQueue()->Front());
+        GetQueue()->Pop();
+      }
+    }
+    return item;
   }
 
   QueueClass *GetQueue() { return queue_; }
   const QueueClass *GetQueue() const { return queue_; }
 
   void SetQueue(QueueClass *queue) { queue_ = queue; }
+
+  TaskClass *GetTask() { return task_; }
+  const TaskClass *GetTask() const { return task_; }
+
+  void SetTask(TaskClass *task) { task_ = task; }
 
   void Lock() {
     if (queue_mutex_) queue_mutex_->lock();

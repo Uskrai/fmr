@@ -18,10 +18,11 @@
 #ifndef FMR_THREAD_RESCALE
 #define FMR_THREAD_RESCALE
 
+#include <fmr/queue/task.h>
+
 #include <queue>
 
 #include "fmr/bitmap/rescaler.h"
-#include "fmr/queue/base.h"
 
 namespace fmr {
 
@@ -34,6 +35,7 @@ class RescaleItem {
   RescaleStatus status_;
 
  public:
+  RescaleItem(wxImage *image) { image_ = image; }
   RescaleItem(RescaleStatus status, wxImage *image) {
     status_ = status;
     image_ = image;
@@ -46,19 +48,21 @@ class RescaleItem {
 
   RescaleStatus GetStatus() { return status_; }
   void SetStatus(RescaleStatus status) { status_ = status; }
+
+  bool operator==(const RescaleItem &oth) const { return oth.image_ == image_; }
 };
 
-class Rescale : public Base<wxImage *, RescaleItem> {
+class Rescale : public Task<RescaleItem> {
  private:
   bitmap::Rescaler *rescaler_ = nullptr;
 
  public:
   Rescale() {}
-  Rescale(receiver_type *receiver) : Base(receiver){};
+  Rescale(receiver_type *receiver) : Task(receiver){};
 
   void SetRescaler(bitmap::Rescaler *rescaler) { rescaler_ = rescaler; }
 
-  bool ProcessTask(value_type &item);
+  bool ProcessItem(value_type &item) override;
 };
 
 }  // namespace queue

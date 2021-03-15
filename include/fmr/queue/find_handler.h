@@ -25,6 +25,7 @@
 #include <fmr/queue/find_handler_checker.h>
 #include <fmr/queue/find_handler_flags.h>
 #include <fmr/queue/find_handler_item.h>
+#include <fmr/queue/task.h>
 #include <fmr/thread/thread.h>
 
 #include <queue>
@@ -35,7 +36,7 @@ namespace fmr {
 
 namespace queue {
 
-class FindHandler : public Base<FindItem, FindItem> {
+class FindHandler : public Task<FindItem> {
  private:
   FindHandlerFlags flags_ = kFindHandlerDefault;
 
@@ -43,7 +44,7 @@ class FindHandler : public Base<FindItem, FindItem> {
 
  public:
   FindHandler() {}
-  FindHandler(receiver_type *receiver) : Base(receiver){};
+  FindHandler(receiver_type *receiver) : Task(receiver){};
 
   FindStatus Find(FindItem &item);
   FindStatus Find(AbstractOpenableHandler *handler, FindItem &item);
@@ -67,7 +68,7 @@ class FindHandler : public Base<FindItem, FindItem> {
    */
   void SetFlags(FindHandlerFlags flags) { flags_ = flags; }
 
-  bool ProcessTask(value_type &item);
+  bool ProcessItem(value_type &item) override;
 
  private:
   bool Is(FindHandlerFlags flags) { return flags_ & flags; }

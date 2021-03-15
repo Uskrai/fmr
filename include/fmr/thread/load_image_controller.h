@@ -19,14 +19,14 @@
 #define FMR_THREAD_LOAD_IMAGE_CONTROLLER
 
 #include "fmr/handler/struct_stream.h"
-#include "fmr/queue/load_image.h"
+#include "fmr/queue/load_image_item.h"
 #include "fmr/thread/queue_ctrl.h"
 
 namespace fmr {
 
 namespace thread {
 
-class LoadImageController : public QueueThreadCtrl<queue::LoadImage> {
+class LoadImageController : public QueueThreadCtrl<queue::LoadImageItem> {
   using QueueThreadCtrl::QueueThreadCtrl;
 };
 

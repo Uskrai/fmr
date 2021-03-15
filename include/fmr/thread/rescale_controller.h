@@ -28,23 +28,9 @@ namespace fmr {
 
 namespace thread {
 
-class RescaleController : public QueueThreadCtrl<queue::Rescale> {
+class RescaleController : public QueueThreadCtrl<queue::RescaleItem> {
  public:
-  RescaleController(wxEvtHandler *parent, int id)
-      : QueueThreadCtrl(parent, id) {
-    SetEventId(id);
-  }
-
-  virtual ~RescaleController() { Clear(); }
-
-  void SetEventId(int id) { QueueThreadCtrl::SetEventId(id); }
-
-  [[deprecated("Replaced by SetEventId")]] void SetThreadId(int id) {
-    SetEventId(id);
-  }
-  [[deprecated("Replaced by GetEventId")]] int GetThreadId() {
-    return GetEventId();
-  }
+  using QueueThreadCtrl::QueueThreadCtrl;
 };
 
 }  // namespace thread

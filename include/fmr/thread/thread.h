@@ -33,9 +33,10 @@ class BaseThread;
 class ThreadController : public wxEvtHandler {
  public:
   ThreadController();
-  ~ThreadController() {}
+  virtual ~ThreadController() {}
   virtual wxEvtHandler *GetParent() = 0;
   virtual void DoSetNull(BaseThread *thread) = 0;
+
   [[deprecated]] virtual void DoSetNull(int id) = delete;
   [[deprecated]] virtual BaseThread *GetThread(int id) = delete;
 

@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef FMR_QUEUE_FIND_HANDLER_ITEM
+#define FMR_QUEUE_FIND_HANDLER_ITEM
+
 #include <fmr/handler/struct_stream.h>
 #include <fmr/queue/find_handler_flags.h>
 
@@ -57,3 +60,5 @@ class FindItem {
 }  // namespace queue
 
 }  // namespace fmr
+
+#endif /* end of include guard: FMR_QUEUE_FIND_HANDLER_ITEM */

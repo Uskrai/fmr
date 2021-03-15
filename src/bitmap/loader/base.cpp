@@ -20,6 +20,7 @@
 #include "fmr/bitmap/image_checker.h"
 #include "fmr/queue/event.h"
 #include "fmr/queue/find_handler.h"
+#include "fmr/queue/load_image.h"
 #include "fmr/thread/find_handler_controller.h"
 #include "fmr/thread/load_image_controller.h"
 
@@ -40,19 +41,24 @@ Base::Base(int event_id) {
   load_receiver_ = std::make_unique<ImageLoadReceiverEvent>(this, event_id);
   load_receiver_->SetEventType(kEventOnImageLoaded);
 
-  load_controller_ =
-      std::make_unique<thread::LoadImageController>(this, event_id);
-  load_controller_->GetQueue()->SetReceiver(load_receiver_.get());
-
   find_receiver_ = std::make_unique<ImageFindReceiverEvent>(this, event_id);
   find_receiver_->SetEventType(kEventOnFindItem);
 
-  image_checker_ = std::make_unique<ImageChecker>();
-
   find_controller_ =
       std::make_unique<thread::FindHandlerController>(this, event_id);
-  find_controller_->GetQueue()->SetReceiver(find_receiver_.get());
-  find_controller_->GetQueue()->SetChecker(image_checker_.get());
+
+  find_task_ =
+      find_controller_->CreateTask<queue::FindHandler>(find_receiver_.get());
+  image_checker_ = std::make_unique<ImageChecker>();
+  find_task_->SetChecker(image_checker_.get());
+
+  load_controller_ =
+      std::make_unique<thread::LoadImageController>(this, event_id);
+  load_task_ =
+      load_controller_->CreateTask<queue::LoadImage>(load_receiver_.get());
+
+  find_controller_->Run();
+  load_controller_->Run();
 
   SetContainer(std::make_unique<Container>());
 
@@ -70,7 +76,7 @@ void Base::SetContainer(std::unique_ptr<Container> container) {
 }
 
 void Base::SetFindFlags(queue::FindHandlerFlags flags) {
-  find_controller_->GetQueue()->SetFlags(flags);
+  find_task_->SetFlags(flags);
 }
 
 void Base::SendImage(const SStream *source_stream, const SStream *found_stream,

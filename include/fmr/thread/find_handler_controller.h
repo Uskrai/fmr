@@ -18,13 +18,13 @@
 #ifndef FMR_THREAD_FIND_HANDLER_CONTROLLER
 #define FMR_THREAD_FIND_HANDLER_CONTROLLER
 
+#include <fmr/queue/find_handler_item.h>
+
 #include <queue>
 #include <unordered_map>
 
 #include "fmr/handler/abstract_handler.h"
 #include "fmr/queue/factory.h"
-#include "fmr/queue/find_handler.h"
-#include "fmr/thread/queue.h"
 #include "fmr/thread/queue_ctrl.h"
 
 namespace fmr {
@@ -33,7 +33,7 @@ namespace thread {
 
 constexpr int FindHandlerControllerIdDefault = wxID_HIGHEST + 3010;
 
-class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
+class FindHandlerController : public QueueThreadCtrl<queue::FindItem> {
  protected:
   bool (*stream_checker_)(const SStream &stream);
   std::unique_ptr<AbstractHandler> handler_;
@@ -51,14 +51,10 @@ class FindHandlerController : public QueueThreadCtrl<queue::FindHandler> {
   wxEvtHandler *parent_ = nullptr;
 
  public:
-  FindHandlerController(wxEvtHandler *parent,
+  FindHandlerController(wxEvtHandler *handler,
                         int id = FindHandlerControllerIdDefault);
   virtual ~FindHandlerController();
   bool Open(const std::string &path);
-
-  wxEvtHandler *GetParent() override { return parent_; }
-
-  void SetEventId(int id) override;
 
   [[deprecated("Replaced by SetEventId")]] void SetThreadId(int id) {
     SetEventId(id);

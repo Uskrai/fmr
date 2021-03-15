@@ -29,31 +29,23 @@ namespace fmr {
 namespace queue {
 enum EventType { kEventUsePost, kEventUseQueue };
 
-template <typename T, typename SendItemClass>
+template <typename T>
 class Base {
  public:
   using value_type = T;
   using pointer_type = std::unique_ptr<value_type>;
   using Container = typename std::deque<pointer_type>;
   using iterator = typename Container::iterator;
-  using send_type = SendItemClass;
-  using receiver_type = ItemReceiver<send_type>;
 
  private:
   Container queue_item_;
-  receiver_type *receiver_ = nullptr;
   bool is_being_deleted_ = false;
 
   EventType event_type_ = kEventUseQueue;
 
  public:
   Base() {}
-  Base(receiver_type *receiver) { SetReceiver(receiver); };
   virtual ~Base() = default;
-
-  void SetReceiver(receiver_type *receiver) { receiver_ = receiver; };
-  receiver_type *GetReceiver() { return receiver_; }
-  void SendItem(send_type &&item) { GetReceiver()->TakeItem(std::move(item)); }
 
   void SetEventType(EventType type) { event_type_ = type; }
 
@@ -137,27 +129,6 @@ class Base {
    * @return: true if container is empty
    */
   bool IsEmpty() const { return GetContainer().empty(); }
-
-  /**
-   * @brief: The method that should be overriden
-   *
-   * @param: the item that should be processed
-   *
-   * @return: true if the task should be removed from queue
-   */
-  virtual bool ProcessTask(value_type &item) = 0;
-
-  /**
-   * @brief: Process front Queue
-   * @return: @see ProcessTask
-   */
-  virtual bool PopTask() {
-    if (ProcessTask(*Front())) {
-      Pop();
-      return true;
-    }
-    return false;
-  };
 
   /**
    * @brief: Return the size of the container

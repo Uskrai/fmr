@@ -20,6 +20,7 @@
 
 #include <fmr/handler/struct_stream.h>
 #include <fmr/queue/load_image_item.h>
+#include <fmr/queue/task.h>
 #include <fmr/thread/thread.h>
 #include <wx/event.h>
 
@@ -37,14 +38,14 @@ enum LoadReturn { kLoadBeingStopped, kLoadSuccess, kLoadCannotReadStream };
 
 enum LoadImageStatus { kItemLoaded, kCannotLoadItem };
 
-class LoadImage : public Base<LoadImageItem, LoadImageItem> {
+class LoadImage : public Task<LoadImageItem> {
   bitmap::Rescaler *rescaler_ = nullptr;
 
  public:
   LoadImage() {}
-  LoadImage(receiver_type *receiver) : Base(receiver){};
+  LoadImage(receiver_type *receiver) : Task(receiver){};
 
-  bool ProcessTask(value_type &item) override;
+  bool ProcessItem(value_type &item) override;
   LoadReturn Load(value_type &stream);
 
   /**

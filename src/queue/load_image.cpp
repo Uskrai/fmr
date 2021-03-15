@@ -52,7 +52,7 @@ LoadReturn LoadImage::Load(LoadImage::value_type &item) {
   return kLoadSuccess;
 }
 
-bool LoadImage::ProcessTask(LoadImage::value_type &item) {
+bool LoadImage::ProcessItem(LoadImage::value_type &item) {
 #define TEST_RETURN() \
   if (IsBeingStopped()) return false;
 

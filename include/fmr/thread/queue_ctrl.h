@@ -18,28 +18,33 @@
 #ifndef FMR_THREAD_QUEUE_CTRL
 #define FMR_THREAD_QUEUE_CTRL
 
+#include <fmr/queue/base.h>
+#include <fmr/queue/task.h>
+#include <fmr/thread/queue.h>
+
 #include <algorithm>
 #include <forward_list>
 #include <memory>
 
-#include "fmr/thread/queue.h"
-
 namespace fmr {
-
 namespace thread {
 
 enum QueuePushType { kQueuePushFront, kQueuePushBack };
 
-template <typename QueueClass>
+template <typename ItemType>
 class QueueThreadCtrl : public ThreadController {
  public:
-  using ThreadClass = Queue<QueueClass>;
+  using value_type = ItemType;
+  using queue_type = queue::Base<value_type>;
+  using QueueClass = queue::Base<ItemType>;
+  using task_type = queue::Task<value_type>;
+  using ThreadClass = Queue<ItemType>;
 
  private:
   wxEvtHandler *parent_ = nullptr;
   int event_id_ = wxID_ANY;
   std::unique_ptr<QueueClass> queue_;
-  wxCriticalSection queue_lock_;
+  std::unique_ptr<task_type> task_;
   bool disable_on_empty_queue_ = false;
 
   std::forward_list<ThreadClass *> thread_list_;
@@ -58,25 +63,38 @@ class QueueThreadCtrl : public ThreadController {
     SetParent(parent);
     SetEventId(id);
     SetQueue(std::make_unique<QueueClass>());
-    PrepareThread();
     Bind(kEventThreadUpdate, &QueueThreadCtrl::OnThreadUpdate, this);
     Bind(kEventThreadCompleted, &QueueThreadCtrl::OnThreadCompleted, this);
   }
+
   virtual ~QueueThreadCtrl() {
     Clear();
     ClearThread();
   }
 
-  wxEvtHandler *GetParent() { return parent_; }
-  void SetParent(wxEvtHandler *parent) { parent_ = parent; }
-
   void SetQueue(std::unique_ptr<QueueClass> queue) {
     queue_ = std::move(queue);
   }
+
+  void SetTask(std::unique_ptr<task_type> task) {
+    task_ = std::move(task);
+    for (auto &it : thread_list_)
+      if (it) it->SetTask(task_.get());
+  }
+
+  template <typename Type, typename... U>
+  Type *CreateTask(U &&...u) {
+    SetTask(std::make_unique<Type>(std::forward<U>(u)...));
+    return static_cast<Type *>(task_.get());
+  }
+
   QueueClass *GetQueue() { return queue_.get(); }
   const QueueClass *GetQueue() const { return queue_.get(); }
 
-  using value_type = typename QueueClass::value_type;
+  wxCriticalSection &GetLock() { return lock_; }
+
+  virtual wxEvtHandler *GetParent() override { return parent_; }
+  void SetParent(wxEvtHandler *parent) { parent_ = parent; }
 
   void SetConcurrency(size_t limit) {
     thread_concurrency_ = limit;
@@ -119,7 +137,6 @@ class QueueThreadCtrl : public ThreadController {
    * @return: Queue locker
    */
   std::mutex &GetQueueMutex() { return queue_mutex_; }
-  wxCriticalSection &GetLock() const { return lock_; }
 
   int GetEventId() const { return event_id_; }
   virtual void SetEventId(int id) { event_id_ = id; }
@@ -148,7 +165,8 @@ class QueueThreadCtrl : public ThreadController {
 
   /**
    * @brief: Create Thread
-   * get the thread from this first if this method is overriden by derived class
+   * get the thread from this first if this method is overriden by derived
+   * class
    * @return: Created Thread
    */
   virtual ThreadClass *CreateThread() {
@@ -169,6 +187,7 @@ class QueueThreadCtrl : public ThreadController {
   void AddThread(ThreadClass *thread) {
     thread->SetQueue(queue_.get());
     thread->SetQueueLocker(&GetQueueMutex(), &queue_wait_);
+    thread->SetTask(task_.get());
     thread->Run();
     thread_list_.push_front(thread);
   }
@@ -198,7 +217,13 @@ class QueueThreadCtrl : public ThreadController {
 
   virtual void Clear() {
     std::scoped_lock locker(GetQueueMutex());
-    queue_->Stop(true);
+    struct task_stopper {
+      task_type *task_;
+      task_stopper(task_type *task) : task_(task) { task_->Stop(true); }
+      ~task_stopper() { task_->Stop(false); }
+    };
+
+    task_stopper stopper(task_.get());
     queue_->ClearTask();
 
     // wait for thread to go to waiting state
@@ -206,11 +231,9 @@ class QueueThreadCtrl : public ThreadController {
       while (it && it->IsOnTask()) {
       }
     }
-
-    queue_->Stop(false);
   }
 
-  void DoSetNull(BaseThread *thread) {
+  void DoSetNull(BaseThread *thread) override {
     std::scoped_lock locker(GetQueueMutex());
     for (auto &it : thread_list_) {
       if (it == thread) {

@@ -45,6 +45,9 @@ class Base : public wxEvtHandler {
   std::unique_ptr<ImageFindReceiverEvent> find_receiver_;
   std::unique_ptr<thread::FindHandlerController> find_controller_;
 
+  queue::FindHandler *find_task_ = nullptr;
+  queue::LoadImage *load_task_ = nullptr;
+
   std::unique_ptr<ImageLoadReceiverEvent> load_receiver_;
   std::unique_ptr<thread::LoadImageController> load_controller_;
 

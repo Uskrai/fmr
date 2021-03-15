@@ -32,6 +32,7 @@ class RescaleContainer;
 class Rescale : public Base {
   std::unique_ptr<thread::RescaleController> rescale_controller_;
   std::unique_ptr<RescaleReceiverEvent> rescale_receiver_;
+  queue::Rescale *rescale_task_ = nullptr;
 
  public:
   Rescale(int event_id);
