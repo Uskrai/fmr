@@ -23,7 +23,7 @@
 #include <fmr/bitmap/loader/container.h>
 #include <fmr/bitmap/loader/find_event.h>
 #include <fmr/bitmap/loader/load_event.h>
-#include <fmr/thread/controller_factory.h>
+#include <fmr/thread/inc.h>
 
 #include <unordered_map>
 #include <unordered_set>
@@ -42,14 +42,28 @@ class Container;
 class Base : public wxEvtHandler {
   std::unordered_map<const wxImage *, const SStream *> map_loaded_to_source_;
 
-  std::unique_ptr<ImageFindReceiverEvent> find_receiver_;
-  std::unique_ptr<thread::FindHandlerController> find_controller_;
+  using FindQueueData =
+      thread::QueueThreadData<queue::FindItem, queue::FindHandler,
+                              ImageFindReceiverEvent>;
 
-  queue::FindHandler *find_task_ = nullptr;
-  queue::LoadImage *load_task_ = nullptr;
+  using LoadQueueData =
+      thread::QueueThreadData<queue::LoadImageItem, queue::LoadImage,
+                              ImageLoadReceiverEvent>;
 
-  std::unique_ptr<ImageLoadReceiverEvent> load_receiver_;
-  std::unique_ptr<thread::LoadImageController> load_controller_;
+  using FindQueueCtrl = thread::QueueThreadCtrl<queue::FindItem>;
+  using LoadQueueCtrl = thread::QueueThreadCtrl<queue::LoadImageItem>;
+
+  std::unique_ptr<FindQueueData> find_data_;
+  std::unique_ptr<LoadQueueData> load_data_;
+
+  // std::unique_ptr<ImageFindReceiverEvent> find_receiver_;
+  // std::unique_ptr<thread::FindHandlerController> find_controller_;
+  //
+  // queue::FindHandler *find_task_ = nullptr;
+  // queue::LoadImage *load_task_ = nullptr;
+  //
+  // std::unique_ptr<ImageLoadReceiverEvent> load_receiver_;
+  // std::unique_ptr<thread::LoadImageController> load_controller_;
 
   std::unique_ptr<ImageChecker> image_checker_;
 
@@ -103,10 +117,10 @@ class Base : public wxEvtHandler {
 
   virtual void SetContainer(std::unique_ptr<Container> container);
 
-  thread::LoadImageController *GetLoadController();
-  const thread::LoadImageController *GetLoadController() const;
-  thread::FindHandlerController *GetFindController();
-  const thread::FindHandlerController *GetFindController() const;
+  LoadQueueCtrl *GetLoadController();
+  const LoadQueueCtrl *GetLoadController() const;
+  FindQueueCtrl *GetFindController();
+  const FindQueueCtrl *GetFindController() const;
 
  private:
   void OnFindItem(ImageFindEvent &event);

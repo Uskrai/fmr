@@ -33,15 +33,23 @@ namespace loader {
 wxDEFINE_EVENT(kOnImageRescaled, RescaleEvent);
 
 Rescale::Rescale(int event_id) : Base(event_id) {
-  rescale_receiver_ = std::make_unique<RescaleReceiverEvent>(this, event_id);
-  rescale_receiver_->SetEventType(kOnImageRescaled);
+  rescale_data_ = std::make_unique<RescaleQueueData>(this, event_id);
+  rescale_data_->CreateReceiver(this, event_id);
+  rescale_data_->GetReceiver()->SetEventType(kOnImageRescaled);
 
-  rescale_controller_ =
-      std::make_unique<thread::RescaleController>(this, event_id);
-  rescale_task_ =
-      rescale_controller_->CreateTask<queue::Rescale>(rescale_receiver_.get());
+  rescale_data_->CreateTask(rescale_data_->GetReceiver());
 
-  rescale_controller_->Run();
+  rescale_data_->Run();
+
+  // rescale_receiver_ = std::make_unique<RescaleReceiverEvent>(this, event_id);
+  // rescale_receiver_->SetEventType(kOnImageRescaled);
+  //
+  // rescale_controller_ =
+  // std::make_unique<thread::RescaleController>(this, event_id);
+  // rescale_task_ =
+  // rescale_controller_->CreateTask<queue::Rescale>(rescale_receiver_.get());
+  //
+  // rescale_controller_->Run();
 
   SetContainer(std::make_unique<RescaleContainer>());
 
@@ -61,7 +69,7 @@ void Rescale::SetContainer(std::unique_ptr<RescaleContainer> container) {
 }
 
 void Rescale::SetRescaler(Rescaler *rescaler) {
-  rescale_task_->SetRescaler(rescaler);
+  rescale_data_->GetTask()->SetRescaler(rescaler);
 }
 
 void Rescale::OnImageLoaded(ImageLoadEvent &event) {
@@ -71,7 +79,7 @@ void Rescale::OnImageLoaded(ImageLoadEvent &event) {
 
 void Rescale::PushRescale(const SStream *found_stream, const wxImage &img) {
   auto img_ptr = GetContainer()->AddImage(found_stream, img);
-  rescale_controller_->Push(img_ptr);
+  rescale_data_->GetQueueCtrl()->Push(img_ptr);
 }
 
 void Rescale::OnImageRescaled(RescaleEvent &event) {
@@ -85,7 +93,7 @@ void Rescale::OnImageRescaled(RescaleEvent &event) {
 }
 
 void Rescale::Clear() {
-  rescale_controller_->Clear();
+  rescale_data_->Clear();
   Base::Clear();
 }
 

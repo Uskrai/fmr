@@ -30,9 +30,12 @@ namespace loader {
 class RescaleContainer;
 
 class Rescale : public Base {
-  std::unique_ptr<thread::RescaleController> rescale_controller_;
-  std::unique_ptr<RescaleReceiverEvent> rescale_receiver_;
-  queue::Rescale *rescale_task_ = nullptr;
+  using RescaleQueueData =
+      thread::QueueThreadData<queue::RescaleItem, queue::Rescale,
+                              RescaleReceiverEvent>;
+  using RescaleQueueCtrl = thread::QueueThreadCtrl<queue::RescaleItem>;
+
+  std::unique_ptr<RescaleQueueData> rescale_data_;
 
  public:
   Rescale(int event_id);

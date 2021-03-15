@@ -38,27 +38,22 @@ wxDEFINE_EVENT(kEventOnFindItemPush, FindEvent);
 Base::Base(int event_id) {
   event_id_ = event_id;
 
-  load_receiver_ = std::make_unique<ImageLoadReceiverEvent>(this, event_id);
-  load_receiver_->SetEventType(kEventOnImageLoaded);
+  load_data_ = std::make_unique<LoadQueueData>(this, event_id);
+  find_data_ = std::make_unique<FindQueueData>(this, event_id);
 
-  find_receiver_ = std::make_unique<ImageFindReceiverEvent>(this, event_id);
-  find_receiver_->SetEventType(kEventOnFindItem);
+  load_data_->CreateReceiver(this, event_id);
+  load_data_->GetReceiver()->SetEventType(kEventOnImageLoaded);
+  load_data_->CreateTask(load_data_->GetReceiver());
 
-  find_controller_ =
-      std::make_unique<thread::FindHandlerController>(this, event_id);
+  find_data_->CreateReceiver(this, event_id);
+  find_data_->GetReceiver()->SetEventType(kEventOnFindItem);
+  find_data_->CreateTask(find_data_->GetReceiver());
 
-  find_task_ =
-      find_controller_->CreateTask<queue::FindHandler>(find_receiver_.get());
   image_checker_ = std::make_unique<ImageChecker>();
-  find_task_->SetChecker(image_checker_.get());
+  find_data_->GetTask()->SetChecker(image_checker_.get());
 
-  load_controller_ =
-      std::make_unique<thread::LoadImageController>(this, event_id);
-  load_task_ =
-      load_controller_->CreateTask<queue::LoadImage>(load_receiver_.get());
-
-  find_controller_->Run();
-  load_controller_->Run();
+  find_data_->Run();
+  load_data_->Run();
 
   SetContainer(std::make_unique<Container>());
 
@@ -76,7 +71,7 @@ void Base::SetContainer(std::unique_ptr<Container> container) {
 }
 
 void Base::SetFindFlags(queue::FindHandlerFlags flags) {
-  find_task_->SetFlags(flags);
+  find_data_->GetTask()->SetFlags(flags);
 }
 
 void Base::SendImage(const SStream *source_stream, const SStream *found_stream,
@@ -183,19 +178,19 @@ void Base::OnImageLoad(ImageLoadEvent &event) {
   OnImageLoaded(event);
 }
 
-const thread::FindHandlerController *Base::GetFindController() const {
-  return find_controller_.get();
+const Base::FindQueueCtrl *Base::GetFindController() const {
+  return find_data_->GetQueueCtrl();
 }
 
-thread::FindHandlerController *Base::GetFindController() {
-  return find_controller_.get();
+Base::FindQueueCtrl *Base::GetFindController() {
+  return find_data_->GetQueueCtrl();
 }
 
-const thread::LoadImageController *Base::GetLoadController() const {
-  return load_controller_.get();
+const Base::LoadQueueCtrl *Base::GetLoadController() const {
+  return load_data_->GetQueueCtrl();
 }
-thread::LoadImageController *Base::GetLoadController() {
-  return load_controller_.get();
+Base::LoadQueueCtrl *Base::GetLoadController() {
+  return load_data_->GetQueueCtrl();
 }
 
 void Base::OnFindItemPush(FindEvent &event) {
@@ -203,8 +198,8 @@ void Base::OnFindItemPush(FindEvent &event) {
 }
 
 void Base::Clear() {
-  load_controller_->Clear();
-  find_controller_->Clear();
+  load_data_->Clear();
+  find_data_->Clear();
   GetContainer()->Clear();
 }
 

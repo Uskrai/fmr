@@ -271,6 +271,36 @@ class QueueThreadCtrl : public ThreadController {
   void OnThreadCompleted(wxThreadEvent &event) {}
 };
 
+template <typename ItemType, typename TaskType, typename TaskReceiver>
+class QueueThreadData {
+  QueueThreadCtrl<ItemType> queue_;
+  TaskType *task_ = nullptr;
+  std::unique_ptr<TaskReceiver> receiver_;
+
+ public:
+  QueueThreadData(wxEvtHandler *parent, int id) : queue_(parent, id) {}
+
+  template <typename... U>
+  void CreateTask(U &&...arg) {
+    auto task = std::make_unique<TaskType>(std::forward<U>(arg)...);
+    task_ = task.get();
+    queue_.SetTask(std::move(task));
+  }
+
+  template <typename... U>
+  void CreateReceiver(U &&...arg) {
+    receiver_ = std::make_unique<TaskReceiver>(std::forward<U>(arg)...);
+  }
+
+  bool Run() { return queue_.Run(); }
+
+  void Clear() { return queue_.Clear(); }
+
+  TaskType *GetTask() { return task_; }
+  TaskReceiver *GetReceiver() { return receiver_.get(); }
+  QueueThreadCtrl<ItemType> *GetQueueCtrl() { return &queue_; }
+};
+
 }  // namespace thread
 
 }  // namespace fmr
