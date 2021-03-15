@@ -121,21 +121,47 @@ wxRect SBitmap::CalcMinimumRect(const wxRect& rect, wxPoint* pos_start) const {
 
 void SBitmap::Draw(wxDC& dc, const wxRect& rect) {
   if (!IsOk()) return;
+
+  if (prepare_) {
+    PrepareBitmap();
+    Prepare(false);
+  }
+
   wxPoint pos;
   wxRect minimum_rect = CalcMinimumRect(visible_area_, &pos);
 
   double x, y;
   dc.GetUserScale(&x, &y);
   dc.SetUserScale(scale_x_, scale_y_);
-  if (!minimum_rect.IsEmpty()) dc.DrawBitmap(visible_bitmap_, pos);
+  if (!minimum_rect.IsEmpty()) dc.DrawBitmap(visible_bitmap_, draw_pos_);
   dc.SetUserScale(x, y);
 }
 
+// TEMP FIX
+const int kBitmapDrawMaximum = 15000;
+
 void SBitmap::PrepareBitmap() {
-  wxRect rect = CalcMinimumRect(visible_area_);
-  if (rect != visible_bitmap_rect_ && !rect.IsEmpty()) {
-    visible_bitmap_ = GetImage().GetSubImage(rect);
-    visible_bitmap_rect_ = rect;
+  wxRect img_size = GetImage().GetSize();
+  if (img_size.GetWidth() < kBitmapDrawMaximum &&
+      img_size.GetHeight() < kBitmapDrawMaximum) {
+    wxRect rect = wxRect(GetPosition(), GetImage().GetSize());
+
+    if (rect != visible_bitmap_rect_) {
+      visible_bitmap_ = GetImage();
+      visible_bitmap_rect_ = wxRect(GetPosition(), GetImage().GetSize());
+
+      draw_pos_ = GetPosition();
+    }
+
+  } else {
+    wxPoint pos;
+    wxRect rect = CalcMinimumRect(visible_area_, &pos);
+
+    if (rect != visible_bitmap_rect_ && !rect.IsEmpty()) {
+      visible_bitmap_ = GetImage().GetSubImage(rect);
+      visible_bitmap_rect_ = rect;
+      draw_pos_ = pos;
+    }
   }
 }
 
@@ -164,15 +190,18 @@ void SBitmap::SetBitmap(const wxBitmap& bmp) {
 
 void SBitmap::SetImage(const wxImage& image) {
   image_ = image;
+  visible_bitmap_ = wxBitmap();
+  visible_bitmap_rect_ = wxRect();
+
   m_isOk = image_.IsOk();
   SetLoaded();
 
-  PrepareBitmap();
+  Prepare();
 }
 
 void SBitmap::SetVisibleArea(const wxRect& rect) {
   visible_area_ = rect;
-  PrepareBitmap();
+  Prepare();
 }
 
 void SBitmap::SetLoaded(bool stat) { m_isLoaded = stat; }
@@ -181,16 +210,16 @@ void SBitmap::SetIndex(size_t idx) { m_index = idx; }
 void SBitmap::SetScale(double scale) {
   scale_x_ = scale;
   scale_y_ = scale;
-  PrepareBitmap();
+  Prepare();
 }
 void SBitmap::SetScale(double x, double y) {
   scale_x_ = x;
   scale_y_ = y;
-  PrepareBitmap();
+  Prepare();
 }
 void SBitmap::SetPosition(const wxPoint& pos) {
   m_pos = pos;
-  PrepareBitmap();
+  Prepare();
 }
 
 void SBitmap::SetY(int PosY) { m_pos.y = PosY; }

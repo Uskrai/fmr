@@ -26,6 +26,8 @@ struct SBitmap {
   wxImage image_;
   wxBitmap visible_bitmap_;
   wxString m_name = wxEmptyString;
+  bool prepare_ = false;
+  wxPoint draw_pos_;
   size_t m_index = -1;
   double scale_x_ = 1, scale_y_ = 1;
   wxPoint m_pos = wxPoint(0, 0);
@@ -80,6 +82,8 @@ struct SBitmap {
   void SetPosition(const wxPoint& pos);
   void SetY(int PosY);
   void SetX(int PosX);
+
+  void Prepare(bool prepare = true) { prepare_ = prepare; }
 };
 
 }  // namespace fmr
