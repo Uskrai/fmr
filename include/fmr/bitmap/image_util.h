@@ -89,7 +89,11 @@ bool Rescale(SBitmap &bmp, wxImage &original_image, float scale,
  */
 bool Rescale(wxImage &image, wxSize maximum_size,
              wxImageResizeQuality image_quality = wxIMAGE_QUALITY_NORMAL);
+
 //@}
+
+std::vector<bitmap::BitmapDraw> CreateBitmapDraw(const wxImage &image);
+
 }  // namespace image_util
 
 }  // namespace fmr

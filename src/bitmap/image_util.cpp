@@ -78,7 +78,7 @@ bool Rescale(SBitmap &bmp, wxImage &img, float scale,
   if (img.GetSize() == bmp.GetSize()) return false;
 
   bmp.SetImage(img);
-  bmp.SetScale(scale);
+  bmp.SetScale(scale, scale);
 
   return true;
 }
@@ -100,6 +100,30 @@ bool Rescale(wxImage &image, wxSize max_size,
     scale = scale_height;
 
   return Rescale(image, scale, image_quality);
+}
+
+std::vector<bitmap::BitmapDraw> CreateBitmapDraw(const wxImage &image) {
+  wxPoint pos(0, 0);
+  std::vector<bitmap::BitmapDraw> bmp_vec_;
+
+  if (!image.IsOk()) return bmp_vec_;
+
+  while (pos.x < image.GetWidth() && pos.y < image.GetHeight()) {
+    bitmap::BitmapDraw bmp(image, pos);
+
+    auto area = bmp.GetSlicedArea();
+
+    pos.x += area.GetWidth();
+
+    bmp_vec_.push_back(std::move(bmp));
+
+    if (pos.x >= image.GetWidth()) {
+      pos.y += area.GetHeight();
+      pos.x = 0;
+    }
+  }
+
+  return bmp_vec_;
 }
 
 }  // namespace image_util

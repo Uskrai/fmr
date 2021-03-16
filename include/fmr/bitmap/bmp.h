@@ -18,30 +18,27 @@
 #ifndef FMR_BITMAP_BMP
 #define FMR_BITMAP_BMP
 
-#include <wx/bitmap.h>
+#include <fmr/bitmap/bitmap_draw.h>
+
+#include <vector>
 
 namespace fmr {
 
 struct SBitmap {
-  wxImage image_;
-  wxBitmap visible_bitmap_;
-  wxString m_name = wxEmptyString;
-  bool prepare_ = false;
-  wxPoint draw_pos_;
-  size_t m_index = -1;
+ private:
+  wxRect rect_, visible_area_;
   double scale_x_ = 1, scale_y_ = 1;
-  wxPoint m_pos = wxPoint(0, 0);
-  wxRect visible_area_;
-  wxRect visible_bitmap_rect_;
-  bool m_isOk = false;  // determine bitmap status
+  wxPoint pos_ = wxPoint(0, 0);
+  bool is_ok_ = false;  // determine bitmap status
   bool m_isLoaded = false;
+  std::vector<bitmap::BitmapDraw> vec_bmp_;
 
-  SBitmap() {}
+ public:
+  SBitmap();
   SBitmap(bool isLoaded);
   SBitmap(const wxImage& image);
+  virtual ~SBitmap();
 
-  const wxImage& GetImage() const { return image_; }
-  wxImage& GetImage() { return image_; }
   bool IsOk() const;
   bool IsLoaded() const;
 
@@ -60,14 +57,16 @@ struct SBitmap {
 
   wxString GetName();
   size_t GetIndex();
-  [[deprecated]] double GetScale();
   void GetScale(double& x, double& y) const;
   int GetWidth() const;
   int GetHeight() const;
   int GetY() const;
   int GetX() const;
 
-  [[deprecated("Use SetImage instead")]] void SetBitmap(const wxBitmap& bmp);
+  int GetOriginalWidth() const;
+  int GetOriginalHeight() const;
+  wxSize GetOriginalSize() const;
+
   void SetImage(const wxImage& image);
 
   void SetVisibleArea(const wxPoint& pos, const wxSize& size) {
@@ -77,13 +76,10 @@ struct SBitmap {
   void SetLoaded(bool stat = true);
   void SetName(const wxString& name);
   void SetIndex(size_t idx);
-  void SetScale(double scale);
   void SetScale(double x, double y);
   void SetPosition(const wxPoint& pos);
   void SetY(int PosY);
   void SetX(int PosX);
-
-  void Prepare(bool prepare = true) { prepare_ = prepare; }
 };
 
 }  // namespace fmr

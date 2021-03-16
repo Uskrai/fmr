@@ -15,15 +15,20 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/bitmap/bmp.h>
-#include <wx/dc.h>
+#include "fmr/bitmap/bmp.h"
+
+#include "fmr/bitmap/bitmap_draw.h"
+#include "fmr/bitmap/image_util.h"
+#include "wx/dc.h"
 
 namespace fmr {
+
+SBitmap::SBitmap() {}
 
 SBitmap::SBitmap(bool isLoaded) { m_isLoaded = isLoaded; }
 SBitmap::SBitmap(const wxImage& image) { SetImage(image); }
 
-bool SBitmap::IsOk() const { return m_isOk || GetImage().IsOk(); }
+bool SBitmap::IsOk() const { return is_ok_; }
 bool SBitmap::IsLoaded() const { return m_isLoaded; }
 
 bool SBitmap::IsPointed(const wxPoint& area, const wxPoint& position) const {
@@ -51,12 +56,47 @@ bool SBitmap::IsShown(const wxPoint& area, const wxSize& size) const {
           (bmpPosX <= right || bmpAfterX <= right));
 }
 
-wxPoint SBitmap::GetPosition() const { return m_pos; }
+wxPoint SBitmap::GetPosition() const { return pos_; }
 wxSize SBitmap::GetSize() const { return wxSize(GetWidth(), GetHeight()); }
 
-void SBitmap::Draw(wxDC& dc, const wxPoint& view_start, const wxSize& area) {
-  Draw(dc, wxRect(view_start, area));
+void SBitmap::GetScale(double& x, double& y) const {
+  x = scale_x_;
+  y = scale_y_;
 }
+int SBitmap::GetOriginalWidth() const { return rect_.GetWidth(); }
+int SBitmap::GetOriginalHeight() const { return rect_.GetHeight(); }
+wxSize SBitmap::GetOriginalSize() const {
+  return wxSize(GetOriginalWidth(), GetOriginalHeight());
+}
+
+int SBitmap::GetWidth() const { return GetOriginalWidth() * scale_x_; }
+int SBitmap::GetHeight() const { return GetOriginalHeight() * scale_y_; }
+
+int SBitmap::GetY() const { return pos_.y; }
+int SBitmap::GetX() const { return pos_.x; }
+
+void SBitmap::SetImage(const wxImage& image) {
+  rect_ = wxRect();
+  is_ok_ = image.IsOk();
+  if (image.IsOk()) rect_ = image.GetSize();
+
+  vec_bmp_ = image_util::CreateBitmapDraw(image);
+  for (auto& it : vec_bmp_) it.SetPosition(GetPosition());
+}
+
+void SBitmap::SetVisibleArea(const wxRect& rect) { visible_area_ = rect; }
+
+void SBitmap::SetLoaded(bool stat) { m_isLoaded = stat; }
+
+void SBitmap::SetScale(double x, double y) {
+  scale_x_ = x;
+  scale_y_ = y;
+  for (auto& it : vec_bmp_) it.SetScale(x, y);
+}
+void SBitmap::SetPosition(const wxPoint& pos) { pos_ = pos; }
+
+void SBitmap::SetY(int PosY) { pos_.y = PosY; }
+void SBitmap::SetX(int PosX) { pos_.x = PosX; }
 
 wxRect SBitmap::CalcMinimumRect(const wxRect& rect, wxPoint* pos_start) const {
   wxRect ret_rect;
@@ -119,110 +159,19 @@ wxRect SBitmap::CalcMinimumRect(const wxRect& rect, wxPoint* pos_start) const {
   return ret_rect;
 }
 
+void SBitmap::Draw(wxDC& dc, const wxPoint& view_start, const wxSize& area) {
+  Draw(dc, wxRect(view_start, area));
+}
+
 void SBitmap::Draw(wxDC& dc, const wxRect& rect) {
   if (!IsOk()) return;
 
-  if (prepare_) {
-    PrepareBitmap();
-    Prepare(false);
-  }
-
-  wxPoint pos;
-  wxRect minimum_rect = CalcMinimumRect(visible_area_, &pos);
-
-  double x, y;
-  dc.GetUserScale(&x, &y);
-  dc.SetUserScale(scale_x_, scale_y_);
-  if (!minimum_rect.IsEmpty()) dc.DrawBitmap(visible_bitmap_, draw_pos_);
-  dc.SetUserScale(x, y);
-}
-
-// TEMP FIX
-const int kBitmapDrawMaximum = 15000;
-
-void SBitmap::PrepareBitmap() {
-  wxRect img_size = GetImage().GetSize();
-  if (img_size.GetWidth() < kBitmapDrawMaximum &&
-      img_size.GetHeight() < kBitmapDrawMaximum) {
-    wxRect rect = wxRect(GetPosition(), GetImage().GetSize());
-
-    if (rect != visible_bitmap_rect_) {
-      visible_bitmap_ = GetImage();
-      visible_bitmap_rect_ = wxRect(GetPosition(), GetImage().GetSize());
-
-      draw_pos_ = GetPosition();
-    }
-
-  } else {
-    wxPoint pos;
-    wxRect rect = CalcMinimumRect(visible_area_, &pos);
-
-    if (rect != visible_bitmap_rect_ && !rect.IsEmpty()) {
-      visible_bitmap_ = GetImage().GetSubImage(rect);
-      visible_bitmap_rect_ = rect;
-      draw_pos_ = pos;
-    }
+  for (auto& it : vec_bmp_) {
+    it.SetPosition(GetPosition());
+    it.Draw(dc);
   }
 }
 
-wxString SBitmap::GetName() { return m_name; }
-size_t SBitmap::GetIndex() { return m_index; }
-void SBitmap::GetScale(double& x, double& y) const {
-  x = scale_x_;
-  y = scale_y_;
-}
-double SBitmap::GetScale() { return scale_x_; }
-int SBitmap::GetWidth() const {
-  return IsOk() ? GetImage().GetWidth() * scale_x_ : 0;
-}
-
-int SBitmap::GetHeight() const {
-  return IsOk() ? GetImage().GetHeight() * scale_y_ : 0;
-}
-
-int SBitmap::GetY() const { return m_pos.y; }
-int SBitmap::GetX() const { return m_pos.x; }
-
-void SBitmap::SetBitmap(const wxBitmap& bmp) {
-  m_isOk = true;
-  SetLoaded();
-}
-
-void SBitmap::SetImage(const wxImage& image) {
-  image_ = image;
-  visible_bitmap_ = wxBitmap();
-  visible_bitmap_rect_ = wxRect();
-
-  m_isOk = image_.IsOk();
-  SetLoaded();
-
-  Prepare();
-}
-
-void SBitmap::SetVisibleArea(const wxRect& rect) {
-  visible_area_ = rect;
-  Prepare();
-}
-
-void SBitmap::SetLoaded(bool stat) { m_isLoaded = stat; }
-void SBitmap::SetName(const wxString& name) { m_name = name; }
-void SBitmap::SetIndex(size_t idx) { m_index = idx; }
-void SBitmap::SetScale(double scale) {
-  scale_x_ = scale;
-  scale_y_ = scale;
-  Prepare();
-}
-void SBitmap::SetScale(double x, double y) {
-  scale_x_ = x;
-  scale_y_ = y;
-  Prepare();
-}
-void SBitmap::SetPosition(const wxPoint& pos) {
-  m_pos = pos;
-  Prepare();
-}
-
-void SBitmap::SetY(int PosY) { m_pos.y = PosY; }
-void SBitmap::SetX(int PosX) { m_pos.x = PosX; }
+SBitmap::~SBitmap() {}
 
 }  // namespace fmr

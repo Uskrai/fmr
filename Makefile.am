@@ -35,7 +35,8 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/rescaler.cpp \
 						$(bitmap)/bitmap_ctrl.cpp \
 						$(bitmap)/bitmap_page_ctrl.cpp \
-						$(bitmap)/image_checker.cpp
+						$(bitmap)/image_checker.cpp \
+						$(bitmap)/bitmap_draw.cpp
 lib_bitmap_la_LIBADD = lib_position.la
 
 bitmap_loader = src/bitmap/loader

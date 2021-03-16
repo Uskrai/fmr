@@ -85,7 +85,7 @@ bool Rescaler::ShouldRescale(const wxSize &size, RescalerFlags flags) {
 }
 
 void Rescaler::GetScale(const SBitmap &bitmap, double &x, double &y) {
-  if (bitmap.IsOk()) GetScale(bitmap.GetImage().GetSize(), x, y);
+  if (bitmap.IsOk()) GetScale(bitmap.GetOriginalSize(), x, y);
 }
 void Rescaler::GetScale(const wxImage &image, double &x, double &y) {
   if (image.IsOk()) GetScale(image.GetSize(), x, y);
