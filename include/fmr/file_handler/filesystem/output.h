@@ -18,7 +18,10 @@
 #ifndef FMR_FILE_HANDLER_FILESYSTEM_OUTPUT
 #define FMR_FILE_HANDLER_FILESYSTEM_OUTPUT
 
+#include <fmr/file_handler/filesystem/write_stream.h>
 #include <fmr/file_handler/local/output.h>
+
+#include <vector>
 
 namespace fmr {
 
@@ -27,7 +30,31 @@ namespace file_handler {
 namespace filesystem {
 
 class Output : public local::Output {
-  //
+  std::string name_;
+  std::vector<WriteStream> write_vec_;
+
+ public:
+  void Open(const std::string name) { name_ = name; }
+  void Create() override;
+  bool Create(const std::string &path);
+
+  void Delete() override;
+
+  void CreateDirectory(const std::string &name) override;
+  WriteStream *CreateFile(const std::string &name, file_handler::Stream *stream,
+                          WriteType type) override;
+
+  void DeleteDirectory(const std::string &name) override;
+  void DeleteFile(const std::string &name) override;
+
+  std::string GetName() { return name_; };
+
+  void CommitWrite() override;
+
+  bool IsOpened();
+
+ protected:
+  bool DoCreateDirectory(const std::string &name);
 };
 
 }  // namespace filesystem

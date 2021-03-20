@@ -15,25 +15,30 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_FILE_HANDLER_WRITE_TYPE
-#define FMR_FILE_HANDLER_WRITE_TYPE
+#include <fmr/file_handler/write_stream.h>
 
 namespace fmr {
 
 namespace file_handler {
 
-/*! \enum WriteType
- *
- */
-enum WriteType {
-  kWriteNone = 0x01,
-  kWriteOverwrite = 0x02,
-  kWriteIfNotExist = 0x04,
-  kWriteDirectory = 0x08
+namespace local {
+
+using WriteStreamBase = file_handler::WriteStream;
+class WriteStream : public WriteStreamBase {
+ public:
+  using WriteStreamBase::WriteStreamBase;
+  virtual std::string GetFullPath() const = 0;
+
+  std::unique_ptr<WriteStream> Clone() const {
+    return std::unique_ptr<WriteStream>(DoClone());
+  }
+
+ protected:
+  virtual WriteStream *DoClone() const = 0;
 };
+
+}  // namespace local
 
 }  // namespace file_handler
 
 }  // namespace fmr
-
-#endif /* end of include guard: FMR_FILE_HANDLER_WRITE_TYPE */

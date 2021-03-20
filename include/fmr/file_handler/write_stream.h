@@ -15,25 +15,36 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_FILE_HANDLER_WRITE_TYPE
-#define FMR_FILE_HANDLER_WRITE_TYPE
+#ifndef FMR_FILE_HANDLER_OUTPUT_STREAM
+#define FMR_FILE_HANDLER_OUTPUT_STREAM
+
+#include <fmr/file_handler/stream.h>
+#include <fmr/file_handler/write_type.h>
 
 namespace fmr {
 
 namespace file_handler {
 
-/*! \enum WriteType
- *
- */
-enum WriteType {
-  kWriteNone = 0x01,
-  kWriteOverwrite = 0x02,
-  kWriteIfNotExist = 0x04,
-  kWriteDirectory = 0x08
+class WriteStream : public Stream {
+  WriteType type_;
+
+ public:
+  WriteStream() : type_(kWriteNone) {}
+  WriteStream(WriteType type) : type_(type) {}
+
+  virtual void Write(const void *src, size_t size) = 0;
+  void Write(const Stream *src) = delete;
+  virtual void Write(const Stream &src) = 0;
+
+  virtual void SetWriteType(WriteType type) { type_ = type; }
+  virtual WriteType GetWriteType() const { return type_; }
+
+ protected:
+  virtual WriteStream *DoClone() const override = 0;
 };
 
 }  // namespace file_handler
 
 }  // namespace fmr
 
-#endif /* end of include guard: FMR_FILE_HANDLER_WRITE_TYPE */
+#endif /* end of include guard: FMR_FILE_HANDLER_OUTPUT_STREAM */

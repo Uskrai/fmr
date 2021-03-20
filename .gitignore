@@ -287,7 +287,7 @@ tramp
 
 # Org-mode
 .org-id-locations
-*_archive
+./*_archive
 
 # flymake-mode
 *_flymake.*

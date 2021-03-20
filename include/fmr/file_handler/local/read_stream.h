@@ -18,7 +18,7 @@
 #ifndef FMR_FILE_HANDLER_LOCAL_STREAM
 #define FMR_FILE_HANDLER_LOCAL_STREAM
 
-#include <fmr/file_handler/stream.h>
+#include <fmr/file_handler/read_stream.h>
 
 namespace fmr {
 
@@ -26,10 +26,13 @@ namespace file_handler {
 
 namespace local {
 
-using StreamBase = fmr::file_handler::Stream;
-class Stream : public StreamBase {
+using StreamBase = fmr::file_handler::ReadStream;
+class ReadStream : public StreamBase {
  public:
   virtual std::string GetFullPath() const = 0;
+
+ protected:
+  virtual ReadStream *DoClone() const override = 0;
 };
 
 //

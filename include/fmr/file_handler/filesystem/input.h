@@ -18,7 +18,7 @@
 #ifndef FMR_FILE_HANDLER_FILESYSTEM_INPUT
 #define FMR_FILE_HANDLER_FILESYSTEM_INPUT
 
-#include <fmr/file_handler/filesystem/stream.h>
+#include <fmr/file_handler/filesystem/read_stream.h>
 #include <fmr/file_handler/local/input.h>
 
 namespace fmr {
@@ -28,15 +28,17 @@ namespace file_handler {
 namespace filesystem {
 
 class Input : public local::Input {
-  std::vector<Stream> vec_;
+  std::vector<ReadStream> vec_;
   std::unique_ptr<nwd::fs::directory_iterator> iterator_item_;
   bool is_opened_ = false;
   std::string path_;
 
  public:
+  void Open(const std::string &path) { path_ = path; }
+
   virtual std::string GetPath() const override { return path_; }
-  virtual Stream *GetFirst(bool get_buffer) override;
-  virtual Stream *GetNext(bool get_buffer) override;
+  virtual ReadStream *GetFirst(bool get_buffer) override;
+  virtual ReadStream *GetNext(bool get_buffer) override;
 
   virtual bool IsEmpty() const override { return vec_.empty(); };
   virtual bool IsOpened() const override { return is_opened_; }
@@ -45,8 +47,22 @@ class Input : public local::Input {
   virtual void GetChild(std::vector<StreamBase *> &vec) override;
   virtual void GetChild(std::vector<const StreamBase *> &vec) const override;
 
-  virtual void GetChild(std::vector<Stream *> &vec);
-  virtual void GetChild(std::vector<const Stream *> &vec) const;
+  virtual void GetChild(std::vector<ReadStream *> &vec);
+  virtual void GetChild(std::vector<const ReadStream *> &vec) const;
+
+  std::vector<ReadStream *> GetChild() {
+    std::vector<ReadStream *> vec;
+    GetChild(vec);
+    return vec;
+  }
+
+  std::vector<const ReadStream *> GetChild() const {
+    std::vector<const ReadStream *> vec;
+    GetChild(vec);
+    return vec;
+  }
+
+  virtual void Clear() override;
 };
 
 }  // namespace filesystem

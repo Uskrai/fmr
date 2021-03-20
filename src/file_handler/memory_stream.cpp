@@ -15,25 +15,39 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_FILE_HANDLER_WRITE_TYPE
-#define FMR_FILE_HANDLER_WRITE_TYPE
+#include <fmr/file_handler/memory_stream.h>
 
 namespace fmr {
 
 namespace file_handler {
 
-/*! \enum WriteType
- *
- */
-enum WriteType {
-  kWriteNone = 0x01,
-  kWriteOverwrite = 0x02,
-  kWriteIfNotExist = 0x04,
-  kWriteDirectory = 0x08
-};
+MemoryStream::MemoryStream() { buffer_ = std::make_shared<Bytes>(); }
+
+void MemoryStream::MakeExclusive() {
+  if (!buffer_)
+    buffer_ = std::make_shared<Bytes>();
+
+  else if (IsShared())
+    buffer_ = std::make_shared<Bytes>(*buffer_);
+}
+
+void MemoryStream::Resize(size_t size) {
+  MakeExclusive();
+  buffer_->resize(size);
+}
+
+void MemoryStream::Write(const void *src, size_t size) {
+  MakeExclusive();
+  auto buffer = reinterpret_cast<const std::byte *>(src);
+
+  buffer_->reserve(Size() + size);
+  for (size_t i = 0; i < size; ++i) buffer_->push_back(buffer[i]);
+}
+
+void MemoryStream::Write(const Stream &src) {
+  Write(src.GetBuffer(), src.Size());
+}
 
 }  // namespace file_handler
 
 }  // namespace fmr
-
-#endif /* end of include guard: FMR_FILE_HANDLER_WRITE_TYPE */

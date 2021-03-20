@@ -20,7 +20,6 @@
 
 #include <fmr/file_handler/filesystem/input.h>
 #include <fmr/file_handler/filesystem/output.h>
-#include <fmr/file_handler/filesystem/stream.h>
 #include <fmr/file_handler/local/handler.h>
 
 #include <memory>
@@ -32,27 +31,37 @@ namespace file_handler {
 namespace filesystem {
 
 class Handler : public local::Handler {
-  std::unique_ptr<Input> input_;
-  std::unique_ptr<Output> output_;
+  Input input_;
+  Output output_;
   std::string path_;
 
+  std::unique_ptr<Handler> parent_;
+
  public:
-  Handler() {
-    input_ = std::make_unique<Input>();
-    // output_ = std::make_unique<Output>();
-  }
+  Handler();
+  Handler(const std::string &path) { Open(path); }
 
   virtual void Open(const std::string &path) override;
   virtual std::string GetPath() const override { return path_; }
 
-  virtual local::Output *Write() override { return output_.get(); }
-  virtual const local::Output *Write() const override { return output_.get(); }
+  virtual Output *Write() override { return &output_; }
+  virtual const Output *Write() const override { return &output_; }
 
-  virtual Input *Read() override { return input_.get(); }
-  virtual const Input *Read() const override { return input_.get(); }
+  virtual Input *Read() override { return &input_; }
+  virtual const Input *Read() const override { return &input_; }
 
-  virtual bool IsOk() const override { return true; }
-  virtual bool IsHandleable(const std::string &name) { return CanHandle(name); }
+  virtual Handler *GetParent() override { return parent_.get(); }
+
+  virtual bool IsExist(const std::string &name) const override;
+
+  virtual bool IsOk() const override;
+  virtual bool IsHandleable(const std::string &name) const override {
+    return CanHandle(name);
+  }
+
+  virtual bool IsHandleable(const file_handler::Stream &stream) const override {
+    return true;
+  }
 
   static bool CanHandle(const std::string &name) { return true; }
 };

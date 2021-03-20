@@ -20,27 +20,29 @@
 
 #include <fmr/compare/sortable.h>
 
+#include <memory>
+
 namespace fmr {
 
 namespace file_handler {
 
 class Stream : public compare::Sortable {
  public:
+  virtual ~Stream() {}
   /**
    * @brief: Getting Stream Filename
    * @return: stream's Filename
    */
-  virtual std::string GetName() = 0;
+  virtual std::string GetName() const = 0;
   /**
    * @brief: Get Handler's path
    * @return: Get Handler's path
    */
-  virtual std::string GetHandlerPath() = 0;
+  virtual std::string GetHandlerPath() const = 0;
   /**
    * @brief: Get Internal Buffer
    * @return: pointer to internal Buffer
    */
-  virtual void *GetBuffer() = 0;
   virtual const void *GetBuffer() const = 0;
 
   virtual size_t Size() const = 0;
@@ -57,10 +59,15 @@ class Stream : public compare::Sortable {
    */
   virtual bool IsDirectory() const = 0;
 
+  std::unique_ptr<Stream> Clone() const {
+    return std::unique_ptr<Stream>(DoClone());
+  }
+
+ protected:
   /**
    * @brief: Clone current Stream object
    */
-  virtual Stream *Clone() const = 0;
+  virtual Stream *DoClone() const = 0;
 };
 
 }  // namespace file_handler

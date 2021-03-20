@@ -19,7 +19,8 @@
 #define FMR_FILE_HANDLER_FILESYSTEM_STREAM
 
 #include <fmr/common/path.h>
-#include <fmr/file_handler/local/stream.h>
+#include <fmr/file_handler/local/read_stream.h>
+#include <fmr/file_handler/memory_stream.h>
 #include <fmr/nowide/filesystem.h>
 #include <fmr/nowide/fstream.h>
 
@@ -32,39 +33,47 @@ namespace file_handler {
 
 namespace filesystem {
 
-using StreamBase = file_handler::local::Stream;
-class Stream : public StreamBase {
+using StreamBase = file_handler::local::ReadStream;
+class ReadStream : public StreamBase {
   nwd::fs::path path_;
   std::string filename_;
-  nwd::fstream file_stream_;
-  std::shared_ptr<std::vector<char>> buffer_;
+  std::shared_ptr<nwd::ifstream> file_stream_;
+  bool loaded_ = false;
+  MemoryStream stream_;
 
  public:
-  Stream(const Stream &stream);
-  Stream(Stream &&stream);
+  ReadStream(const ReadStream &stream) = default;
+  ReadStream(ReadStream &&stream) = default;
 
-  Stream(const nwd::fs::path &path);
-  Stream(nwd::fs::path &&path);
+  ReadStream(const nwd::fs::path &path, bool load = false);
 
-  Stream(const std::string &path) : Stream(Path::MakePath(path)) {}
-  Stream(const char *path) : Stream(Path::MakePath(path)) {}
+  ReadStream(const std::string &path) : ReadStream(Path::MakePath(path)) {}
+  ReadStream(const char *path) : ReadStream(Path::MakePath(path)) {}
 
-  std::string GetName() override { return filename_; }
+  std::string GetName() const override { return filename_; }
   const std::string &GetString() override { return filename_; }
-  std::string GetHandlerPath() override { return path_.parent_path(); }
+  std::string GetHandlerPath() const override {
+    return Path::MakeString(path_.parent_path());
+  }
 
   std::string GetFullPath() const override { return Path::MakeString(path_); }
 
-  bool IsShared() const override { return buffer_.use_count() != 0; }
+  bool IsShared() const override { return stream_.IsShared(); }
 
   bool IsDirectory() const override { return Path::IsDirectory(path_); }
 
   size_t Size() const override;
+  size_t FileSize() const;
 
-  void *GetBuffer() override { return buffer_->data(); }
-  const void *GetBuffer() const override { return buffer_->data(); }
+  const void *GetBuffer() const override { return stream_.GetBuffer(); }
 
-  Stream *Clone() const override { return new Stream(*this); }
+  bool IsLoaded() const override { return loaded_; };
+  bool Load() override;
+
+  std::unique_ptr<Stream> Clone() { return std::unique_ptr<Stream>(DoClone()); }
+
+ protected:
+  ReadStream *DoClone() const override { return new ReadStream(*this); }
 };
 
 }  // namespace filesystem

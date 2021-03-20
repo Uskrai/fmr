@@ -152,7 +152,11 @@ std::string MakeRelative(const std::string &parent, const std::string &target) {
     std::string path = target.substr(parent.size() + 1, std::string::npos);
     return path;
   }
-  return MakeString(nwd::fs::relative(MakePath(target), MakePath(parent)));
+
+  std::string target_path = target;
+  if (!HasRootPath(target)) target_path = Append(parent, target);
+
+  return MakeString(nwd::fs::relative(MakePath(target_path), MakePath(parent)));
 }
 
 std::string MakeAbsolute(const std::string &path) {

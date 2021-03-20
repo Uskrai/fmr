@@ -15,46 +15,30 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_FILE_HANDLER_BASE
-#define FMR_FILE_HANDLER_BASE
-
-#include <fmr/common/compare.h>
-#include <fmr/file_handler/input.h>
-#include <fmr/file_handler/output.h>
 #include <fmr/file_handler/stream.h>
-
-#include <string>
-#include <vector>
+#ifndef FMR_FILE_HANDLER_READ_STREAM
+#define FMR_FILE_HANDLER_READ_STREAM
 
 namespace fmr {
 
 namespace file_handler {
 
-class Handler {
+class ReadStream : public Stream {
  public:
-  Handler() {}
-  virtual ~Handler(){};
+  virtual bool IsLoaded() const = 0;
+  virtual bool Load() = 0;
+  virtual ~ReadStream(){};
 
-  virtual void Open(const std::string &name) = 0;
-  virtual std::string GetPath() const = 0;
+  std::unique_ptr<ReadStream> Clone() const {
+    return std::unique_ptr<ReadStream>(DoClone());
+  }
 
-  virtual Input *Read() = 0;
-  virtual const Input *Read() const = 0;
-
-  virtual Output *Write() = 0;
-  virtual const Output *Write() const = 0;
-
-  virtual Handler *GetParent() = 0;
-
-  virtual bool IsExist(const std::string &name) const = 0;
-
-  virtual bool IsHandleable(const Stream &stream) const = 0;
-  virtual bool IsHandleable(const std::string &name) const = 0;
-  virtual bool IsOk() const = 0;
+ protected:
+  ReadStream *DoClone() const override = 0;
 };
 
 }  // namespace file_handler
 
 }  // namespace fmr
 
-#endif /* end of include guard: FMR_FILE_HANDLER_BASE */
+#endif /* end of include guard: FMR_FILE_HANDLER_READ_STREAM */

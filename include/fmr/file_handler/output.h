@@ -18,7 +18,7 @@
 #ifndef FMR_FILE_HANDLER_WRITER
 #define FMR_FILE_HANDLER_WRITER
 
-#include <fmr/file_handler/stream.h>
+#include <fmr/file_handler/write_stream.h>
 #include <fmr/file_handler/write_type.h>
 
 namespace fmr {
@@ -30,13 +30,17 @@ class Output {
   Output() {}
   virtual ~Output() {}
 
-  virtual bool CreateDirectory(const std::string &name) = 0;
-  virtual bool CreateFile(Stream *stream, WriteType type) = 0;
+  virtual void Create() = 0;
+  virtual void Delete() = 0;
 
-  virtual bool DeleteDirectory(const std::string &name) = 0;
-  virtual bool DeleteFile(const std::string &name) = 0;
+  virtual void CreateDirectory(const std::string &name) = 0;
+  virtual WriteStream *CreateFile(const std::string &name, Stream *stream,
+                                  WriteType type) = 0;
 
-  virtual bool CommitWrite() = 0;
+  virtual void DeleteDirectory(const std::string &name) = 0;
+  virtual void DeleteFile(const std::string &name) = 0;
+
+  virtual void CommitWrite() = 0;
 };
 
 }  // namespace file_handler

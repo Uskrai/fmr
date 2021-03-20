@@ -15,25 +15,38 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_FILE_HANDLER_WRITE_TYPE
-#define FMR_FILE_HANDLER_WRITE_TYPE
+#include "fmr/file_handler/filesystem/handler.h"
 
 namespace fmr {
 
 namespace file_handler {
 
-/*! \enum WriteType
- *
- */
-enum WriteType {
-  kWriteNone = 0x01,
-  kWriteOverwrite = 0x02,
-  kWriteIfNotExist = 0x04,
-  kWriteDirectory = 0x08
-};
+namespace filesystem {
+
+Handler::Handler() = default;
+
+void Handler::Open(const std::string &path) {
+  path_ = path;
+  Write()->Open(path_);
+  Read()->Open(path_);
+
+  std::string parent_path = Path::GetParent(path_);
+
+  if (!Path::IsRoot(path)) {
+    parent_ = std::make_unique<Handler>(parent_path);
+  }
+}
+
+bool Handler::IsOk() const {
+  return path_ != "" && Path::Exist(GetPath()) && !Path::IsDirectory(GetPath());
+}
+
+bool Handler::IsExist(const std::string &name) const {
+  return Path::Exist(name);
+}
+
+}  // namespace filesystem
 
 }  // namespace file_handler
 
 }  // namespace fmr
-
-#endif /* end of include guard: FMR_FILE_HANDLER_WRITE_TYPE */

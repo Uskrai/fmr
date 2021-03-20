@@ -19,7 +19,7 @@
 #define FMR_FILE_HANDLER_READER
 
 #include <fmr/common/bitmask.h>
-#include <fmr/file_handler/stream.h>
+#include <fmr/file_handler/read_stream.h>
 
 #include <vector>
 
@@ -34,7 +34,7 @@ enum InputOption {
   kInputSkipDirectory = 0x08,
 };
 
-DEFINE_BITMASK_TYPE(InputOption);
+DEFINE_BITMASK_TYPE(InputOption)
 
 class Input {
  public:
@@ -45,23 +45,38 @@ class Input {
   virtual bool IsOpened() const = 0;
 
   virtual void Traverse(bool load_buffer) {
+    Clear();
     auto stream = GetFirst(load_buffer);
     while (stream) stream = GetNext(load_buffer);
   }
 
-  virtual Stream *GetFirst(bool load_buffer) = 0;
-  virtual Stream *GetNext(bool load_buffer) = 0;
+  virtual ReadStream *GetFirst(bool load_buffer) = 0;
+  virtual ReadStream *GetNext(bool load_buffer) = 0;
 
   virtual bool IsEmpty() const = 0;
   virtual size_t Size() const = 0;
 
-  virtual void GetChild(std::vector<Stream *> &vec) = 0;
-  virtual void GetChild(std::vector<const Stream *> &vec) const = 0;
+  virtual void GetChild(std::vector<ReadStream *> &vec) = 0;
+  virtual void GetChild(std::vector<const ReadStream *> &vec) const = 0;
+
+  virtual void Clear() = 0;
+
+  std::vector<const ReadStream *> GetChild() const {
+    std::vector<const ReadStream *> vec;
+    GetChild(vec);
+    return vec;
+  }
+
+  std::vector<ReadStream *> GetChild() {
+    std::vector<ReadStream *> vec;
+    GetChild(vec);
+    return vec;
+  }
 };
 
 template <typename InputClass, typename StreamType, typename StreamBaseType>
 void InputGetChildHelper(InputClass *ptr, std::vector<StreamBaseType *> &vec) {
-  std::vector<StreamBaseType *> take_vec;
+  std::vector<StreamType *> take_vec;
   take_vec.reserve(ptr->Size());
   ptr->GetChild(take_vec);
 

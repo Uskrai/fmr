@@ -19,9 +19,13 @@
 
 #include <wx/log.h>
 
+#include <filesystem>
+
 #include "fmr/bitmap/image_util.h"
+#include "fmr/common/path.h"
 #include "fmr/handler/handler_factory.h"
 #include "fmr/handler/stream_util.h"
+#include "fmr/nowide/filesystem.h"
 #include "fmr/nowide/string.h"
 
 namespace fmr {

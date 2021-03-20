@@ -126,6 +126,25 @@ lib_queue_la_SOURCES = $(queue)/load_image.cpp \
 											 $(queue)/factory.cpp
 lib_queue_la_LIBADD = lib_handler.la
 
+file_handler = src/file_handler
+file_handlerdir = @abs_builddir@/file_handler
+file_handler_LTLIBRARIES = lib_file_handler.la
+file_handler_fs = src/file_handler/filesystem
+file_handler_filesystem = $(file_handler_fs)/handler.cpp \
+													$(file_handler_fs)/input.cpp \
+													$(file_handler_fs)/output.cpp \
+													$(file_handler_fs)/read_stream.cpp 
+
+file_handler_wxarch = src/file_handler/wx_archive
+file_handler_wx_archive = $(file_handler_wxarch)/handler.cpp \
+													$(file_handler_wxarch)/input.cpp \
+													$(file_handler_wxarch)/read_stream.cpp
+
+lib_file_handler_la_SOURCES = $(file_handler_filesystem) \
+															$(file_handler_wx_archive) \
+															$(file_handler)/memory_stream.cpp 
+lib_file_handler_la_LIBADD = lib_path.la
+
 
 fmr = src/main
 bin_PROGRAMS = fmr

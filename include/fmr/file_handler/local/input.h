@@ -19,7 +19,7 @@
 #define FMR_FILE_HANDLER_LOCAL_READER
 
 #include <fmr/file_handler/input.h>
-#include <fmr/file_handler/local/stream.h>
+#include <fmr/file_handler/local/read_stream.h>
 
 namespace fmr {
 
@@ -30,19 +30,31 @@ namespace local {
 using InputBase = fmr::file_handler::Input;
 class Input : public InputBase {
  public:
-  virtual local::Stream *GetFirst(bool get_buffer) override = 0;
-  virtual local::Stream *GetNext(bool get_buffer) override = 0;
+  virtual ReadStream *GetFirst(bool get_buffer) override = 0;
+  virtual ReadStream *GetNext(bool get_buffer) override = 0;
 
   virtual void GetChild(std::vector<StreamBase *> &vec) override {
-    InputGetChildHelper<Input, Stream, StreamBase>(this, vec);
+    InputGetChildHelper<Input, ReadStream, StreamBase>(this, vec);
   }
 
   virtual void GetChild(std::vector<const StreamBase *> &vec) const override {
-    InputGetChildHelper<const Input, const Stream, const StreamBase>(this, vec);
+    InputGetChildHelper<const Input, const ReadStream, const StreamBase>(this,
+                                                                         vec);
   }
 
-  virtual void GetChild(std::vector<Stream *> &vec) = 0;
-  virtual void GetChild(std::vector<const Stream *> &vec) const = 0;
+  virtual void GetChild(std::vector<ReadStream *> &vec) = 0;
+  virtual void GetChild(std::vector<const ReadStream *> &vec) const = 0;
+
+  std::vector<ReadStream *> GetChild() {
+    std::vector<ReadStream *> vec;
+    GetChild(vec);
+    return vec;
+  }
+  std::vector<const ReadStream *> GetChild() const {
+    std::vector<const ReadStream *> vec;
+    GetChild(vec);
+    return vec;
+  }
 };
 
 //
