@@ -15,22 +15,25 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_COMPARE_SORTABLE
-#define FMR_COMPARE_SORTABLE
+#ifndef FMR_COMPARE_NATURAL
+#define FMR_COMPARE_NATURAL
 
-#include <string>
+#include <fmr/compare/comparer.h>
 
 namespace fmr {
 
 namespace compare {
 
-class Sortable {
+class Natural : public Comparer {
  public:
-  virtual const std::string &GetString() const = 0;
+  virtual bool Compare(const String &s1, const String &s2) override;
+
+ protected:
+  Natural *DoClone() const override { return new Natural(*this); }
 };
 
 }  // namespace compare
 
 }  // namespace fmr
 
-#endif /* end of include guard: FMR_COMPARE_SORTABLE */
+#endif /* end of include guard: FMR_COMPARE_NATURAL */

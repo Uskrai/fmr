@@ -15,22 +15,20 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_COMPARE_SORTABLE
-#define FMR_COMPARE_SORTABLE
-
-#include <string>
+#ifndef FMR_COMPARE_CHAR_MODIFIER
+#define FMR_COMPARE_CHAR_MODIFIER
 
 namespace fmr {
 
 namespace compare {
 
-class Sortable {
+class CharModifier {
  public:
-  virtual const std::string &GetString() const = 0;
+  virtual void Modify(char &ch) const = 0;
 };
 
 }  // namespace compare
 
 }  // namespace fmr
 
-#endif /* end of include guard: FMR_COMPARE_SORTABLE */
+#endif /* end of include guard: FMR_COMPARE_CHAR_MODIFIER */
