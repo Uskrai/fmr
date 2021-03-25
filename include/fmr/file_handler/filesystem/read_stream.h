@@ -42,9 +42,7 @@ class ReadStream : public StreamBase {
   bool loaded_ = false;
 
  public:
-  ReadStream(const ReadStream &stream) = default;
-  ReadStream(ReadStream &&stream) = default;
-
+  using StreamBase::StreamBase;
   ReadStream(const nwd::fs::path &path, bool load = false);
 
   ReadStream(const std::string &path) : ReadStream(Path::MakePath(path)) {}

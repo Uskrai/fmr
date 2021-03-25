@@ -18,7 +18,6 @@
 #ifndef FMR_FILE_HANDLER_BASE
 #define FMR_FILE_HANDLER_BASE
 
-#include <fmr/common/compare.h>
 #include <fmr/file_handler/input.h>
 #include <fmr/file_handler/output.h>
 #include <fmr/file_handler/stream.h>

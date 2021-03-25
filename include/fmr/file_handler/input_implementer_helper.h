@@ -18,6 +18,7 @@
 #ifndef FMR_FILE_HANDLER_INPUT_IMPLEMENTER_HELPER
 #define FMR_FILE_HANDLER_INPUT_IMPLEMENTER_HELPER
 
+#include <fmr/compare/comparer.h>
 #include <fmr/file_handler/input_iterator.h>
 
 #include <vector>
@@ -56,6 +57,10 @@ class InputImplementHelper : public HandlerBase {
   const_pointer At(size_t idx) const override { return &vec_[idx]; }
 
   bool IsEmpty() const override { return vec_.empty(); }
+
+  void Sort(const compare::Comparer &compare) override {
+    compare::Sort(vec_.begin(), vec_.end(), compare);
+  }
 
  private:
   container_type vec_;

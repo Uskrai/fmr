@@ -48,7 +48,7 @@ class Comparer {
     // Compare(String(s1.GetString()), String(s2.GetString()));
   };
 
-  std::unique_ptr<Comparer> Clone() {
+  std::unique_ptr<Comparer> Clone() const {
     return std::unique_ptr<Comparer>(DoClone());
   }
 
@@ -68,7 +68,7 @@ class ComparerSort {
 };
 
 template <typename RandomIt>
-void Sort(RandomIt first, RandomIt last, Comparer &compare) {
+void Sort(RandomIt first, RandomIt last, const Comparer &compare) {
   auto ptr = compare.Clone();
   ComparerSort cmp(*ptr);
   std::sort(first, last, cmp);

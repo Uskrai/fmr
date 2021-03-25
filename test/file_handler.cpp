@@ -20,6 +20,7 @@
 #include <fmr/file_handler/wx_archive/handler.h>
 #include <gtest/gtest.h>
 
+#include "fmr/compare/natural.h"
 #include "fmr/file_handler/memory_stream.h"
 
 namespace test_path {
@@ -39,8 +40,10 @@ std::string GetAbsolutePath(Handler &handler) {
 
 namespace var {
 
-constexpr size_t kBufferSize = 100;
+constexpr size_t kBufferSize = 10;
 constexpr size_t kSecondBufferSize = kBufferSize * 2;
+constexpr size_t kLoopCount = 25;
+constexpr size_t kSecondLoopCount = kLoopCount * 2;
 
 }  // namespace var
 
@@ -108,11 +111,11 @@ void test_write(fmr::file_handler::Handler &handler, std::string path) {
   fmr::file_handler::MemoryStream stream;
   stream.Write(&ch, buff_size);
 
-  for (int i = 1; i < 100; ++i) {
+  for (int i = 1; i < var::kLoopCount; ++i) {
     handler.Write()->CreateFile(std::to_string(i), &stream,
                                 fmr::file_handler::kWriteNone);
-    handler.Write()->CommitWrite();
 
+    handler.Write()->CommitWrite();
     handler.Read()->Traverse(false);
     ASSERT_EQ(handler.Read()->Size(), i);
   }
@@ -143,7 +146,7 @@ void test_overwrite(fmr::file_handler::Handler &handler, std::string path) {
   constexpr size_t initial_size = var::kBufferSize;
   constexpr size_t overwriten_size = var::kSecondBufferSize;
 
-  for (size_t i = 0; i < 100; ++i) {
+  for (size_t i = 0; i < var::kSecondLoopCount; ++i) {
     using namespace fmr::file_handler;
 
     char ch[initial_size];
@@ -154,7 +157,7 @@ void test_overwrite(fmr::file_handler::Handler &handler, std::string path) {
     handler.Write()->CommitWrite();
   }
 
-  for (size_t i = 0; i < 50; ++i) {
+  for (size_t i = 0; i < var::kLoopCount; ++i) {
     using namespace fmr::file_handler;
     char ch[overwriten_size];
     MemoryStream stream;
@@ -165,28 +168,23 @@ void test_overwrite(fmr::file_handler::Handler &handler, std::string path) {
   }
 
   handler.Read()->Traverse(false);
+  handler.Read()->Sort(fmr::compare::Natural());
 
-  // std::sort(handler.Read()->begin(), handler.Read()->end(),
-  // [](const fmr::file_handler::Stream *s1,
-  // const fmr::file_handler::Stream *s2) {
-  // return std::stoi(s1->GetName()) < std::stoi(s2->GetName());
-  // });
+  size_t i = 0;
+  while (i < var::kLoopCount) {
+    ASSERT_EQ(handler.Read()->At(i)->Size(), 0);
+    handler.Read()->At(i)->Load();
+    ASSERT_EQ(handler.Read()->At(i)->Size(), overwriten_size);
+    ++i;
+  }
 
-  // size_t i = 0;
-  // while (i < 50) {
-  // ASSERT_EQ(vec[i]->Size(), 0);
-  // vec[i]->Load();
-  // ASSERT_EQ(vec[i]->Size(), overwriten_size);
-  // ++i;
-  // }
-  //
-  // while (i < 100) {
-  // ASSERT_EQ(vec[i]->Size(), 0);
-  // vec[i]->Load();
-  // ASSERT_EQ(vec[i]->Size(), initial_size);
-  // ++i;
-  // }
-  //
+  while (i < var::kSecondLoopCount) {
+    ASSERT_EQ(handler.Read()->At(i)->Size(), 0);
+    handler.Read()->At(i)->Load();
+    ASSERT_EQ(handler.Read()->At(i)->Size(), initial_size);
+    ++i;
+  }
+
   handler.Write()->Delete();
 }
 

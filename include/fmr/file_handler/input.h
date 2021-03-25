@@ -19,6 +19,7 @@
 #define FMR_FILE_HANDLER_READER
 
 #include <fmr/common/bitmask.h>
+#include <fmr/compare/comparer.h>
 #include <fmr/file_handler/input_base_helper.h>
 #include <fmr/file_handler/read_stream.h>
 
@@ -58,6 +59,8 @@ class Input : public InputBaseHelper<ReadStream> {
 
   virtual ReadStream *At(size_t idx) = 0;
   virtual const ReadStream *At(size_t idx) const = 0;
+
+  virtual void Sort(const compare::Comparer &comparer) = 0;
 
   virtual size_t Index(const std::string &path) const = 0;
 
