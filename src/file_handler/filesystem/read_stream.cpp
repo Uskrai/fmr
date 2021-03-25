@@ -25,12 +25,9 @@ namespace file_handler {
 
 namespace filesystem {
 
-// Stream::Stream(Stream &&stream) {}
-
-// Stream::Stream(const Stream &stream) = default;
-
-ReadStream::ReadStream(const nwd::fs::path &path, bool load)
-    : path_(path), filename_(Path::MakeString(path.filename())) {
+ReadStream::ReadStream(const nwd::fs::path &path, bool load) : path_(path) {
+  DoSetHandlerPath(Path::MakeString(path_.parent_path()));
+  DoSetName(Path::MakeString(path_.filename()));
   if (load) Load();
 }
 
@@ -47,14 +44,14 @@ bool ReadStream::Load() {
   nwd::ifstream stream(Path::MakeString(path_));
   stream.read(reinterpret_cast<char *>(vec->data()), size);
 
-  stream_.Clear();
-  stream_.Write(vec);
+  DoStreamClear();
+  DoWrite(vec);
 
   loaded_ = true;
   return true;
 }
 
-size_t ReadStream::Size() const { return stream_.Size(); }
+// size_t ReadStream::Size() const { return stream_.Size(); }
 
 }  // namespace filesystem
 

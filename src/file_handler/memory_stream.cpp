@@ -23,6 +23,11 @@ namespace file_handler {
 
 MemoryStream::MemoryStream() { buffer_ = std::make_shared<Bytes>(); }
 
+MemoryStream::MemoryStream(const file_handler::Stream &stream)
+    : MemoryStream() {
+  DoWrite(stream);
+}
+
 void MemoryStream::MakeExclusive() {
   if (!buffer_)
     buffer_ = std::make_shared<Bytes>();
@@ -36,7 +41,16 @@ void MemoryStream::Resize(size_t size) {
   buffer_->resize(size);
 }
 
-void MemoryStream::Write(const void *src, size_t size) {
+void MemoryStream::Write(const void *src, size_t size) { DoWrite(src, size); }
+
+void MemoryStream::Write(const Stream &src) { DoWrite(src); }
+
+void MemoryStream::Write(std::shared_ptr<Bytes> vec) { DoWrite(vec); }
+
+void MemoryStream::DoWrite(const file_handler::Stream &src) {
+  DoWrite(src.GetBuffer(), src.Size());
+}
+void MemoryStream::DoWrite(const void *src, size_t size) {
   MakeExclusive();
   auto buffer = reinterpret_cast<const std::byte *>(src);
 
@@ -44,8 +58,16 @@ void MemoryStream::Write(const void *src, size_t size) {
   for (size_t i = 0; i < size; ++i) buffer_->push_back(buffer[i]);
 }
 
-void MemoryStream::Write(const Stream &src) {
-  Write(src.GetBuffer(), src.Size());
+void MemoryStream::DoWrite(std::shared_ptr<Bytes> vec) {
+  MakeExclusive();
+  if (!vec) {
+    buffer_ = vec;
+  }
+  if (IsEmpty())
+    buffer_ = vec;
+  else {
+    Write(vec->data(), vec->size());
+  }
 }
 
 }  // namespace file_handler

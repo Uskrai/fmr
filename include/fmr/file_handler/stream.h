@@ -45,6 +45,8 @@ class Stream : public compare::Sortable {
    */
   virtual const void *GetBuffer() const = 0;
 
+  virtual const void *GetBufferEnd() const = 0;
+
   virtual size_t Size() const = 0;
 
   /**

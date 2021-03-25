@@ -15,34 +15,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_FILE_HANDLER_LOCAL_READER
-#define FMR_FILE_HANDLER_LOCAL_READER
+#ifndef FMR_FILE_HANDLER_DEFAULT_FACTORY
+#define FMR_FILE_HANDLER_DEFAULT_FACTORY
 
-#include <fmr/file_handler/input.h>
-#include <fmr/file_handler/local/read_stream.h>
+#include <fmr/file_handler/factory.h>
 
 namespace fmr {
-
-namespace file_handler {
-
-namespace local {
-
-using InputBase = InputBaseHelper<ReadStream, file_handler::Input>;
-class Input : public InputBase {
- public:
-  virtual ReadStream *GetFirst(bool get_buffer) override = 0;
-  virtual ReadStream *GetNext(bool get_buffer) override = 0;
-
-  virtual ReadStream *At(size_t idx) override = 0;
-  virtual const ReadStream *At(size_t idx) const override = 0;
-};
-
 //
-
-}  // namespace local
-
-}  // namespace file_handler
 
 }  // namespace fmr
 
-#endif /* end of include guard: FMR_FILE_HANDLER_LOCAL_READER */
+#endif /* end of include guard: FMR_FILE_HANDLER_DEFAULT_FACTORY */

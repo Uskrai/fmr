@@ -21,7 +21,7 @@
 #include <fmr/file_handler/read_stream.h>
 #include <wx/archive.h>
 
-#include "fmr/file_handler/memory_stream.h"
+#include "fmr/file_handler/utility/memory_stream_helper.h"
 
 namespace fmr {
 
@@ -29,32 +29,24 @@ namespace file_handler {
 
 namespace wx_archive {
 
-class ReadStream : public file_handler::ReadStream {
+using ReadStreamBase =
+    utility::ReadMemoryStreamHelper<file_handler::ReadStream>;
+class ReadStream : public ReadStreamBase {
   std::shared_ptr<file_handler::ReadStream> archive_stream_;
-  std::string handler_path_, name_;
   const wxArchiveClassFactory *factory_ = nullptr;
   wxArchiveEntry *entry_ = nullptr;
   bool loaded_ = false;
-  MemoryStream stream_;
 
  public:
   ReadStream(std::shared_ptr<file_handler::ReadStream> archive_stream,
-             wxArchiveEntry *entry, std::string handler_path_);
-
-  const std::string &GetString() override { return name_; }
-  std::string GetName() const override { return name_; }
-
-  const void *GetBuffer() const override { return stream_.GetBuffer(); }
-
-  size_t Size() const override { return stream_.Size(); }
+             wxArchiveEntry *entry, std::string handler_path_,
+             const wxArchiveClassFactory *factory);
 
   bool IsDirectory() const override { return entry_ && entry_->IsDir(); }
-  bool IsShared() const override { return stream_.IsShared(); }
-  bool IsLoaded() const override;
+
+  bool IsLoaded() const override { return loaded_; };
   bool Load() override;
   bool Load(wxArchiveInputStream &stream, wxArchiveEntry *entry);
-
-  std::string GetHandlerPath() const override { return handler_path_; }
 
   std::unique_ptr<ReadStream> Clone() const {
     return std::unique_ptr<ReadStream>(DoClone());

@@ -35,8 +35,12 @@ class Handler {
   Handler() {}
   virtual ~Handler(){};
 
-  virtual void Open(const std::string &name) = 0;
+  virtual bool Open(const std::string &name) = 0;
+  virtual bool Open(const ReadStream &stream) = 0;
   virtual std::string GetPath() const = 0;
+
+  virtual std::string GetInternalName(const std::string &name) const = 0;
+  virtual std::string GetExternalName(const ReadStream &stream) const = 0;
 
   virtual Input *Read() = 0;
   virtual const Input *Read() const = 0;
@@ -46,11 +50,18 @@ class Handler {
 
   virtual Handler *GetParent() = 0;
 
-  virtual bool IsExist(const std::string &name) const = 0;
+  virtual bool IsExist() const = 0;
 
   virtual bool IsHandleable(const Stream &stream) const = 0;
   virtual bool IsHandleable(const std::string &name) const = 0;
   virtual bool IsOk() const = 0;
+
+  std::unique_ptr<Handler> CreateNew() const {
+    return std::unique_ptr<Handler>(DoCreateNew());
+  }
+
+ protected:
+  virtual Handler *DoCreateNew() const = 0;
 };
 
 }  // namespace file_handler

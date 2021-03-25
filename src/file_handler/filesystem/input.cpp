@@ -27,7 +27,7 @@ namespace file_handler {
 namespace filesystem {
 
 ReadStream *Input::GetFirst(bool get_buffer) {
-  vec_.clear();
+  ClearVector();
   iterator_item_ =
       std::make_unique<nwd::fs::directory_iterator>(Path::MakePath(GetPath()));
   *iterator_item_ = nwd::fs::begin(*iterator_item_);
@@ -41,33 +41,25 @@ ReadStream *Input::GetNext(bool get_buffer) {
   if (*iterator_item_ == nwd::fs::end(*iterator_item_)) return nullptr;
 
   const nwd::fs::directory_entry &entry = **iterator_item_;
-  ReadStream &stream = vec_.emplace_back(entry.path(), get_buffer);
+  ReadStream &stream = VectorEmplaceBack(entry.path(), get_buffer);
   ++(*iterator_item_);
   return &stream;
 }
 
-void Input::GetChild(std::vector<StreamBase *> &vec) {
-  InputGetChildHelper<Input, ReadStream, StreamBase>(this, vec);
-}
+size_t Input::Index(const std::string &path) const {
+  size_t idx = 0;
+  for (const auto &it : GetVector()) {
+    if (it.GetFullPath() == path) return idx;
+    if (it.GetName() == path) return idx;
 
-void Input::GetChild(std::vector<const StreamBase *> &vec) const {
-  InputGetChildHelper<const Input, const ReadStream, const StreamBase>(this,
-                                                                       vec);
-}
-
-void Input::GetChild(std::vector<const ReadStream *> &vec) const {
-  vec.reserve(vec_.size() + vec.size());
-  for (auto &it : vec_) vec.push_back(&it);
-}
-
-void Input::GetChild(std::vector<ReadStream *> &vec) {
-  vec.reserve(vec_.size() + vec.size());
-  for (auto &it : vec_) vec.push_back(&it);
+    ++idx;
+  }
+  return -1;
 }
 
 void Input::Clear() {
   iterator_item_ = nullptr;
-  vec_.clear();
+  ClearVector();
 }
 
 }  // namespace filesystem

@@ -15,34 +15,36 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_FILE_HANDLER_LOCAL_READER
-#define FMR_FILE_HANDLER_LOCAL_READER
+#ifndef FMR_FILE_HANDLER_WX_ARCHIVE_WRITE_STREAM
+#define FMR_FILE_HANDLER_WX_ARCHIVE_WRITE_STREAM
 
-#include <fmr/file_handler/input.h>
-#include <fmr/file_handler/local/read_stream.h>
+#include <fmr/file_handler/utility/memory_stream_helper.h>
+#include <fmr/file_handler/write_stream.h>
 
 namespace fmr {
 
 namespace file_handler {
 
-namespace local {
+namespace wx_archive {
 
-using InputBase = InputBaseHelper<ReadStream, file_handler::Input>;
-class Input : public InputBase {
+using WriteStreamBase =
+    utility::WriteMemoryStreamHelper<file_handler::WriteStream>;
+class WriteStream : public WriteStreamBase {
  public:
-  virtual ReadStream *GetFirst(bool get_buffer) override = 0;
-  virtual ReadStream *GetNext(bool get_buffer) override = 0;
+  using WriteStreamBase::WriteStreamBase;
 
-  virtual ReadStream *At(size_t idx) override = 0;
-  virtual const ReadStream *At(size_t idx) const override = 0;
+  std::unique_ptr<WriteStream> Clone() const {
+    return std::unique_ptr<WriteStream>(DoClone());
+  }
+
+ protected:
+  WriteStream *DoClone() const override { return new WriteStream(*this); }
 };
 
-//
-
-}  // namespace local
+}  // namespace wx_archive
 
 }  // namespace file_handler
 
 }  // namespace fmr
 
-#endif /* end of include guard: FMR_FILE_HANDLER_LOCAL_READER */
+#endif /* end of include guard: FMR_FILE_HANDLER_WX_ARCHIVE_WRITE_STREAM */

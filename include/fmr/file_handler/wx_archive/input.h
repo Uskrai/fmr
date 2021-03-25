@@ -19,6 +19,7 @@
 #define FMR_FILE_HANDLER_WX_ARCHIVE_INPUT
 
 #include <fmr/file_handler/input.h>
+#include <fmr/file_handler/input_implementer_helper.h>
 #include <fmr/file_handler/wx_archive/read_stream.h>
 #include <wx/archive.h>
 
@@ -28,20 +29,21 @@ namespace file_handler {
 
 namespace wx_archive {
 
-using ReadStreamBase = file_handler::ReadStream;
-class Input : public file_handler::Input {
-  std::string path_;
+class Output;
+class Handler;
+
+using InputBase = InputImplementHelper<ReadStream, file_handler::Input>;
+class Input : public InputBase {
   std::weak_ptr<file_handler::ReadStream> stream_;
   const wxArchiveClassFactory *factory_ = nullptr;
+  Handler *handler_ = nullptr;
 
-  std::unique_ptr<wxArchiveInputStream> arch_stream_;
-
-  std::vector<ReadStream> vec_;
+  std::shared_ptr<file_handler::ReadStream> arch_memory_stream_;
+  std::unique_ptr<wxArchiveInputStream> arch_input_stream_;
 
  public:
+  Input(Handler *handler) { handler_ = handler; }
   void Open(std::weak_ptr<file_handler::ReadStream> stream);
-
-  virtual std::string GetPath() const override { return path_; }
 
   virtual bool IsOpened() const override;
 
@@ -50,16 +52,13 @@ class Input : public file_handler::Input {
 
   virtual bool IsEmpty() const override;
 
-  virtual size_t Size() const override;
-
-  virtual void GetChild(std::vector<ReadStreamBase *> &vec) override;
-  virtual void GetChild(
-      std::vector<const ReadStreamBase *> &vec) const override;
-
-  void GetChild(std::vector<ReadStream *> &vec);
-  void GetChild(std::vector<const ReadStream *> &vec) const;
+  virtual size_t Index(const std::string &path) const override;
 
   virtual void Clear() override;
+
+  void UpdateStream(std::weak_ptr<file_handler::ReadStream> stream);
+
+ protected:
 };
 
 }  // namespace wx_archive

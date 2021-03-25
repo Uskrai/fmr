@@ -19,6 +19,7 @@
 #define FMR_FILE_HANDLER_READER
 
 #include <fmr/common/bitmask.h>
+#include <fmr/file_handler/input_base_helper.h>
 #include <fmr/file_handler/read_stream.h>
 
 #include <vector>
@@ -36,11 +37,10 @@ enum InputOption {
 
 DEFINE_BITMASK_TYPE(InputOption)
 
-class Input {
+class Input : public InputBaseHelper<ReadStream> {
  public:
   Input(){};
   virtual ~Input() {}
-  virtual std::string GetPath() const = 0;
 
   virtual bool IsOpened() const = 0;
 
@@ -56,22 +56,12 @@ class Input {
   virtual bool IsEmpty() const = 0;
   virtual size_t Size() const = 0;
 
-  virtual void GetChild(std::vector<ReadStream *> &vec) = 0;
-  virtual void GetChild(std::vector<const ReadStream *> &vec) const = 0;
+  virtual ReadStream *At(size_t idx) = 0;
+  virtual const ReadStream *At(size_t idx) const = 0;
+
+  virtual size_t Index(const std::string &path) const = 0;
 
   virtual void Clear() = 0;
-
-  std::vector<const ReadStream *> GetChild() const {
-    std::vector<const ReadStream *> vec;
-    GetChild(vec);
-    return vec;
-  }
-
-  std::vector<ReadStream *> GetChild() {
-    std::vector<ReadStream *> vec;
-    GetChild(vec);
-    return vec;
-  }
 };
 
 template <typename InputClass, typename StreamType, typename StreamBaseType>

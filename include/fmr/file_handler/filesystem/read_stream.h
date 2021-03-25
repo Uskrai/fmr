@@ -20,7 +20,7 @@
 
 #include <fmr/common/path.h>
 #include <fmr/file_handler/local/read_stream.h>
-#include <fmr/file_handler/memory_stream.h>
+#include <fmr/file_handler/utility/memory_stream_helper.h>
 #include <fmr/nowide/filesystem.h>
 #include <fmr/nowide/fstream.h>
 
@@ -33,13 +33,13 @@ namespace file_handler {
 
 namespace filesystem {
 
-using StreamBase = file_handler::local::ReadStream;
+using StreamBase =
+    utility::ReadMemoryStreamHelper<file_handler::local::ReadStream>;
+
 class ReadStream : public StreamBase {
   nwd::fs::path path_;
-  std::string filename_;
   std::shared_ptr<nwd::ifstream> file_stream_;
   bool loaded_ = false;
-  MemoryStream stream_;
 
  public:
   ReadStream(const ReadStream &stream) = default;
@@ -50,22 +50,16 @@ class ReadStream : public StreamBase {
   ReadStream(const std::string &path) : ReadStream(Path::MakePath(path)) {}
   ReadStream(const char *path) : ReadStream(Path::MakePath(path)) {}
 
-  std::string GetName() const override { return filename_; }
-  const std::string &GetString() override { return filename_; }
   std::string GetHandlerPath() const override {
     return Path::MakeString(path_.parent_path());
   }
 
   std::string GetFullPath() const override { return Path::MakeString(path_); }
 
-  bool IsShared() const override { return stream_.IsShared(); }
-
   bool IsDirectory() const override { return Path::IsDirectory(path_); }
 
-  size_t Size() const override;
+  // size_t Size() const override;
   size_t FileSize() const;
-
-  const void *GetBuffer() const override { return stream_.GetBuffer(); }
 
   bool IsLoaded() const override { return loaded_; };
   bool Load() override;

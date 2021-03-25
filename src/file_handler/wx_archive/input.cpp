@@ -18,7 +18,9 @@
 #include "fmr/file_handler/wx_archive/input.h"
 
 #include "fmr/file_handler/wx_archive/handler.h"
+#include "fmr/nowide/string.h"
 #include "wx/mstream.h"
+#include "wx/wfstream.h"
 
 namespace fmr {
 
@@ -42,39 +44,62 @@ ReadStream *Input::GetFirst(bool load_buffer) {
     auto mem_stream = std::make_unique<wxMemoryInputStream>(stream->GetBuffer(),
                                                             stream->Size());
 
-    auto arch_stream = std::unique_ptr<wxArchiveInputStream>(
+    arch_input_stream_ = std::unique_ptr<wxArchiveInputStream>(
         factory_->NewStream(mem_stream.release()));
-
-    return GetNext(load_buffer);
+    arch_memory_stream_ = stream;
   }
-  return nullptr;
+  return GetNext(load_buffer);
 }
 
 ReadStream *Input::GetNext(bool load_buffer) {
   auto archive_stream = stream_.lock();
-  if (!arch_stream_ && !archive_stream) return nullptr;
+  if (!arch_input_stream_ && !archive_stream) return nullptr;
 
-  auto entry = std::unique_ptr<wxArchiveEntry>(arch_stream_->GetNextEntry());
+  auto entry =
+      std::unique_ptr<wxArchiveEntry>(arch_input_stream_->GetNextEntry());
 
-  auto &stream = vec_.emplace_back(archive_stream, entry.get(), path_);
+  if (!entry) return nullptr;
 
-  if (load_buffer) stream.Load(*arch_stream_, entry.get());
+  auto &stream = VectorEmplaceBack(archive_stream, entry.get(),
+                                   handler_->GetPath(), factory_);
+
+  if (load_buffer) stream.Load(*arch_input_stream_, entry.get());
 
   return &stream;
 }
 
-size_t Input::Size() const { return vec_.size(); }
+size_t Input::Index(const std::string &path) const {
+  size_t idx = 0;
+  for (const auto &it : GetVector()) {
+    if (it.GetName() == path) return idx;
 
-void Input::Clear() { vec_.clear(); }
-
-void Input::GetChild(std::vector<const ReadStreamBase *> &vec) const {
-  InputGetChildHelper<const Input, const ReadStream, const ReadStreamBase>(this,
-                                                                           vec);
+    ++idx;
+  }
+  return -1;
 }
 
-void Input::GetChild(std::vector<ReadStreamBase *> &vec) {
-  InputGetChildHelper<Input, ReadStream, ReadStreamBase>(this, vec);
+void Input::UpdateStream(std::weak_ptr<file_handler::ReadStream> stream) {
+  stream_ = stream;
 }
+
+void Input::Clear() { ClearVector(); }
+
+// void Input::GetChild(std::vector<const ReadStream *> &vec) const {
+// for (const auto &it : vec_) vec.push_back(&it);
+// }
+//
+// void Input::GetChild(std::vector<ReadStream *> &vec) {
+// for (auto &it : vec_) vec.push_back(&it);
+// }
+//
+// void Input::GetChild(std::vector<const ReadStreamBase *> &vec) const {
+// InputGetChildHelper<const Input, const ReadStream, const
+// ReadStreamBase>(this, vec);
+// }
+//
+// void Input::GetChild(std::vector<ReadStreamBase *> &vec) {
+// InputGetChildHelper<Input, ReadStream, ReadStreamBase>(this, vec);
+// }
 
 }  // namespace wx_archive
 

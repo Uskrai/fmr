@@ -15,34 +15,24 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_FILE_HANDLER_LOCAL_READER
-#define FMR_FILE_HANDLER_LOCAL_READER
+#include "fmr/file_handler/factory.h"
 
-#include <fmr/file_handler/input.h>
-#include <fmr/file_handler/local/read_stream.h>
+#include "fmr/file_handler/filesystem/handler.h"
+#include "fmr/file_handler/wx_archive/handler.h"
 
 namespace fmr {
 
 namespace file_handler {
 
-namespace local {
+void InitDefaultFactory(Factory &factory) {
+  // to supress ambigous warning
+  Factory::UniquePtrLocalHandler fs_handler =
+      std::make_unique<filesystem::Handler>();
+  factory.RegisterHandler(std::move(fs_handler));
 
-using InputBase = InputBaseHelper<ReadStream, file_handler::Input>;
-class Input : public InputBase {
- public:
-  virtual ReadStream *GetFirst(bool get_buffer) override = 0;
-  virtual ReadStream *GetNext(bool get_buffer) override = 0;
-
-  virtual ReadStream *At(size_t idx) override = 0;
-  virtual const ReadStream *At(size_t idx) const override = 0;
-};
-
-//
-
-}  // namespace local
+  factory.RegisterHandler(std::make_unique<wx_archive::Handler>());
+}
 
 }  // namespace file_handler
 
 }  // namespace fmr
-
-#endif /* end of include guard: FMR_FILE_HANDLER_LOCAL_READER */

@@ -138,12 +138,24 @@ file_handler_filesystem = $(file_handler_fs)/handler.cpp \
 file_handler_wxarch = src/file_handler/wx_archive
 file_handler_wx_archive = $(file_handler_wxarch)/handler.cpp \
 													$(file_handler_wxarch)/input.cpp \
-													$(file_handler_wxarch)/read_stream.cpp
+													$(file_handler_wxarch)/read_stream.cpp \
+													$(file_handler_wxarch)/output.cpp \
+													# $(file_handler_wxarch)/write_stream.cpp
+# file_handler_utility_path = src/file_handler/utility/
+# file_handler_utility = (file_handler_utility_path)/memory_stream.cpp
 
-lib_file_handler_la_SOURCES = $(file_handler_filesystem) \
-															$(file_handler_wx_archive) \
-															$(file_handler)/memory_stream.cpp 
-lib_file_handler_la_LIBADD = lib_path.la
+lib_file_handler_la_SOURCES = $(file_handler)/memory_stream.cpp \
+															$(file_handler)/factory.cpp \
+															$(file_handler_filesystem) \
+															$(file_handler_wx_archive)
+lib_file_handler_la_LIBADD = lib_path.la \
+														 lib_comparer.la
+
+compare = src/compare
+comparedir = @abs_builddir@/compare
+compare_LTLIBRARIES = lib_comparer.la
+lib_comparer_la_SOURCES = $(compare)/natural.cpp
+
 
 
 fmr = src/main

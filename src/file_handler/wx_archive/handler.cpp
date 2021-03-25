@@ -18,7 +18,7 @@
 #include "fmr/file_handler/wx_archive/handler.h"
 
 #include "fmr/common/path.h"
-#include "fmr/file_handler/filesystem/handler.h"
+#include "fmr/file_handler/factory.h"
 #include "fmr/nowide/string.h"
 #include "wx/archive.h"
 
@@ -28,15 +28,78 @@ namespace file_handler {
 
 namespace wx_archive {
 
-void Handler::Open(const std::string &path) {
-  path_ = path;
+std::string PopExtension(std::string path) {
+  auto fcf = wxFilterClassFactory::Find(path, wxSTREAM_FILEEXT);
 
-  parent_ = std::make_unique<filesystem::Handler>(Path::GetParent(path));
+  if (fcf) path = fcf->PopExtension(path);
+
+  auto factory = Handler::FindFactory(path);
+
+  if (factory) path = factory->PopExtension(path);
+  return path;
 }
 
-void Handler::Open(const file_handler::ReadStream &stream) {
-  stream_ = stream.Clone();
-  input.Open(stream_);
+bool Handler::Open(const std::string &path) {
+  if (factory_) {
+    auto handler = factory_->NewHandler(PopExtension(path));
+    if (handler->GetParent()) {
+      auto parent = handler->GetParent()->CreateNew();
+      parent->Open(handler->GetParent()->GetPath());
+      return Open(std::move(parent), path);
+    }
+  }
+  return false;
+}
+
+bool Handler::Open(const file_handler::ReadStream &stream) {
+  auto ret = FindFactory(stream);
+  if (ret && factory_) {
+    auto parent = factory_->NewHandler(stream.GetHandlerPath());
+    return factory_ && parent &&
+           DoOpen(factory_->NewHandler(stream.GetHandlerPath()), stream.Clone(),
+                  parent->GetExternalName(stream));
+  }
+  return ret;
+}
+
+bool Handler::Open(Handler::UniqueParentHandler handler,
+                   const std::string &path) {
+  if (handler) {
+    handler->Read()->Traverse(false);
+    auto idx = handler->Read()->Index(path);
+
+    std::shared_ptr<file_handler::ReadStream> stream;
+    if (idx < handler->Read()->Size())
+      stream = handler->Read()->At(idx)->Clone();
+    else
+      stream = std::make_shared<
+          utility::ReadMemoryStreamHelper<file_handler::ReadStream>>(
+          handler->GetPath(), handler->GetInternalName(path));
+
+    DoOpen(std::move(handler), std::move(stream), path);
+  }
+  return false;
+}
+
+bool Handler::DoOpen(std::unique_ptr<file_handler::Handler> parent,
+                     std::shared_ptr<file_handler::ReadStream> stream,
+                     std::string path) {
+  archive_factory_ = FindFactory(stream->GetName());
+  stream_ = stream;
+  path_ = path;
+  Read()->Open(stream);
+  Write()->Open(stream, archive_factory_, parent.get());
+  parent_ = std::move(parent);
+  return stream_ && archive_factory_ && parent_;
+}
+
+std::string Handler::GetInternalName(const std::string &path) const {
+  return "";
+}
+
+std::string Handler::GetExternalName(
+    const file_handler::ReadStream &stream) const {
+  return "";
 }
 
 bool Handler::IsHandleable(const std::string &str_path) const {
@@ -72,11 +135,26 @@ const wxArchiveClassFactory *Handler::FindFactory(const std::string &str_path) {
   return factory;
 }
 
-bool Handler::IsOk() const { return IsExist(path_) && IsHandleable(path_); }
-
-bool Handler::IsExist(const std::string &path) const {
-  return Path::Exist(path);
+void Handler::UpdateStream(std::shared_ptr<file_handler::ReadStream> stream) {
+  stream_ = stream;
+  Read()->UpdateStream(stream);
 }
+
+bool Handler::IsOk() const { return IsExist() && IsHandleable(path_); }
+
+bool Handler::IsExist() const {
+  bool ret = false;
+  if (parent_ && parent_->IsExist() && stream_) {
+    auto stream = parent_->Read()->GetFirst(false);
+    while (stream && !ret) {
+      ret = stream->GetName() == stream_->GetName();
+      stream = parent_->Read()->GetNext(false);
+    }
+  }
+  return ret;
+}
+
+const Factory *Handler::GetHandlerFactory() { return Factory::GetGlobal(); }
 
 }  // namespace wx_archive
 

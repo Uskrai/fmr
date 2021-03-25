@@ -28,11 +28,13 @@ namespace file_handler {
 namespace wx_archive {
 
 ReadStream::ReadStream(std::shared_ptr<file_handler::ReadStream> archive_stream,
-                       wxArchiveEntry *entry, std::string handler_path) {
+                       wxArchiveEntry *entry, std::string handler_path,
+                       const wxArchiveClassFactory *factory) {
   archive_stream_ = archive_stream;
   entry_ = entry;
-  name_ = entry->GetName();
-  handler_path_ = handler_path;
+  DoSetName(String::Narrow(entry->GetName()));
+  DoSetHandlerPath(handler_path);
+  factory_ = factory;
 }
 
 bool ReadStream::Load() {
@@ -44,10 +46,10 @@ bool ReadStream::Load() {
         std::unique_ptr<wxArchiveInputStream>(factory_->NewStream(mem_stream));
 
     std::unique_ptr<wxArchiveEntry> entry;
-    wxString name = String::Widen<wxString>(name_);
+    wxString name = String::Widen<wxString>(GetName());
     do {
       entry.reset(arch_stream->GetNextEntry());
-    } while (entry && entry->GetName() == name);
+    } while (entry && entry->GetName() != name);
 
     return entry && Load(*arch_stream, entry.get());
   }
@@ -56,18 +58,16 @@ bool ReadStream::Load() {
 }
 
 bool ReadStream::Load(wxArchiveInputStream &stream, wxArchiveEntry *entry) {
-  if (entry && entry->GetName() == name_) {
-    std::shared_ptr<std::vector<std::byte>> vec;
+  if (entry && entry->GetName() == String::Widen<wxString>(GetName())) {
+    auto vec = std::make_shared<Bytes>();
     vec->resize(stream.GetSize());
 
     stream.Read(vec->data(), stream.GetSize()).LastRead();
 
-    stream_.Clear();
-    stream_.Write(vec);
+    DoWrite(vec);
     loaded_ = true;
-    return true;
   }
-  return false;
+  return loaded_;
 }
 
 }  // namespace wx_archive

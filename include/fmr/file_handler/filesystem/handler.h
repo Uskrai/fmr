@@ -41,8 +41,15 @@ class Handler : public local::Handler {
   Handler();
   Handler(const std::string &path) { Open(path); }
 
-  virtual void Open(const std::string &path) override;
+  virtual bool Open(const std::string &path) override;
+  virtual bool Open(const file_handler::ReadStream &path) override;
+  virtual bool Open(const local::ReadStream &path) override;
+
   virtual std::string GetPath() const override { return path_; }
+
+  virtual std::string GetInternalName(const std::string &path) const override;
+  virtual std::string GetExternalName(
+      const file_handler::ReadStream &stream) const override;
 
   virtual Output *Write() override { return &output_; }
   virtual const Output *Write() const override { return &output_; }
@@ -52,7 +59,7 @@ class Handler : public local::Handler {
 
   virtual Handler *GetParent() override { return parent_.get(); }
 
-  virtual bool IsExist(const std::string &name) const override;
+  virtual bool IsExist() const override;
 
   virtual bool IsOk() const override;
   virtual bool IsHandleable(const std::string &name) const override {
@@ -64,6 +71,9 @@ class Handler : public local::Handler {
   }
 
   static bool CanHandle(const std::string &name) { return true; }
+
+ protected:
+  Handler *DoCreateNew() const override { return new Handler(); }
 };
 
 }  // namespace filesystem

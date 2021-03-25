@@ -17,7 +17,7 @@
 
 #include <fmr/common/path.h>
 #include <fmr/file_handler/local/write_stream.h>
-#include <fmr/file_handler/memory_stream.h>
+#include <fmr/file_handler/utility/memory_stream_helper.h>
 #include <fmr/file_handler/write_type.h>
 
 namespace fmr {
@@ -26,11 +26,11 @@ namespace file_handler {
 
 namespace filesystem {
 
-using WriteStreamBase = local::WriteStream;
+using WriteStreamBase = utility::WriteMemoryStreamHelper<local::WriteStream>;
 
-class WriteStream : public MemoryStreamTemplate<WriteStreamBase> {
+class WriteStream : public WriteStreamBase {
  public:
-  using MemoryStreamTemplate::MemoryStreamTemplate;
+  using WriteStreamBase::WriteStreamBase;
 
   std::string GetFullPath() const override {
     return Path::Append(GetHandlerPath(), GetName());

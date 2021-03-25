@@ -30,11 +30,21 @@ namespace local {
 
 class Handler : public fmr::file_handler::Handler {
  public:
+  using fmr::file_handler::Handler::Open;
+  virtual bool Open(const ReadStream &stream) = 0;
+
   virtual local::Input *Read() override = 0;
   virtual const local::Input *Read() const override = 0;
 
   virtual local::Output *Write() override = 0;
   virtual const local::Output *Write() const override = 0;
+
+  std::unique_ptr<Handler> CreateNew() const {
+    return std::unique_ptr<Handler>(DoCreateNew());
+  }
+
+ protected:
+  virtual Handler *DoCreateNew() const override = 0;
 };
 
 }  // namespace local

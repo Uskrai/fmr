@@ -22,6 +22,8 @@
 
 #include <filesystem>
 
+#include "fmr/file_handler/write_type.h"
+
 namespace fmr {
 
 namespace file_handler {
