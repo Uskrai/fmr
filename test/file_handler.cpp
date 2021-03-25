@@ -37,6 +37,13 @@ std::string GetAbsolutePath(Handler &handler) {
 
 }  // namespace test_path
 
+namespace var {
+
+constexpr size_t kBufferSize = 100;
+constexpr size_t kSecondBufferSize = kBufferSize * 2;
+
+}  // namespace var
+
 template <typename HandlerType>
 class HandlerFixture : public ::testing::TestWithParam<HandlerType> {
  protected:
@@ -96,10 +103,10 @@ void test_write(fmr::file_handler::Handler &handler, std::string path) {
   ASSERT_EQ(handler.GetPath(), path);
   handler.Write()->Create();
 
-  constexpr size_t buff_size = 1000;
+  constexpr size_t buff_size = var::kBufferSize;
   char ch[buff_size];
   fmr::file_handler::MemoryStream stream;
-  stream.Write(&ch, 1000);
+  stream.Write(&ch, buff_size);
 
   for (int i = 1; i < 100; ++i) {
     handler.Write()->CreateFile(std::to_string(i), &stream,
@@ -133,8 +140,8 @@ void test_overwrite(fmr::file_handler::Handler &handler, std::string path) {
 
   ASSERT_TRUE(handler.IsExist());
 
-  constexpr size_t initial_size = 1000;
-  constexpr size_t overwriten_size = 3000;
+  constexpr size_t initial_size = var::kBufferSize;
+  constexpr size_t overwriten_size = var::kSecondBufferSize;
 
   for (size_t i = 0; i < 100; ++i) {
     using namespace fmr::file_handler;
@@ -202,7 +209,7 @@ TYPED_TEST(HandlerFixture, TestOverwrite) {
 TEST(StreamTest, TestWrite) {
   fmr::file_handler::MemoryStream stream;
 
-  constexpr size_t buff_size = 1000;
+  constexpr size_t buff_size = var::kBufferSize;
   char ch[buff_size];
   stream.Write(&ch, buff_size);
 

@@ -37,16 +37,26 @@ void Output::Create() {
 
 void Output::CommitWrite() {
   for (auto &it : write_vec_) {
-    if (!(it.GetWriteType() & kWriteOverwrite))
-      if (Path::Exist(it.GetFullPath())) continue;
-
-    if (it.GetWriteType() & kWriteDirectory) {
-      DoCreateDirectory(it.GetName());
+    if (it.GetWriteType() & kWriteDelete) {
+      auto path = it.GetFullPath();
+      if (it.GetWriteType() & kWriteDirectory) {
+        if (Path::IsDirectory(path)) nwd::fs::remove(path);
+      } else if (!Path::IsDirectory(path)) {
+        nwd::fs::remove(path);
+      }
       continue;
     } else {
-      nwd::ofstream stream(it.GetFullPath());
-      stream.write(reinterpret_cast<const char *>(it.GetBuffer()), it.Size());
-      stream.close();
+      if (!(it.GetWriteType() & kWriteOverwrite))
+        if (Path::Exist(it.GetFullPath())) continue;
+
+      if (it.GetWriteType() & kWriteDirectory) {
+        DoCreateDirectory(it.GetName());
+        continue;
+      } else {
+        nwd::ofstream stream(it.GetFullPath());
+        stream.write(reinterpret_cast<const char *>(it.GetBuffer()), it.Size());
+        stream.close();
+      }
     }
   }
   write_vec_.clear();
@@ -57,9 +67,13 @@ void Output::CreateDirectory(const std::string &name) {
   CreateFile(name, nullptr, kWriteDirectory);
 }
 
-void Output::DeleteDirectory(const std::string &name) { ; }
+void Output::DeleteDirectory(const std::string &name) {
+  CreateFile(name, nullptr, kWriteDelete | kWriteDirectory);
+}
 
-void Output::DeleteFile(const std::string &name) { ; }
+void Output::DeleteFile(const std::string &name) {
+  CreateFile(name, nullptr, kWriteDelete);
+}
 
 void Output::Delete() { nwd::fs::remove_all(Path::MakePath(GetName())); }
 

@@ -18,6 +18,8 @@
 #ifndef FMR_FILE_HANDLER_WRITE_TYPE
 #define FMR_FILE_HANDLER_WRITE_TYPE
 
+#include <fmr/common/bitmask.h>
+
 namespace fmr {
 
 namespace file_handler {
@@ -29,8 +31,11 @@ enum WriteType {
   kWriteNone = 0x01,
   kWriteOverwrite = 0x02,
   kWriteIfNotExist = 0x04,
-  kWriteDirectory = 0x08
+  kWriteDirectory = 0x08,
+  kWriteDelete = 0x10
 };
+
+DEFINE_BITMASK_TYPE(WriteType)
 
 }  // namespace file_handler
 
