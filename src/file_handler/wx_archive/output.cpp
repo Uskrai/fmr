@@ -24,6 +24,7 @@
 #include "fmr/compare/natural.h"
 #include "fmr/compare/sortable.h"
 #include "fmr/file_handler/utility/memory_stream_helper.h"
+#include "fmr/file_handler/write_type.h"
 #include "fmr/file_handler/wx_archive/handler.h"
 #include "fmr/file_handler/wx_archive/input.h"
 #include "fmr/nowide/string.h"
@@ -147,9 +148,9 @@ void Output::CommitWrite() {
   compare::Sort(vec_.begin(), vec_.end(), comparer);
 
   for (auto it = vec_.begin(); it != vec_.end(); ++it) {
-    if (it->IsDirectory())
+    if (it->GetWriteType() & kWriteDirectory) {
       archive_output->PutNextDirEntry(it->GetName());
-    else {
+    } else {
       archive_output->PutNextEntry(it->GetName());
       archive_output->Write(it->GetBuffer(), it->Size());
     }

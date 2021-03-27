@@ -86,6 +86,8 @@ class Handler : public HandlerBase {
   bool DoOpen(std::unique_ptr<file_handler::Handler> parent,
               std::shared_ptr<file_handler::ReadStream> stream,
               std::string path);
+
+  void Reset();
 };
 
 }  // namespace wx_archive

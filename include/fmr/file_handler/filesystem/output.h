@@ -55,6 +55,14 @@ class Output : public local::Output {
 
  protected:
   bool DoCreateDirectory(const std::string &name);
+
+  bool DoWrite(const WriteStream &stream);
+  bool DoWriteDirectory(const WriteStream &stream);
+  bool DoWriteFile(const WriteStream &stream);
+
+  bool DoDelete(const WriteStream &stream);
+  bool DoDeleteDirectory(const WriteStream &stream);
+  bool DoDeleteFile(const WriteStream &stream);
 };
 
 }  // namespace filesystem

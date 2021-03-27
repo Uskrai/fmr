@@ -54,7 +54,7 @@ std::string Handler::GetExternalName(
 }
 
 bool Handler::IsOk() const {
-  return path_ != "" && Path::Exist(GetPath()) && !Path::IsDirectory(GetPath());
+  return path_ != "" && Path::Exist(GetPath()) && Path::IsDirectory(GetPath());
 }
 
 bool Handler::IsExist() const { return Path::Exist(GetPath()); }

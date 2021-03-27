@@ -40,9 +40,11 @@ std::string PopExtension(std::string path) {
 }
 
 bool Handler::Open(const std::string &path) {
+  Reset();
+
   if (factory_) {
     auto handler = factory_->NewHandler(PopExtension(path));
-    if (handler->GetParent()) {
+    if (handler && handler->GetParent()) {
       auto parent = handler->GetParent()->CreateNew();
       parent->Open(handler->GetParent()->GetPath());
       return Open(std::move(parent), path);
@@ -52,6 +54,8 @@ bool Handler::Open(const std::string &path) {
 }
 
 bool Handler::Open(const file_handler::ReadStream &stream) {
+  Reset();
+
   auto ret = FindFactory(stream);
   if (ret && factory_) {
     auto parent = factory_->NewHandler(stream.GetHandlerPath());
@@ -64,6 +68,8 @@ bool Handler::Open(const file_handler::ReadStream &stream) {
 
 bool Handler::Open(Handler::UniqueParentHandler handler,
                    const std::string &path) {
+  Reset();
+
   if (handler) {
     handler->Read()->Traverse(false);
     auto idx = handler->Read()->Index(path);
@@ -141,6 +147,16 @@ void Handler::UpdateStream(std::shared_ptr<file_handler::ReadStream> stream) {
 }
 
 bool Handler::IsOk() const { return IsExist() && IsHandleable(path_); }
+
+void Handler::Reset() {
+  archive_factory_ = nullptr;
+  parent_ = nullptr;
+  path_ = "";
+  stream_ = nullptr;
+
+  Read()->Clear();
+  // Write()->Clear();
+}
 
 bool Handler::IsExist() const {
   bool ret = false;

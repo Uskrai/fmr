@@ -16,11 +16,10 @@
  */
 
 #include <fmr/common/path.h>
+#include <fmr/file_handler/filesystem/handler.h>
 #include <fmr/file_handler/filesystem/output.h>
 #include <fmr/nowide/filesystem.h>
 #include <fmr/nowide/fstream.h>
-
-#include <filesystem>
 
 #include "fmr/file_handler/write_type.h"
 
@@ -36,27 +35,17 @@ void Output::Create() {
 }
 
 void Output::CommitWrite() {
+  Handler handler{};
+  handler.Open(name_);
+  handler.Read()->Traverse(false);
+
   for (auto &it : write_vec_) {
     if (it.GetWriteType() & kWriteDelete) {
-      auto path = it.GetFullPath();
-      if (it.GetWriteType() & kWriteDirectory) {
-        if (Path::IsDirectory(path)) nwd::fs::remove(path);
-      } else if (!Path::IsDirectory(path)) {
-        nwd::fs::remove(path);
-      }
+      DoDelete(it);
+
       continue;
     } else {
-      if (!(it.GetWriteType() & kWriteOverwrite))
-        if (Path::Exist(it.GetFullPath())) continue;
-
-      if (it.GetWriteType() & kWriteDirectory) {
-        DoCreateDirectory(it.GetName());
-        continue;
-      } else {
-        nwd::ofstream stream(it.GetFullPath());
-        stream.write(reinterpret_cast<const char *>(it.GetBuffer()), it.Size());
-        stream.close();
-      }
+      DoWrite(it);
     }
   }
   write_vec_.clear();
@@ -84,7 +73,42 @@ WriteStream *Output::CreateFile(const std::string &name,
   return &it;
 }
 
-bool Output::DoCreateDirectory(const std::string &name) { return false; }
+bool Output::DoWrite(const WriteStream &stream) {
+  if (stream.GetWriteType() & kWriteDirectory) {
+    return DoWriteDirectory(stream);
+  } else
+    return DoWriteFile(stream);
+}
+
+bool Output::DoWriteDirectory(const WriteStream &stream) {
+  return nwd::fs::create_directory(stream.GetFullPath());
+}
+
+bool Output::DoWriteFile(const WriteStream &stream) {
+  nwd::ofstream w_stream(stream.GetFullPath());
+  w_stream.write(reinterpret_cast<const char *>(stream.GetBuffer()),
+                 stream.Size());
+  w_stream.close();
+  return w_stream.good();
+}
+
+bool Output::DoDelete(const WriteStream &stream) {
+  if (stream.GetWriteType() & kWriteDirectory) {
+    return DoDeleteDirectory(stream);
+  } else
+    return DoDeleteFile(stream);
+}
+
+bool Output::DoDeleteDirectory(const WriteStream &stream) {
+  return Path::IsDirectory(stream.GetFullPath()) &&
+         nwd::fs::is_empty(stream.GetFullPath()) &&
+         nwd::fs::remove(stream.GetFullPath());
+}
+
+bool Output::DoDeleteFile(const WriteStream &stream) {
+  return !Path::IsDirectory(stream.GetFullPath()) &&
+         nwd::fs::remove(stream.GetFullPath());
+}
 
 }  // namespace filesystem
 

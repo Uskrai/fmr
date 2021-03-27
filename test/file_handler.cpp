@@ -22,6 +22,7 @@
 
 #include "fmr/compare/natural.h"
 #include "fmr/file_handler/memory_stream.h"
+#include "fmr/file_handler/write_type.h"
 
 namespace test_path {
 using namespace fmr::file_handler;
@@ -53,17 +54,38 @@ class HandlerFixture : public ::testing::TestWithParam<HandlerType> {
   HandlerType handler_;
   const char *path = test_path::GetDirName(handler_);
 
+ private:
+  bool should_delete_ = false;
+
+ protected:
   void SetUp() override {
-    // fmr::file_handler::Handler &handler = handler_;
-    // ASSERT_FALSE(handler.IsOk());
-    // handler.Open(path);
-    // handler.Write().Create();
+    fmr::file_handler::Handler &handler = handler_;
+    should_delete_ = false;
+
+    ASSERT_FALSE(handler.IsOk());
+    handler.Open(path);
+    ASSERT_FALSE(handler.IsExist())
+        << this->path << " Is going to be used as testing directory";
+    ASSERT_FALSE(handler.IsOk());
+
+    handler.Write()->Create();
+    ASSERT_TRUE(handler.IsExist());
+    ASSERT_TRUE(handler.IsOk());
+
+    should_delete_ = true;
   }
 
   void TearDown() override {
-    //
+    if (should_delete_) {
+      fmr::file_handler::Handler &handler = handler_;
+
+      handler.Open(path);
+      handler.Write()->Delete();
+
+      ASSERT_FALSE(handler.IsExist())
+          << path << " still exist after Write()->Delete()";
+    }
   }
-  //
 };
 
 namespace type {
@@ -73,7 +95,6 @@ using HandlerFixtureType =
 }  // namespace type
 
 void test_open(fmr::file_handler::Handler &handler, std::string path) {
-  ASSERT_FALSE(handler.IsOk());
   handler.Open("");
   ASSERT_FALSE(handler.IsOk());
   handler.Open(path);
@@ -97,21 +118,12 @@ void create_dumies(fmr::file_handler::Handler &handler,
 }
 
 void test_write(fmr::file_handler::Handler &handler, std::string path) {
-  handler.Open(path);
-  ASSERT_FALSE(handler.IsExist())
-      << path << " is going to be used as test directory";
-  ASSERT_FALSE(handler.IsOk()) << "Should be false when pat is not exist";
-
-  handler.Open(path);
-  ASSERT_EQ(handler.GetPath(), path);
-  handler.Write()->Create();
-
   constexpr size_t buff_size = var::kBufferSize;
   char ch[buff_size];
   fmr::file_handler::MemoryStream stream;
   stream.Write(&ch, buff_size);
 
-  for (int i = 1; i < var::kLoopCount; ++i) {
+  for (size_t i = 1; i < var::kLoopCount; ++i) {
     handler.Write()->CreateFile(std::to_string(i), &stream,
                                 fmr::file_handler::kWriteNone);
 
@@ -125,24 +137,9 @@ void test_write(fmr::file_handler::Handler &handler, std::string path) {
     it.Load();
     ASSERT_EQ(it.Size(), buff_size);
   }
-
-  handler.Write()->Delete();
-
-  handler.Open(path);
-  ASSERT_FALSE(handler.IsExist());
 }
 
 void test_overwrite(fmr::file_handler::Handler &handler, std::string path) {
-  handler.Open(path);
-  ASSERT_EQ(handler.GetPath(), path);
-  ASSERT_FALSE(handler.IsExist())
-      << path << " is going to be used as test directory";
-  ASSERT_FALSE(handler.IsOk()) << "Should be false when path is not exist";
-
-  handler.Write()->Create();
-
-  ASSERT_TRUE(handler.IsExist());
-
   constexpr size_t initial_size = var::kBufferSize;
   constexpr size_t overwriten_size = var::kSecondBufferSize;
 
@@ -184,15 +181,9 @@ void test_overwrite(fmr::file_handler::Handler &handler, std::string path) {
     ASSERT_EQ(handler.Read()->At(i)->Size(), initial_size);
     ++i;
   }
-
-  handler.Write()->Delete();
 }
 
-void test_parent(fmr::file_handler::Handler &handler, std::string path) {
-  // handler.GetParent()->GetPath();
-}
-
-TYPED_TEST_SUITE(HandlerFixture, type::HandlerFixtureType);
+TYPED_TEST_SUITE(HandlerFixture, type::HandlerFixtureType, );
 
 TYPED_TEST(HandlerFixture, TestOpen) { test_open(this->handler_, this->path); }
 
@@ -224,6 +215,53 @@ TEST(StreamTest, TestWrite) {
   ASSERT_EQ(stream_2.Size(), buff_size * 2);
 }
 
+TYPED_TEST(HandlerFixture, TestDelete) {
+  fmr::file_handler::Handler &handler = this->handler_;
+  fmr::file_handler::MemoryStream stream;
+  constexpr size_t buff_size = var::kBufferSize;
+  char ch[buff_size];
+  stream.Write(&ch, buff_size);
+
+  handler.Write()->CreateDirectory("test");
+  for (size_t i = 0; i < var::kLoopCount; ++i) {
+    handler.Write()->CreateFile("test/" + std::to_string(i), &stream,
+                                fmr::file_handler::kWriteNone);
+  }
+  handler.Write()->CommitWrite();
+
+  handler.Write()->DeleteDirectory("test");
+  handler.Read()->Traverse(false);
+
+  handler.Write()->CommitWrite();
+
+  handler.Read()->Traverse(false);
+  handler.Read()->Sort(fmr::compare::Natural());
+
+  {
+    bool found = false;
+    for (const auto &it : *handler.Read()) {
+      if (it.GetName() == "test" && it.IsDirectory()) found = true;
+    }
+
+    ASSERT_TRUE(found) << "Directory should'nt be deleted when it is not empty";
+  }
+}
+
+void iterator_test(fmr::file_handler::Handler &handler) {
+  for (const auto &it : *handler.Read()) it.GetName();
+}
+
+void iterator_test(fmr::file_handler::local::Handler &handler) {
+  for (const auto &it : *handler.Read()) it.GetName();
+  iterator_test(static_cast<fmr::file_handler::Handler &>(handler));
+}
+
+TYPED_TEST(HandlerFixture, TestIterator) {
+  for (const auto &it : *this->handler_.Read()) it.GetName();
+  for (auto &it : *this->handler_.Read()) it.GetName();
+  iterator_test(this->handler_);
+}
+
 int main(int argc, char **argv) {
   auto factory = std::make_unique<fmr::file_handler::Factory>();
   fmr::file_handler::InitDefaultFactory(*factory);
@@ -231,9 +269,3 @@ int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
-// TEST_P(HandlerFixture, FirstTest) {}
-
-// TEST_P(HandlerFixture, Testing) {
-//
-// }
