@@ -146,6 +146,7 @@ file_handler_wx_archive = $(file_handler_wxarch)/handler.cpp \
 
 lib_file_handler_la_SOURCES = $(file_handler)/memory_stream.cpp \
 															$(file_handler)/factory.cpp \
+															$(file_handler)/virtual_write/map.cpp \
 															$(file_handler_filesystem) \
 															$(file_handler_wx_archive)
 lib_file_handler_la_LIBADD = lib_path.la \
