@@ -107,7 +107,6 @@ class Helper : public StreamBase, public HelperBase {
   size_t Size() const { return DoGetSize(); }
 
   bool IsShared() const { return DoIsShared(); }
-  bool IsDirectory() const { return DoIsDirectory(); }
 };
 
 template <typename Base>
@@ -183,6 +182,10 @@ class HelperBase : public memory_stream::Helper<ReadStreamBase> {
   using memory_stream::Helper<ReadStreamBase>::Helper;
   bool IsLoaded() const { return true; }
   bool Load() { return true; }
+
+  bool IsDirectory() const {
+    return memory_stream::Helper<ReadStreamBase>::DoIsDirectory();
+  }
 };
 
 template <typename ReadStreamBase, typename = void>

@@ -26,18 +26,16 @@ namespace fmr {
 namespace file_handler {
 
 class WriteStream : public Stream {
-  WriteType type_;
-
  public:
-  WriteStream() : type_(kWriteNone) {}
-  WriteStream(WriteType type) : type_(type) {}
-
   virtual void Write(const void *src, size_t size) = 0;
   void Write(const Stream *src) = delete;
   virtual void Write(const Stream &src) = 0;
 
-  virtual void SetWriteType(WriteType type) { type_ = type; }
-  virtual WriteType GetWriteType() const { return type_; }
+  virtual bool IsDirectory() const final {
+    return GetWriteType() & kWriteDirectory;
+  }
+
+  virtual WriteType GetWriteType() const = 0;
 
  protected:
   virtual WriteStream *DoClone() const override = 0;

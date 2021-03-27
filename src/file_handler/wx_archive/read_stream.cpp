@@ -31,7 +31,7 @@ ReadStream::ReadStream(std::shared_ptr<file_handler::ReadStream> archive_stream,
                        wxArchiveEntry *entry, std::string handler_path,
                        const wxArchiveClassFactory *factory) {
   archive_stream_ = archive_stream;
-  entry_ = entry;
+  is_directory_ = entry->IsDir();
   DoSetName(String::Narrow(entry->GetName()));
   DoSetHandlerPath(handler_path);
   factory_ = factory;

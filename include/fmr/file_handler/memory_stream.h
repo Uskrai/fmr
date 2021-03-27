@@ -49,9 +49,10 @@ class MemoryStream : public WriteStream {
   const void *GetBufferEnd() const override { return buffer_->data() + Size(); }
 
   bool IsShared() const override { return buffer_.use_count() > 1; }
-  bool IsDirectory() const override { return false; }
 
   bool IsEmpty() const { return Size() == 0; }
+
+  WriteType GetWriteType() const override { return kWriteNone; }
 
   void Write(const void *src, size_t size) override;
   // void Write(const Stream &src) override;

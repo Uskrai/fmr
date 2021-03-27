@@ -34,15 +34,15 @@ using ReadStreamBase =
 class ReadStream : public ReadStreamBase {
   std::shared_ptr<file_handler::ReadStream> archive_stream_;
   const wxArchiveClassFactory *factory_ = nullptr;
-  wxArchiveEntry *entry_ = nullptr;
   bool loaded_ = false;
+  bool is_directory_ = false;
 
  public:
   ReadStream(std::shared_ptr<file_handler::ReadStream> archive_stream,
              wxArchiveEntry *entry, std::string handler_path_,
              const wxArchiveClassFactory *factory);
 
-  bool IsDirectory() const override { return entry_ && entry_->IsDir(); }
+  bool IsDirectory() const override { return is_directory_; }
 
   bool IsLoaded() const override { return loaded_; };
   bool Load() override;
