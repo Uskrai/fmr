@@ -21,6 +21,7 @@
 #include <fmr/file_handler/factory.h>
 #include <fmr/file_handler/output.h>
 #include <fmr/file_handler/read_stream.h>
+#include <fmr/file_handler/virtual_write/stream.h>
 #include <fmr/file_handler/wx_archive/write_stream.h>
 #include <wx/archive.h>
 
@@ -66,6 +67,8 @@ class Output : public file_handler::Output {
 
  protected:
   void UpdateStream(const Stream &stream);
+
+  std::vector<virtual_write::Stream> ToVirtualStream(Input &input) const;
 };
 
 }  // namespace wx_archive

@@ -139,8 +139,7 @@ file_handler_wxarch = src/file_handler/wx_archive
 file_handler_wx_archive = $(file_handler_wxarch)/handler.cpp \
 													$(file_handler_wxarch)/input.cpp \
 													$(file_handler_wxarch)/read_stream.cpp \
-													$(file_handler_wxarch)/output.cpp \
-													# $(file_handler_wxarch)/write_stream.cpp
+													$(file_handler_wxarch)/output.cpp
 # file_handler_utility_path = src/file_handler/utility/
 # file_handler_utility = (file_handler_utility_path)/memory_stream.cpp
 

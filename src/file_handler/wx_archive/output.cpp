@@ -24,6 +24,7 @@
 #include "fmr/compare/natural.h"
 #include "fmr/compare/sortable.h"
 #include "fmr/file_handler/utility/memory_stream_helper.h"
+#include "fmr/file_handler/virtual_write/map.h"
 #include "fmr/file_handler/write_type.h"
 #include "fmr/file_handler/wx_archive/handler.h"
 #include "fmr/file_handler/wx_archive/input.h"
@@ -86,31 +87,17 @@ bool Output::IsOk() const {
          handler_parent_ && handler_parent_->IsExist();
 }
 
-void FilterWriteVector(std::vector<ReadStream *> &read_vec,
-                       std::vector<WriteStream> &vec) {
-  auto GetWriteList = [&]() -> std::vector<WriteStream> & { return vec; };
+std::vector<virtual_write::Stream> Output::ToVirtualStream(Input &input) const {
+  input.Open(stream_);
+  input.Traverse(true);
 
-  auto it = GetWriteList().begin();
-  while (it != GetWriteList().end()) {
-    bool is_increment_it = true;
-    auto next = it;
-    while (next != GetWriteList().end()) {
-      bool is_increment_next = true;
-      if (it != next && it->GetName() == next->GetName()) {
-        if (next->GetWriteType() & kWriteOverwrite) {
-          GetWriteList().erase(it);
-          is_increment_it = false;
-          break;
-        } else {
-          GetWriteList().erase(next);
-          is_increment_next = false;
-        }
-      }
-      if (is_increment_next) ++next;
-    }
-
-    if (is_increment_it) ++it;
+  auto map_path = virtual_write::Map('/');
+  for (auto &it : input) map_path.AddEmplace(&it, kWriteNone);
+  for (auto &it : vec_) {
+    map_path.AddEmplace(&it, it.GetWriteType());
   }
+
+  return map_path.ToVector(map_path.kExtractAll);
 }
 
 void Output::CommitWrite() {
@@ -131,28 +118,22 @@ void Output::CommitWrite() {
   if (archive_input->IsOk() && archive_input->GetSize() != 0)
     archive_output->CopyArchiveMetaData(*archive_input);
 
-  std::vector<ReadStream *> read_vec;
-
   Input input(handler_);
-  input.Open(stream_);
-  auto stream = input.GetFirst(true);
-
-  while (stream) {
-    read_vec.push_back(stream);
-    stream = input.GetNext(true);
-  }
-
-  FilterWriteVector(read_vec, vec_);
+  auto vec = ToVirtualStream(input);
 
   compare::Natural comparer;
-  compare::Sort(vec_.begin(), vec_.end(), comparer);
+  compare::Sort(vec.begin(), vec.end(), comparer);
 
-  for (auto it = vec_.begin(); it != vec_.end(); ++it) {
-    if (it->GetWriteType() & kWriteDirectory) {
+  for (auto it = vec.begin(); it != vec.end(); ++it) {
+    auto stream = it->GetStream();
+
+    if (!stream) continue;
+
+    if (it->IsDirectory()) {
       archive_output->PutNextDirEntry(it->GetName());
     } else {
       archive_output->PutNextEntry(it->GetName());
-      archive_output->Write(it->GetBuffer(), it->Size());
+      archive_output->Write(stream->GetBuffer(), stream->Size());
     }
   }
 

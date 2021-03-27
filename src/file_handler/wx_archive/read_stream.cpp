@@ -27,12 +27,22 @@ namespace file_handler {
 
 namespace wx_archive {
 
+std::string PopTraillingSeparator(wxArchiveEntry *entry) {
+  auto str = String::Narrow(entry->GetName());
+
+  if (entry->IsDir() && !str.empty() &&
+      str.back() == wxFileName::GetPathSeparator())
+    str.pop_back();
+
+  return str;
+}
+
 ReadStream::ReadStream(std::shared_ptr<file_handler::ReadStream> archive_stream,
                        wxArchiveEntry *entry, std::string handler_path,
                        const wxArchiveClassFactory *factory) {
   archive_stream_ = archive_stream;
   is_directory_ = entry->IsDir();
-  DoSetName(String::Narrow(entry->GetName()));
+  DoSetName(PopTraillingSeparator(entry));
   DoSetHandlerPath(handler_path);
   factory_ = factory;
 }

@@ -188,7 +188,9 @@ am__objects_2 = $(file_handler_wxarch)/handler.lo \
 	$(file_handler_wxarch)/read_stream.lo \
 	$(file_handler_wxarch)/output.lo
 am_lib_file_handler_la_OBJECTS = $(file_handler)/memory_stream.lo \
-	$(file_handler)/factory.lo $(am__objects_1) $(am__objects_2)
+	$(file_handler)/factory.lo \
+	$(file_handler)/virtual_write/map.lo $(am__objects_1) \
+	$(am__objects_2)
 lib_file_handler_la_OBJECTS = $(am_lib_file_handler_la_OBJECTS)
 lib_frame_la_DEPENDENCIES = lib_explorer.la lib_reader.la
 am_lib_frame_la_OBJECTS = $(gui)/frame.lo $(gui)/panel.lo \
@@ -270,6 +272,7 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(explorer)/$(DEPDIR)/string_rect.Plo \
 	$(file_handler)/$(DEPDIR)/factory.Plo \
 	$(file_handler)/$(DEPDIR)/memory_stream.Plo \
+	$(file_handler)/virtual_write/$(DEPDIR)/map.Plo \
 	$(file_handler_fs)/$(DEPDIR)/handler.Plo \
 	$(file_handler_fs)/$(DEPDIR)/input.Plo \
 	$(file_handler_fs)/$(DEPDIR)/output.Plo \
@@ -719,13 +722,13 @@ file_handler_wxarch = src/file_handler/wx_archive
 file_handler_wx_archive = $(file_handler_wxarch)/handler.cpp \
 													$(file_handler_wxarch)/input.cpp \
 													$(file_handler_wxarch)/read_stream.cpp \
-													$(file_handler_wxarch)/output.cpp \
-													# $(file_handler_wxarch)/write_stream.cpp
+													$(file_handler_wxarch)/output.cpp
 
 # file_handler_utility_path = src/file_handler/utility/
 # file_handler_utility = (file_handler_utility_path)/memory_stream.cpp
 lib_file_handler_la_SOURCES = $(file_handler)/memory_stream.cpp \
 															$(file_handler)/factory.cpp \
+															$(file_handler)/virtual_write/map.cpp \
 															$(file_handler_filesystem) \
 															$(file_handler_wx_archive)
 
@@ -1337,6 +1340,15 @@ $(file_handler)/memory_stream.lo: $(file_handler)/$(am__dirstamp) \
 	$(file_handler)/$(DEPDIR)/$(am__dirstamp)
 $(file_handler)/factory.lo: $(file_handler)/$(am__dirstamp) \
 	$(file_handler)/$(DEPDIR)/$(am__dirstamp)
+$(file_handler)/virtual_write/$(am__dirstamp):
+	@$(MKDIR_P) $(file_handler)/virtual_write
+	@: > $(file_handler)/virtual_write/$(am__dirstamp)
+$(file_handler)/virtual_write/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) $(file_handler)/virtual_write/$(DEPDIR)
+	@: > $(file_handler)/virtual_write/$(DEPDIR)/$(am__dirstamp)
+$(file_handler)/virtual_write/map.lo:  \
+	$(file_handler)/virtual_write/$(am__dirstamp) \
+	$(file_handler)/virtual_write/$(DEPDIR)/$(am__dirstamp)
 $(file_handler_fs)/$(am__dirstamp):
 	@$(MKDIR_P) $(file_handler_fs)
 	@: > $(file_handler_fs)/$(am__dirstamp)
@@ -1529,6 +1541,8 @@ mostlyclean-compile:
 	-rm -f $(explorer)/*.lo
 	-rm -f $(file_handler)/*.$(OBJEXT)
 	-rm -f $(file_handler)/*.lo
+	-rm -f $(file_handler)/virtual_write/*.$(OBJEXT)
+	-rm -f $(file_handler)/virtual_write/*.lo
 	-rm -f $(file_handler_fs)/*.$(OBJEXT)
 	-rm -f $(file_handler_fs)/*.lo
 	-rm -f $(file_handler_wxarch)/*.$(OBJEXT)
@@ -1573,6 +1587,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(explorer)/$(DEPDIR)/string_rect.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(file_handler)/$(DEPDIR)/factory.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(file_handler)/$(DEPDIR)/memory_stream.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@$(file_handler)/virtual_write/$(DEPDIR)/map.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(file_handler_fs)/$(DEPDIR)/handler.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(file_handler_fs)/$(DEPDIR)/input.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(file_handler_fs)/$(DEPDIR)/output.Plo@am__quote@ # am--include-marker
@@ -1654,6 +1669,7 @@ clean-libtool:
 	-rm -rf $(compare)/.libs $(compare)/_libs
 	-rm -rf $(explorer)/.libs $(explorer)/_libs
 	-rm -rf $(file_handler)/.libs $(file_handler)/_libs
+	-rm -rf $(file_handler)/virtual_write/.libs $(file_handler)/virtual_write/_libs
 	-rm -rf $(file_handler_fs)/.libs $(file_handler_fs)/_libs
 	-rm -rf $(file_handler_wxarch)/.libs $(file_handler_wxarch)/_libs
 	-rm -rf $(gui)/.libs $(gui)/_libs
@@ -2017,6 +2033,8 @@ distclean-generic:
 	-test -z "$(explorer)/$(am__dirstamp)" || rm -f $(explorer)/$(am__dirstamp)
 	-test -z "$(file_handler)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(file_handler)/$(DEPDIR)/$(am__dirstamp)
 	-test -z "$(file_handler)/$(am__dirstamp)" || rm -f $(file_handler)/$(am__dirstamp)
+	-test -z "$(file_handler)/virtual_write/$(DEPDIR)/$(am__dirstamp)" || rm -f $(file_handler)/virtual_write/$(DEPDIR)/$(am__dirstamp)
+	-test -z "$(file_handler)/virtual_write/$(am__dirstamp)" || rm -f $(file_handler)/virtual_write/$(am__dirstamp)
 	-test -z "$(file_handler_fs)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(file_handler_fs)/$(DEPDIR)/$(am__dirstamp)
 	-test -z "$(file_handler_fs)/$(am__dirstamp)" || rm -f $(file_handler_fs)/$(am__dirstamp)
 	-test -z "$(file_handler_wxarch)/$(DEPDIR)/$(am__dirstamp)" || rm -f $(file_handler_wxarch)/$(DEPDIR)/$(am__dirstamp)
@@ -2074,6 +2092,7 @@ distclean: distclean-recursive
 	-rm -f $(explorer)/$(DEPDIR)/string_rect.Plo
 	-rm -f $(file_handler)/$(DEPDIR)/factory.Plo
 	-rm -f $(file_handler)/$(DEPDIR)/memory_stream.Plo
+	-rm -f $(file_handler)/virtual_write/$(DEPDIR)/map.Plo
 	-rm -f $(file_handler_fs)/$(DEPDIR)/handler.Plo
 	-rm -f $(file_handler_fs)/$(DEPDIR)/input.Plo
 	-rm -f $(file_handler_fs)/$(DEPDIR)/output.Plo
@@ -2187,6 +2206,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(explorer)/$(DEPDIR)/string_rect.Plo
 	-rm -f $(file_handler)/$(DEPDIR)/factory.Plo
 	-rm -f $(file_handler)/$(DEPDIR)/memory_stream.Plo
+	-rm -f $(file_handler)/virtual_write/$(DEPDIR)/map.Plo
 	-rm -f $(file_handler_fs)/$(DEPDIR)/handler.Plo
 	-rm -f $(file_handler_fs)/$(DEPDIR)/input.Plo
 	-rm -f $(file_handler_fs)/$(DEPDIR)/output.Plo
