@@ -123,6 +123,8 @@ class InputIteratorBaseHelper : public IteratorBase {
   using It = InputIteratorBaseHelper;
   using ItBase = IteratorBase;
 
+  using Base = IteratorBase;
+
  public:
   virtual ~InputIteratorBaseHelper() {}
   virtual reference operator*() = 0;
@@ -176,6 +178,8 @@ class InputIteratorHelper : public IteratorBase {
 
   using It = InputIteratorHelper;
   using ItBase = IteratorBase;
+
+  using Base = IteratorBase;
 
  private:
   pointer ptr_;
@@ -241,17 +245,17 @@ class InputIteratorHelper : public IteratorBase {
   // bool operator<=(const It &oth) { return !(*this > oth); }
 };
 
-template <typename StreamType>
+template <typename IteratorPointer>
 class InputIterator {
  public:
-  using value_type = StreamType;
+  using value_type = typename IteratorPointer::value_type;
   using reference = value_type &;
   using pointer = value_type *;
   using difference_type = std::ptrdiff_t;
   using iterator_category = std::random_access_iterator_tag;
 
   using It = InputIterator;
-  using ItBase = InputIteratorBaseHelper<StreamType>;
+  using ItBase = IteratorPointer;
 
  protected:
   std::unique_ptr<ItBase> it_;
@@ -319,10 +323,7 @@ class InputIterator {
   bool operator>=(const It &oth) { return !(*this < oth); }
   bool operator<=(const It &oth) { return !(*this > oth); }
 
-  pointer GetPtr() {
-    printf("%p\n", (void *)it_.get());
-    return it_->GetPtr();
-  }
+  pointer GetPtr() { return it_->GetPtr(); }
 };
 
 template <typename SteamType>

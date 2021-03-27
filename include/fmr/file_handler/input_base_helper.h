@@ -32,13 +32,10 @@ template <typename StreamType, typename HandlerBase = internal::EmptyInputBase>
 class InputBaseHelper : public HandlerBase {
  public:
   using value_type = StreamType;
-  using iterator = InputIterator<value_type>;
-  using const_iterator = ConstInputIterator<value_type>;
   using pointer = value_type *;
   using const_pointer = const value_type *;
   using reference = value_type &;
   using const_reference = const value_type &;
-  using difference_type = typename iterator::difference_type;
   using size_type = std::size_t;
 
   using iterator_pointer =
@@ -47,6 +44,10 @@ class InputBaseHelper : public HandlerBase {
   using const_iterator_pointer =
       InputIteratorBaseHelper<const value_type,
                               typename HandlerBase::const_iterator_pointer>;
+
+  using iterator = InputIterator<iterator_pointer>;
+  using const_iterator = ConstInputIterator<const_iterator_pointer>;
+  using difference_type = typename iterator::difference_type;
 
   iterator begin() { return iterator(DoBegin()); }
   iterator end() { return iterator(DoEnd()); }

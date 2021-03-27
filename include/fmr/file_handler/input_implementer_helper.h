@@ -35,15 +35,15 @@ class InputImplementHelper : public HandlerBase {
   using pointer = value_type *;
   using const_pointer = const value_type *;
   using reference = value_type &;
-  using iterator = InputIterator<value_type>;
-  using const_iterator = ConstInputIterator<value_type>;
-
   using iterator_pointer =
       InputIteratorHelper<value_type, typename HandlerBase::iterator_pointer>;
 
   using const_iterator_pointer =
       InputIteratorHelper<const value_type,
                           typename HandlerBase::const_iterator_pointer>;
+
+  using iterator = InputIterator<iterator_pointer>;
+  using const_iterator = ConstInputIterator<const_iterator_pointer>;
 
   iterator begin() { return iterator(DoBegin()); }
   iterator end() { return iterator(DoEnd()); }
