@@ -167,6 +167,8 @@ void test_overwrite(fmr::file_handler::Handler &handler, std::string path) {
   handler.Read()->Traverse(false);
   handler.Read()->Sort(fmr::compare::Natural());
 
+  ASSERT_EQ(handler.Read()->Size(), var::kSecondLoopCount);
+
   size_t i = 0;
   while (i < var::kLoopCount) {
     ASSERT_EQ(handler.Read()->At(i)->Size(), 0);
