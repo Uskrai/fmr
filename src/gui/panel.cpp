@@ -29,7 +29,6 @@
 
 #include "fmr/bitmap/image_checker.h"
 #include "fmr/explorer/controller.h"
-#include "fmr/handler/handler_factory.h"
 #include "fmr/nowide/string.h"
 #include "fmr/reader/controller.h"
 #include "fmr/window/grid_window.h"

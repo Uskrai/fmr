@@ -15,21 +15,28 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/common/compare.h>
-#include <fmr/handler/default_handler.h>
-#include <fmr/handler/std_handler.h>
-#include <fmr/handler/struct_stream.h>
+#include <fmr/compare/comparer.h>
 #include <gtest/gtest.h>
 
 #include <algorithm>
 #include <iostream>
 #include <random>
 
+#include "fmr/compare/natural.h"
+
 namespace fmr {
 
-SStream GetStream(std::string name) {
-  SStream stream;
-  stream.SetName(name);
+class TestSortable : public compare::Sortable {
+  std::string string_;
+
+ public:
+  TestSortable(const std::string &str) : string_(str) {}
+
+  const std::string &GetString() const { return string_; }
+};
+
+TestSortable GetStream(std::string name) {
+  TestSortable stream(name);
   return stream;
 }
 
@@ -52,15 +59,14 @@ std::wstring MakeName(size_t size) {
 }
 
 TEST(SortTest, NaturalTest) {
-  std::vector<SStream> vec_string;
+  std::vector<TestSortable> vec_string;
 
   for (size_t i = 0; i < 100; i++) {
-    SStream stream;
-    stream.SetName(std::string("testing"));
-    vec_string.push_back(stream);
+    TestSortable test("testing");
+    vec_string.push_back(test);
   }
 
-  std::sort(vec_string.begin(), vec_string.end(), Compare::NaturalSortable);
+  std::sort(vec_string.begin(), vec_string.end(), compare::Natural());
 }
 
 }  // namespace fmr

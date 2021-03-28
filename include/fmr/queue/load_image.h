@@ -18,7 +18,6 @@
 #ifndef FMR_EXPLORER_LOAD_EXPLORER
 #define FMR_EXPLORER_LOAD_EXPLORER
 
-#include <fmr/handler/struct_stream.h>
 #include <fmr/queue/load_image_item.h>
 #include <fmr/queue/task.h>
 #include <fmr/thread/thread.h>

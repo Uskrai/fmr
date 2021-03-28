@@ -22,7 +22,6 @@
 
 #include "fmr/compare/natural.h"
 #include "fmr/file_handler/factory.h"
-#include "fmr/handler/stream_util.h"
 #include "fmr/queue/find_handler_flags.h"
 #include "wx/filename.h"
 #include "wx/image.h"

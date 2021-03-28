@@ -24,13 +24,13 @@ namespace fmr {
 
 namespace image_util {
 
-bool CanRead(const SStream &stream) {
-  return stream.IsOk() && wxImage::CanRead(*stream.GetStream());
-}
-
-bool CanRead(const std::string &name) {
-  return wxImage::CanRead(String::Widen<wxString>(name));
-}
+// bool CanRead(const SStream &stream) {
+// return stream.IsOk() && wxImage::CanRead(*stream.GetStream());
+// }
+//
+// bool CanRead(const std::string &name) {
+// return wxImage::CanRead(String::Widen<wxString>(name));
+// }
 
 bool Load(wxImage &image, wxInputStream &stream) {
   if (!stream.IsOk() && stream.GetSize() == 0) return false;
@@ -41,22 +41,22 @@ bool Load(wxImage &image, wxInputStream &stream) {
   return image.LoadFile(stream);
 }
 
-bool Load(wxImage &image, const SStream &stream) {
-  std::shared_ptr<wxInputStream> input_stream;
-  if (!stream.IsOk()) return false;
-
-  input_stream = stream.GetStream();
-
-  if (input_stream) return Load(image, *input_stream);
-
-  return false;
-}
-
-bool Load(wxImage &image, const AbstractHandler &handler, size_t index) {
-  if (!handler.IsExist(index)) return false;
-
-  return Load(image, handler.Item(index));
-}
+// bool Load(wxImage &image, const SStream &stream) {
+// std::shared_ptr<wxInputStream> input_stream;
+// if (!stream.IsOk()) return false;
+//
+// input_stream = stream.GetStream();
+//
+// if (input_stream) return Load(image, *input_stream);
+//
+// return false;
+// }
+//
+// bool Load(wxImage &image, const AbstractHandler &handler, size_t index) {
+// if (!handler.IsExist(index)) return false;
+//
+// return Load(image, handler.Item(index));
+// }
 
 bool Rescale(wxImage &image, float scale, wxImageResizeQuality image_quality) {
   wxSize original_size = image.GetSize();

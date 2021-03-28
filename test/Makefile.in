@@ -88,8 +88,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = sort$(EXEEXT) handler$(EXEEXT) position$(EXEEXT) \
-	file_handler$(EXEEXT)
+bin_PROGRAMS = sort$(EXEEXT) position$(EXEEXT) file_handler$(EXEEXT)
 subdir = test
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/aux-build/wxwin.m4 \
@@ -114,17 +113,12 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-am_handler_OBJECTS = handler.$(OBJEXT)
-handler_OBJECTS = $(am_handler_OBJECTS)
-handler_DEPENDENCIES = $(LIB_DIR)/lib_path.la \
-	$(LIB_DIR)/lib_handler.la $(LIB_DIR)/lib_compare.la
 am_position_OBJECTS = position.$(OBJEXT)
 position_OBJECTS = $(am_position_OBJECTS)
 position_DEPENDENCIES = $(LIB_DIR)/lib_position.la
 am_sort_OBJECTS = sort.$(OBJEXT)
 sort_OBJECTS = $(am_sort_OBJECTS)
-sort_DEPENDENCIES = $(LIB_DIR)/lib_compare.la \
-	$(LIB_DIR)/lib_handler.la
+sort_DEPENDENCIES = $(LIB_DIR)/lib_comparer.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -141,8 +135,7 @@ DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/aux-build/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/file_handler.Po \
-	./$(DEPDIR)/handler.Po ./$(DEPDIR)/position.Po \
-	./$(DEPDIR)/sort.Po
+	./$(DEPDIR)/position.Po ./$(DEPDIR)/sort.Po
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -162,10 +155,9 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(file_handler_SOURCES) $(handler_SOURCES) \
-	$(position_SOURCES) $(sort_SOURCES)
-DIST_SOURCES = $(file_handler_SOURCES) $(handler_SOURCES) \
-	$(position_SOURCES) $(sort_SOURCES)
+SOURCES = $(file_handler_SOURCES) $(position_SOURCES) $(sort_SOURCES)
+DIST_SOURCES = $(file_handler_SOURCES) $(position_SOURCES) \
+	$(sort_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -547,15 +539,8 @@ top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -I@top_srcdir@/include
 AM_LDFLAGS = -lgtest
 LIB_DIR = @abs_top_builddir@
-handler_SOURCES = handler.cpp
-handler_LDADD = $(LIB_DIR)/lib_path.la \
-				$(LIB_DIR)/lib_handler.la \
-                $(LIB_DIR)/lib_compare.la
-
 sort_SOURCES = sort.cpp
-sort_LDADD = $(LIB_DIR)/lib_compare.la \
-                $(LIB_DIR)/lib_handler.la
-
+sort_LDADD = $(LIB_DIR)/lib_comparer.la
 position_SOURCES = position.cpp
 position_LDADD = $(LIB_DIR)/lib_position.la
 file_handler_SOURCES = file_handler.cpp
@@ -648,10 +633,6 @@ file_handler$(EXEEXT): $(file_handler_OBJECTS) $(file_handler_DEPENDENCIES) $(EX
 	@rm -f file_handler$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(file_handler_OBJECTS) $(file_handler_LDADD) $(LIBS)
 
-handler$(EXEEXT): $(handler_OBJECTS) $(handler_DEPENDENCIES) $(EXTRA_handler_DEPENDENCIES) 
-	@rm -f handler$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(handler_OBJECTS) $(handler_LDADD) $(LIBS)
-
 position$(EXEEXT): $(position_OBJECTS) $(position_DEPENDENCIES) $(EXTRA_position_DEPENDENCIES) 
 	@rm -f position$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(position_OBJECTS) $(position_LDADD) $(LIBS)
@@ -667,7 +648,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file_handler.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/handler.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/position.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sort.Po@am__quote@ # am--include-marker
 
@@ -907,13 +887,6 @@ sort.log: sort$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-handler.log: handler$(EXEEXT)
-	@p='handler$(EXEEXT)'; \
-	b='handler'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
 position.log: position$(EXEEXT)
 	@p='position$(EXEEXT)'; \
 	b='position'; \
@@ -1023,7 +996,6 @@ clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/file_handler.Po
-	-rm -f ./$(DEPDIR)/handler.Po
 	-rm -f ./$(DEPDIR)/position.Po
 	-rm -f ./$(DEPDIR)/sort.Po
 	-rm -f Makefile
@@ -1072,7 +1044,6 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/file_handler.Po
-	-rm -f ./$(DEPDIR)/handler.Po
 	-rm -f ./$(DEPDIR)/position.Po
 	-rm -f ./$(DEPDIR)/sort.Po
 	-rm -f Makefile

@@ -19,8 +19,6 @@
 #define FMR_BITMAP_IMAGE_UTIL
 
 #include <fmr/bitmap/bmp.h>
-#include <fmr/handler/abstract_handler.h>
-#include <fmr/handler/struct_stream.h>
 #include <wx/image.h>
 
 namespace fmr {
@@ -32,10 +30,10 @@ namespace fmr {
 
 namespace image_util {
 
-bool CanRead(const SStream &stream);
-
-bool CanRead(const std::string &name);
-
+// bool CanRead(const SStream &stream);
+//
+// bool CanRead(const std::string &name);
+//
 /**
  * @brief load image from input stream
  *
@@ -45,16 +43,16 @@ bool CanRead(const std::string &name);
  * @return true if loaded
  * @return false if not loaded
  */
-bool Load(wxImage &image, wxInputStream &stream);
+// bool Load(wxImage &image, wxInputStream &stream);
 /**
  * @param stream struct_stream that contain the input stream
  */
-bool Load(wxImage &image, const SStream &stream);
+// bool Load(wxImage &image, const SStream &stream);
 /**
  * @param handler handler to get the stream from
  * @param index the index of the struct_stream
  */
-bool Load(wxImage &image, const AbstractHandler &handler, size_t index);
+// bool Load(wxImage &image, const AbstractHandler &handler, size_t index);
 
 /**
  * @name Rescaling Image

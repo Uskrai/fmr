@@ -12,19 +12,19 @@ common_LTLIBRARIES = lib_compare.la lib_path.la
     lib_path_la_SOURCES = $(common)/path.cpp
 
 
-handler = src/handler
-handlerdir = @abs_builddir@/handler
-handler_LTLIBRARIES = lib_handler.la
-lib_handler_la_SOURCES = $(handler)/default_handler.cpp \
-						 $(handler)/wxarchive_handler.cpp \
-						 $(handler)/handler_factory.cpp \
-						 $(handler)/struct_stream.cpp \
-						 $(handler)/std_handler.cpp \
-						 $(handler)/stream_util.cpp
-
-lib_handler_la_LIBADD = lib_path.la \
-						lib_compare.la \
-						$(BOOST_FILESYSTEM_LDFLAGS)
+# handler = src/handler
+# handlerdir = @abs_builddir@/handler
+# handler_LTLIBRARIES = lib_handler.la
+# lib_handler_la_SOURCES = $(handler)/default_handler.cpp \
+						 # $(handler)/wxarchive_handler.cpp \
+						 # $(handler)/handler_factory.cpp \
+						 # $(handler)/struct_stream.cpp \
+						 # $(handler)/std_handler.cpp \
+						 # $(handler)/stream_util.cpp
+#
+# lib_handler_la_LIBADD = lib_path.la \
+						# lib_compare.la \
+						# $(BOOST_FILESYSTEM_LDFLAGS)
 
 # make libraries for bitmap
 bitmap = src/bitmap
@@ -37,8 +37,8 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/bitmap_page_ctrl.cpp \
 						$(bitmap)/image_checker.cpp \
 						$(bitmap)/bitmap_draw.cpp
-lib_bitmap_la_LIBADD = lib_position.la \
-											 lib_handler.la
+lib_bitmap_la_LIBADD = lib_position.la 
+											 
 
 loaderdir = @abs_builddir@/loader
 loader_LTLIBRARIES = lib_loader.la
@@ -68,7 +68,6 @@ lib_reader_la_SOURCES = $(reader)/controller.cpp \
 												$(reader)/page_indicator.cpp
 
 lib_reader_la_LIBADD = lib_bitmap.la \
-											 lib_handler.la \
 											 lib_window.la \
 											 lib_thread.la \
 											 lib_loader.la
@@ -81,8 +80,7 @@ lib_explorer_la_SOURCES = $(explorer)/controller.cpp \
 													$(explorer)/string_draw.cpp \
 													$(explorer)/string_rect.cpp
 
-lib_explorer_la_LIBADD = lib_handler.la \
-												 lib_thread.la \
+lib_explorer_la_LIBADD = lib_thread.la \
 												 lib_window.la \
 												 lib_loader.la
 
@@ -124,8 +122,7 @@ lib_queue_la_SOURCES = $(queue)/load_image.cpp \
 											 $(queue)/find_handler.cpp \
 											 $(queue)/rescale.cpp  \
 											 $(queue)/factory.cpp
-lib_queue_la_LIBADD = lib_handler.la \
-											lib_comparer.la
+lib_queue_la_LIBADD = lib_comparer.la
 
 file_handler = src/file_handler
 file_handlerdir = @abs_builddir@/file_handler

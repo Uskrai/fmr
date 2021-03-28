@@ -22,14 +22,12 @@
 #include "fmr/bitmap/rescaler.h"
 #include "fmr/common/dimension.h"
 #include "fmr/common/event.h"
-#include "fmr/handler/handler_factory.h"
 #include "fmr/loader/page.h"
 #include "fmr/nowide/string.h"
 #include "fmr/position/box_ctrl.h"
 #include "fmr/queue/event.h"
 #include "fmr/reader/scroll_controller.h"
 #include "fmr/reader/settings.h"
-#include "fmr/thread/load_image_controller.h"
 #include "fmr/window/scrolledwindow.h"
 
 namespace fmr {

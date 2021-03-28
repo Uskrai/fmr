@@ -18,7 +18,6 @@
 #ifndef FMR_BITMAP_LOADER_PAGE
 #define FMR_BITMAP_LOADER_PAGE
 
-#include <fmr/handler/handler_factory.h>
 #include <fmr/loader/loader.h>
 
 namespace fmr {
