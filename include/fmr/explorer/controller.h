@@ -20,9 +20,11 @@
 
 #include <fmr/bitmap/inc.h>
 #include <fmr/handler/abstract_openable_handler.h>
+#include <fmr/loader/fwd.h>
 #include <wx/gdicmn.h>
 
 #include <unordered_map>
+
 class wxWindow;
 
 namespace fmr {
@@ -46,7 +48,7 @@ class Controller : public wxEvtHandler {
   std::vector<std::unique_ptr<SStream>> stream_vec_;
   std::unique_ptr<AbstractOpenableHandler> handler_;
   std::unique_ptr<bitmap::Rescaler> rescaler_;
-  std::unique_ptr<bitmap::loader::Rescale> loader_;
+  std::unique_ptr<loader::Rescale> loader_;
 
  public:
   Controller();
@@ -75,7 +77,7 @@ class Controller : public wxEvtHandler {
  private:
   void OnKeyDown(wxKeyEvent &event);
   void OnOpenCell(wxNotifyEvent &event);
-  void OnImageLoaded(bitmap::loader::LoadEvent &event);
+  void OnImageLoaded(loader::LoadEvent &event);
 };
 
 }  // namespace explorer

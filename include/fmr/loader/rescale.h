@@ -18,18 +18,17 @@
 #ifndef FMR_BITMAP_LOADER_RESCALE
 #define FMR_BITMAP_LOADER_RESCALE
 
-#include <fmr/bitmap/loader/base.h>
-#include <fmr/bitmap/loader/rescale_container.h>
+#include <fmr/bitmap/inc.h>
+#include <fmr/loader/loader.h>
+#include <fmr/loader/rescale_container.h>
 
 namespace fmr {
-
-namespace bitmap {
 
 namespace loader {
 
 class RescaleContainer;
 
-class Rescale : public Base {
+class Rescale : public Loader {
   using RescaleQueueData =
       thread::QueueThreadData<queue::RescaleItem, queue::Rescale,
                               RescaleReceiverEvent>;
@@ -44,7 +43,7 @@ class Rescale : public Base {
   virtual RescaleContainer *GetContainer() override;
   virtual const RescaleContainer *GetContainer() const override;
 
-  void SetRescaler(Rescaler *rescaler);
+  void SetRescaler(bitmap::Rescaler *rescaler);
 
   void PushRescale(const SStream *found_stream, const wxImage &img);
 
@@ -58,8 +57,6 @@ class Rescale : public Base {
 };
 
 }  // namespace loader
-
-}  // namespace bitmap
 
 }  // namespace fmr
 

@@ -21,26 +21,27 @@ namespace fmr {
 
 namespace bitmap {
 
-class Loader;
-typedef queue::ItemEvent<queue::FindItem> ImageFindEvent;
-typedef queue::ItemEvent<queue::LoadImageItem> ImageLoadEvent;
-typedef queue::ItemReceiverEvent<queue::LoadImageItem> ImageLoadReceiverEvent;
-typedef queue::ItemReceiverEvent<queue::FindItem> ImageFindReceiverEvent;
-
-class RescaleLoader;
-typedef queue::ItemEvent<queue::RescaleItem> RescaleEvent;
-typedef queue::ItemReceiverEvent<queue::RescaleItem> RescaleReceiverEvent;
-
-namespace loader {
-
-class Base;
-class Page;
-class Rescale;
-
-class LoadEvent;
-class FindEvent;
-
-}  // namespace loader
+// class Loader;
+// typedef queue::ItemEvent<queue::FindItem> ImageFindEvent;
+// typedef queue::ItemEvent<queue::LoadImageItem> ImageLoadEvent;
+// typedef queue::ItemReceiverEvent<queue::LoadImageItem>
+// ImageLoadReceiverEvent; typedef queue::ItemReceiverEvent<queue::FindItem>
+// ImageFindReceiverEvent;
+//
+// class RescaleLoader;
+// typedef queue::ItemEvent<queue::RescaleItem> RescaleEvent;
+// typedef queue::ItemReceiverEvent<queue::RescaleItem> RescaleReceiverEvent;
+//
+// namespace loader {
+//
+// class Base;
+// class Page;
+// class Rescale;
+//
+// class LoadEvent;
+// class FindEvent;
+//
+// }  // namespace loader
 
 class PageLoader;
 class Rescaler;

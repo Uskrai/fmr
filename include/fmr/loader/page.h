@@ -18,21 +18,24 @@
 #ifndef FMR_BITMAP_LOADER_PAGE
 #define FMR_BITMAP_LOADER_PAGE
 
-#include <fmr/bitmap/loader/base.h>
 #include <fmr/handler/handler_factory.h>
+#include <fmr/loader/loader.h>
 
 namespace fmr {
 
 namespace bitmap {
 
 class BitmapPageCtrl;
+class BitmapVectorEvent;
+
+}  // namespace bitmap
 
 namespace loader {
 
 wxDECLARE_EVENT(kEventOpenedStreamFound, wxCommandEvent);
 
-class Page : public Base {
-  BitmapPageCtrl *bmp_ctrl_;
+class Page : public Loader {
+  bitmap::BitmapPageCtrl *bmp_ctrl_;
   std::unique_ptr<AbstractHandler> handler_;
   size_t opened_index_ = -1, item_per_page_ = 1;
   size_t preload_prev_ = 1, preload_next_ = 1;
@@ -41,7 +44,7 @@ class Page : public Base {
   std::vector<std::vector<SStream *>> stream_page_;
 
  public:
-  Page(int event_id, BitmapPageCtrl *bmp_ctrl);
+  Page(int event_id, bitmap::BitmapPageCtrl *bmp_ctrl);
   virtual ~Page();
 
   bool Open(const std::string &path);
@@ -76,12 +79,10 @@ class Page : public Base {
  protected:
   virtual void OnFindItemPush(FindEvent &event) override;
 
-  virtual void OnBitmapChanged(BitmapVectorEvent &event);
+  virtual void OnBitmapChanged(bitmap::BitmapVectorEvent &event);
 };
 
 }  // namespace loader
-
-}  // namespace bitmap
 
 }  // namespace fmr
 

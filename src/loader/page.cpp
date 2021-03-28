@@ -15,25 +15,22 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmr/bitmap/loader/page.h"
+#include "fmr/loader/page.h"
 
 #include "fmr/bitmap/bitmap_page_ctrl.h"
 #include "fmr/bitmap/bitmap_vector_event.h"
-#include "fmr/bitmap/loader/rescale.h"
 #include "fmr/common/vector.h"
 #include "fmr/handler/abstract_handler.h"
 
 namespace fmr {
 
-namespace bitmap {
-
 namespace loader {
 
 wxDEFINE_EVENT(kEventOpenedStreamFound, wxCommandEvent);
 
-Page::Page(int event_id, BitmapPageCtrl *ctrl) : Base(event_id) {
+Page::Page(int event_id, bitmap::BitmapPageCtrl *ctrl) : Loader(event_id) {
   bmp_ctrl_ = ctrl;
-  bmp_ctrl_->Bind(kEventBitmapChanged, &Page::OnBitmapChanged, this);
+  bmp_ctrl_->Bind(bitmap::kEventBitmapChanged, &Page::OnBitmapChanged, this);
 }
 
 bool Page::Open(const std::string &path) {
@@ -186,7 +183,7 @@ void Page::ClearUnused() {
   clear_page(next, 1);
 }
 
-void Page::OnBitmapChanged(BitmapVectorEvent &event) {
+void Page::OnBitmapChanged(bitmap::BitmapVectorEvent &event) {
   AdjustLoad();
   event.Skip();
 }
@@ -219,7 +216,7 @@ size_t Page::GetStreamPosInPage(const SStream *stream) const {
 void Page::Clear() {
   stream_page_.clear();
 
-  Base::Clear();
+  Loader::Clear();
 
   stream_page_.clear();
 }
@@ -227,7 +224,5 @@ void Page::Clear() {
 Page::~Page() { Clear(); }
 
 }  // namespace loader
-
-}  // namespace bitmap
 
 }  // namespace fmr

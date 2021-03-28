@@ -29,7 +29,7 @@ lib_handler_la_LIBADD = lib_path.la \
 # make libraries for bitmap
 bitmap = src/bitmap
 bitmapdir = @abs_builddir@/bitmap
-bitmap_LTLIBRARIES = lib_bitmap.la lib_bitmap_loader.la
+bitmap_LTLIBRARIES = lib_bitmap.la
 lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/image_util.cpp \
 						$(bitmap)/rescaler.cpp \
@@ -39,15 +39,17 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/bitmap_draw.cpp
 lib_bitmap_la_LIBADD = lib_position.la
 
-bitmap_loader = src/bitmap/loader
-lib_bitmap_loader_la_SOURCES = $(bitmap_loader)/base.cpp \
-															 $(bitmap_loader)/page.cpp \
-															 $(bitmap_loader)/rescale.cpp \
-															 $(bitmap_loader)/container.cpp \
-															 $(bitmap_loader)/rescale_container.cpp
-lib_bitmap_loader_la_LIBADD = lib_queue.la \
-															lib_bitmap.la \
-															lib_thread.la
+loaderdir = @abs_builddir@/loader
+loader_LTLIBRARIES = lib_loader.la
+loader = src/loader
+lib_loader_la_SOURCES = $(loader)/loader.cpp \
+												$(loader)/page.cpp \
+												$(loader)/rescale.cpp \
+												$(loader)/container.cpp \
+												$(loader)/rescale_container.cpp
+lib_loader_la_LIBADD = lib_queue.la \
+											 lib_bitmap.la \
+											 lib_thread.la
 
 
 position = src/position
@@ -68,7 +70,7 @@ lib_reader_la_LIBADD = lib_bitmap.la \
 											 lib_handler.la \
 											 lib_window.la \
 											 lib_thread.la \
-											 lib_bitmap_loader.la
+											 lib_loader.la
 
 explorer = src/explorer
 explorerdir = @abs_builddir@/explorer
@@ -81,7 +83,7 @@ lib_explorer_la_SOURCES = $(explorer)/controller.cpp \
 lib_explorer_la_LIBADD = lib_handler.la \
 												 lib_thread.la \
 												 lib_window.la \
-												 lib_bitmap_loader.la
+												 lib_loader.la
 
 gui = src/gui
 guidir = @abs_builddir@/gui
@@ -140,8 +142,6 @@ file_handler_wx_archive = $(file_handler_wxarch)/handler.cpp \
 													$(file_handler_wxarch)/input.cpp \
 													$(file_handler_wxarch)/read_stream.cpp \
 													$(file_handler_wxarch)/output.cpp
-# file_handler_utility_path = src/file_handler/utility/
-# file_handler_utility = (file_handler_utility_path)/memory_stream.cpp
 
 lib_file_handler_la_SOURCES = $(file_handler)/memory_stream.cpp \
 															$(file_handler)/factory.cpp \

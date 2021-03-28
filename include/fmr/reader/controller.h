@@ -21,6 +21,7 @@
 #include <fmr/bitmap/inc.h>
 #include <fmr/bitmap/rescaler.h>
 #include <fmr/handler/handler_factory.h>
+#include <fmr/loader/fwd.h>
 #include <fmr/position/inc.h>
 #include <fmr/reader/decorator_ctrl.h>
 #include <fmr/reader/scroll_controller.h>
@@ -36,7 +37,7 @@ wxDECLARE_EVENT(kEventOpenFile, wxCommandEvent);
 enum ControllerId { kLoaderId = wxID_HIGHEST + 1500, kOpenedTimer };
 
 class Controller : public ScrollController {
-  std::unique_ptr<bitmap::loader::Page> loader_;
+  std::unique_ptr<loader::Page> loader_;
   std::unique_ptr<position::BoxCtrl> position_ctrl_;
   std::unique_ptr<bitmap::BitmapPageCtrl> bitmap_ctrl_;
   std::unique_ptr<bitmap::Rescaler> rescaler_;
@@ -87,7 +88,7 @@ class Controller : public ScrollController {
   wxWindow *GetParent() { return parent_; }
 
  private:
-  void OnLoadedImage(bitmap::loader::LoadEvent &event);
+  void OnLoadedImage(loader::LoadEvent &event);
   void OnOpenedStreamFound(wxCommandEvent &event);
   void OnWindowScroll(wxScrollWinEvent &event);
   void OnWindowSize(wxSizeEvent &event);

@@ -15,11 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmr/bitmap/loader/container.h"
+#include "fmr/loader/container.h"
 
 namespace fmr {
-
-namespace bitmap {
 
 namespace loader {
 
@@ -83,7 +81,5 @@ void Container::Clear() {
 }
 
 }  // namespace loader
-
-}  // namespace bitmap
 
 }  // namespace fmr

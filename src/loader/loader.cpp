@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmr/bitmap/loader/base.h"
+#include "fmr/loader/loader.h"
 
 #include "fmr/bitmap/image_checker.h"
 #include "fmr/queue/event.h"
@@ -26,8 +26,6 @@
 
 namespace fmr {
 
-namespace bitmap {
-
 namespace loader {
 
 wxDEFINE_EVENT(kEventOnFindItem, ImageFindEvent);
@@ -35,7 +33,7 @@ wxDEFINE_EVENT(kEventOnImageLoaded, ImageLoadEvent);
 wxDEFINE_EVENT(kEventImageLoaded, LoadEvent);
 wxDEFINE_EVENT(kEventOnFindItemPush, FindEvent);
 
-Base::Base(int event_id) {
+Loader::Loader(int event_id) {
   event_id_ = event_id;
 
   load_data_ = std::make_unique<LoadQueueData>(this, event_id);
@@ -49,7 +47,7 @@ Base::Base(int event_id) {
   find_data_->GetReceiver()->SetEventType(kEventOnFindItem);
   find_data_->CreateTask(find_data_->GetReceiver());
 
-  image_checker_ = std::make_unique<ImageChecker>();
+  image_checker_ = std::make_unique<bitmap::ImageChecker>();
   find_data_->GetTask()->SetChecker(image_checker_.get());
 
   find_data_->Run();
@@ -57,25 +55,25 @@ Base::Base(int event_id) {
 
   SetContainer(std::make_unique<Container>());
 
-  Bind(kEventOnFindItem, &Base::OnFindItem, this, GetEventId());
-  Bind(kEventOnImageLoaded, &Base::OnImageLoad, this, GetEventId());
+  Bind(kEventOnFindItem, &Loader::OnFindItem, this, GetEventId());
+  Bind(kEventOnImageLoaded, &Loader::OnImageLoad, this, GetEventId());
 
-  Bind(kEventOnFindItemPush, &Base::OnFindItemPush, this, GetEventId());
+  Bind(kEventOnFindItemPush, &Loader::OnFindItemPush, this, GetEventId());
 }
 
-Container *Base::GetContainer() { return container_.get(); }
-const Container *Base::GetContainer() const { return container_.get(); }
+Container *Loader::GetContainer() { return container_.get(); }
+const Container *Loader::GetContainer() const { return container_.get(); }
 
-void Base::SetContainer(std::unique_ptr<Container> container) {
+void Loader::SetContainer(std::unique_ptr<Container> container) {
   container_ = std::move(container);
 }
 
-void Base::SetFindFlags(queue::FindHandlerFlags flags) {
+void Loader::SetFindFlags(queue::FindHandlerFlags flags) {
   find_data_->GetTask()->SetFlags(flags);
 }
 
-void Base::SendImage(const SStream *source_stream, const SStream *found_stream,
-                     const wxImage &image) {
+void Loader::SendImage(const SStream *source_stream,
+                       const SStream *found_stream, const wxImage &image) {
   LoadEvent send_event(GetEventId(), kEventImageLoaded);
   send_event.SetStream(source_stream, found_stream);
   send_event.SetBitmap(image);
@@ -83,35 +81,35 @@ void Base::SendImage(const SStream *source_stream, const SStream *found_stream,
   wxPostEvent(this, send_event);
 }
 
-void Base::PushFind(const SStream *stream) {
+void Loader::PushFind(const SStream *stream) {
   GetContainer()->InsertFind(stream);
   GetFindController()->Push(stream);
 }
 
-void Base::PushFrontFind(const SStream *stream) {
+void Loader::PushFrontFind(const SStream *stream) {
   GetContainer()->InsertFind(stream);
   GetFindController()->PushFront(stream);
 }
 
-bool Base::MakeFrontFind(const SStream *stream) {
+bool Loader::MakeFrontFind(const SStream *stream) {
   return GetFindController()->MakeFront(stream);
 }
 
-void Base::PushLoad(SStream *stream) {
+void Loader::PushLoad(SStream *stream) {
   GetContainer()->InsertLoad(stream);
   GetLoadController()->Push(stream);
 }
 
-void Base::PushFrontLoad(SStream *found_stream) {
+void Loader::PushFrontLoad(SStream *found_stream) {
   GetContainer()->InsertLoad(found_stream);
   GetLoadController()->PushFront(found_stream);
 }
 
-bool Base::MakeFrontLoad(SStream *found_stream) {
+bool Loader::MakeFrontLoad(SStream *found_stream) {
   return GetLoadController()->MakeFront(found_stream);
 }
 
-void Base::LoadFoundStream(const SStream *found_stream) {
+void Loader::LoadFoundStream(const SStream *found_stream) {
   if (GetContainer()->IsFound(found_stream)) {
     auto source_stream = GetContainer()->GetSourceStream(found_stream);
     auto item = GetContainer()->GetFoundStream(source_stream);
@@ -120,37 +118,37 @@ void Base::LoadFoundStream(const SStream *found_stream) {
   }
 }
 
-void Base::LoadSourceStream(const SStream *source_stream) {
+void Loader::LoadSourceStream(const SStream *source_stream) {
   auto item = GetContainer()->GetFoundStream(source_stream);
   for (auto &it : item) PushLoad(it);
 }
 
-bool Base::IsFound(const SStream *found_stream) const {
+bool Loader::IsFound(const SStream *found_stream) const {
   return GetContainer()->IsFound(found_stream);
 }
 
-bool Base::IsSourceFound(const SStream *source_stream) const {
+bool Loader::IsSourceFound(const SStream *source_stream) const {
   return GetContainer()->IsSourceFound(source_stream);
 }
 
-const SStream *Base::GetSourceStream(const SStream *found_stream) const {
+const SStream *Loader::GetSourceStream(const SStream *found_stream) const {
   return GetContainer()->GetSourceStream(found_stream);
 }
 
-std::vector<SStream *> Base::GetFoundStream(
+std::vector<SStream *> Loader::GetFoundStream(
     const SStream *source_stream) const {
   return GetContainer()->GetFoundStream(source_stream);
 }
 
-bool Base::IsInFindQueue(const SStream *stream) {
+bool Loader::IsInFindQueue(const SStream *stream) {
   return GetContainer()->IsInFindQueue(stream);
 }
 
-bool Base::IsInLoadQueue(const SStream *found_stream) {
+bool Loader::IsInLoadQueue(const SStream *found_stream) {
   return GetContainer()->IsInLoadQueue(found_stream);
 }
 
-void Base::OnImageLoaded(ImageLoadEvent &event) {
+void Loader::OnImageLoaded(ImageLoadEvent &event) {
   auto &item = event.GetItem();
 
   auto found_stream = item.GetStream();
@@ -158,7 +156,7 @@ void Base::OnImageLoaded(ImageLoadEvent &event) {
   SendImage(source_stream, found_stream, event.GetItem().GetImage());
 }
 
-void Base::OnFindItem(ImageFindEvent &event) {
+void Loader::OnFindItem(ImageFindEvent &event) {
   auto &item = event.GetItem();
   if (IsInFindQueue(item.GetSourceStream()) &&
       item.GetStatus() != queue::kFindNotFound) {
@@ -173,40 +171,38 @@ void Base::OnFindItem(ImageFindEvent &event) {
   GetContainer()->RemoveFind(event.GetItem().GetSourceStream());
 }
 
-void Base::OnImageLoad(ImageLoadEvent &event) {
+void Loader::OnImageLoad(ImageLoadEvent &event) {
   GetContainer()->RemoveLoad(event.GetItem().GetStream());
   OnImageLoaded(event);
 }
 
-const Base::FindQueueCtrl *Base::GetFindController() const {
+const Loader::FindQueueCtrl *Loader::GetFindController() const {
   return find_data_->GetQueueCtrl();
 }
 
-Base::FindQueueCtrl *Base::GetFindController() {
+Loader::FindQueueCtrl *Loader::GetFindController() {
   return find_data_->GetQueueCtrl();
 }
 
-const Base::LoadQueueCtrl *Base::GetLoadController() const {
+const Loader::LoadQueueCtrl *Loader::GetLoadController() const {
   return load_data_->GetQueueCtrl();
 }
-Base::LoadQueueCtrl *Base::GetLoadController() {
+Loader::LoadQueueCtrl *Loader::GetLoadController() {
   return load_data_->GetQueueCtrl();
 }
 
-void Base::OnFindItemPush(FindEvent &event) {
+void Loader::OnFindItemPush(FindEvent &event) {
   if (!IsLazyLoad()) PushLoad(event.GetFoundStream());
 }
 
-void Base::Clear() {
+void Loader::Clear() {
   load_data_->Clear();
   find_data_->Clear();
   GetContainer()->Clear();
 }
 
-Base::~Base() { Clear(); }
+Loader::~Loader() { Clear(); }
 
 }  // namespace loader
-
-}  // namespace bitmap
 
 }  // namespace fmr

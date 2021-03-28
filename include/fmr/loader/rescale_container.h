@@ -19,11 +19,9 @@
 #define FMR_BITMAP_LOADER_RESCALE_CONTAINER
 
 #include <fmr/bitmap/bmp.h>
-#include <fmr/bitmap/loader/container.h>
+#include <fmr/loader/container.h>
 
 namespace fmr {
-
-namespace bitmap {
 
 namespace loader {
 
@@ -44,8 +42,6 @@ class RescaleContainer : public Container {
 };
 
 }  // namespace loader
-
-}  // namespace bitmap
 
 }  // namespace fmr
 

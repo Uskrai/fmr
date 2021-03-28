@@ -26,8 +26,6 @@
 
 namespace fmr {
 
-namespace bitmap {
-
 namespace loader {
 
 template <typename KeyT, typename ValueT>
@@ -157,8 +155,6 @@ class Container {
 };
 
 }  // namespace loader
-
-}  // namespace bitmap
 
 }  // namespace fmr
 

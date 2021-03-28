@@ -19,18 +19,16 @@
 #define FMR_BITMAP_LOADER_BASE
 
 #include <fmr/bitmap/image_checker.h>
-#include <fmr/bitmap/inc.h>
-#include <fmr/bitmap/loader/container.h>
-#include <fmr/bitmap/loader/find_event.h>
-#include <fmr/bitmap/loader/load_event.h>
+#include <fmr/loader/container.h>
+#include <fmr/loader/find_event.h>
+#include <fmr/loader/fwd.h>
+#include <fmr/loader/load_event.h>
 #include <fmr/thread/inc.h>
 
 #include <unordered_map>
 #include <unordered_set>
 
 namespace fmr {
-
-namespace bitmap {
 
 namespace loader {
 
@@ -39,7 +37,7 @@ wxDECLARE_EVENT(kEventOnFindItemPush, FindEvent);
 
 class Container;
 
-class Base : public wxEvtHandler {
+class Loader : public wxEvtHandler {
   std::unordered_map<const wxImage *, const SStream *> map_loaded_to_source_;
 
   using FindQueueData =
@@ -56,16 +54,7 @@ class Base : public wxEvtHandler {
   std::unique_ptr<FindQueueData> find_data_;
   std::unique_ptr<LoadQueueData> load_data_;
 
-  // std::unique_ptr<ImageFindReceiverEvent> find_receiver_;
-  // std::unique_ptr<thread::FindHandlerController> find_controller_;
-  //
-  // queue::FindHandler *find_task_ = nullptr;
-  // queue::LoadImage *load_task_ = nullptr;
-  //
-  // std::unique_ptr<ImageLoadReceiverEvent> load_receiver_;
-  // std::unique_ptr<thread::LoadImageController> load_controller_;
-
-  std::unique_ptr<ImageChecker> image_checker_;
+  std::unique_ptr<bitmap::ImageChecker> image_checker_;
 
   std::unique_ptr<Container> container_;
 
@@ -74,8 +63,8 @@ class Base : public wxEvtHandler {
   bool lazy_load_ = false;
 
  public:
-  Base(int event_id);
-  virtual ~Base();
+  Loader(int event_id);
+  virtual ~Loader();
 
   void PushFind(const SStream *stream);
   void PushFrontFind(const SStream *stream);
@@ -128,8 +117,6 @@ class Base : public wxEvtHandler {
 };
 
 }  // namespace loader
-
-}  // namespace bitmap
 
 }  // namespace fmr
 

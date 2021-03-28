@@ -19,11 +19,11 @@
 
 #include "fmr/bitmap/bitmap_page_ctrl.h"
 #include "fmr/bitmap/bitmap_vector_event.h"
-#include "fmr/bitmap/loader/page.h"
 #include "fmr/bitmap/rescaler.h"
 #include "fmr/common/dimension.h"
 #include "fmr/common/event.h"
 #include "fmr/handler/handler_factory.h"
+#include "fmr/loader/page.h"
 #include "fmr/nowide/string.h"
 #include "fmr/position/box_ctrl.h"
 #include "fmr/queue/event.h"
@@ -60,12 +60,12 @@ Controller::Controller() {
 
   decorator_ = std::make_unique<DecoratorCtrl>(GetWindow(), bitmap_ctrl_.get());
 
-  loader_ = std::make_unique<bitmap::loader::Page>(kLoaderId, GetBitmapCtrl());
+  loader_ = std::make_unique<loader::Page>(kLoaderId, GetBitmapCtrl());
 
-  loader_->Bind(bitmap::loader::kEventImageLoaded, &Controller::OnLoadedImage,
-                this, kLoaderId);
+  loader_->Bind(loader::kEventImageLoaded, &Controller::OnLoadedImage, this,
+                kLoaderId);
 
-  loader_->Bind(bitmap::loader::kEventOpenedStreamFound,
+  loader_->Bind(loader::kEventOpenedStreamFound,
                 &Controller::OnOpenedStreamFound, this, kLoaderId);
 }
 
@@ -147,7 +147,7 @@ void Controller::AdjustBitmap() {
   GetWindow()->Refresh();
 }
 
-void Controller::OnLoadedImage(bitmap::loader::LoadEvent &event) {
+void Controller::OnLoadedImage(loader::LoadEvent &event) {
   auto stream_page = loader_->GetStreamPage(event.GetFoundStream());
   auto stream_pos_in_page = loader_->GetStreamPosInPage(event.GetFoundStream());
 

@@ -17,11 +17,11 @@
 
 #include "fmr/explorer/controller.h"
 
-#include "fmr/bitmap/loader/rescale.h"
 #include "fmr/bitmap/rescaler.h"
 #include "fmr/common/dimension.h"
 #include "fmr/explorer/image_cell_explorer.h"
 #include "fmr/handler/handler_factory.h"
+#include "fmr/loader/rescale.h"
 #include "fmr/nowide/string.h"
 #include "fmr/queue/event.h"
 #include "fmr/queue/load_image_item.h"
@@ -38,14 +38,14 @@ Controller::Controller() {
   window_ = new window::GridWindow();
   rescaler_ = std::make_unique<bitmap::Rescaler>();
   rescaler_->SetFlags(bitmap::kRescaleFitAll | bitmap::kRescaleShrink);
-  loader_ = std::make_unique<bitmap::loader::Rescale>(kLoaderId);
+  loader_ = std::make_unique<loader::Rescale>(kLoaderId);
   loader_->SetRescaler(rescaler_.get());
   loader_->SetFindFlags(queue::kFindHandlerOnlyFirstItem |
                         queue::kFindHandlerRecursive);
 
   window_->Bind(wxEVT_KEY_DOWN, &Controller::OnKeyDown, this);
-  loader_->Bind(bitmap::loader::kEventImageLoaded, &Controller::OnImageLoaded,
-                this, kLoaderId);
+  loader_->Bind(loader::kEventImageLoaded, &Controller::OnImageLoaded, this,
+                kLoaderId);
 
   Bind(kEventOpenCell, &Controller::OnOpenCell, this);
 }
@@ -199,7 +199,7 @@ void Controller::OnKeyDown(wxKeyEvent &event) {
   event.Skip();
 }
 
-void Controller::OnImageLoaded(bitmap::loader::LoadEvent &event) {
+void Controller::OnImageLoaded(loader::LoadEvent &event) {
   auto item =
       stream_to_cell_.find(loader_->GetSourceStream(event.GetFoundStream()));
   if (item != stream_to_cell_.end()) {

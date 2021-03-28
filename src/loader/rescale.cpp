@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "fmr/bitmap/loader/rescale.h"
+#include "fmr/loader/rescale.h"
 
 #include "fmr/bitmap/image_checker.h"
 #include "fmr/queue/event.h"
@@ -26,13 +26,11 @@
 
 namespace fmr {
 
-namespace bitmap {
-
 namespace loader {
 
 wxDEFINE_EVENT(kOnImageRescaled, RescaleEvent);
 
-Rescale::Rescale(int event_id) : Base(event_id) {
+Rescale::Rescale(int event_id) : Loader(event_id) {
   rescale_data_ = std::make_unique<RescaleQueueData>(this, event_id);
   rescale_data_->CreateReceiver(this, event_id);
   rescale_data_->GetReceiver()->SetEventType(kOnImageRescaled);
@@ -57,18 +55,18 @@ Rescale::Rescale(int event_id) : Base(event_id) {
 }
 
 const RescaleContainer *Rescale::GetContainer() const {
-  return static_cast<const RescaleContainer *>(Base::GetContainer());
+  return static_cast<const RescaleContainer *>(Loader::GetContainer());
 }
 
 RescaleContainer *Rescale::GetContainer() {
-  return static_cast<RescaleContainer *>(Base::GetContainer());
+  return static_cast<RescaleContainer *>(Loader::GetContainer());
 }
 
 void Rescale::SetContainer(std::unique_ptr<RescaleContainer> container) {
-  Base::SetContainer(std::move(container));
+  Loader::SetContainer(std::move(container));
 }
 
-void Rescale::SetRescaler(Rescaler *rescaler) {
+void Rescale::SetRescaler(bitmap::Rescaler *rescaler) {
   rescale_data_->GetTask()->SetRescaler(rescaler);
 }
 
@@ -94,13 +92,11 @@ void Rescale::OnImageRescaled(RescaleEvent &event) {
 
 void Rescale::Clear() {
   rescale_data_->Clear();
-  Base::Clear();
+  Loader::Clear();
 }
 
 Rescale::~Rescale() { Clear(); }
 
 }  // namespace loader
-
-}  // namespace bitmap
 
 }  // namespace fmr
