@@ -224,6 +224,17 @@ TYPED_TEST(HandlerFixture, TestDelete) {
   char ch[buff_size];
   stream.Write(&ch, buff_size);
 
+  handler.Write()->CreateFile("1", &stream, fmr::file_handler::kWriteNone);
+  handler.Write()->DeleteDirectory("1");
+  handler.Write()->CommitWrite();
+  handler.Read()->Traverse(false);
+
+  ASSERT_EQ(handler.Read()->Size(), 1);
+  handler.Write()->DeleteFile("1");
+  handler.Write()->CommitWrite();
+  handler.Read()->Traverse(false);
+  ASSERT_EQ(handler.Read()->Size(), 0) << " file not deleted";
+
   handler.Write()->CreateDirectory("test");
   for (size_t i = 0; i < var::kLoopCount; ++i) {
     handler.Write()->CreateFile("test/" + std::to_string(i), &stream,
