@@ -20,7 +20,7 @@
 #include "fmr/bitmap/bitmap_page_ctrl.h"
 #include "fmr/bitmap/bitmap_vector_event.h"
 #include "fmr/common/vector.h"
-#include "fmr/handler/abstract_handler.h"
+#include "fmr/compare/natural.h"
 
 namespace fmr {
 
@@ -34,34 +34,42 @@ Page::Page(int event_id, bitmap::BitmapPageCtrl *ctrl) : Loader(event_id) {
 }
 
 bool Page::Open(const std::string &path) {
-  auto handler = HandlerFactory::NewHandler(path);
+  auto handler = GetHandlerFactory()->NewHandler(path);
 
-  if (handler) {
-    handler->Traverse(false);
+  if (!handler) return false;
 
-    // return false if handler empty
-    if (handler->Size() == 0) return false;
-
-    // store index to check page location later
-    opened_index_ = handler->Index(path);
-
-    if (!handler->IsExist(opened_index_)) opened_index_ = 0;
-
-    opened_stream_ = &handler->Item(opened_index_);
-
-    if (opened_index_ < GetItemPerPage()) {
-      SendOpenedStreamInBack();
-    }
-
-    for (const auto &it : handler->GetChild()) {
-      PushFind(&it);
-    }
-
-    handler_ = std::move(handler);
-    return true;
+  if (!handler->IsOk()) {
+    if (handler->GetParent()) handler->Open(handler->GetParent()->GetPath());
+    if (!handler->IsOk()) return false;
   }
 
-  return false;
+  if (!handler->Read()) return false;
+
+  file_handler::Input &input = *handler->Read();
+
+  input.Traverse(false);
+  input.Sort(compare::Natural());
+
+  // return false if handler empty
+  if (input.IsEmpty()) return false;
+
+  // store index to check page location later
+  opened_index_ = input.Index(path);
+
+  if (opened_index_ > input.Size()) opened_index_ = 0;
+
+  opened_stream_ = input.At(opened_index_);
+
+  if (opened_index_ < GetItemPerPage()) {
+    SendOpenedStreamInBack();
+  }
+
+  for (const auto &it : input) {
+    PushFind(&it);
+  }
+
+  handler_ = std::move(handler);
+  return true;
 }
 
 void Page::SendOpenedStreamInBack() {
@@ -188,10 +196,10 @@ void Page::OnBitmapChanged(bitmap::BitmapVectorEvent &event) {
   event.Skip();
 }
 
-AbstractHandler *Page::GetHandler() { return handler_.get(); }
-const AbstractHandler *Page::GetHandler() const { return handler_.get(); }
+file_handler::Handler *Page::GetHandler() { return handler_.get(); }
+const file_handler::Handler *Page::GetHandler() const { return handler_.get(); }
 
-size_t Page::GetStreamPage(const SStream *stream) const {
+size_t Page::GetStreamPage(const ReadStream *stream) const {
   size_t idx = 0;
   for (const auto &it : stream_page_) {
     if (std::find(it.begin(), it.end(), stream) != it.end()) return idx;
@@ -200,7 +208,7 @@ size_t Page::GetStreamPage(const SStream *stream) const {
   return -1;
 }
 
-size_t Page::GetStreamPosInPage(const SStream *stream) const {
+size_t Page::GetStreamPosInPage(const ReadStream *stream) const {
   size_t idx;
   for (const auto &vec : stream_page_) {
     idx = 0;

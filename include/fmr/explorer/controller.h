@@ -19,8 +19,9 @@
 #define FMR_EXPLORER_CONTROLLER
 
 #include <fmr/bitmap/inc.h>
-#include <fmr/handler/abstract_openable_handler.h>
+#include <fmr/file_handler/factory.h>
 #include <fmr/loader/fwd.h>
+#include <wx/event.h>
 #include <wx/gdicmn.h>
 
 #include <unordered_map>
@@ -35,7 +36,22 @@ class GridWindow;
 
 namespace explorer {
 
-wxDECLARE_EVENT(kEventOpenCell, wxNotifyEvent);
+using ReadStream = file_handler::ReadStream;
+class OpenCellEvent : public wxEvent {
+  std::unique_ptr<ReadStream> stream_;
+
+ public:
+  OpenCellEvent(int id, wxEventType event_type, const ReadStream &stream)
+      : wxEvent(id, event_type), stream_(stream.Clone()) {}
+  OpenCellEvent(const OpenCellEvent &oth)
+      : wxEvent(oth), stream_(oth.stream_->Clone()) {}
+
+  std::unique_ptr<ReadStream> &GetStream() { return stream_; }
+
+  OpenCellEvent *Clone() const override { return new OpenCellEvent(*this); }
+};
+
+wxDECLARE_EVENT(kEventOpenCell, OpenCellEvent);
 
 enum ExplorerId { kLoaderId = wxID_HIGHEST + 130 };
 class ImageCell;
@@ -44,11 +60,13 @@ class Controller : public wxEvtHandler {
   wxSize border_size_{30, 30};
   int column_ = 5;
   window::GridWindow *window_ = nullptr;
-  std::unordered_map<const SStream *, ImageCell *> stream_to_cell_;
-  std::vector<std::unique_ptr<SStream>> stream_vec_;
-  std::unique_ptr<AbstractOpenableHandler> handler_;
+  std::unordered_map<const ReadStream *, ImageCell *> stream_to_cell_;
+  std::vector<std::unique_ptr<ReadStream>> stream_vec_;
+  std::unique_ptr<file_handler::Handler> handler_;
   std::unique_ptr<bitmap::Rescaler> rescaler_;
   std::unique_ptr<loader::Rescale> loader_;
+
+  const file_handler::Factory *factory_ = file_handler::Factory::GetGlobal();
 
  public:
   Controller();
@@ -60,15 +78,13 @@ class Controller : public wxEvtHandler {
 
   window::GridWindow *GetWindow() { return window_; }
 
-  bool Open(std::unique_ptr<AbstractOpenableHandler> handler);
+  bool Open(std::unique_ptr<file_handler::Handler> handler);
   bool Open(const std::string &path);
   bool OpenCell(size_t index);
   bool OpenParent(const std::string &name);
   bool OpenParent();
 
-  void PushCell(const SStream &stream);
-
-  void Select(std::string name);
+  bool Select(std::string name);
 
   void AdjustCell();
 
@@ -76,8 +92,10 @@ class Controller : public wxEvtHandler {
 
  private:
   void OnKeyDown(wxKeyEvent &event);
-  void OnOpenCell(wxNotifyEvent &event);
+  void OnOpenCell(OpenCellEvent &event);
   void OnImageLoaded(loader::LoadEvent &event);
+
+  void PushCell(const ReadStream &stream);
 };
 
 }  // namespace explorer

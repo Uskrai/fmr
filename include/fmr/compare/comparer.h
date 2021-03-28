@@ -44,8 +44,6 @@ class Comparer {
   };
   bool operator()(const Sortable &s1, const Sortable &s2) {
     return this->operator()(s1.GetString(), s2.GetString());
-    // Compare(s1.GetString(), s2.GetString());
-    // Compare(String(s1.GetString()), String(s2.GetString()));
   };
 
   std::unique_ptr<Comparer> Clone() const {

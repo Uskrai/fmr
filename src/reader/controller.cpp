@@ -117,7 +117,9 @@ void Controller::SetSettings(const Settings &setting) {
 
 void Controller::SetImagePerPage(size_t size) { loader_->SetItemPerPage(size); }
 
-AbstractHandler *Controller::GetHandler() { return loader_->GetHandler(); }
+file_handler::Handler *Controller::GetHandler() {
+  return loader_->GetHandler();
+}
 
 wxSize Controller::GetFitSize() {
   wxSize client_size = GetWindow()->GetClientSize();
@@ -197,12 +199,16 @@ void Controller::ChangePage(wxDirection direction) {
 bool Controller::ChangeFolder(wxDirection direction) {
   int step = GetStep(direction);
 
-  AbstractHandler *handler = loader_->GetHandler();
-  if (handler && handler->GetParent()) {
-    handler->GetParent()->Traverse();
-    std::string path = handler->GetFromCurrent(step);
-    if (path != "") {
-      return Open(path);
+  file_handler::Handler *handler = loader_->GetHandler();
+  if (handler && handler->GetParent() && handler->GetParent()->Read()) {
+    auto parent_input = handler->GetParent()->Read();
+    parent_input->Traverse(false);
+    auto idx = parent_input->Index(handler->GetPath());
+    if (idx + step < parent_input->Size()) {
+      auto next_handler =
+          handler_factory_->NewHandler(*parent_input->At(idx + step));
+
+      if (next_handler) return Open(next_handler->GetPath());
     }
   }
   return false;

@@ -20,7 +20,7 @@
 
 #include <fmr/bitmap/inc.h>
 #include <fmr/bitmap/rescaler.h>
-#include <fmr/handler/handler_factory.h>
+#include <fmr/file_handler/factory.h>
 #include <fmr/loader/fwd.h>
 #include <fmr/position/inc.h>
 #include <fmr/reader/decorator_ctrl.h>
@@ -44,6 +44,9 @@ class Controller : public ScrollController {
   std::unique_ptr<DecoratorCtrl> decorator_;
   bool is_read_from_right_ = false;
   wxWindow *parent_ = nullptr;
+
+  const file_handler::Factory *handler_factory_ =
+      file_handler::Factory::GetGlobal();
 
   wxTimer opened_timer_{this, kOpenedTimer};
   bool is_opened_ = false;
@@ -69,7 +72,7 @@ class Controller : public ScrollController {
 
   void SetSettings(const Settings &setting);
 
-  AbstractHandler *GetHandler();
+  file_handler::Handler *GetHandler();
   virtual void Clear();
 
   void SetImagePerPage(size_t size);

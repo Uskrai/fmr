@@ -16,15 +16,17 @@
  */
 
 #include <fmr/bitmap/bmp.h>
-#include <fmr/handler/struct_stream.h>
+#include <fmr/file_handler/read_stream.h>
 #include <wx/event.h>
 
 namespace fmr {
 
 namespace loader {
 
+using ReadStream = file_handler::ReadStream;
+
 class LoadEvent : public wxEvent {
-  const SStream *source_stream_ = nullptr, *found_stream_ = nullptr;
+  const ReadStream *source_stream_ = nullptr, *found_stream_ = nullptr;
   SBitmap bitmap_;
 
  public:
@@ -33,15 +35,16 @@ class LoadEvent : public wxEvent {
 
   LoadEvent *Clone() const override { return new LoadEvent(*this); }
 
-  void SetStream(const SStream *source_stream, const SStream *found_stream) {
+  void SetStream(const ReadStream *source_stream,
+                 const ReadStream *found_stream) {
     source_stream_ = source_stream;
     found_stream_ = found_stream;
   }
 
   void SetBitmap(const SBitmap &bitmap) { bitmap_ = bitmap; }
 
-  const SStream *GetSourceStream() const { return source_stream_; }
-  const SStream *GetFoundStream() const { return found_stream_; }
+  const ReadStream *GetSourceStream() const { return source_stream_; }
+  const ReadStream *GetFoundStream() const { return found_stream_; }
 
   SBitmap &GetBitmap() { return bitmap_; }
   const SBitmap &GetBitmap() const { return bitmap_; }

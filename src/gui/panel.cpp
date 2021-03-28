@@ -27,6 +27,7 @@
 #include <iostream>
 #include <memory>
 
+#include "fmr/bitmap/image_checker.h"
 #include "fmr/explorer/controller.h"
 #include "fmr/handler/handler_factory.h"
 #include "fmr/nowide/string.h"
@@ -115,7 +116,7 @@ bool Panel::OpenExplorer() {
   if (reader_) {
     auto handler = reader_->GetHandler();
     if (handler) {
-      select_path = handler->GetName();
+      select_path = handler->GetPath();
     }
   }
 
@@ -155,36 +156,39 @@ void Panel::OnKeyDown(wxKeyEvent &event) {
   event.Skip();
 }
 
-void Panel::OnExplorerOpenFile(wxNotifyEvent &event) {
-  std::string path = String::Narrow(event.GetString());
-  if (HandlerFactory::IsOpenable(path)) {
-    auto handler = HandlerFactory::NewOpenableHandler(path);
-    handler->Traverse();
+void Panel::OnExplorerOpenFile(explorer::OpenCellEvent &event) {
+  auto handler =
+      file_handler::Factory::GetGlobal()->NewHandler(*event.GetStream());
 
-    for (auto &it : handler->GetChild()) {
-      auto child_path = handler->GetItemPath(it);
-      auto child_handler = HandlerFactory::NewHandler(child_path);
-      if (child_handler && child_handler->GetName() == child_path) {
-        event.Skip();
-        return;
+  if (handler) {
+    handler->Read()->Traverse(false);
+    for (auto &it : *handler->Read()) {
+      bitmap::ImageChecker checker;
+
+      if (checker.Check(it, nullptr) == queue::kFindNotFound) {
+        auto handler = file_handler::Factory::GetGlobal()->NewHandler(it);
+        if (handler && handler->IsExist()) {
+          event.Skip();
+          return;
+        }
       }
     }
   }
 
   explorer_->GetWindow()->Hide();
 
-  if (event.GetString().empty()) return;
+  if (!handler && !handler->IsOk()) return;
 
-  if (LoadFile(String::Narrow(event.GetString()))) {
+  if (LoadFile(handler->GetPath())) {
     explorer_->Clear();
     return;
   } else {
     explorer_->GetWindow()->Show();
     explorer_->GetWindow()->SetFocus();
-    explorer_->Open(String::Narrow(event.GetString()));
+    explorer_->Open(handler->GetPath());
   }
 
-  wxLogError("Cannot open:%s", event.GetString());
+  wxLogError("Cannot open:%s", handler->GetPath());
 }
 
 void Panel::OnReaderOpenFile(wxCommandEvent &event) {

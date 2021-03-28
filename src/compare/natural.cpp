@@ -39,9 +39,6 @@ String GetNonZero(const String& str, size_t idx, char chr) {
 }
 
 bool Natural::Compare(const String& s1, const String& s2) {
-  // const String& first = s1.Lower().wx_str();
-
-  // const String& second = s2.Lower().wx_str();
   // idx for first, pos for second;
   size_t idx = 0, pos = 0;
   while (s1.Exist(idx) && s2.Exist(pos)) {
@@ -77,7 +74,6 @@ bool Natural::Compare(const String& s1, const String& s2) {
   }
 
   return s1.Size() < s2.Size();
-  return true;
 }
 
 }  // namespace compare

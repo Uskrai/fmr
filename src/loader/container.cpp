@@ -21,55 +21,55 @@ namespace fmr {
 
 namespace loader {
 
-SStream *Container::AddFoundStream(const SStream *source_stream,
-                                   const SStream &found_stream) {
-  auto stream = std::make_unique<SStream>(found_stream);
-  auto found_stream_ptr = stream.get();
+ReadStream *Container::AddFoundStream(
+    const ReadStream *source_stream, std::unique_ptr<ReadStream> found_stream) {
+  auto ret = found_stream.get();
 
-  source_found_map_.Insert(source_stream, found_stream_ptr);
-  loaded_stream_.push_back(std::move(stream));
+  source_found_map_.Insert(source_stream, ret);
+  loaded_stream_.push_back(std::move(found_stream));
 
-  return found_stream_ptr;
+  return ret;
 }
 
-std::vector<SStream *> Container::GetFoundStream(
-    const SStream *source_stream) const {
+std::vector<ReadStream *> Container::GetFoundStream(
+    const ReadStream *source_stream) const {
   return source_found_map_.GetValue(source_stream);
 }
 
-bool Container::IsFound(const SStream *found_stream) const {
-  return source_found_map_.IsValueExist(const_cast<SStream *>(found_stream));
+bool Container::IsFound(const ReadStream *found_stream) const {
+  return source_found_map_.IsValueExist(const_cast<ReadStream *>(found_stream));
 }
 
-bool Container::IsSourceFound(const SStream *source_stream) const {
+bool Container::IsSourceFound(const ReadStream *source_stream) const {
   return source_found_map_.IsKeyExist(source_stream);
 }
 
-const SStream *Container::GetSourceStream(const SStream *found_stream) const {
-  return source_found_map_.GetKey(const_cast<SStream *>(found_stream));
+const ReadStream *Container::GetSourceStream(
+    const ReadStream *found_stream) const {
+  return source_found_map_.GetKey(const_cast<ReadStream *>(found_stream));
 }
 
-void Container::InsertFind(const SStream *source_stream) {
+void Container::InsertFind(const ReadStream *source_stream) {
   find_queue_set_.Insert(source_stream);
 }
 
-void Container::RemoveFind(const SStream *source_stream) {
+void Container::RemoveFind(const ReadStream *source_stream) {
   find_queue_set_.Remove(source_stream);
 }
 
-bool Container::IsInFindQueue(const SStream *source_stream) const {
+bool Container::IsInFindQueue(const ReadStream *source_stream) const {
   return find_queue_set_.Exist(source_stream);
 }
 
-void Container::InsertLoad(const SStream *found_stream) {
+void Container::InsertLoad(const ReadStream *found_stream) {
   load_queue_set_.Insert(found_stream);
 }
 
-bool Container::IsInLoadQueue(const SStream *found_stream) const {
+bool Container::IsInLoadQueue(const ReadStream *found_stream) const {
   return load_queue_set_.Exist(found_stream);
 }
 
-void Container::RemoveLoad(const SStream *found_stream) {
+void Container::RemoveLoad(const ReadStream *found_stream) {
   return load_queue_set_.Remove(found_stream);
 }
 

@@ -26,12 +26,8 @@ namespace bitmap {
 
 class ImageChecker : public queue::FindHandlerChecker {
  public:
-  virtual queue::FindStatus Check(queue::FindHandler &parent,
-                                  AbstractOpenableHandler &handler,
-                                  SStream &stream) override;
-  virtual queue::FindStatus Check(queue::FindHandler &parent,
-                                  AbstractHandler &handler,
-                                  SStream &stream) override;
+  virtual queue::FindStatus Check(file_handler::ReadStream &stream,
+                                  queue::FindHandler *parent) override;
 };
 
 }  // namespace bitmap

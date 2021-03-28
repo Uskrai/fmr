@@ -36,20 +36,20 @@ wxDECLARE_EVENT(kEventOpenedStreamFound, wxCommandEvent);
 
 class Page : public Loader {
   bitmap::BitmapPageCtrl *bmp_ctrl_;
-  std::unique_ptr<AbstractHandler> handler_;
+  std::unique_ptr<file_handler::Handler> handler_;
   size_t opened_index_ = -1, item_per_page_ = 1;
   size_t preload_prev_ = 1, preload_next_ = 1;
-  SStream *opened_stream_ = nullptr;
+  ReadStream *opened_stream_ = nullptr;
 
-  std::vector<std::vector<SStream *>> stream_page_;
+  std::vector<std::vector<ReadStream *>> stream_page_;
 
  public:
   Page(int event_id, bitmap::BitmapPageCtrl *bmp_ctrl);
   virtual ~Page();
 
   bool Open(const std::string &path);
-  AbstractHandler *GetHandler();
-  const AbstractHandler *GetHandler() const;
+  file_handler::Handler *GetHandler();
+  const file_handler::Handler *GetHandler() const;
 
   void AdjustLoad();
   void PreloadImage();
@@ -68,8 +68,8 @@ class Page : public Loader {
   void SetItemPerPage(size_t size) { item_per_page_ = size; }
   size_t GetItemPerPage() const { return item_per_page_; }
 
-  size_t GetStreamPage(const SStream *stream) const;
-  size_t GetStreamPosInPage(const SStream *stream) const;
+  size_t GetStreamPage(const ReadStream *stream) const;
+  size_t GetStreamPosInPage(const ReadStream *stream) const;
 
   void SendOpenedStreamInBack();
   size_t GetOpenedPagePos() { return opened_index_; }

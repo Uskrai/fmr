@@ -38,7 +38,9 @@ bool Handler::Open(const std::string &path) {
   return true;
 }
 
-bool Handler::Open(const file_handler::ReadStream &stream) { return false; }
+bool Handler::Open(const file_handler::ReadStream &stream) {
+  return Open(Path::Append(stream.GetHandlerPath(), stream.GetName()));
+}
 
 bool Handler::Open(const local::ReadStream &stream) {
   return Open(stream.GetFullPath());

@@ -21,13 +21,13 @@ namespace fmr {
 
 namespace loader {
 
-const SStream *RescaleContainer::GetFoundStream(const wxImage *bmp) const {
+const ReadStream *RescaleContainer::GetFoundStream(const wxImage *bmp) const {
   auto item = img_to_stream_.find(bmp);
   if (item != img_to_stream_.end()) return item->second;
   return nullptr;
 }
 
-wxImage *RescaleContainer::AddImage(const SStream *found_stream,
+wxImage *RescaleContainer::AddImage(const ReadStream *found_stream,
                                     const wxImage &img) {
   stream_to_img_.insert(std::make_pair(found_stream, img));
   auto img_ptr = GetImage(found_stream);
@@ -35,13 +35,14 @@ wxImage *RescaleContainer::AddImage(const SStream *found_stream,
   return img_ptr;
 }
 
-const wxImage *RescaleContainer::GetImage(const SStream *found_stream) const {
+const wxImage *RescaleContainer::GetImage(
+    const ReadStream *found_stream) const {
   auto item = stream_to_img_.find(found_stream);
   if (item != stream_to_img_.end()) return &item->second;
   return nullptr;
 }
 
-wxImage *RescaleContainer::GetImage(const SStream *found_stream) {
+wxImage *RescaleContainer::GetImage(const ReadStream *found_stream) {
   auto item = stream_to_img_.find(found_stream);
   if (item != stream_to_img_.end()) return &item->second;
   return nullptr;

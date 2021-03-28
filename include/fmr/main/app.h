@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <fmr/file_handler/factory.h>
 #include <wx/app.h>
 
 #include <iostream>
@@ -28,12 +29,14 @@ class Config;
 
 class App : public wxApp {
   wxFrame* frame;
+  std::unique_ptr<file_handler::Factory> file_handler_factory_;
   std::unique_ptr<Config> config_;
   std::ofstream* log_stream;
   bool OnInit();
   int OnExit();
 
   void PrepareConfig();
+  void PrepareFileHandlerFactory();
 
  public:
   void OpenFile(wxString Path);

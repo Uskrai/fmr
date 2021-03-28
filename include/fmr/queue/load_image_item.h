@@ -18,7 +18,7 @@
 #ifndef FMR_QUEUE_LOAD_IMAGE_ITEM
 #define FMR_QUEUE_LOAD_IMAGE_ITEM
 
-#include <fmr/handler/struct_stream.h>
+#include <fmr/file_handler/read_stream.h>
 #include <wx/image.h>
 
 namespace fmr {
@@ -26,32 +26,43 @@ namespace fmr {
 namespace queue {
 
 class LoadImageItem {
+  using ReadStream = file_handler::ReadStream;
   wxImage image_;
-  const SStream *source_ = nullptr;
-  SStream stream_;
+  const ReadStream *source_ = nullptr;
+  std::unique_ptr<ReadStream> stream_;
 
  public:
   LoadImageItem() = default;
-  LoadImageItem(const SStream *source) {
+  LoadImageItem(const ReadStream *source) {
     source_ = source;
-    stream_ = *source_;
+    stream_ = source_->Clone();
   }
   LoadImageItem(LoadImageItem &&move) = default;
-  LoadImageItem(const LoadImageItem &other) = default;
+  LoadImageItem(const LoadImageItem &other) {
+    source_ = other.source_;
+    stream_ = other.stream_->Clone();
+  }
 
   virtual ~LoadImageItem() = default;
 
-  LoadImageItem &operator=(const LoadImageItem &other) = default;
+  LoadImageItem &operator=(const LoadImageItem &other) {
+    if (&other != this) {
+      source_ = other.source_;
+      stream_ = other.stream_->Clone();
+    }
+    return *this;
+  }
+
   LoadImageItem &operator=(LoadImageItem &&other) = default;
 
   void SetImage(const wxImage &image) { image_ = image; }
   wxImage &GetImage() { return image_; }
 
-  void SetStream(const SStream *stream) { source_ = stream; }
-  const SStream *GetStream() { return source_; }
+  void SetStream(const ReadStream *stream) { source_ = stream; }
+  const ReadStream *GetStream() { return source_; }
 
-  SStream &GetLoadedStream() { return stream_; }
-  const SStream &GetLoadedStream() const { return stream_; }
+  std::unique_ptr<ReadStream> &GetLoadedStream() { return stream_; }
+  const std::unique_ptr<ReadStream> &GetLoadedStream() const { return stream_; }
 
   bool operator==(const LoadImageItem &item) const {
     return item.source_ == source_;

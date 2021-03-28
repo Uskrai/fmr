@@ -22,7 +22,6 @@
 #include <regex>
 
 #include "fmr/bitmap/image_util.h"
-#include "fmr/handler/stream_util.h"
 #include "fmr/nowide/string.h"
 #include "fmr/queue/find_handler.h"
 
@@ -30,11 +29,11 @@ namespace fmr {
 
 namespace bitmap {
 
-queue::FindStatus ImageChecker::Check(queue::FindHandler &parent,
-                                      AbstractHandler &handler,
-                                      SStream &stream) {
+queue::FindStatus ImageChecker::Check(file_handler::ReadStream &stream,
+                                      queue::FindHandler *parent) {
   std::string ext = String::Narrow(wxImage::GetImageExtWildcard());
   ext = ext.substr(ext.find_first_of('(') + 1, ext.find_last_of(')') - 1);
+  std::string name = stream.GetName();
   while (ext.size()) {
     size_t separator = ext.find_first_of(';');
     // separate extension
@@ -43,11 +42,11 @@ queue::FindStatus ImageChecker::Check(queue::FindHandler &parent,
     try {
       std::regex re(temp);
       std::smatch c;
-      bool res = std::regex_search(stream.GetName(), c, re);
+      bool res = std::regex_search(name, c, re);
       if (res) return queue::kFindItemFound;
     } catch (std::regex_error &err) {
-      handler.GetStream(stream);
-      if (image_util::CanRead(stream)) return queue::kFindItemFound;
+      // stream.Load();
+      // if (image_util::CanRead(stream)) return queue::kFindItemFound;
       return queue::kFindNotFound;
     }
 
@@ -55,16 +54,6 @@ queue::FindStatus ImageChecker::Check(queue::FindHandler &parent,
     ext = ext.substr(separator + 1);
   }
   return queue::kFindNotFound;
-}
-
-queue::FindStatus ImageChecker::Check(queue::FindHandler &parent,
-                                      AbstractOpenableHandler &handler,
-                                      SStream &stream) {
-  if (image_util::CanRead(stream_util::GetPath(stream))) {
-    return queue::kFindItemFound;
-  }
-
-  return Check(parent, static_cast<AbstractHandler &>(handler), stream);
 }
 
 }  // namespace bitmap

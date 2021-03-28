@@ -18,7 +18,7 @@
 #ifndef FMR_BITMAP_LOADER_CONTAINER
 #define FMR_BITMAP_LOADER_CONTAINER
 
-#include <fmr/handler/struct_stream.h>
+#include <fmr/file_handler/read_stream.h>
 
 #include <unordered_map>
 #include <unordered_set>
@@ -127,29 +127,32 @@ class MapVector {
   }
 };
 
+using ReadStream = file_handler::ReadStream;
+
 class Container {
-  MapVector<const SStream *, SStream *> source_found_map_;
-  Set<const SStream *> find_queue_set_, load_queue_set_;
-  std::vector<std::unique_ptr<SStream>> loaded_stream_;
+  MapVector<const ReadStream *, ReadStream *> source_found_map_;
+  Set<const ReadStream *> find_queue_set_, load_queue_set_;
+  std::vector<std::unique_ptr<ReadStream>> loaded_stream_;
 
  public:
   virtual ~Container() = default;
 
-  SStream *AddFoundStream(const SStream *source_stream,
-                          const SStream &found_stream);
+  ReadStream *AddFoundStream(const ReadStream *source_stream,
+                             std::unique_ptr<ReadStream> found_stream);
 
-  void InsertFind(const SStream *source_stream);
-  virtual bool IsInFindQueue(const SStream *source_stream) const;
-  void RemoveFind(const SStream *source_stream);
+  void InsertFind(const ReadStream *source_stream);
+  virtual bool IsInFindQueue(const ReadStream *source_stream) const;
+  void RemoveFind(const ReadStream *source_stream);
 
-  void InsertLoad(const SStream *found_stream);
-  virtual bool IsInLoadQueue(const SStream *found_stream) const;
-  void RemoveLoad(const SStream *found_stream);
+  void InsertLoad(const ReadStream *found_stream);
+  virtual bool IsInLoadQueue(const ReadStream *found_stream) const;
+  void RemoveLoad(const ReadStream *found_stream);
 
-  bool IsSourceFound(const SStream *source_stream) const;
-  bool IsFound(const SStream *found_stream) const;
-  const SStream *GetSourceStream(const SStream *found_stream) const;
-  std::vector<SStream *> GetFoundStream(const SStream *source_stream) const;
+  bool IsSourceFound(const ReadStream *source_stream) const;
+  bool IsFound(const ReadStream *found_stream) const;
+  const ReadStream *GetSourceStream(const ReadStream *found_stream) const;
+  std::vector<ReadStream *> GetFoundStream(
+      const ReadStream *source_stream) const;
 
   virtual void Clear();
 };

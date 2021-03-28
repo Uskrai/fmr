@@ -23,6 +23,7 @@
 
 #include "fmr/bitmap/image_util.h"
 #include "fmr/common/path.h"
+#include "fmr/file_handler/wx/input_stream.h"
 #include "fmr/handler/handler_factory.h"
 #include "fmr/handler/stream_util.h"
 #include "fmr/nowide/filesystem.h"
@@ -40,15 +41,15 @@ LoadReturn LoadImage::Load(LoadImage::value_type &item) {
 
   TEST_DELETED();
 
-  auto input_stream = stream.GetStream();
-  if (!wxImage::CanRead(*input_stream)) return kLoadCannotReadStream;
+  auto input_stream = file_handler::wx::InputStream(*stream);
+  if (!wxImage::CanRead(input_stream)) return kLoadCannotReadStream;
 
   TEST_DELETED();
 
-  wxLogMessage("Loading image in %s/%s", stream.GetHandlerPath(),
-               stream.GetName());
+  wxLogMessage("Loading image in %s/%s", stream->GetHandlerPath(),
+               stream->GetName());
 
-  image_util::Load(item.GetImage(), stream);
+  item.GetImage() = wxImage(input_stream);
 
   if (rescaler_) rescaler_->DoRescale(item.GetImage());
 
@@ -61,16 +62,15 @@ bool LoadImage::ProcessItem(LoadImage::value_type &item) {
   if (IsBeingStopped()) return false;
 
   auto &stream = item.GetLoadedStream();
-  std::shared_ptr<wxInputStream> input_stream = stream.GetStream();
+  auto input_stream = file_handler::wx::InputStream(*stream);
 
   TEST_RETURN();
 
-  if (!stream.IsOk() || !wxImage::CanRead(*input_stream)) {
+  if (!stream->IsLoaded() || !wxImage::CanRead(input_stream)) {
     TEST_RETURN();
-    wxLogMessage("Loading Stream in %s/%s", stream.GetHandlerPath(),
-                 stream.GetName());
-
-    stream_util::LoadStream(stream);
+    wxLogMessage("Loading Stream in %s/%s", stream->GetHandlerPath(),
+                 stream->GetName());
+    stream->Load();
   }
 
   TEST_RETURN();

@@ -27,6 +27,7 @@
 #include <fstream>
 
 #include "fmr/common/path.h"
+#include "fmr/file_handler/factory.h"
 #include "fmr/nowide/string.h"
 #include "wx/dir.h"
 #include "wx/filename.h"
@@ -40,6 +41,7 @@ bool App::OnInit() {
   wxInitAllImageHandlers();
 
   PrepareConfig();
+  PrepareFileHandlerFactory();
 
   wxLocale locale;
   locale.Init(wxLANGUAGE_DEFAULT);
@@ -96,6 +98,12 @@ void App::PrepareConfig() {
 
   config_ = std::make_unique<Config>(wxEmptyString, wxEmptyString, config_path);
   Config::Set(config_.get());
+}
+
+void App::PrepareFileHandlerFactory() {
+  file_handler_factory_ = std::make_unique<file_handler::Factory>();
+  file_handler::InitDefaultFactory(*file_handler_factory_);
+  file_handler_factory_->SetGlobal(file_handler_factory_.get());
 }
 
 int App::OnExit() {

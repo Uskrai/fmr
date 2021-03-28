@@ -19,8 +19,9 @@
 
 #include "fmr/bitmap/rescaler.h"
 #include "fmr/common/dimension.h"
+#include "fmr/compare/natural.h"
 #include "fmr/explorer/image_cell_explorer.h"
-#include "fmr/handler/handler_factory.h"
+#include "fmr/file_handler/factory.h"
 #include "fmr/loader/rescale.h"
 #include "fmr/nowide/string.h"
 #include "fmr/queue/event.h"
@@ -32,7 +33,7 @@ namespace fmr {
 
 namespace explorer {
 
-wxDEFINE_EVENT(kEventOpenCell, wxNotifyEvent);
+wxDEFINE_EVENT(kEventOpenCell, OpenCellEvent);
 
 Controller::Controller() {
   window_ = new window::GridWindow();
@@ -56,21 +57,20 @@ bool Controller::CreateWindow(wxWindow *parent, int id, const wxPoint &pos,
   return window_->Create(parent, id, pos, size, style, name);
 }
 
-bool Controller::Open(std::unique_ptr<AbstractOpenableHandler> handler) {
+bool Controller::Open(std::unique_ptr<file_handler::Handler> handler) {
   if (!handler) return false;
 
-  handler->Traverse(false);
+  handler->Read()->Traverse(false);
 
-  if (handler->Size() == 0) return false;
-  if (handler_ && handler->GetName() == handler_->GetName()) {
-    if (handler_->Size() == handler->Size()) return true;
+  if (handler->Read()->Size() == 0) return false;
+  if (handler_ && handler->GetPath() == handler_->GetPath()) {
+    if (handler_->Read()->Size() == handler->Read()->Size()) return true;
   }
 
   Clear();
 
-  for (auto &it : handler->GetChild()) {
-    PushCell(it);
-  }
+  handler->Read()->Sort(compare::Natural());
+  for (auto &it : *handler->Read()) PushCell(it);
 
   handler_ = std::move(handler);
   AdjustCell();
@@ -78,8 +78,8 @@ bool Controller::Open(std::unique_ptr<AbstractOpenableHandler> handler) {
   return true;
 }
 
-void Controller::PushCell(const SStream &item) {
-  auto stream = std::make_unique<SStream>(item);
+void Controller::PushCell(const ReadStream &item) {
+  auto stream = item.Clone();
 
   auto cell = std::make_unique<ImageCell>();
   cell->SetString(stream->GetName());
@@ -95,17 +95,16 @@ void Controller::PushCell(const SStream &item) {
 bool Controller::Open(const std::string &path) {
   if (path.empty()) return false;
 
-  auto handler = std::shared_ptr<AbstractOpenableHandler>(
-      HandlerFactory::NewOpenableHandler(path));
+  auto handler = factory_->NewHandler(path);
 
-  return Open(HandlerFactory::NewOpenableHandler(path));
+  return Open(std::move(handler));
 }
 
 bool Controller::OpenCell(size_t index) {
   auto opening_cell = window_->GetCellWindow(index);
   if (!opening_cell) return false;
 
-  const SStream *stream = nullptr;
+  const ReadStream *stream = nullptr;
   for (const auto &it : stream_to_cell_) {
     if (it.second == opening_cell) {
       stream = it.first;
@@ -113,52 +112,38 @@ bool Controller::OpenCell(size_t index) {
   }
   if (!stream) return false;
 
-  wxString path = String::Widen<wxString>(handler_->GetItemPath(*stream));
-
-  auto event = wxNotifyEvent(kEventOpenCell, GetWindow()->GetId());
-  event.SetString(path);
-  wxPostEvent(this, event);
+  auto event = new OpenCellEvent(GetWindow()->GetId(), kEventOpenCell, *stream);
+  wxQueueEvent(this, event);
   return true;
 }
 
 bool Controller::OpenParent(const std::string &path) {
-  auto child_handler =
-      std::unique_ptr<AbstractHandler>(HandlerFactory::NewHandler(path));
+  auto child_handler = factory_->NewHandler(path);
 
-  if (!child_handler) return false;
+  if (!child_handler || !child_handler->GetParent()) return false;
 
-  std::string parent_path = child_handler->GetParent()->GetName();
+  std::string parent_path = child_handler->GetParent()->GetPath();
 
   if (!Open(parent_path)) return false;
 
-  size_t idx = handler_->Index(path);
-  if (handler_->IsExist(idx)) Select(handler_->Item(idx).GetName());
-
-  return true;
+  return Select(path);
 }
 
 bool Controller::OpenParent() {
   if (!handler_) return false;
 
-  auto path = handler_->GetName();
+  auto path = handler_->GetPath();
   return OpenParent(path);
 }
 
-void Controller::Select(std::string name) {
-  if (!handler_) return;
+bool Controller::Select(std::string name) {
+  if (!handler_) return false;
 
-  name = Path::GetName(name);
+  auto idx = handler_->Read()->Index(name);
 
-  size_t idx = 0;
-  for (const auto &it : stream_vec_) {
-    if (it) {
-      if (it->GetName() == name) {
-        window_->GoToCell(idx);
-        break;
-      }
-    }
-    idx++;
-  }
+  bool change = idx < handler_->Read()->Size();
+  if (change) window_->GoToCell(idx);
+  return change;
 }
 
 void Controller::AdjustCell() {
@@ -182,12 +167,8 @@ void Controller::AdjustCell() {
     return AdjustCell();
 }
 
-void Controller::OnOpenCell(wxNotifyEvent &event) {
-  if (event.IsAllowed()) {
-    std::string path = String::Narrow(event.GetString());
-
-    Open(path);
-  }
+void Controller::OnOpenCell(OpenCellEvent &event) {
+  Open(factory_->NewHandler(*event.GetStream()));
 }
 
 void Controller::OnKeyDown(wxKeyEvent &event) {
@@ -202,6 +183,7 @@ void Controller::OnKeyDown(wxKeyEvent &event) {
 void Controller::OnImageLoaded(loader::LoadEvent &event) {
   auto item =
       stream_to_cell_.find(loader_->GetSourceStream(event.GetFoundStream()));
+
   if (item != stream_to_cell_.end()) {
     SBitmap &bitmap = item->second->GetBitmap();
     bitmap = event.GetBitmap();
@@ -213,7 +195,6 @@ void Controller::Clear() {
   window_->ClearCell();
   loader_->Clear();
   stream_to_cell_.clear();
-  stream_vec_.clear();
   handler_.reset();
 }
 

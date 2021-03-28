@@ -37,7 +37,8 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/bitmap_page_ctrl.cpp \
 						$(bitmap)/image_checker.cpp \
 						$(bitmap)/bitmap_draw.cpp
-lib_bitmap_la_LIBADD = lib_position.la
+lib_bitmap_la_LIBADD = lib_position.la \
+											 lib_handler.la
 
 loaderdir = @abs_builddir@/loader
 loader_LTLIBRARIES = lib_loader.la
@@ -113,11 +114,8 @@ lib_window_la_LIBADD = lib_position.la
 thread = src/thread
 threaddir = @abs_builddir@/thread
 thread_LTLIBRARIES = lib_thread.la
-lib_thread_la_SOURCES = $(thread)/thread.cpp \
-												$(thread)/find_handler_controller.cpp \
-												$(thread)/controller_factory.cpp
+lib_thread_la_SOURCES = $(thread)/thread.cpp 
 
-lib_thread_la_LIBADD = lib_queue.la
 
 queue = src/queue
 queuedir = @abs_builddir@/queue
@@ -126,7 +124,8 @@ lib_queue_la_SOURCES = $(queue)/load_image.cpp \
 											 $(queue)/find_handler.cpp \
 											 $(queue)/rescale.cpp  \
 											 $(queue)/factory.cpp
-lib_queue_la_LIBADD = lib_handler.la
+lib_queue_la_LIBADD = lib_handler.la \
+											lib_comparer.la
 
 file_handler = src/file_handler
 file_handlerdir = @abs_builddir@/file_handler
@@ -161,5 +160,6 @@ lib_comparer_la_SOURCES = $(compare)/natural.cpp
 fmr = src/main
 bin_PROGRAMS = fmr
 fmr_SOURCES = $(fmr)/app.cpp
-fmr_LDADD = lib_frame.la
+fmr_LDADD = lib_frame.la \
+						lib_file_handler.la
 

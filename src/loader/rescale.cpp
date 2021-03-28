@@ -21,8 +21,7 @@
 #include "fmr/queue/event.h"
 #include "fmr/queue/load_image.h"
 #include "fmr/queue/rescale.h"
-#include "fmr/thread/controller_factory.h"
-#include "fmr/thread/rescale_controller.h"
+#include "fmr/thread/queue_ctrl.h"
 
 namespace fmr {
 
@@ -75,7 +74,7 @@ void Rescale::OnImageLoaded(ImageLoadEvent &event) {
   PushRescale(item.GetStream(), item.GetImage());
 }
 
-void Rescale::PushRescale(const SStream *found_stream, const wxImage &img) {
+void Rescale::PushRescale(const ReadStream *found_stream, const wxImage &img) {
   auto img_ptr = GetContainer()->AddImage(found_stream, img);
   rescale_data_->GetQueueCtrl()->Push(img_ptr);
 }

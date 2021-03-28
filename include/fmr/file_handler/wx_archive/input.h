@@ -50,8 +50,6 @@ class Input : public InputBase {
   virtual ReadStream *GetFirst(bool load_buffer) override;
   virtual ReadStream *GetNext(bool load_buffer) override;
 
-  virtual bool IsEmpty() const override;
-
   virtual size_t Index(const std::string &path) const override;
 
   virtual void Clear() override;

@@ -150,7 +150,7 @@ LTLIBRARIES = $(bitmap_LTLIBRARIES) $(common_LTLIBRARIES) \
 	$(position_LTLIBRARIES) $(queue_LTLIBRARIES) \
 	$(reader_LTLIBRARIES) $(thread_LTLIBRARIES) \
 	$(window_LTLIBRARIES)
-lib_bitmap_la_DEPENDENCIES = lib_position.la
+lib_bitmap_la_DEPENDENCIES = lib_position.la lib_handler.la
 am__dirstamp = $(am__leading_dot)dirstamp
 am_lib_bitmap_la_OBJECTS = $(bitmap)/bmp.lo $(bitmap)/image_util.lo \
 	$(bitmap)/rescaler.lo $(bitmap)/bitmap_ctrl.lo \
@@ -210,7 +210,7 @@ lib_position_la_LIBADD =
 am_lib_position_la_OBJECTS = $(position)/box_ctrl.lo \
 	$(position)/grid_ctrl.lo
 lib_position_la_OBJECTS = $(am_lib_position_la_OBJECTS)
-lib_queue_la_DEPENDENCIES = lib_handler.la
+lib_queue_la_DEPENDENCIES = lib_handler.la lib_comparer.la
 am_lib_queue_la_OBJECTS = $(queue)/load_image.lo \
 	$(queue)/find_handler.lo $(queue)/rescale.lo \
 	$(queue)/factory.lo
@@ -221,10 +221,8 @@ am_lib_reader_la_OBJECTS = $(reader)/controller.lo \
 	$(reader)/scroll_controller.lo $(reader)/decorator_ctrl.lo \
 	$(reader)/page_indicator.lo
 lib_reader_la_OBJECTS = $(am_lib_reader_la_OBJECTS)
-lib_thread_la_DEPENDENCIES = lib_queue.la
-am_lib_thread_la_OBJECTS = $(thread)/thread.lo \
-	$(thread)/find_handler_controller.lo \
-	$(thread)/controller_factory.lo
+lib_thread_la_LIBADD =
+am_lib_thread_la_OBJECTS = $(thread)/thread.lo
 lib_thread_la_OBJECTS = $(am_lib_thread_la_OBJECTS)
 lib_window_la_DEPENDENCIES = lib_position.la
 am_lib_window_la_OBJECTS = $(window)/scrolledwindow.lo \
@@ -235,7 +233,7 @@ am_lib_window_la_OBJECTS = $(window)/scrolledwindow.lo \
 lib_window_la_OBJECTS = $(am_lib_window_la_OBJECTS)
 am_fmr_OBJECTS = $(fmr)/app.$(OBJEXT)
 fmr_OBJECTS = $(am_fmr_OBJECTS)
-fmr_DEPENDENCIES = lib_frame.la
+fmr_DEPENDENCIES = lib_frame.la lib_file_handler.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -299,8 +297,6 @@ am__depfiles_remade = $(bitmap)/$(DEPDIR)/bitmap_ctrl.Plo \
 	$(reader)/$(DEPDIR)/decorator_ctrl.Plo \
 	$(reader)/$(DEPDIR)/page_indicator.Plo \
 	$(reader)/$(DEPDIR)/scroll_controller.Plo \
-	$(thread)/$(DEPDIR)/controller_factory.Plo \
-	$(thread)/$(DEPDIR)/find_handler_controller.Plo \
 	$(thread)/$(DEPDIR)/thread.Plo \
 	$(window)/$(DEPDIR)/decorator.Plo \
 	$(window)/$(DEPDIR)/flex_grid_cell_window.Plo \
@@ -621,7 +617,9 @@ lib_bitmap_la_SOURCES = $(bitmap)/bmp.cpp \
 						$(bitmap)/image_checker.cpp \
 						$(bitmap)/bitmap_draw.cpp
 
-lib_bitmap_la_LIBADD = lib_position.la
+lib_bitmap_la_LIBADD = lib_position.la \
+											 lib_handler.la
+
 loaderdir = @abs_builddir@/loader
 loader_LTLIBRARIES = lib_loader.la
 loader = src/loader
@@ -695,11 +693,7 @@ lib_window_la_LIBADD = lib_position.la
 thread = src/thread
 threaddir = @abs_builddir@/thread
 thread_LTLIBRARIES = lib_thread.la
-lib_thread_la_SOURCES = $(thread)/thread.cpp \
-												$(thread)/find_handler_controller.cpp \
-												$(thread)/controller_factory.cpp
-
-lib_thread_la_LIBADD = lib_queue.la
+lib_thread_la_SOURCES = $(thread)/thread.cpp 
 queue = src/queue
 queuedir = @abs_builddir@/queue
 queue_LTLIBRARIES = lib_queue.la
@@ -708,7 +702,9 @@ lib_queue_la_SOURCES = $(queue)/load_image.cpp \
 											 $(queue)/rescale.cpp  \
 											 $(queue)/factory.cpp
 
-lib_queue_la_LIBADD = lib_handler.la
+lib_queue_la_LIBADD = lib_handler.la \
+											lib_comparer.la
+
 file_handler = src/file_handler
 file_handlerdir = @abs_builddir@/file_handler
 file_handler_LTLIBRARIES = lib_file_handler.la
@@ -739,7 +735,9 @@ compare_LTLIBRARIES = lib_comparer.la
 lib_comparer_la_SOURCES = $(compare)/natural.cpp
 fmr = src/main
 fmr_SOURCES = $(fmr)/app.cpp
-fmr_LDADD = lib_frame.la
+fmr_LDADD = lib_frame.la \
+						lib_file_handler.la
+
 all: all-recursive
 
 .SUFFIXES:
@@ -1514,10 +1512,6 @@ $(thread)/$(DEPDIR)/$(am__dirstamp):
 	@: > $(thread)/$(DEPDIR)/$(am__dirstamp)
 $(thread)/thread.lo: $(thread)/$(am__dirstamp) \
 	$(thread)/$(DEPDIR)/$(am__dirstamp)
-$(thread)/find_handler_controller.lo: $(thread)/$(am__dirstamp) \
-	$(thread)/$(DEPDIR)/$(am__dirstamp)
-$(thread)/controller_factory.lo: $(thread)/$(am__dirstamp) \
-	$(thread)/$(DEPDIR)/$(am__dirstamp)
 
 lib_thread.la: $(lib_thread_la_OBJECTS) $(lib_thread_la_DEPENDENCIES) $(EXTRA_lib_thread_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(threaddir) $(lib_thread_la_OBJECTS) $(lib_thread_la_LIBADD) $(LIBS)
@@ -1649,8 +1643,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/decorator_ctrl.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/page_indicator.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(reader)/$(DEPDIR)/scroll_controller.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/controller_factory.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/find_handler_controller.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(thread)/$(DEPDIR)/thread.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/decorator.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@$(window)/$(DEPDIR)/flex_grid_cell_window.Plo@am__quote@ # am--include-marker
@@ -2155,8 +2147,6 @@ distclean: distclean-recursive
 	-rm -f $(reader)/$(DEPDIR)/decorator_ctrl.Plo
 	-rm -f $(reader)/$(DEPDIR)/page_indicator.Plo
 	-rm -f $(reader)/$(DEPDIR)/scroll_controller.Plo
-	-rm -f $(thread)/$(DEPDIR)/controller_factory.Plo
-	-rm -f $(thread)/$(DEPDIR)/find_handler_controller.Plo
 	-rm -f $(thread)/$(DEPDIR)/thread.Plo
 	-rm -f $(window)/$(DEPDIR)/decorator.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo
@@ -2270,8 +2260,6 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f $(reader)/$(DEPDIR)/decorator_ctrl.Plo
 	-rm -f $(reader)/$(DEPDIR)/page_indicator.Plo
 	-rm -f $(reader)/$(DEPDIR)/scroll_controller.Plo
-	-rm -f $(thread)/$(DEPDIR)/controller_factory.Plo
-	-rm -f $(thread)/$(DEPDIR)/find_handler_controller.Plo
 	-rm -f $(thread)/$(DEPDIR)/thread.Plo
 	-rm -f $(window)/$(DEPDIR)/decorator.Plo
 	-rm -f $(window)/$(DEPDIR)/flex_grid_cell_window.Plo

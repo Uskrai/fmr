@@ -34,19 +34,15 @@ void Input::Open(std::weak_ptr<file_handler::ReadStream> ptrstream) {
   if (auto stream = stream_.lock()) factory_ = Handler::FindFactory(*stream);
 }
 
-bool Input::IsEmpty() const { return true; }
-
 bool Input::IsOpened() const { return factory_; }
 
 ReadStream *Input::GetFirst(bool load_buffer) {
   if (!factory_) return nullptr;
 
   if (auto stream = stream_.lock()) {
-    auto mem_stream = std::make_unique<wx::InputStream>(*stream);
-    // auto mem_stream =
-    // std::make_unique<wxMemoryInputStream>(stream->GetBuffer(),
-    // stream->Size());
+    if (!stream->IsLoaded()) stream->Load();
 
+    auto mem_stream = std::make_unique<wx::InputStream>(*stream);
     arch_input_stream_ = std::unique_ptr<wxArchiveInputStream>(
         factory_->NewStream(mem_stream.release()));
     arch_memory_stream_ = stream;

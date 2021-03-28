@@ -34,7 +34,8 @@ class Settings;
 }  // namespace reader
 namespace explorer {
 class Controller;
-}
+class OpenCellEvent;
+}  // namespace explorer
 
 enum WindowID {
   ReaderWindow = wxID_HIGHEST + 1,
@@ -63,7 +64,7 @@ class Panel : public wxPanel {
 
   void OnKeyDown(wxKeyEvent &event);
   void OnCharHook(wxKeyEvent &event);
-  void OnExplorerOpenFile(wxNotifyEvent &event);
+  void OnExplorerOpenFile(explorer::OpenCellEvent &event);
   void OnReaderOpenFile(wxCommandEvent &event);
 
   std::unique_ptr<reader::Controller> reader_;

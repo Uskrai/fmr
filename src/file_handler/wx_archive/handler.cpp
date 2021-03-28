@@ -90,7 +90,7 @@ bool Handler::Open(Handler::UniqueParentHandler handler,
 bool Handler::DoOpen(std::unique_ptr<file_handler::Handler> parent,
                      std::shared_ptr<file_handler::ReadStream> stream,
                      std::string path) {
-  archive_factory_ = FindFactory(stream->GetName());
+  archive_factory_ = FindFactory(*stream);
   stream_ = stream;
   path_ = path;
   Read()->Open(stream);
@@ -112,14 +112,16 @@ bool Handler::IsHandleable(const std::string &str_path) const {
   return FindFactory(str_path);
 }
 
-bool Handler::IsHandleable(const Stream &stream) const { return false; }
+bool Handler::IsHandleable(const Stream &stream) const {
+  return FindFactory(stream);
+}
 
 bool Handler::IsHandleable(const file_handler::ReadStream &stream) const {
   return FindFactory(stream);
 }
 
 const wxArchiveClassFactory *Handler::FindFactory(
-    const file_handler::ReadStream &stream) {
+    const file_handler::Stream &stream) {
   return FindFactory(stream.GetName());
 }
 

@@ -26,17 +26,17 @@ namespace fmr {
 namespace loader {
 
 class RescaleContainer : public Container {
-  std::unordered_map<const SStream *, wxImage> stream_to_img_;
-  std::unordered_map<const wxImage *, const SStream *> img_to_stream_;
+  std::unordered_map<const ReadStream *, wxImage> stream_to_img_;
+  std::unordered_map<const wxImage *, const ReadStream *> img_to_stream_;
 
  public:
-  wxImage *AddImage(const SStream *found_stream, const wxImage &img);
+  wxImage *AddImage(const ReadStream *found_stream, const wxImage &img);
 
-  wxImage *GetImage(const SStream *found_stream);
-  const wxImage *GetImage(const SStream *found_stream) const;
+  wxImage *GetImage(const ReadStream *found_stream);
+  const wxImage *GetImage(const ReadStream *found_stream) const;
 
   using Container::GetFoundStream;
-  const SStream *GetFoundStream(const wxImage *bmp) const;
+  const ReadStream *GetFoundStream(const wxImage *bmp) const;
 
   virtual void Clear() override;
 };

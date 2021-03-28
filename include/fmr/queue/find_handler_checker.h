@@ -18,7 +18,7 @@
 #ifndef FMR_QUEUE_FIND_HANDLER_CHECKER
 #define FMR_QUEUE_FIND_HANDLER_CHECKER
 
-#include <fmr/handler/handler_factory.h>
+#include <fmr/file_handler/factory.h>
 #include <fmr/queue/find_handler_flags.h>
 
 namespace fmr {
@@ -28,12 +28,8 @@ namespace queue {
 class FindHandler;
 class FindHandlerChecker {
  public:
-  virtual FindStatus Check(FindHandler &parent,
-                           AbstractOpenableHandler &handler, SStream &stream) {
-    return Check(parent, static_cast<AbstractHandler &>(handler), stream);
-  };
-  virtual FindStatus Check(FindHandler &parent, AbstractHandler &handler,
-                           SStream &stream) = 0;
+  virtual FindStatus Check(file_handler::ReadStream &stream,
+                           FindHandler *parent) = 0;
 };
 
 }  // namespace queue

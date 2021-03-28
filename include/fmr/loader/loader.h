@@ -37,8 +37,10 @@ wxDECLARE_EVENT(kEventOnFindItemPush, FindEvent);
 
 class Container;
 
+using ReadStream = file_handler::ReadStream;
+
 class Loader : public wxEvtHandler {
-  std::unordered_map<const wxImage *, const SStream *> map_loaded_to_source_;
+  std::unordered_map<const wxImage *, const ReadStream *> map_loaded_to_source_;
 
   using FindQueueData =
       thread::QueueThreadData<queue::FindItem, queue::FindHandler,
@@ -50,6 +52,9 @@ class Loader : public wxEvtHandler {
 
   using FindQueueCtrl = thread::QueueThreadCtrl<queue::FindItem>;
   using LoadQueueCtrl = thread::QueueThreadCtrl<queue::LoadImageItem>;
+
+  const file_handler::Factory *handler_factory_ =
+      file_handler::Factory::GetGlobal();
 
   std::unique_ptr<FindQueueData> find_data_;
   std::unique_ptr<LoadQueueData> load_data_;
@@ -66,37 +71,42 @@ class Loader : public wxEvtHandler {
   Loader(int event_id);
   virtual ~Loader();
 
-  void PushFind(const SStream *stream);
-  void PushFrontFind(const SStream *stream);
-  bool MakeFrontFind(const SStream *stream);
+  void PushFind(const ReadStream *stream);
+  void PushFrontFind(const ReadStream *stream);
+  bool MakeFrontFind(const ReadStream *stream);
 
-  void PushLoad(SStream *found_stream);
-  void PushFrontLoad(SStream *found_stream);
-  bool MakeFrontLoad(SStream *found_stream);
+  void PushLoad(ReadStream *found_stream);
+  void PushFrontLoad(ReadStream *found_stream);
+  bool MakeFrontLoad(ReadStream *found_stream);
 
-  void LoadSourceStream(const SStream *source_stream);
-  void LoadFoundStream(const SStream *found_stream);
+  void LoadSourceStream(const ReadStream *source_stream);
+  void LoadFoundStream(const ReadStream *found_stream);
 
   void SetFindFlags(queue::FindHandlerFlags flags);
 
-  void SendImage(const SStream *source_stream, const SStream *found_stream,
-                 const wxImage &image);
+  void SendImage(const ReadStream *source_stream,
+                 const ReadStream *found_stream, const wxImage &image);
 
   int GetEventId() const { return event_id_; }
 
-  bool IsInFindQueue(const SStream *stream);
-  bool IsInLoadQueue(const SStream *found_stream);
+  bool IsInFindQueue(const ReadStream *stream);
+  bool IsInLoadQueue(const ReadStream *found_stream);
 
   virtual Container *GetContainer();
   virtual const Container *GetContainer() const;
 
+  const file_handler::Factory *GetHandlerFactory() const {
+    return handler_factory_;
+  }
+
   void SetLazyLoad(bool lazy) { lazy_load_ = lazy; }
   bool IsLazyLoad() { return lazy_load_; }
 
-  bool IsFound(const SStream *found_stream) const;
-  bool IsSourceFound(const SStream *source_stream) const;
-  const SStream *GetSourceStream(const SStream *found_stream) const;
-  std::vector<SStream *> GetFoundStream(const SStream *source_stream) const;
+  bool IsFound(const ReadStream *found_stream) const;
+  bool IsSourceFound(const ReadStream *source_stream) const;
+  const ReadStream *GetSourceStream(const ReadStream *found_stream) const;
+  std::vector<ReadStream *> GetFoundStream(
+      const ReadStream *source_stream) const;
 
   void Clear();
 

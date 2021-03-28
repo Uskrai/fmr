@@ -21,8 +21,7 @@
 #include "fmr/queue/event.h"
 #include "fmr/queue/find_handler.h"
 #include "fmr/queue/load_image.h"
-#include "fmr/thread/find_handler_controller.h"
-#include "fmr/thread/load_image_controller.h"
+#include "fmr/thread/queue_ctrl.h"
 
 namespace fmr {
 
@@ -45,7 +44,7 @@ Loader::Loader(int event_id) {
 
   find_data_->CreateReceiver(this, event_id);
   find_data_->GetReceiver()->SetEventType(kEventOnFindItem);
-  find_data_->CreateTask(find_data_->GetReceiver());
+  find_data_->CreateTask(GetHandlerFactory(), find_data_->GetReceiver());
 
   image_checker_ = std::make_unique<bitmap::ImageChecker>();
   find_data_->GetTask()->SetChecker(image_checker_.get());
@@ -72,8 +71,8 @@ void Loader::SetFindFlags(queue::FindHandlerFlags flags) {
   find_data_->GetTask()->SetFlags(flags);
 }
 
-void Loader::SendImage(const SStream *source_stream,
-                       const SStream *found_stream, const wxImage &image) {
+void Loader::SendImage(const ReadStream *source_stream,
+                       const ReadStream *found_stream, const wxImage &image) {
   LoadEvent send_event(GetEventId(), kEventImageLoaded);
   send_event.SetStream(source_stream, found_stream);
   send_event.SetBitmap(image);
@@ -81,35 +80,35 @@ void Loader::SendImage(const SStream *source_stream,
   wxPostEvent(this, send_event);
 }
 
-void Loader::PushFind(const SStream *stream) {
+void Loader::PushFind(const ReadStream *stream) {
   GetContainer()->InsertFind(stream);
   GetFindController()->Push(stream);
 }
 
-void Loader::PushFrontFind(const SStream *stream) {
+void Loader::PushFrontFind(const ReadStream *stream) {
   GetContainer()->InsertFind(stream);
   GetFindController()->PushFront(stream);
 }
 
-bool Loader::MakeFrontFind(const SStream *stream) {
+bool Loader::MakeFrontFind(const ReadStream *stream) {
   return GetFindController()->MakeFront(stream);
 }
 
-void Loader::PushLoad(SStream *stream) {
+void Loader::PushLoad(ReadStream *stream) {
   GetContainer()->InsertLoad(stream);
   GetLoadController()->Push(stream);
 }
 
-void Loader::PushFrontLoad(SStream *found_stream) {
+void Loader::PushFrontLoad(ReadStream *found_stream) {
   GetContainer()->InsertLoad(found_stream);
   GetLoadController()->PushFront(found_stream);
 }
 
-bool Loader::MakeFrontLoad(SStream *found_stream) {
+bool Loader::MakeFrontLoad(ReadStream *found_stream) {
   return GetLoadController()->MakeFront(found_stream);
 }
 
-void Loader::LoadFoundStream(const SStream *found_stream) {
+void Loader::LoadFoundStream(const ReadStream *found_stream) {
   if (GetContainer()->IsFound(found_stream)) {
     auto source_stream = GetContainer()->GetSourceStream(found_stream);
     auto item = GetContainer()->GetFoundStream(source_stream);
@@ -118,33 +117,34 @@ void Loader::LoadFoundStream(const SStream *found_stream) {
   }
 }
 
-void Loader::LoadSourceStream(const SStream *source_stream) {
+void Loader::LoadSourceStream(const ReadStream *source_stream) {
   auto item = GetContainer()->GetFoundStream(source_stream);
   for (auto &it : item) PushLoad(it);
 }
 
-bool Loader::IsFound(const SStream *found_stream) const {
+bool Loader::IsFound(const ReadStream *found_stream) const {
   return GetContainer()->IsFound(found_stream);
 }
 
-bool Loader::IsSourceFound(const SStream *source_stream) const {
+bool Loader::IsSourceFound(const ReadStream *source_stream) const {
   return GetContainer()->IsSourceFound(source_stream);
 }
 
-const SStream *Loader::GetSourceStream(const SStream *found_stream) const {
+const ReadStream *Loader::GetSourceStream(
+    const ReadStream *found_stream) const {
   return GetContainer()->GetSourceStream(found_stream);
 }
 
-std::vector<SStream *> Loader::GetFoundStream(
-    const SStream *source_stream) const {
+std::vector<ReadStream *> Loader::GetFoundStream(
+    const ReadStream *source_stream) const {
   return GetContainer()->GetFoundStream(source_stream);
 }
 
-bool Loader::IsInFindQueue(const SStream *stream) {
+bool Loader::IsInFindQueue(const ReadStream *stream) {
   return GetContainer()->IsInFindQueue(stream);
 }
 
-bool Loader::IsInLoadQueue(const SStream *found_stream) {
+bool Loader::IsInLoadQueue(const ReadStream *found_stream) {
   return GetContainer()->IsInLoadQueue(found_stream);
 }
 
@@ -160,8 +160,8 @@ void Loader::OnFindItem(ImageFindEvent &event) {
   auto &item = event.GetItem();
   if (IsInFindQueue(item.GetSourceStream()) &&
       item.GetStatus() != queue::kFindNotFound) {
-    auto found_stream = GetContainer()->AddFoundStream(item.GetSourceStream(),
-                                                       item.GetFoundStream());
+    auto found_stream = GetContainer()->AddFoundStream(
+        item.GetSourceStream(), std::move(item.GetFoundStream()));
 
     FindEvent send_event(GetEventId(), kEventOnFindItemPush);
     send_event.SetStream(item.GetSourceStream(), found_stream);
@@ -192,7 +192,8 @@ Loader::LoadQueueCtrl *Loader::GetLoadController() {
 }
 
 void Loader::OnFindItemPush(FindEvent &event) {
-  if (!IsLazyLoad()) PushLoad(event.GetFoundStream());
+  if (!IsLazyLoad() && IsFound(event.GetFoundStream()))
+    PushLoad(event.GetFoundStream());
 }
 
 void Loader::Clear() {

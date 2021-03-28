@@ -19,9 +19,7 @@
 #define FMR_THREAD_FIND_HANDLER
 
 #include <fmr/common/bitmask.h>
-#include <fmr/handler/abstract_handler.h>
-#include <fmr/handler/handler_factory.h>
-#include <fmr/handler/struct_stream.h>
+#include <fmr/file_handler/factory.h>
 #include <fmr/queue/find_handler_checker.h>
 #include <fmr/queue/find_handler_flags.h>
 #include <fmr/queue/find_handler_item.h>
@@ -39,24 +37,25 @@ namespace queue {
 class FindHandler : public Task<FindItem> {
  private:
   FindHandlerFlags flags_ = kFindHandlerDefault;
+  const file_handler::Factory *factory_ = file_handler::Factory::GetGlobal();
 
   FindHandlerChecker *checker_ = nullptr;
 
  public:
-  FindHandler() {}
-  FindHandler(receiver_type *receiver) : Task(receiver){};
+  FindHandler(const file_handler::Factory *factory) : factory_(factory) {}
+  FindHandler(const file_handler::Factory *factory, receiver_type *receiver)
+      : Task(receiver), factory_(factory){};
+
+  void SetHandlerFactory(const file_handler::Factory *factory) {
+    factory_ = factory;
+  }
 
   FindStatus Find(FindItem &item);
-  FindStatus Find(AbstractOpenableHandler *handler, FindItem &item);
-  FindStatus Find(AbstractHandler *handler, FindItem &item);
 
   void SetChecker(FindHandlerChecker *checker) { checker_ = checker; }
   FindHandlerChecker *GetChecker() { return checker_; }
 
   void SendFoundEvent(FindItem &item);
-
-  // FindStatus CheckAndSendIfFound(AbstractHandler *handler, FoundEvent
-  // *event);
 
   /**
    * @brief: flags for the thread
@@ -73,12 +72,8 @@ class FindHandler : public Task<FindItem> {
  private:
   bool Is(FindHandlerFlags flags) { return flags_ & flags; }
 
-  // void StreamFound(FoundEvent *stream);
-  template <typename T>
-  FindStatus CheckAndSendIfFound(T *handler, FindItem &item);
-
-  template <typename T>
-  FindStatus TraverseHandler(T *handler, FindItem &item);
+  FindStatus CheckAndSendIfFound(FindItem &item);
+  FindStatus TraverseHandler(file_handler::Handler &handler, FindItem &item);
 };
 
 }  // namespace queue

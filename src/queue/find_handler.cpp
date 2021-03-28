@@ -15,17 +15,18 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fmr/handler/abstract_handler.h>
-#include <fmr/handler/handler_factory.h>
-#include <fmr/queue/find_handler.h>
-#include <wx/filename.h>
-#include <wx/image.h>
-#include <wx/log.h>
+#include "fmr/queue/find_handler.h"
 
 #include <iostream>
 #include <memory>
 
+#include "fmr/compare/natural.h"
+#include "fmr/file_handler/factory.h"
 #include "fmr/handler/stream_util.h"
+#include "fmr/queue/find_handler_flags.h"
+#include "wx/filename.h"
+#include "wx/image.h"
+#include "wx/log.h"
 
 namespace fmr {
 
@@ -49,117 +50,70 @@ bool FindHandler::ProcessItem(value_type &item) {
 #define TEST_RETURN() \
   if (IsBeingStopped()) return kFindBeingStopped
 
-FindStatus FindHandler::Find(FindItem &item) {
-  auto search_stream = item.GetFoundStream();
-  std::string handler_path = search_stream.GetHandlerPath();
+FindStatus FindHandler::CheckAndSendIfFound(FindItem &item) {
+  TEST_RETURN();
 
-  if (HandlerFactory::IsOpenable(handler_path)) {
-    auto handler = stream_util::MakeParentOpenableHandler(search_stream);
+  auto temp_item = item;
+  auto status = GetChecker()->Check(*temp_item.GetFoundStream(), this);
 
-    TEST_RETURN();
-
-    return Find(handler.get(), item);
-  } else {
-    auto handler = stream_util::MakeParentHandler(search_stream);
-
-    if (handler) {
-      return Find(handler.get(), item);
-    }
+  temp_item.SetStatus(status);
+  if (status == kFindItemFound) {
+    SendItem(std::move(temp_item));
   }
-  return kFindNotFound;
+
+  return status;
 }
 
-FindStatus FindHandler::Find(AbstractOpenableHandler *handler, FindItem &item) {
-  std::string path = handler->GetItemPath(item.GetFoundStream());
+FindStatus FindHandler::Find(FindItem &item) {
+  auto ret_val = CheckAndSendIfFound(item);
 
-  FindStatus ret_val = kFindNotFound;
+  TEST_RETURN();
 
-  // Get Stream from handler if openable or is check handler
-  if (HandlerFactory::IsOpenable(path)) {
-    if (CheckAndSendIfFound(handler, item) == kFindItemFound)
-      ret_val = kFindItemFound;
-
-    if (ret_val == kFindItemFound && Is(kFindHandlerOnlyFirstItem))
-      return ret_val;
-
-    if (!Is(kFindHandlerRecursive)) return ret_val;
-
-    std::unique_ptr<AbstractOpenableHandler> stream_handler(
-        HandlerFactory::NewOpenableHandler(path));
-    if (path != stream_handler->GetName()) return ret_val;
-
-    auto temp = TraverseHandler(stream_handler.get(), item);
-
-    if (temp < ret_val) ret_val = temp;
-    return ret_val;
-  } else if (!HandlerFactory::IsOpenable(path)) {
-    std::unique_ptr<AbstractHandler> non_openable_handler(
-        HandlerFactory::NewHandler(path));
-
-    TEST_RETURN();
-    // traverse non-openable handler and if item found and with flags Only first
-    // item, return
-    if (TraverseHandler(non_openable_handler.get(), item) == kFindItemFound) {
-      return kFindItemFound;
-    } else if (!Is(kFindHandlerCheckHandler)) {
-      return kFindNotFound;
-    }
+  switch (ret_val) {
+    case kFindItemFound:
+      if (Is(kFindHandlerOnlyFirstItem)) {
+        return ret_val;
+      }
+    case kFindNotFound:
+      if (Is(kFindHandlerRecursive)) {
+        auto handler = factory_->NewHandler(*item.GetFoundStream());
+        if (handler && handler->IsOk() && handler->IsExist()) {
+          return TraverseHandler(*handler, item);
+        }
+      }
+      break;
+    case kFindBeingStopped:
+      return kFindBeingStopped;
   }
 
   return ret_val;
 }
 
-template <typename T>
-FindStatus FindHandler::TraverseHandler(T *handler, FindItem &item) {
-  wxLogMessage("Traversing %s", handler->GetName());
-
-  SStream stream;
-  std::vector<SStream> vec_stream;
-  bool cont = handler->GetFirst(stream, kDirDefault, false);
-
+FindStatus FindHandler::TraverseHandler(file_handler::Handler &handler,
+                                        FindItem &item) {
+  auto cont = handler.Read()->GetFirst(false);
   while (cont) {
-    vec_stream.push_back(std::move(stream));
-
-    cont = handler->GetNextStream(stream, false);
-
+    cont = handler.Read()->GetNext(false);
     TEST_RETURN();
   }
 
-  std::sort(vec_stream.begin(), vec_stream.end(), Compare::NaturalSortable);
+  handler.Read()->Sort(compare::Natural());
 
   FindStatus is_found = kFindNotFound;
-  for (const auto &it : vec_stream) {
+  for (const auto &it : *handler.Read()) {
     TEST_RETURN();
 
-    auto child_item = FindItem(item.GetSourceStream(), it);
+    auto child_item = FindItem(item.GetSourceStream(), it.Clone());
 
     TEST_RETURN();
-    if (Find(handler, child_item) == kFindItemFound) {
-      if (Is(kFindHandlerOnlyFirstItem))
-        // return after once if only find first item
+    if (Find(child_item) == kFindItemFound) {
+      if (Is(kFindHandlerOnlyFirstItem)) {
         return kFindItemFound;
-      else
+      } else
         is_found = kFindItemFound;
     }
   }
   return is_found;
-}
-
-FindStatus FindHandler::Find(AbstractHandler *handler, FindItem &item) {
-  return CheckAndSendIfFound(handler, item);
-}
-
-template <typename T>
-FindStatus FindHandler::CheckAndSendIfFound(T *handler, FindItem &item) {
-  TEST_RETURN();
-
-  auto temp_item = item;
-  auto status =
-      GetChecker()->Check(*this, *handler, temp_item.GetFoundStream());
-  temp_item.SetStatus(status);
-  if (status == kFindItemFound) SendItem(std::move(temp_item));
-
-  return status;
 }
 
 }  // namespace queue

@@ -18,7 +18,7 @@
 #ifndef FMR_QUEUE_FIND_HANDLER_ITEM
 #define FMR_QUEUE_FIND_HANDLER_ITEM
 
-#include <fmr/handler/struct_stream.h>
+#include <fmr/file_handler/read_stream.h>
 #include <fmr/queue/find_handler_flags.h>
 
 namespace fmr {
@@ -26,30 +26,45 @@ namespace fmr {
 namespace queue {
 
 class FindItem {
-  SStream found_stream_;
-  const SStream *source_stream_;
+  std::unique_ptr<file_handler::ReadStream> found_stream_;
+  const file_handler::ReadStream *source_stream_;
   FindStatus status_ = kFindNotFound;
 
  public:
-  FindItem(const SStream *source_stream, SStream found_stream) {
+  FindItem(const file_handler::ReadStream *source_stream,
+           std::unique_ptr<file_handler::ReadStream> found_stream) {
     SetFoundStream(std::move(found_stream));
     SetSourceStream(source_stream);
   };
-  FindItem(const SStream *source_stream) {
-    SetFoundStream(*source_stream);
+
+  FindItem(const file_handler::ReadStream *source_stream) {
+    SetFoundStream(source_stream->Clone());
     SetSourceStream(source_stream);
   }
-  FindItem(const FindItem &item) = default;
+
+  FindItem(const FindItem &item) {
+    SetFoundStream(item.found_stream_->Clone());
+    SetSourceStream(item.source_stream_);
+  }
+
   FindItem(FindItem &&item) = default;
 
   virtual ~FindItem() = default;
 
-  SStream &GetFoundStream() { return found_stream_; }
-  const SStream *GetSourceStream() { return source_stream_; }
+  std::unique_ptr<file_handler::ReadStream> &GetFoundStream() {
+    return found_stream_;
+  }
+
+  const file_handler::ReadStream *GetSourceStream() { return source_stream_; }
+
   FindStatus GetStatus() { return status_; }
 
-  void SetFoundStream(SStream stream) { found_stream_ = std::move(stream); }
-  void SetSourceStream(const SStream *stream) { source_stream_ = stream; }
+  void SetFoundStream(std::unique_ptr<file_handler::ReadStream> stream) {
+    found_stream_ = std::move(stream);
+  }
+  void SetSourceStream(const file_handler::ReadStream *stream) {
+    source_stream_ = stream;
+  }
   void SetStatus(FindStatus status) { status_ = status; }
 
   bool operator==(const FindItem &other) const {

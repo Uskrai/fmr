@@ -72,7 +72,7 @@ class Handler : public HandlerBase {
 
   static const wxArchiveClassFactory *FindFactory(const std::string &path);
   static const wxArchiveClassFactory *FindFactory(
-      const file_handler::ReadStream &stream);
+      const file_handler::Stream &stream);
 
   static const Factory *GetHandlerFactory();
 

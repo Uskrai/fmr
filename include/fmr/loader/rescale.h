@@ -45,7 +45,7 @@ class Rescale : public Loader {
 
   void SetRescaler(bitmap::Rescaler *rescaler);
 
-  void PushRescale(const SStream *found_stream, const wxImage &img);
+  void PushRescale(const ReadStream *found_stream, const wxImage &img);
 
   void Clear();
 
