@@ -178,9 +178,13 @@ WriteStream *Output::CreateFile(const std::string &name, Stream *stream,
   return &ret_stream;
 }
 
-void Output::DeleteDirectory(const std::string &name) {}
+void Output::DeleteDirectory(const std::string &name) {
+  CreateFile(name, nullptr, kWriteDelete | kWriteDirectory);
+}
 
-void Output::DeleteFile(const std::string &name) {}
+void Output::DeleteFile(const std::string &name) {
+  CreateFile(name, nullptr, kWriteDelete);
+}
 
 void Output::Delete() {
   if (!IsOk()) return;
