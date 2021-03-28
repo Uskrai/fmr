@@ -40,6 +40,11 @@ class Map {
  public:
   Map(char separator) : is_dir_(true), separator_(separator) {}
 
+  /**
+   * @brief: Check if given name exist within map or child's
+   * @param: name name to check
+   * @return: Check if given name exist within this map or child's
+   */
   bool Exist(const std::string &name) const;
 
   template <typename... U>
@@ -47,13 +52,34 @@ class Map {
     return Add(virtual_write::Stream(std::forward<U>(u)...));
   }
 
-  bool Add(const virtual_write::Stream &stream);
+  /**
+   * @brief: Add Stream to map
+   *
+   * the given stream will only added if the parent path exist or if WriteType
+   * is overwrite and IsDirectory is equal from existing stream
+   *
+   * @return: true if the stream is added
+   */
+  bool Add(const Stream &stream);
 
   bool IsDirectory() const { return is_dir_; }
 
+  /**
+   * @brief: Check if current map is empty
+   */
   bool Empty() const { return path_.empty(); }
 
+  /**
+   * @brief: Search for given stream's Map
+   * @param: stream stream to search for
+   * @return: Map from given name, nullptr if map is not found
+   */
   const Map *Search(const Stream &stream) const;
+  /**
+   * @brief: Search for given name's map
+   * @param:
+   * @return: Map from given name, nullptr if nap is not found
+   */
   const Map *Search(const std::string &name) const;
   char GetSeparator() const { return separator_; }
 
@@ -65,6 +91,11 @@ class Map {
     kExtractAll = kExtractReadStream | kExtractWriteStream
   };
 
+  /**
+   * @brief: Extract virtual Stream from map to vector
+   * @param: extract_type Extract mode
+   * @return: Vector to virtual_write::Stream
+   */
   std::vector<virtual_write::Stream> ToVector(ExtractType extract_type) const;
 
  protected:

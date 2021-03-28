@@ -36,9 +36,12 @@ bool Map::Exist(const std::string &name) const {
 
 Map::StringVector Map::Separate(const std::string &name) const {
   StringVector ret;
+  // if separator is empty, push name to ret
   if (separator_ == '\0') {
     ret.push(name);
   } else {
+    // else for each name if it is not separator, then add it to current, if it
+    // is separator then push current to ret and clear current.
     std::string current;
     for (auto it : name) {
       if (it == separator_) {
@@ -48,12 +51,14 @@ Map::StringVector Map::Separate(const std::string &name) const {
         current += it;
       }
     }
-    if (current != "") ret.push(current);
+    // if current is not then push current to ret
+    if (!current.empty()) ret.push(current);
   }
   return ret;
 }
 
 bool Map::SetVirtualStream(const Stream &stream) {
+  // if stream IsDirectory is not equal to this IsDirectory, then dont set
   if (IsDirectory() != stream.IsDirectory()) return false;
   stream_ = stream;
   return true;
@@ -67,13 +72,30 @@ bool Map::Add(StringVector &vec, Stream stream) {
     auto child = Find(str);
 
     if (vec.empty()) {
-      if (child && stream.GetWriteType() & kWriteOverwrite) {
-        return child->SetVirtualStream(stream);
-      } else if (!child) {
-        path_.insert(std::make_pair(str, Map(separator_, stream)));
-        return true;
+      // if write type is delete and child is empty and the
+      // IsDirectory value is equal then erase child
+      if (stream.GetWriteType() & kWriteDelete) {
+        if (child && child->Empty() &&
+            child->IsDirectory() == stream.IsDirectory()) {
+          path_.erase(str);
+        }
+        return false;
+      } else {
+        // else if child exist and write type is overwrite and IsDirectory value
+        // is equal then change virtual stream in child to current stream
+        if (child && stream.GetWriteType() & kWriteOverwrite &&
+            stream.IsDirectory() == child->IsDirectory()) {
+          return child->SetVirtualStream(stream);
+        }
+        // else if child doesnt exist, then insert to path_
+        else if (!child) {
+          path_.insert(std::make_pair(str, Map(separator_, stream)));
+          return true;
+        }
       }
-    } else if (child && child->IsDirectory()) {
+    }
+    // else if child exist and child is directory, then add vec to child
+    else if (child && child->IsDirectory()) {
       return child->Add(vec, stream);
     }
   }
