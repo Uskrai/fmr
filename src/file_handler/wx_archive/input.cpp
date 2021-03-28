@@ -17,6 +17,7 @@
 
 #include "fmr/file_handler/wx_archive/input.h"
 
+#include "fmr/file_handler/wx/input_stream.h"
 #include "fmr/file_handler/wx_archive/handler.h"
 #include "fmr/nowide/string.h"
 #include "wx/mstream.h"
@@ -41,8 +42,10 @@ ReadStream *Input::GetFirst(bool load_buffer) {
   if (!factory_) return nullptr;
 
   if (auto stream = stream_.lock()) {
-    auto mem_stream = std::make_unique<wxMemoryInputStream>(stream->GetBuffer(),
-                                                            stream->Size());
+    auto mem_stream = std::make_unique<wx::InputStream>(*stream);
+    // auto mem_stream =
+    // std::make_unique<wxMemoryInputStream>(stream->GetBuffer(),
+    // stream->Size());
 
     arch_input_stream_ = std::unique_ptr<wxArchiveInputStream>(
         factory_->NewStream(mem_stream.release()));

@@ -26,6 +26,8 @@
 #include "fmr/file_handler/utility/memory_stream_helper.h"
 #include "fmr/file_handler/virtual_write/map.h"
 #include "fmr/file_handler/write_type.h"
+#include "fmr/file_handler/wx/input_stream.h"
+#include "fmr/file_handler/wx/output_stream.h"
 #include "fmr/file_handler/wx_archive/handler.h"
 #include "fmr/file_handler/wx_archive/input.h"
 #include "fmr/nowide/string.h"
@@ -39,35 +41,6 @@ namespace fmr {
 namespace file_handler {
 
 namespace wx_archive {
-
-class wxToFmrOutputStream : public wxOutputStream {
-  file_handler::WriteStream *stream_;
-
- public:
-  wxToFmrOutputStream(file_handler::WriteStream *stream) : stream_(stream) {}
-
- protected:
-  size_t OnSysWrite(const void *buffer, size_t size) override {
-    stream_->Write(buffer, size);
-    return size;
-  }
-};
-
-class wxToFmrInputStream : public wxInputStream {
-  file_handler::Stream *stream_;
-
- public:
-  wxToFmrInputStream(file_handler::Stream *stream) : stream_(stream) {}
-
- protected:
-  size_t OnSysRead(void *buffer, size_t size) override {
-    auto dst = static_cast<std::byte *>(buffer);
-    auto src = static_cast<const std::byte *>(stream_->GetBuffer());
-    auto src_end = static_cast<const std::byte *>(stream_->GetBuffer()) + size;
-    auto ret = std::copy(src, src_end, dst);
-    return ret - dst;
-  }
-};
 
 Output::Output(Handler *handler, Input *input) {
   handler_ = handler;
@@ -106,11 +79,11 @@ void Output::CommitWrite() {
   auto write_stream = handler_parent_->Write()->CreateFile(
       stream_->GetName(), nullptr, kWriteOverwrite);
 
-  auto in_stream = wxMemoryInputStream(stream_->GetBuffer(), stream_->Size());
+  auto in_stream = wx::InputStream(*stream_);
   auto archive_input = std::unique_ptr<wxArchiveInputStream>(
       archive_factory_->NewStream(in_stream));
 
-  wxToFmrOutputStream output(write_stream);
+  wx::OutputStream output(*write_stream);
 
   auto archive_output = std::unique_ptr<wxArchiveOutputStream>(
       archive_factory_->NewStream(output));
@@ -150,7 +123,7 @@ void Output::Create() {
 
   auto write = handler_parent_->Write()->CreateFile(stream_->GetName(), nullptr,
                                                     kWriteNone);
-  auto wx_output = wxToFmrOutputStream(write);
+  auto wx_output = wx::OutputStream(*write);
 
   auto archive_output = std::unique_ptr<wxArchiveOutputStream>(
       archive_factory_->NewStream(wx_output));
