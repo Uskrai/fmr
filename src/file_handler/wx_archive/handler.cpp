@@ -29,14 +29,16 @@ namespace file_handler {
 namespace wx_archive {
 
 std::string PopExtension(std::string path) {
+  wxString ret = String::Widen<wxString>(path);
   auto fcf = wxFilterClassFactory::Find(path, wxSTREAM_FILEEXT);
 
-  if (fcf) path = fcf->PopExtension(path);
+  if (fcf) ret = fcf->PopExtension(ret);
 
-  auto factory = Handler::FindFactory(path);
+  auto factory = Handler::FindFactory(String::Narrow(ret));
 
-  if (factory) path = factory->PopExtension(path);
-  return path;
+  if (factory) ret = factory->PopExtension(ret);
+
+  return String::Narrow(ret);
 }
 
 bool Handler::Open(const std::string &path) {
@@ -82,7 +84,7 @@ bool Handler::Open(Handler::UniqueParentHandler handler,
           utility::ReadMemoryStreamHelper<file_handler::ReadStream>>(
           handler->GetPath(), handler->GetInternalName(path));
 
-    DoOpen(std::move(handler), std::move(stream), path);
+    return DoOpen(std::move(handler), std::move(stream), path);
   }
   return false;
 }
@@ -96,6 +98,7 @@ bool Handler::DoOpen(std::unique_ptr<file_handler::Handler> parent,
   Read()->Open(stream);
   Write()->Open(stream, archive_factory_, parent.get());
   parent_ = std::move(parent);
+
   return stream_ && archive_factory_ && parent_;
 }
 
@@ -163,11 +166,10 @@ void Handler::Reset() {
 bool Handler::IsExist() const {
   bool ret = false;
   if (parent_ && parent_->IsExist() && stream_) {
-    auto stream = parent_->Read()->GetFirst(false);
-    while (stream && !ret) {
-      ret = stream->GetName() == stream_->GetName();
-      stream = parent_->Read()->GetNext(false);
-    }
+    parent_->Read()->Traverse(false);
+    auto idx = parent_->Read()->Index(path_);
+
+    ret = idx < parent_->Read()->Size();
   }
   return ret;
 }
