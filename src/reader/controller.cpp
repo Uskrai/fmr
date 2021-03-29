@@ -22,6 +22,7 @@
 #include "fmr/bitmap/rescaler.h"
 #include "fmr/common/dimension.h"
 #include "fmr/common/event.h"
+#include "fmr/compare/natural.h"
 #include "fmr/loader/page.h"
 #include "fmr/nowide/string.h"
 #include "fmr/position/box_ctrl.h"
@@ -201,6 +202,7 @@ bool Controller::ChangeFolder(wxDirection direction) {
   if (handler && handler->GetParent() && handler->GetParent()->Read()) {
     auto parent_input = handler->GetParent()->Read();
     parent_input->Traverse(false);
+    parent_input->Sort(compare::Natural());
     auto idx = parent_input->Index(handler->GetPath());
     if (idx + step < parent_input->Size()) {
       auto next_handler =
