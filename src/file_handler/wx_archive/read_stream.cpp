@@ -17,9 +17,9 @@
 
 #include "fmr/file_handler/wx_archive/read_stream.h"
 
+#include "fmr/file_handler/wx/input_stream.h"
 #include "fmr/file_handler/wx_archive/input.h"
 #include "fmr/nowide/string.h"
-#include "wx/mstream.h"
 
 namespace fmr {
 
@@ -49,8 +49,7 @@ ReadStream::ReadStream(std::shared_ptr<file_handler::ReadStream> archive_stream,
 
 bool ReadStream::Load() {
   if (archive_stream_) {
-    wxMemoryInputStream mem_stream(archive_stream_->GetBuffer(),
-                                   archive_stream_->Size());
+    auto mem_stream = wx::InputStream(*archive_stream_);
 
     auto arch_stream =
         std::unique_ptr<wxArchiveInputStream>(factory_->NewStream(mem_stream));
