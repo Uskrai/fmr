@@ -29,6 +29,7 @@
 
 #include "fmr/bitmap/image_checker.h"
 #include "fmr/explorer/controller.h"
+#include "fmr/file_handler/factory.h"
 #include "fmr/nowide/string.h"
 #include "fmr/reader/controller.h"
 #include "fmr/window/grid_window.h"
@@ -135,14 +136,23 @@ bool Panel::OpenExplorer() {
     explorer_->GetWindow()->SetFocus();
     explorer_->GetWindow()->Show();
     Layout();
-    if (explorer_->OpenParent(select_path)) {
-      explorer_->GetWindow()->Show();
-      explorer_->GetWindow()->SetFocus();
-      if (reader_) reader_->Clear();
-      return true;
-    } else {
-      if (reader_) {
-        reader_->GetWindow()->Show();
+
+    auto handler = file_handler::Factory::GetGlobal()->NewHandler(select_path);
+
+    if (handler && handler->GetParent()) {
+      if (!handler->GetParent()->IsExist()) {
+        wxLogError("%s doesn't exist",
+                   String::Widen<wxString>(handler->GetParent()->GetPath()));
+      }
+      if (explorer_->OpenParent(select_path)) {
+        explorer_->GetWindow()->Show();
+        explorer_->GetWindow()->SetFocus();
+        if (reader_) reader_->Clear();
+        return true;
+      } else {
+        if (reader_) {
+          reader_->GetWindow()->Show();
+        }
       }
     }
   }
