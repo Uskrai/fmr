@@ -15,6 +15,7 @@ Makefile
 .vim/
 compile_*
 
+
 /*https://gist.github.com/Yousha/3830712334ac30a90eb6041b932b68d7*/
 ##### Windows
 # Windows thumbnail cache files
@@ -1057,3 +1058,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+
+!include/fmr/*
+!*.h
+!*.cpp
+
+
