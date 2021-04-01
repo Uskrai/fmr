@@ -18,6 +18,7 @@
 #ifndef FMR_EXPLORER_LOAD_EXPLORER
 #define FMR_EXPLORER_LOAD_EXPLORER
 
+#include <fmr/log/logger.h>
 #include <fmr/queue/load_image_item.h>
 #include <fmr/queue/task.h>
 #include <fmr/thread/thread.h>
@@ -40,12 +41,18 @@ enum LoadImageStatus { kItemLoaded, kCannotLoadItem };
 class LoadImage : public Task<LoadImageItem> {
   bitmap::Rescaler *rescaler_ = nullptr;
 
+  log::UniqueLogger log_{log::Logger::GetGlobal(), "Loader"};
+
  public:
   LoadImage() {}
   LoadImage(receiver_type *receiver) : Task(receiver){};
 
   bool ProcessItem(value_type &item) override;
   LoadReturn Load(value_type &stream);
+
+  log::Logger &GetLogger() { return log_; }
+  void SetLogger(const log::Logger &log) { log_.SetLogger(log, "Loader"); }
+  void SetLogLevel(log::Logger::LogLevel level){};
 
   /**
    * @brief: Rescaller to use after load image physically ( if any )

@@ -20,11 +20,11 @@
 
 #include <fmr/common/bitmask.h>
 #include <fmr/file_handler/factory.h>
+#include <fmr/log/logger.h>
 #include <fmr/queue/find_handler_checker.h>
 #include <fmr/queue/find_handler_flags.h>
 #include <fmr/queue/find_handler_item.h>
 #include <fmr/queue/task.h>
-#include <fmr/thread/thread.h>
 
 #include <queue>
 
@@ -35,6 +35,8 @@ namespace fmr {
 namespace queue {
 
 class FindHandler : public Task<FindItem> {
+  log::UniqueLogger log_{log::Logger::GetGlobal(), "Find"};
+
  private:
   FindHandlerFlags flags_ = kFindHandlerDefault;
   const file_handler::Factory *factory_ = file_handler::Factory::GetGlobal();
@@ -48,6 +50,11 @@ class FindHandler : public Task<FindItem> {
 
   void SetHandlerFactory(const file_handler::Factory *factory) {
     factory_ = factory;
+  }
+
+  log::Logger &GetLogger() { return log_; }
+  void SetLogger(const log::Logger &log, std::string_view name) {
+    log_.SetLogger(log, name);
   }
 
   FindStatus Find(FindItem &item);

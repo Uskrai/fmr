@@ -21,14 +21,16 @@
 #include <wx/display.h>
 #include <wx/image.h>
 #include <wx/intl.h>
-#include <wx/log.h>
 #include <wx/stdpaths.h>
 
 #include <fstream>
+#include <memory>
 
 #include "fmr/common/path.h"
 #include "fmr/file_handler/factory.h"
+#include "fmr/log/spd_logger.h"
 #include "fmr/nowide/string.h"
+#include "spdlog/sinks/basic_file_sink.h"
 #include "wx/dir.h"
 #include "wx/filename.h"
 
@@ -46,18 +48,26 @@ bool App::OnInit() {
   wxLocale locale;
   locale.Init(wxLANGUAGE_DEFAULT);
 
-  log_stream =
-      new std::ofstream("log.txt", log_stream->binary | log_stream->app);
-  wxLog::SetActiveTarget(new wxLogStream(log_stream));
+  // spdlog::set_error_logger.
+  try {
+    logger_ = std::make_unique<log::SpdLogger>(
+        spdlog::basic_logger_mt("global", SearchLoggerPath()));
+  } catch (const spdlog::spdlog_ex &exc) {
+  }
+
+  if (!logger_) {
+    logger_ = std::make_unique<log::UniqueLogger>();
+  }
+  log::Logger::SetGlobal(*logger_);
 
   try {
     std::locale::global(std::locale(locale.GetSysName().ToStdString()));
   } catch (std::runtime_error &error) {
-    wxLogMessage("Can't find user-preferred locale, defaulting to %s",
-                 std::locale::classic().name());
+    logger_->Warn("Can't find user-preferred locale, defaulting to {}",
+                  std::locale::classic().name());
     std::locale::global(std::locale::classic());
   }
-  wxLogMessage("Opening program with %s locale", std::locale().name());
+  logger_->Info("Opening program with {} locale", std::locale().name());
 
   std::setlocale(LC_ALL, "");
   std::locale::global(std::locale(std::locale::classic()));
@@ -85,13 +95,13 @@ void App::PrepareConfig() {
         wxRemoveFile(path);
         wxDir::Make(path);
       } else {
-        wxLogError("Cannot create config file in %s", path);
+        logger_->Error("Cannot create config file in {}", path);
         config_path = wxFileName::CreateTempFileName(path);
       }
     }
   } else {
     if (!wxDir::Make(path)) {
-      wxLogError("Cannot Makedir : %s", path);
+      logger_->Error("Cannot Make directory {}", path);
       config_path = wxFileName::CreateTempFileName(path);
     }
   }
@@ -100,6 +110,8 @@ void App::PrepareConfig() {
   Config::Set(config_.get());
 }
 
+std::string App::SearchLoggerPath() { return "log.txt"; }
+
 void App::PrepareFileHandlerFactory() {
   file_handler_factory_ = std::make_unique<file_handler::Factory>();
   file_handler::InitDefaultFactory(*file_handler_factory_);
@@ -107,9 +119,7 @@ void App::PrepareFileHandlerFactory() {
 }
 
 int App::OnExit() {
-  log_stream->close();
-  delete log_stream;
-
+  logger_->Flush();
   return 0;
 }
 

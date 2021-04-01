@@ -92,6 +92,7 @@ bool Controller::CreateWindow(wxWindow *parent, wxWindowID id,
 
 bool Controller::Open(const std::string &path) {
   Clear();
+  GetLogger().Info("Opening {}", path);
   if (loader_->Open(path)) {
     GetWindow()->Scroll(0, 0);
     GetWindow()->SetVirtualSize(GetWindow()->GetClientSize());
@@ -99,9 +100,11 @@ bool Controller::Open(const std::string &path) {
     event.SetString(String::Widen<wxString>(path).c_str());
     wxPostEvent(GetParent(), event);
     opened_timer_.StartOnce(opened_delay_);
+    GetLogger().Info("{} Opened", path);
     return true;
   }
 
+  GetLogger().Error("Can't open {}", path);
   return false;
 }
 

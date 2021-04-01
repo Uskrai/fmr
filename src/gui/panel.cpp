@@ -143,8 +143,7 @@ bool Panel::OpenExplorer() {
       if (!handler->GetParent()->IsExist()) {
         wxLogError("%s doesn't exist",
                    String::Widen<wxString>(handler->GetParent()->GetPath()));
-      }
-      if (explorer_->OpenParent(select_path)) {
+      } else if (explorer_->OpenParent(select_path)) {
         explorer_->GetWindow()->Show();
         explorer_->GetWindow()->SetFocus();
         if (reader_) reader_->Clear();

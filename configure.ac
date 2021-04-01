@@ -17,6 +17,7 @@ AC_PROG_CC
 AC_PROG_CXX
 
 
+
 m4_include([aux-build/wxwin.m4])
 m4_include([aux-build/ax_cxx_compile_stdcxx.m4])
 m4_include([aux-build/ax_check_compile_flag.m4])
@@ -87,6 +88,8 @@ esac
 AM_CONDITIONAL([SHARED], test "x$enable_shared" = "xyes")
 
 AX_CXX_COMPILE_STDCXX([17],[noext],[mandatory])
+
+PKG_CHECK_MODULES(fmt, fmt, [LDFLAGS="-lfmt $LDFLAGS"] )
 
 AM_COND_IF(USE_STD_FILESYSTEM,
 [

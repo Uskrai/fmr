@@ -24,6 +24,7 @@
 #include "fmr/bitmap/image_util.h"
 #include "fmr/common/path.h"
 #include "fmr/file_handler/wx/input_stream.h"
+#include "fmr/log/stopwatch.h"
 #include "fmr/nowide/filesystem.h"
 #include "fmr/nowide/string.h"
 
@@ -44,8 +45,8 @@ LoadReturn LoadImage::Load(LoadImage::value_type &item) {
 
   TEST_DELETED();
 
-  wxLogMessage("Loading image in %s/%s", stream->GetHandlerPath(),
-               stream->GetName());
+  GetLogger().Trace("Loading image in {}/{}", stream->GetHandlerPath(),
+                    stream->GetName());
 
   item.GetImage() = wxImage(input_stream);
 
@@ -62,18 +63,26 @@ bool LoadImage::ProcessItem(LoadImage::value_type &item) {
   auto &stream = item.GetLoadedStream();
   auto input_stream = file_handler::wx::InputStream(*stream);
 
+  log::StopWatchMilli sw;
+  auto id = stream->GetHandlerPath() + "/" + stream->GetName();
+  GetLogger().Info("Start Loading {} ", id);
+
   TEST_RETURN();
 
   if (!stream->IsLoaded() || !wxImage::CanRead(input_stream)) {
     TEST_RETURN();
-    wxLogMessage("Loading Stream in %s/%s", stream->GetHandlerPath(),
-                 stream->GetName());
+    GetLogger().Trace("Loading Stream for {}/{}", stream->GetHandlerPath(),
+                      stream->GetName());
     stream->Load();
   }
 
   TEST_RETURN();
 
-  return Load(item) != kLoadBeingStopped;
+  auto ret = Load(item) != kLoadBeingStopped;
+
+  GetLogger().Info("Load completed in {} for {}", sw, id);
+
+  return ret;
 }
 
 }  // namespace queue

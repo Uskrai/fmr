@@ -22,6 +22,7 @@
 #include <fmr/bitmap/rescaler.h>
 #include <fmr/file_handler/factory.h>
 #include <fmr/loader/fwd.h>
+#include <fmr/log/logger.h>
 #include <fmr/position/inc.h>
 #include <fmr/reader/decorator_ctrl.h>
 #include <fmr/reader/scroll_controller.h>
@@ -45,6 +46,8 @@ class Controller : public ScrollController {
   bool is_read_from_right_ = false;
   wxWindow *parent_ = nullptr;
 
+  log::UniqueLogger log_{log::Logger::GetGlobal(), "Reader"};
+
   const file_handler::Factory *handler_factory_ =
       file_handler::Factory::GetGlobal();
 
@@ -66,6 +69,11 @@ class Controller : public ScrollController {
                     const wxPoint &pos = wxDefaultPosition,
                     const wxSize &size = wxDefaultSize, long style = 0,
                     const wxString &name = wxPanelNameStr);
+
+  log::Logger &GetLogger() { return log_; }
+  void SetLogger(const log::Logger &log, std::string_view name) {
+    log_.SetLogger(log_, name);
+  }
 
   bool Open(const std::string &path);
   void AdjustBitmap();

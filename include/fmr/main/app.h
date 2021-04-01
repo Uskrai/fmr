@@ -16,6 +16,7 @@
  */
 
 #include <fmr/file_handler/factory.h>
+#include <fmr/log/logger.h>
 #include <wx/app.h>
 
 #include <iostream>
@@ -31,15 +32,19 @@ class App : public wxApp {
   wxFrame* frame;
   std::unique_ptr<file_handler::Factory> file_handler_factory_;
   std::unique_ptr<Config> config_;
-  std::ofstream* log_stream;
+  std::unique_ptr<log::Logger> logger_;
   bool OnInit();
   int OnExit();
 
   void PrepareConfig();
   void PrepareFileHandlerFactory();
 
+  std::string SearchLoggerPath();
+
  public:
   void OpenFile(wxString Path);
+
+  std::string GetLoggerPath() const;
 };
 
 }  // namespace fmr

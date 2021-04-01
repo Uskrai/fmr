@@ -22,20 +22,24 @@
 
 #include "fmr/compare/natural.h"
 #include "fmr/file_handler/factory.h"
+#include "fmr/log/stopwatch.h"
 #include "fmr/queue/find_handler_flags.h"
-#include "wx/filename.h"
-#include "wx/image.h"
-#include "wx/log.h"
 
 namespace fmr {
-
 namespace queue {
 
 bool FindHandler::ProcessItem(value_type &item) {
   if (IsBeingStopped()) return false;
 
   FindStatus ret;
+  log::StopWatchMilli sw;
+  GetLogger().Info("Start traversing {}/{}",
+                   item.GetFoundStream()->GetHandlerPath(),
+                   item.GetFoundStream()->GetName());
   ret = Find(item);
+  GetLogger().Info("Finished traversing {}/{} in {}",
+                   item.GetFoundStream()->GetHandlerPath(),
+                   item.GetFoundStream()->GetName(), sw);
 
   if (ret == kFindNotFound) {
     item.SetStatus(kFindNotFound);
