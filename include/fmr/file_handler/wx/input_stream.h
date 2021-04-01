@@ -22,8 +22,6 @@
 #include <wx/mstream.h>
 #include <wx/stream.h>
 
-#include <cstring>
-
 namespace fmr {
 
 namespace file_handler {
@@ -32,41 +30,74 @@ namespace wx {
 
 class InputStream : public wxInputStream {
   const Stream *stream_ = nullptr;
-  std::unique_ptr<wxMemoryInputStream> mem_stream_;
-
-  // only used when using constructor with pointer
-  std::unique_ptr<Stream> stream_holder_;
+  wxMemoryInputStream mem_stream_;
 
  public:
-  InputStream(const Stream &stream) : stream_(&stream) { Init(); }
+  InputStream(const Stream &stream)
+      : stream_(&stream), mem_stream_(stream.GetBuffer(), stream.Size()) {}
 
-  wxFileOffset GetLength() const override { return mem_stream_->GetLength(); }
-  virtual size_t GetSize() const override { return mem_stream_->GetSize(); }
-  bool IsSeekable() const override { return mem_stream_->IsSeekable(); }
+  wxFileOffset GetLength() const override { return mem_stream_.GetLength(); }
+
+  bool IsSeekable() const override { return mem_stream_.IsSeekable(); }
+
+  const Stream *GetStream() const { return stream_; }
 
  protected:
-  void Init() {
-    const void *buffer = nullptr;
-    size_t size = 0;
-    if (stream_) {
-      buffer = stream_->GetBuffer();
-      size = stream_->Size();
-    }
-    mem_stream_ = std::make_unique<wxMemoryInputStream>(buffer, size);
-  }
-
-  size_t OnSysRead(void *buffer_void, size_t size) override {
-    mem_stream_->Read(buffer_void, size);
-    m_lasterror = mem_stream_->GetLastError();
-    return mem_stream_->LastRead();
+  size_t OnSysRead(void *buffer, size_t size) override {
+    m_lasterror = mem_stream_.Read(buffer, size).GetLastError();
+    return mem_stream_.LastRead();
   }
 
   wxFileOffset OnSysSeek(wxFileOffset pos, wxSeekMode mode) override {
-    return mem_stream_->SeekI(pos, mode);
+    return mem_stream_.SeekI(pos, mode);
+  }
+  wxFileOffset OnSysTell() const override { return mem_stream_.TellI(); }
+};
+
+namespace WIP {
+class InputStream : public wxInputStream {
+  const Stream *stream_ = nullptr;
+
+  // only used when using constructor with pointer
+  std::unique_ptr<Stream> stream_holder_;
+  const std::byte *buffer_start_, *buffer_pos_, *buffer_end_;
+  wxMemoryInputStream mem_stream_;
+
+ public:
+  InputStream(const Stream &stream)
+      : stream_(&stream), mem_stream_(stream.GetBuffer(), stream.Size()) {
+    Init();
   }
 
-  wxFileOffset OnSysTell() const override { return mem_stream_->TellI(); }
+  wxFileOffset GetLength() const override {
+    return buffer_end_ - buffer_start_;
+  }
+
+  bool IsSeekable() const override { return true; }
+
+ protected:
+  void Init() {
+    buffer_start_ = static_cast<const std::byte *>(stream_->GetBuffer());
+    buffer_end_ = static_cast<const std::byte *>(stream_->GetBufferEnd());
+    buffer_pos_ = buffer_start_;
+  }
+
+  size_t GetIntPosition() const { return buffer_pos_ - buffer_start_; }
+  void SetIntPosition(size_t pos) { buffer_pos_ = buffer_start_ + pos; }
+  size_t GetLastAccess() const { return buffer_end_ - buffer_start_; }
+  size_t GetBytesLeft() const { return buffer_end_ - buffer_pos_; }
+  size_t GetDataLeft() { return GetBytesLeft(); }
+
+  size_t OnSysRead(void *buffer, size_t size) override;
+
+  size_t ReadFromBuffer(void *buffer, size_t size);
+  void GetFromBuffer(void *buffer, size_t size);
+
+  wxFileOffset OnSysSeek(wxFileOffset pos, wxSeekMode mode) override;
+  wxFileOffset OnSysTell() const override;
 };
+
+}  // namespace WIP
 
 }  // namespace wx
 

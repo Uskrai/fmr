@@ -52,7 +52,7 @@ void MemoryStream::DoWrite(const file_handler::Stream &src) {
 }
 void MemoryStream::DoWrite(const void *src, size_t size) {
   MakeExclusive();
-  auto buffer = reinterpret_cast<const std::byte *>(src);
+  auto buffer = reinterpret_cast<const Byte *>(src);
 
   buffer_->reserve(Size() + size);
   for (size_t i = 0; i < size; ++i) buffer_->push_back(buffer[i]);

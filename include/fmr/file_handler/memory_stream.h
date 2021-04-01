@@ -28,7 +28,11 @@ namespace fmr {
 namespace file_handler {
 
 class MemoryStream : public WriteStream {
-  typedef std::vector<std::byte> Bytes;
+ public:
+  typedef std::byte Byte;
+  typedef std::vector<Byte> Bytes;
+
+ private:
   std::shared_ptr<Bytes> buffer_;
   std::string name_;
 

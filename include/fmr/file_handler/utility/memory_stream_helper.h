@@ -34,6 +34,10 @@ namespace internal {
 namespace memory_stream {
 
 class HelperBase {
+ public:
+  using Bytes = MemoryStream::Bytes;
+
+ private:
   MemoryStream stream_;
   std::string handler_path_, name_;
   WriteType type_ = kWriteNone;
@@ -69,9 +73,7 @@ class HelperBase {
     return stream_.Write(stream);
   }
 
-  void DoWrite(std::shared_ptr<std::vector<std::byte>> vec) {
-    return stream_.Write(vec);
-  }
+  void DoWrite(std::shared_ptr<Bytes> vec) { return stream_.Write(vec); }
 
   void DoStreamClear() { return stream_.Clear(); }
 
@@ -95,7 +97,7 @@ class Helper : public StreamBase, public HelperBase {
     DoSetWriteType(type);
   };
 
-  using Bytes = std::vector<std::byte>;
+  using Bytes = MemoryStream::Bytes;
 
   const std::string &GetString() const { return DoGetName(); }
   std::string GetName() const { return DoGetName(); }
