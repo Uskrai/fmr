@@ -30,7 +30,6 @@ ReadStream *Input::GetFirst(bool get_buffer) {
   ClearVector();
   iterator_item_ =
       std::make_unique<nwd::fs::directory_iterator>(Path::MakePath(GetPath()));
-  *iterator_item_ = nwd::fs::begin(*iterator_item_);
 
   return GetNext(get_buffer);
 }
