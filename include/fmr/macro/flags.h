@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020-2021 Uskrai
+ *  Copyright (c) 2021 Uskrai
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FMR_COMMON_BITMASK
-#define FMR_COMMON_BITMASK
+#ifndef INCLUDE_FMR_MACRO_FLAGS_H_
+#define INCLUDE_FMR_MACRO_FLAGS_H_
 
 #include <type_traits>
 
-#define DEFINE_BITMASK_TYPE(T)                                             \
+#define FMR_MACRO_DEFINE_ENUM_FLAG_OPERATORS(T)                            \
   constexpr inline T operator~(T a) {                                      \
     return static_cast<T>(~static_cast<std::underlying_type<T>::type>(a)); \
   }                                                                        \
@@ -58,4 +58,4 @@
         static_cast<std::underlying_type<T>::type>(b));                    \
   }
 
-#endif /* end of include guard: FMR_COMMON_BITMASK */
+#endif  // INCLUDE_FMR_MACRO_FLAGS_H_
