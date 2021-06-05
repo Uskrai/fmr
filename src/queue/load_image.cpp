@@ -48,7 +48,10 @@ LoadReturn LoadImage::Load(LoadImage::value_type &item) {
   GetLogger().Trace("Loading image in {}/{}", stream->GetHandlerPath(),
                     stream->GetName());
 
-  item.GetImage() = wxImage(input_stream);
+  {
+    wxLogNull nuller;
+    item.GetImage() = wxImage(input_stream);
+  }
 
   if (rescaler_) rescaler_->DoRescale(item.GetImage());
 
