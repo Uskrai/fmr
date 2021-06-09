@@ -15,27 +15,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_FMR_NOWIDE_FSTREAM_H_
-#define INCLUDE_FMR_NOWIDE_FSTREAM_H_
-
-#ifdef FMR_OPTION_USE_STD_FILESYSTEM
 #include <fstream>
-#else
-#include <boost/nowide/fstream.hpp>
-#endif
 
 namespace fmr {
 
 namespace nwd {
 
-#ifdef FMR_OPTION_USE_STD_FILESYSTEM
 using namespace std;
-#else
-using namespace boost::nowide;
-#endif
 
 }  // namespace nwd
 
 }  // namespace fmr
-
-#endif  // INCLUDE_FMR_NOWIDE_FSTREAM_H_

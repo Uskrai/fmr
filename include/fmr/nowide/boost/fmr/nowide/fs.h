@@ -15,27 +15,29 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_FMR_NWD_FS_H_
-#define INCLUDE_FMR_NWD_FS_H_
+#ifndef INCLUDE_FMR_NOWIDE_BOOST_FS_H_
+#define INCLUDE_FMR_NOWIDE_BOOST_FS_H_
 
-#ifdef FMR_OPTION_USE_STD_FILESYSTEM
-#include <filesystem>
-#else
 #include <boost/filesystem.hpp>
-#endif
+#include <boost/nowide/filesystem.hpp>
 
 namespace fmr {
 
 namespace nwd {
 
-#ifdef FMR_OPTION_USE_STD_FILESYSTEM
-namespace fs = std::filesystem;
-#else
 namespace fs = boost::filesystem;
-#endif
+
+namespace internal {
+
+inline const auto activate_nowide = []() {
+  boost::nowide::nowide_filesystem();
+  return 0;
+}();
+
+}
 
 }  // namespace nwd
 
 }  // namespace fmr
 
-#endif  // INCLUDE_FMR_NWD_FS_H_
+#endif  // INCLUDE_FMR_NOWIDE_BOOST_FS_H_
