@@ -8,23 +8,51 @@ orbs:
 jobs:
   build-for-linux:
     docker:
-      - image: buildpack-deps:trusty
+      - image: buildpack-deps:focal
     steps:
       - checkout
       - run:
-          name: Installing compiler
-          command: 'apt install -y gcc g++ cmake'
+          name: Install gcc
+          command: |
+            apt update
+            apt install -y gcc
       - run:
-          name: Create Build files
-          command: 'cmake -H. -Bbuild'
+          name: Installing apt-add-repository
+          command: |
+            apt install -y apt-transport-https
+            apt install -y software-properties-common
+            wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+            apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'
+            apt update
       - run:
-          name: Create Binary files
-          command: 'cmake --build build'
-      - run:
-          name: Testing
-          command: ctest --test-dir build
-       
+          name: Installing cmake
+          command: apt install -y cmake
+      # - run:
+      #     name: Installing Boost
+      #     command: |
+      #       apt install -y libboost-all-dev
 
+      # - run:
+      #     name: Installing Boost Nowide
+      #     command: |
+      #       mkdir dependency
+      #       wget https://github.com/boostorg/nowide/releases/download/v11.1.2/nowide_standalone_v11.1.2.tar.gz
+      #       tar -xf nowide_standalone_v11.1.2.tar.gz
+      #       cd nowide_standalone_v11.1.2
+      #       cmake .
+      #       make install
+      #       cd ../../
+      - run:
+          name: Installing google test
+          command: apt install -y libgtest-dev
+      - run:
+          name: building
+          command: |
+            mkdir build
+            cd build
+            cmake .. -DWITH_FMR_USE_STD_FILESYSTEM=ON #TODO: Make Boost::nowide works here, i dunno why cmake cant find boost_nowide
+            make
+            make test
 workflows:
   build:
     jobs:
