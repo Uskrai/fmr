@@ -28,6 +28,11 @@ namespace fs {
 
 class Find;
 
+/**
+ * This is an abstract class used to Open folder, Find from sub directory in
+ * opened folder, Check whether sub directories or files in the folder is the
+ * searched files and Consume them
+ */
 class Provider : public find::Checker<nwd::fs::path> {
  public:
   virtual ~Provider(){};
@@ -35,8 +40,23 @@ class Provider : public find::Checker<nwd::fs::path> {
   using UniqueInputContainer = std::unique_ptr<InputContainer<path>>;
   using UniqueFind = std::unique_ptr<find::Find<path>>;
 
+  /**
+   * Open path to iterate
+   *
+   * this method should not return nullptr
+   */
   virtual UniqueInputContainer Open(const path &path) = 0;
+
+  /**
+   * Find file in children
+   *
+   * This method should not return nullptr
+   */
   virtual UniqueFind Find(Find *parent, const path &path) = 0;
+
+  /**
+   * Process Found file
+   */
   virtual void Consume(const path &path) = 0;
 };
 

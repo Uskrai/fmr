@@ -24,9 +24,17 @@ namespace fmr {
 
 namespace find {
 
+/**
+ * This is an abstract class used to check the path given by find class
+ */
 template <typename T>
 class Checker {
  public:
+  virtual ~Checker() {}
+
+  /**
+   * Check whether this is the right path or not
+   */
   virtual bool Check(const T &path) = 0;
 };
 
