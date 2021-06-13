@@ -19,6 +19,8 @@
 #define INCLUDE_FMR_WX_ARCHIVE_FIND_H_
 
 #include <fmr/find/find.h>
+#include <fmr/wx/archive/archive.h>
+#include <fmr/wx/archive/provider.h>
 #include <wx/archive.h>
 #include <wx/stream.h>
 
@@ -28,15 +30,45 @@ namespace wx {
 
 namespace archive {
 
-class Find : public find::Find<std::string> {
-  std::unique_ptr<wxArchiveInputStream> stream_;
+class Find : public find::Find<wxArchiveEntry> {
+  Archive archive_;
+  Provider *provider_;
+  compare::Comparer<wxArchiveEntry> *comparer_ = nullptr;
+
+  using pmt = void (Find::*)();
+  pmt next_ = &Find::Start;
+
+  using ChildContainer = std::vector<std::unique_ptr<wxArchiveEntry>>;
+  ChildContainer child_;
+  ChildContainer::iterator child_it_;
 
  public:
-  Find(wxInputStream &stream);
-  Find(wxInputStream *stream);
+  Find(Provider *provider, Archive archive);
+  Find(Find &parent, Archive archive);
+  Find(task::Task &parent, Provider *provider, Archive archive);
+  Find(find::Find<wxArchiveEntry> &parent, Provider *provider, Archive archive);
+
+  void SetComparer(compare::Comparer<wxArchiveEntry> *comparer) {
+    comparer_ = comparer;
+  }
 
  protected:
   void DoResume() override;
+
+  void SetNext(pmt next) { next_ = next; }
+  void SetNextAndResume(pmt next) {
+    SetNext(next);
+    Resume();
+  }
+
+  void Done();
+
+  void Start();
+  void NonSeekableIterateChild();
+
+  void SeekableIterateChild();
+  void SortChild();
+  void SendChild();
 };
 
 }  // namespace archive
