@@ -2,8 +2,7 @@
 add_library(nwd INTERFACE)
 
 
-option(WITH_FMR_USE_STD_FILESYSTEM "Use std::filesystem instead of boost::filesystem")
-if (WITH_FMR_USE_STD_FILESYSTEM)
+if (FMR_USE_STD_FILESYSTEM)
   target_include_directories(nwd INTERFACE ../include/fmr/nowide/std)
   target_compile_features(nwd INTERFACE cxx_std_17)
 else()
@@ -19,3 +18,6 @@ add_library(fmr_fs
 target_link_libraries(fmr_fs PUBLIC nwd)
 target_include_directories(fmr_fs PUBLIC ../include)
 
+if (FMR_USE_WX_WIDGETS)
+  add_subdirectory(wx)
+endif()
