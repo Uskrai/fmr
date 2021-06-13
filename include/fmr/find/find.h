@@ -34,6 +34,8 @@ class Find<void> : public task::Task {
   bool recursive_ = false;
 
  public:
+  Find() {}
+  Find(task::Task &parent) : task::Task(parent) {}
   /**
    * Set if Find should be Recursive or not
    */
@@ -52,6 +54,10 @@ class Find : public Find<void> {
 
  public:
   Find(Checker<T> *checker) : checker_(checker) {}
+  Find(task::Task &parent, Checker<T> *checker)
+      : Find<void>(parent), checker_(checker) {}
+  Find(Find<void> &parent, Checker<T> *checker)
+      : Find<void>(parent), checker_(checker) {}
 
   // void SetChecker(Checker<T> *checker) { checker_ = checker; }
   /**
