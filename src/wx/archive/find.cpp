@@ -31,24 +31,12 @@ std::string ToStdString(wxString string) {
   return std::string(string.utf8_str());
 }
 
-Find::Find(Provider *provider, Archive archive)
-    : BaseFind(provider), archive_(std::move(archive)), provider_(provider) {}
+Find::Find(Archive archive, Context *context)
+    : archive_(std::move(archive)), context_(context) {}
 
-Find::Find(Find &parent, Archive archive)
-    : BaseFind(parent),
-      provider_(parent.provider_),
-      archive_(std::move(archive)) {}
+void Find::Next() { (this->*next_)(); }
 
-Find::Find(find::Find<wxArchiveEntry> &parent, Provider *provider,
-           Archive archive)
-    : BaseFind(parent), archive_(std::move(archive)), provider_(provider) {}
-
-void Find::DoResume() { (this->*next_)(); }
-
-void Find::Done() {
-  task::Task::Done(true);
-  next_ = &Find::Done;
-}
+void Find::Done() { next_ = &Find::Done; }
 
 void Find::Start() {
   auto stream = archive_.GetInputStream();
@@ -62,8 +50,6 @@ void Find::Start() {
   } else {
     SetNext(&Find::NonSeekableIterateChild);
   }
-
-  DoResume();
 }
 
 void Find::NonSeekableIterateChild() {
@@ -73,15 +59,16 @@ void Find::NonSeekableIterateChild() {
     return std::unique_ptr<wxArchiveEntry>(stream->GetNextEntry());
   };
 
-  while (auto entry = next_entry()) {
-    if (provider_->Check(*entry)) {
-      provider_->ConsumeNonSeekable(*entry, *stream);
+  auto entry = next_entry();
+
+  if (entry) {
+    Entry ent{entry.get(), archive_.GetInputStream()};
+    if (GetContext()->Check(ent)) {
+      GetContext()->Consume(ent);
     }
-
-    if (IsPaused()) return;
+  } else {
+    Done();
   }
-
-  Done();
 }
 
 void Find::SeekableIterateChild() {
@@ -91,46 +78,42 @@ void Find::SeekableIterateChild() {
     return std::unique_ptr<wxArchiveEntry>(stream->GetNextEntry());
   };
 
-  while (auto entry = next_entry()) {
-    auto name = entry->GetName();
+  auto entry = next_entry();
 
-    if (Check(*entry)) {
+  if (entry) {
+    Entry ent{entry.get(), archive_.GetInputStream()};
+    if (GetContext()->Check(ent)) {
       child_.push_back(std::move(entry));
     }
-
-    if (IsPaused()) return;
+  } else {
+    SetNext(&Find::SortChild);
   }
-
-  SetNextAndResume(&Find::SortChild);
 }
 
 void Find::SortChild() {
-  if (comparer_) {
-    auto sorter = [this](const auto &t1, const auto &t2) {
-      return comparer_->operator()(*t1, *t2);
-    };
+  auto compare = [this](const auto &t1, const auto &t2) {
+    return GetContext()->Compare(t1, t2);
+  };
 
-    std::sort(child_.begin(), child_.end(), sorter);
-  }
   child_it_ = child_.begin();
 
-  if (IsPaused()) return;
-
   SetNext(&Find::SendChild);
-  DoResume();
 }
 
 void Find::SendChild() {
   auto &it = child_it_;
   auto stream = archive_.GetInputStream();
 
-  while (it != child_.end()) {
-    auto &entry = **it;
-    if (stream->OpenEntry(entry)) {
-      stream->OpenEntry(entry);
-      provider_->ConsumeSeekable(entry, *stream);
-    }
+  auto &entry = **it;
+
+  if (stream->OpenEntry(entry)) {
+    Entry ent{&entry, stream};
+    GetContext()->Consume(ent);
   }
+
+  ++it;
+
+  if (it == child_.end()) Done();
 }
 
 }  // namespace archive

@@ -15,31 +15,26 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_FMR_FIND_CHECKER_H_
-#define INCLUDE_FMR_FIND_CHECKER_H_
+#ifndef INCLUDE_FMR_WX_ARCHIVE_CONTEXT_H_
+#define INCLUDE_FMR_WX_ARCHIVE_CONTEXT_H_
 
-#include <string>
+#include <fmr/find/context.h>
+#include <fmr/wx/archive/entry.h>
 
 namespace fmr {
 
-namespace find {
+namespace wx {
 
-/**
- * This is an abstract class used to check the path given by find class
- */
-template <typename T>
-class Checker {
+namespace archive {
+
+class Context : public find::Context<Entry> {
  public:
-  virtual ~Checker() {}
-
-  /**
-   * Check whether this is the right path or not
-   */
-  virtual bool Check(const T &path) = 0;
 };
 
-}  // namespace find
+}  // namespace archive
+
+}  // namespace wx
 
 }  // namespace fmr
 
-#endif  // INCLUDE_FMR_FIND_CHECKER_H_
+#endif  // INCLUDE_FMR_WX_ARCHIVE_CONTEXT_H_

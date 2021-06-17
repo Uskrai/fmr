@@ -15,33 +15,26 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_FMR_FS_FILESYSTEM_H_
-#define INCLUDE_FMR_FS_FILESYSTEM_H_
+#ifndef INCLUDE_FMR_WX_ARCHIVE_ENTRY_H_
+#define INCLUDE_FMR_WX_ARCHIVE_ENTRY_H_
 
-#include <fmr/iterator/input.h>
-#include <fmr/nowide/fs.h>
-
-#include <memory>
+#include <wx/archive.h>
 
 namespace fmr {
 
-namespace fs {
+namespace wx {
 
-class FilesystemInputContainer
-    : public iterator::InputContainer<nwd::fs::path> {
-  nwd::fs::path path_;
+namespace archive {
 
-  iterator::Input<nwd::fs::path> end_;
-  iterator::Input<nwd::fs::path> it_;
-
- public:
-  FilesystemInputContainer(nwd::fs::path path);
-  iterator::Input<nwd::fs::path> &iterator() override;
-  iterator::Input<nwd::fs::path> &end() override;
+struct Entry {
+  wxArchiveEntry *entry;
+  wxArchiveInputStream *stream;
 };
 
-}  // namespace fs
+}  // namespace archive
+
+}  // namespace wx
 
 }  // namespace fmr
 
-#endif  // INCLUDE_FMR_FS_FILESYSTEM_H_
+#endif  // INCLUDE_FMR_WX_ARCHIVE_ENTRY_H_

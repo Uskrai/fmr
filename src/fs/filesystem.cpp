@@ -16,12 +16,14 @@
  */
 
 #include <fmr/fs/filesystem.h>
+#include <fmr/iterator/input.h>
+#include <fmr/nowide/fs.h>
 
 namespace fmr {
 
 namespace fs {
 
-class DirectoryIterator : public BaseInputIterator<nwd::fs::path> {
+class DirectoryIterator : public iterator::BaseInput<nwd::fs::path> {
   nwd::fs::directory_iterator iterator_;
 
  public:
@@ -36,25 +38,24 @@ class DirectoryIterator : public BaseInputIterator<nwd::fs::path> {
   const nwd::fs::path &operator*() const override { return iterator_->path(); }
 
  protected:
-  bool equal(const BaseInputIterator<nwd::fs::path> &o) const override {
+  bool equal(const iterator::BaseInput<nwd::fs::path> &o) const override {
     auto &it = (DirectoryIterator &)(o);
     return it.iterator_ == iterator_;
   }
 };
 
-FileSystem::FileSystem(nwd::fs::path path) : path_(path) {
-  it_ = InputIterator<nwd::fs::path>(std::make_unique<DirectoryIterator>(path));
-  end_ = InputIterator<nwd::fs::path>(std::make_unique<DirectoryIterator>());
+FilesystemInputContainer::FilesystemInputContainer(nwd::fs::path path)
+    : path_(path) {
+  it_ =
+      iterator::Input<nwd::fs::path>(std::make_unique<DirectoryIterator>(path));
+  end_ = iterator::Input<nwd::fs::path>(std::make_unique<DirectoryIterator>());
 }
 
-InputIterator<nwd::fs::path> &FileSystem::iterator() { return it_; }
-
-InputIterator<nwd::fs::path> &FileSystem::end() { return end_; }
-
-std::unique_ptr<InputContainer<nwd::fs::path>> FileSystemProvider::Open(
-    const nwd::fs::path &path) {
-  return std::make_unique<FileSystem>(path);
+iterator::Input<nwd::fs::path> &FilesystemInputContainer::iterator() {
+  return it_;
 }
+
+iterator::Input<nwd::fs::path> &FilesystemInputContainer::end() { return end_; }
 
 }  // namespace fs
 

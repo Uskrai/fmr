@@ -32,8 +32,9 @@ namespace archive {
 /**
  * This class is an abstract class used to interact with fmr::wx::archive::Find
  */
-class Provider : public find::Checker<wxArchiveEntry> {
+class Provider {
  public:
+  virtual ~Provider() {}
   /**
    * Consume Searched entry from Non Seekable Archive Stream
    *

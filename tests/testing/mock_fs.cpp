@@ -29,7 +29,7 @@ namespace fs {
 /**
  * Mock Iteartor used by MockProvider
  */
-class MockIterator : public BaseInputIterator<nwd::fs::path> {
+class MockIterator : public iterator::BaseInput<nwd::fs::path> {
   nwd::fs::path parent_;
   std::vector<nwd::fs::path>::iterator it_;
 
@@ -51,57 +51,62 @@ class MockIterator : public BaseInputIterator<nwd::fs::path> {
     return temp_;
   }
 
-  bool equal(const BaseInputIterator<nwd::fs::path> &o) const override {
+  bool equal(const iterator::BaseInput<nwd::fs::path> &o) const override {
     auto &oc = (MockIterator &)(o);
     return it_ == oc.it_;
   }
 };
 
-class MockContainer : public InputContainer<nwd::fs::path> {
+class MockContainer : public iterator::InputContainer<nwd::fs::path> {
   nwd::fs::path parent_;
 
   std::vector<nwd::fs::path> child_;
-  InputIterator<nwd::fs::path> it_;
-  InputIterator<nwd::fs::path> end_;
+  iterator::Input<nwd::fs::path> it_;
+  iterator::Input<nwd::fs::path> end_;
 
  public:
   MockContainer(std::pair<nwd::fs::path, std::vector<nwd::fs::path>> it) {
     parent_ = it.first;
     child_ = it.second;
 
-    it_ = InputIterator<nwd::fs::path>(
+    it_ = iterator::Input<nwd::fs::path>(
         std::make_unique<MockIterator>(parent_, child_.begin()));
-    end_ = InputIterator<nwd::fs::path>(
+    end_ = iterator::Input<nwd::fs::path>(
         std::make_unique<MockIterator>(parent_, child_.end()));
   }
 
-  InputIterator<nwd::fs::path> &iterator() override { return it_; }
+  iterator::Input<nwd::fs::path> &iterator() override { return it_; }
 
-  InputIterator<nwd::fs::path> &end() override { return end_; }
+  iterator::Input<nwd::fs::path> &end() override { return end_; }
 };
 
-class MockProvider : public Provider {
+class MockContext : public Context {
+ public:
+  MOCK_METHOD(bool, Check, (const nwd::fs::path &));
+  MOCK_METHOD(bool, Compare, (const nwd::fs::path &, const nwd::fs::path &));
+
+  MOCK_METHOD(void, Consume, (nwd::fs::path &));
+
+  MOCK_METHOD(std::unique_ptr<find::Find<>>, Find,
+              (fmr::fs::Find *, const nwd::fs::path &));
+
+  void Map(std::string name, std::vector<std::string> child) {}
+};
+
+class MockProvider {
   std::map<nwd::fs::path, std::vector<nwd::fs::path>> directory_;
 
-  std::function<bool(const nwd::fs::path &)> checker_ =
-      [](const nwd::fs::path &) { return false; };
+  using UniqueInputContainer =
+      std::unique_ptr<iterator::InputContainer<nwd::fs::path>>;
 
-  std::function<void(const nwd::fs::path &)> consumer_ = [](const path &) {};
+  using UniqueFind = std::unique_ptr<find::Find<nwd::fs::path>>;
+
+  Context *context_;
 
  public:
-  MOCK_METHOD(UniqueInputContainer, Open, (const nwd::fs::path &));
+  MockProvider() {}
 
-  MOCK_METHOD(UniqueFind, Find, (fs::Find *, const nwd::fs::path &));
-
-  MOCK_METHOD(bool, Check, (const nwd::fs::path &));
-
-  MOCK_METHOD(void, Consume, (const nwd::fs::path &));
-
-  void Map(const nwd::fs::path &path, std::vector<nwd::fs::path> child) {
-    directory_.emplace(std::make_pair(path, child));
-  }
-
-  UniqueInputContainer DefaultOpen(const nwd::fs::path &path) {
+  UniqueInputContainer Open(const nwd::fs::path &path) {
     auto it = directory_.find(path);
 
     if (it == directory_.end()) return nullptr;
@@ -109,20 +114,12 @@ class MockProvider : public Provider {
     return std::make_unique<MockContainer>(*it);
   }
 
-  void SetChecker(std::function<bool(const nwd::fs::path &)> checker) {
-    checker_ = checker;
+  UniqueFind Find(fs::Find *find, const nwd::fs::path &path) {
+    return std::make_unique<fs::Find>(Open(path), find->GetContext());
   }
 
-  bool DefaultCheck(const nwd::fs::path &path) { return checker_(path); }
-
-  UniqueFind DefaultFind(fs::Find *find, const nwd::fs::path &path) {
-    return std::make_unique<fs::Find>(*find, path);
-  }
-
-  void DefaultConsume(const nwd::fs::path &path) { consumer_(path); }
-
-  void SetConsumer(std::function<void(const nwd::fs::path &)> consumer) {
-    consumer_ = consumer;
+  void Map(nwd::fs::path name, std::vector<nwd::fs::path> child) {
+    directory_.insert(std::make_pair(name, child));
   }
 };
 

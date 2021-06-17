@@ -23,87 +23,73 @@ namespace fmr {
 
 namespace fs {
 
-Find::Find(nwd::fs::path path, Provider *provider)
-    : find::Find<nwd::fs::path>(provider), path_(path), provider_(provider) {}
+Find::Find(std::unique_ptr<iterator::InputContainer<nwd::fs::path>> container,
+           Context *context)
+    : container_(std::move(container)), context_(context) {}
 
-Find::Find(Find &find, nwd::fs::path path)
-    : find::Find<nwd::fs::path>(find), path_(path), provider_(find.provider_) {}
-
-void Find::Done() {
-  find::Find<nwd::fs::path>::Done(true);
-  SetNext(&Find::DonePmt);
-}
+void Find::Done() { SetNext(&Find::Done); }
 
 void Find::Start() {
-  container_ = provider_->Open(path_);
-
-  if (container_)
+  if (container_) {
     SetNext(&Find::IterateDirectory);
-  else
+  } else
     Done();
-  Resume();
 }
 
 void Find::IterateDirectory() {
   auto &it = container_->iterator();
 
-  for (; it != container_->end(); ++it) {
-    if (IsPaused()) return;
+  if (it != container_->end()) {
+    if (GetContext()->Check(*it)) founds_.push_back(*it);
 
-    auto &path = *it;
+    auto find = GetContext()->Find(this, *it);
+    assert(find && "GetContext()->Find() should not return null");
+    if (find) child_.push_back(std::move(find));
 
-    if (Check(path)) {
-      founds_.push_back(path);
-    }
-
-    auto find = provider_->Find(this, path);
-    child_.push_back(std::move(find));
+    ++it;
+  } else {
+    SetNext(&Find::SortFound);
   }
-
-  SetNext(&Find::SortFound);
-  if (IsPaused()) return;
-  Resume();
 }
 
 void Find::SortFound() {
-  if (GetComparer()) GetComparer()->Sort(founds_.begin(), founds_.end());
+  auto compare = [this](const auto &t1, const auto &t2) {
+    return GetContext()->Compare(t1, t2);
+  };
+
+  std::sort(founds_.begin(), founds_.end(), compare);
+
   found_it_ = founds_.begin();
 
   SetNext(&Find::SendFound);
-  if (IsPaused()) return;
-  Resume();
 }
 
 void Find::SendFound() {
   auto &it = found_it_;
 
-  for (; it != founds_.end(); ++it) {
-    if (IsPaused()) return;
-
-    provider_->Consume(*it);
-  }
-
-  if (IsRecursive()) {
-    child_it_ = child_.begin();
-    SetNext(&Find::IterateChild);
-    Resume();
+  if (it != founds_.end()) {
+    context_->Consume(*it);
+    ++it;
   } else {
-    Done();
+    if (IsRecursive()) {
+      child_it_ = child_.begin();
+      SetNext(&Find::IterateChild);
+    } else {
+      Done();
+    }
   }
 }
 
 void Find::IterateChild() {
   auto &it = child_it_;
 
-  while (it != child_.end()) {
+  if (it != child_.end()) {
     auto &find = *it;
-
-    if (IsPaused()) return;
-    find->Resume();
-    if (find->IsDone()) ++it;
+    find->Next();
+    if (!find->HasNext()) ++it;
+  } else {
+    Done();
   }
-
-  Done();
 }
 
 bool Find::CanFind(nwd::fs::path path) { return nwd::fs::is_directory(path); }

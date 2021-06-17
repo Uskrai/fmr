@@ -19,7 +19,8 @@
 #define INCLUDE_FMR_FS_FIND_H_
 
 #include <fmr/find/find.h>
-#include <fmr/fs/provider.h>
+#include <fmr/fs/context.h>
+#include <fmr/iterator/input.h>
 #include <fmr/nowide/fs.h>
 
 #include <functional>
@@ -29,10 +30,12 @@ namespace fmr {
 namespace fs {
 
 class Find : public find::Find<nwd::fs::path> {
-  using ChildContainer =
-      std::vector<std::unique_ptr<find::Find<nwd::fs::path>>>;
-
+  using ChildContainer = std::vector<std::unique_ptr<find::Find<>>>;
   ChildContainer child_;
+
+  bool recursive_{false};
+
+  Context *context_{nullptr};
 
   std::vector<nwd::fs::path> founds_;
 
@@ -40,42 +43,41 @@ class Find : public find::Find<nwd::fs::path> {
   ptm next_ = &Find::Start;
   nwd::fs::path path_;
 
-  Provider *provider_ = nullptr;
-  std::unique_ptr<InputContainer<nwd::fs::path>> container_;
+  std::unique_ptr<iterator::InputContainer<nwd::fs::path>> container_;
 
   ChildContainer::iterator child_it_;
   std::vector<nwd::fs::path>::iterator found_it_;
 
  public:
-  Find(nwd::fs::path path, Provider *provider);
-  Find(std::string path, Provider *provider)
-      : Find(nwd::fs::path(path), provider){};
-  Find(Find &find, nwd::fs::path path);
+  Find(std::unique_ptr<iterator::InputContainer<nwd::fs::path>> container,
+       Context *context);
 
-  Find(Find &&o) = default;
+  Find(Find &&o);
 
   static bool CanFind(nwd::fs::path path);
   static bool CanFind(std::string path);
+
+  bool IsRecursive() const override { return recursive_; }
+  void SetRecursive(bool recursive) override { recursive_ = recursive; }
+  bool CanRecursive() const override { return true; }
+
+  void Next() override { (this->*next_)(); }
+  virtual bool HasNext() const override { return next_ != &Find::Done; }
+
+  Context *GetContext() override { return context_; }
 
  protected:
   void Done();
 
  private:
   void Start();
+
   void IterateDirectory();
   void SortFound();
   void SendFound();
   void IterateChild();
 
-  void DonePmt() {}
-
-  void DoResume() override { (this->*next_)(); }
-
   void SetNext(ptm next) { next_ = next; };
-  void SetNextAndResume(ptm next) {
-    SetNext(next);
-    if (!IsPaused()) return DoResume();
-  }
 };
 
 }  // namespace fs

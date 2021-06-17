@@ -20,7 +20,8 @@
 
 #include <fmr/find/find.h>
 #include <fmr/wx/archive/archive.h>
-#include <fmr/wx/archive/provider.h>
+#include <fmr/wx/archive/context.h>
+#include <fmr/wx/archive/entry.h>
 #include <wx/archive.h>
 #include <wx/stream.h>
 
@@ -30,10 +31,9 @@ namespace wx {
 
 namespace archive {
 
-class Find : public find::Find<wxArchiveEntry> {
+class Find : public find::Find<Entry> {
   Archive archive_;
-  Provider *provider_;
-  compare::Comparer<wxArchiveEntry> *comparer_ = nullptr;
+  Context *context_;
 
   using pmt = void (Find::*)();
   pmt next_ = &Find::Start;
@@ -43,24 +43,20 @@ class Find : public find::Find<wxArchiveEntry> {
   ChildContainer::iterator child_it_;
 
  public:
-  Find(Provider *provider, Archive archive);
-  Find(Find &parent, Archive archive);
-  Find(task::Task &parent, Provider *provider, Archive archive);
-  Find(find::Find<wxArchiveEntry> &parent, Provider *provider, Archive archive);
+  Find(Archive archive, Context *context);
 
-  void SetComparer(compare::Comparer<wxArchiveEntry> *comparer) {
-    comparer_ = comparer;
-  }
+  Context *GetContext() override { return context_; }
+
+  void Next() override;
+
+  bool HasNext() const override { return next_ != &Find::Done; }
+
+  void SetRecursive(bool recursive) override {}
+  bool IsRecursive() const override { return false; }
+  bool CanRecursive() const override { return false; }
 
  protected:
-  void DoResume() override;
-
   void SetNext(pmt next) { next_ = next; }
-  void SetNextAndResume(pmt next) {
-    SetNext(next);
-    Resume();
-  }
-
   void Done();
 
   void Start();

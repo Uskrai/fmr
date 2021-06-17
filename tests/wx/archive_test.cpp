@@ -31,32 +31,13 @@ namespace wx {
 
 namespace archive {
 
-class MockProvider : public Provider {
-  std::function<void(wxArchiveEntry &, wxInputStream &)> consume_ =
-      [](auto &a, auto &b) {};
-
+class MockContext : public Context {
  public:
-  MOCK_METHOD(bool, Check, (const wxArchiveEntry &));
+  MOCK_METHOD(bool, Check, (const Entry &));
 
-  MOCK_METHOD(void, Consume, (wxArchiveEntry &, wxInputStream &));
+  MOCK_METHOD(void, Consume, (Entry &));
 
-  void ConsumeNonSeekable(wxArchiveEntry &entry,
-                          wxInputStream &stream) override {
-    return Consume(entry, stream);
-  }
-
-  void ConsumeSeekable(wxArchiveEntry &entry, wxInputStream &stream) override {
-    return Consume(entry, stream);
-  }
-
-  void DefaultConsume(wxArchiveEntry &entry, wxInputStream &stream) {
-    consume_(entry, stream);
-  }
-
-  void SetDefaultConsume(
-      std::function<void(wxArchiveEntry &, wxInputStream &)> consume) {
-    consume_ = consume;
-  }
+  MOCK_METHOD(bool, Compare, (const Entry &t1, const Entry &t2));
 };
 
 struct Seekable {};
@@ -65,7 +46,7 @@ struct NonSeekable {};
 template <typename Type>
 class ArchiveTest : public testing::Test {
  protected:
-  MockProvider mock_;
+  MockContext mock_;
   wxMemoryOutputStream out_stream_;
   wxZipOutputStream arc_stream_{out_stream_};
   std::vector<wxString> content_;
@@ -103,7 +84,7 @@ TYPED_TEST_SUITE(ArchiveTest, ArchiveTestTypes);
 
 TYPED_TEST(ArchiveTest, Testing) {
   wxArchiveOutputStream &arc_stream = this->arc_stream_;
-  MockProvider &mock = this->mock_;
+  MockContext &mock = this->mock_;
   arc_stream.Close();
 
   wxMemoryInputStream stream(this->out_stream_);
@@ -111,20 +92,20 @@ TYPED_TEST(ArchiveTest, Testing) {
   {
     std::vector<wxString> &content = this->content_;
     for (auto it : content) {
-      EXPECT_CALL(mock, Check(testing::Truly([it](const wxArchiveEntry &entry) {
-                    return entry.GetName(wxPATH_UNIX) == it;
+      EXPECT_CALL(mock, Check(testing::Truly([it](const Entry &entry) {
+                    return entry.entry->GetName(wxPATH_UNIX) == it;
                   })))
           .WillOnce(testing::Return(true));
 
-      EXPECT_CALL(mock, Consume(testing::Truly([it](wxArchiveEntry &entry) {
-                                  return entry.GetName(wxPATH_UNIX) == it;
-                                }),
-                                testing::_));
+      EXPECT_CALL(mock, Consume(testing::Truly([it](Entry &entry) {
+                    return entry.entry->GetName(wxPATH_UNIX) == it;
+                  })));
     }
   }
 
-  Find find(&this->mock_, Archive("a.zip", stream));
-  find.Resume();
+  Find find(Archive("a.zip", stream), &mock);
+
+  while (find.HasNext()) find.Next();
 }
 
 }  // namespace archive

@@ -22,67 +22,66 @@
 
 namespace fmr {
 
-namespace fs {
+namespace iterator {
 
 class Entry;
 
 template <typename T>
-class BaseInputIterator {
+class BaseInput {
  public:
-  virtual ~BaseInputIterator() {}
-  virtual BaseInputIterator &operator++() = 0;
+  virtual ~BaseInput() {}
+  virtual BaseInput &operator++() = 0;
   virtual const T &operator*() const = 0;
 
-  bool operator==(const BaseInputIterator &o) {
+  bool operator==(const BaseInput &o) {
     return typeid(*this) == typeid(o) && equal(o);
   }
 
  protected:
-  virtual bool equal(const BaseInputIterator &o) const { return true; }
+  virtual bool equal(const BaseInput &o) const { return true; }
 };
 
 template <typename T>
-class InputIterator {
-  std::unique_ptr<BaseInputIterator<T>> ptr_;
+class Input {
+  std::unique_ptr<BaseInput<T>> ptr_;
 
  public:
   using value_type = T;
 
-  InputIterator() {}
-  InputIterator(std::unique_ptr<BaseInputIterator<T>> ptr)
-      : ptr_{std::move(ptr)} {}
-  InputIterator(InputIterator &&o) { *this = std::move(o); }
+  Input() {}
+  Input(std::unique_ptr<BaseInput<T>> ptr) : ptr_{std::move(ptr)} {}
+  Input(Input &&o) { *this = std::move(o); }
 
-  InputIterator &operator=(InputIterator &&o) {
+  Input &operator=(Input &&o) {
     ptr_ = std::move(o.ptr_);
     return *this;
   }
 
   const T &operator*() const { return **ptr_; }
 
-  InputIterator &operator++() {
+  Input &operator++() {
     ++(*ptr_);
     return *this;
   }
 
-  bool operator==(const InputIterator &o) const {
+  bool operator==(const Input &o) const {
     return (ptr_ == o.ptr_) || (*ptr_ == *o.ptr_);
   }
 
-  BaseInputIterator<T> *ptr() { return ptr_.get(); }
+  BaseInput<T> *ptr() { return ptr_.get(); }
 
-  bool operator!=(const InputIterator &o) const { return !((*this) == o); }
+  bool operator!=(const Input &o) const { return !((*this) == o); }
 };
 
 template <typename T>
 class InputContainer {
  public:
   virtual ~InputContainer() {}
-  virtual InputIterator<T> &iterator() = 0;
-  virtual InputIterator<T> &end() = 0;
+  virtual Input<T> &iterator() = 0;
+  virtual Input<T> &end() = 0;
 };
 
-}  // namespace fs
+}  // namespace iterator
 
 }  // namespace fmr
 

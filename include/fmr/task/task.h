@@ -26,23 +26,11 @@ namespace fmr {
 
 namespace task {
 
-class Task : public task::State {
+class Task {
  public:
-  void Resume() {
-    Pause(false);
-    DoResume();
-  }
-
- protected:
-  /**
-   * Resume when not paused
-   */
-  void ResumeIfNotPaused() {
-    if (IsPaused()) return;
-    Resume();
-  }
-
-  virtual void DoResume() = 0;
+  virtual void Next() = 0;
+  virtual bool HasNext() const = 0;
+  virtual ~Task() {}
 };
 
 }  // namespace task

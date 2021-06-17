@@ -19,7 +19,7 @@
 #define INCLUDE_FMR_FIND_FIND_H_
 
 #include <fmr/compare/comparer.h>
-#include <fmr/find/checker.h>
+#include <fmr/find/context.h>
 #include <fmr/task/task.h>
 
 namespace fmr {
@@ -31,51 +31,16 @@ class Find;
 
 template <>
 class Find<void> : public task::Task {
-  bool recursive_ = false;
-
  public:
-  Find() {}
-  Find(task::Task &parent) : task::Task(parent) {}
-  /**
-   * Set if Find should be Recursive or not
-   */
-  void SetRecursive(bool recursive) { recursive_ = recursive; }
-
-  /**
-   * Check if Find recursive
-   */
-  bool IsRecursive() const { return recursive_; }
+  virtual void SetRecursive(bool recursive) = 0;
+  virtual bool IsRecursive() const = 0;
+  virtual bool CanRecursive() const = 0;
 };
 
 template <typename T>
 class Find : public Find<void> {
-  Checker<T> *checker_ = nullptr;
-  compare::Comparer<T> *comparer_ = nullptr;
-
  public:
-  Find(Checker<T> *checker) : checker_(checker) {}
-  Find(task::Task &parent, Checker<T> *checker)
-      : Find<void>(parent), checker_(checker) {}
-  Find(Find<void> &parent, Checker<T> *checker)
-      : Find<void>(parent), checker_(checker) {}
-
-  // void SetChecker(Checker<T> *checker) { checker_ = checker; }
-  /**
-   * Set Comparer used for sorting child
-   */
-  void SetComparer(compare::Comparer<T> *comparer) { comparer_ = comparer; }
-
-  /**
-   * Get Checker
-   */
-  Checker<T> *GetChecker() const { return checker_; }
-
-  /**
-   * Get Compare
-   */
-  auto GetComparer() { return comparer_; }
-
-  bool Check(const T &check) { return checker_->Check(check); }
+  virtual Context<T> *GetContext() = 0;
 };
 
 }  // namespace find

@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_FMR_FS_FILESYSTEM_H_
-#define INCLUDE_FMR_FS_FILESYSTEM_H_
+#ifndef INCLUDE_FMR_FS_CONTEXT_H_
+#define INCLUDE_FMR_FS_CONTEXT_H_
 
-#include <fmr/iterator/input.h>
+#include <fmr/find/context.h>
+#include <fmr/find/find.h>
 #include <fmr/nowide/fs.h>
 
 #include <memory>
@@ -27,21 +28,16 @@ namespace fmr {
 
 namespace fs {
 
-class FilesystemInputContainer
-    : public iterator::InputContainer<nwd::fs::path> {
-  nwd::fs::path path_;
+class Find;
 
-  iterator::Input<nwd::fs::path> end_;
-  iterator::Input<nwd::fs::path> it_;
-
+class Context : public find::Context<nwd::fs::path> {
  public:
-  FilesystemInputContainer(nwd::fs::path path);
-  iterator::Input<nwd::fs::path> &iterator() override;
-  iterator::Input<nwd::fs::path> &end() override;
+  virtual std::unique_ptr<find::Find<>> Find(Find *parent,
+                                             const nwd::fs::path &path) = 0;
 };
 
 }  // namespace fs
 
 }  // namespace fmr
 
-#endif  // INCLUDE_FMR_FS_FILESYSTEM_H_
+#endif  // INCLUDE_FMR_FS_CONTEXT_H_
