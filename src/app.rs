@@ -212,30 +212,6 @@ impl eframe::App for App {
                     let app_setting = &mut self.setting.reader;
                     let setting = &mut app_setting.reader;
 
-                    ui.checkbox(
-                        &mut app_setting.change_folder_with_scroll_wheel,
-                        "Change Folder with Scroll Wheel",
-                    );
-
-                    ui.add(
-                        DragValue::new(&mut app_setting.preload_prev)
-                            .prefix("Preload Previous image: ")
-                            .clamp_range(usize::MIN..=usize::MAX),
-                    );
-                    ui.add(
-                        DragValue::new(&mut app_setting.preload_next)
-                            .prefix("Preload Next Image: ")
-                            .clamp_range(usize::MIN..=usize::MAX),
-                    );
-
-                    ui.add(
-                        DragValue::new(&mut setting.scroll_per_page).prefix("Scroll per Page: "),
-                    );
-
-                    ui.add(
-                        DragValue::new(&mut setting.scroll_per_arrow).prefix("Scroll per Arrow: "),
-                    );
-
                     ui.menu_button("Default Mode", |ui| {
                         let mode = &mut setting.mode;
                         ui.radio_value(mode, ReaderMode::Paged, "Paged");
@@ -251,6 +227,36 @@ impl eframe::App for App {
                         ui.checkbox(option.fit_vertical_mut(), "Fit Height");
                         ui.checkbox(&mut option.shrink, "Shrink");
                         ui.checkbox(&mut option.enlarge, "Enlarge");
+                    });
+
+                    ui.menu_button("Scroll", |ui| {
+                        ui.checkbox(
+                            &mut app_setting.change_folder_with_scroll_wheel,
+                            "Change Folder with Scroll Wheel",
+                        );
+
+                        ui.add(
+                            DragValue::new(&mut setting.scroll_per_page)
+                                .prefix("Scroll per Page: "),
+                        );
+
+                        ui.add(
+                            DragValue::new(&mut setting.scroll_per_arrow)
+                                .prefix("Scroll per Arrow: "),
+                        );
+                    });
+
+                    ui.menu_button("Loading", |ui| {
+                        ui.add(
+                            DragValue::new(&mut app_setting.preload_prev)
+                                .prefix("Preload Previous image: ")
+                                .clamp_range(usize::MIN..=usize::MAX),
+                        );
+                        ui.add(
+                            DragValue::new(&mut app_setting.preload_next)
+                                .prefix("Preload Next Image: ")
+                                .clamp_range(usize::MIN..=usize::MAX),
+                        );
                     });
                 });
 
