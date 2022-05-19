@@ -60,7 +60,9 @@ impl<'a, Item: ExplorerItem> ExplorerView<'a, Item> {
 
         let available_width = ui.available_width();
 
-        let column = (available_width / (setting.minimum_column_width as f32)).floor() as usize;
+        let column = (available_width / (setting.minimum_column_width as f32))
+            .floor()
+            .max(1.0) as usize;
         let width = (available_width / (column as f32)).floor() - (ui.spacing().item_spacing.x);
 
         if explorer.column_count != column {
