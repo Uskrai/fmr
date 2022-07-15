@@ -1,7 +1,13 @@
 name: Build Release
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'     
+        required: false
+        type: boolean
+        default: false
   
 env:
   CARGO_TERM_COLOR: always
@@ -14,6 +20,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: Swatinem/rust-cache@v1
+    - name: tmate
+      uses: mxschmitt/action-tmate@v3
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
     - name: Build
       run: cargo build --verbose --release
     - uses: actions/upload-artifact@v3
