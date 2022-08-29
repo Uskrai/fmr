@@ -105,7 +105,7 @@ impl ImageData {
             .into_frames()
             .collect_frames()?
             .into_iter()
-            .map(|it| FrameData::from(it))
+            .map(FrameData::from)
             .collect::<Vec<_>>();
         //
         Ok(ImageData::AnimatedImage(frames))
@@ -127,9 +127,8 @@ impl ImageData {
 
         let mut reader = Vec::new();
         read.read_to_end(&mut reader)?;
-        let image = crate::image::ImageData::load_with_format(Cursor::new(reader), format);
 
-        image
+        crate::image::ImageData::load_with_format(Cursor::new(reader), format)
     }
 
     pub fn load_with_format(
@@ -142,7 +141,7 @@ impl ImageData {
 
                 let frames = decoder.into_frames().collect_frames()?;
 
-                let frames = frames.into_iter().map(|it| FrameData::from(it)).collect();
+                let frames = frames.into_iter().map(FrameData::from).collect();
 
                 ImageData::AnimatedImage(frames)
             }
@@ -342,7 +341,7 @@ impl From<SplittedImageData> for EguiSplittedImageData {
                 Self::AnimatedImage(
                     image
                         .into_iter()
-                        .map(|it| EguiSplittedFrameData::from(it))
+                        .map(EguiSplittedFrameData::from)
                         .collect(),
                 )
             }

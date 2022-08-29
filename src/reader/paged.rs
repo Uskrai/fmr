@@ -70,7 +70,7 @@ impl PagedReaderState {
                 }
             }
         }
-        return false;
+        false
     }
 
     pub fn reset(&mut self, step: isize) {

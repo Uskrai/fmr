@@ -83,7 +83,7 @@ impl<'a, Item: ExplorerItem> ExplorerView<'a, Item> {
                         let size = explorer
                             .row_size
                             .entry(row)
-                            .or_insert(egui::vec2(width, width));
+                            .or_insert_with(|| egui::vec2(width, width));
 
                         let response = ExplorerItemView::new(it, egui::vec2(width, width))
                             .container_size(*size)
@@ -122,13 +122,11 @@ impl<'a, Item: ExplorerItem> ExplorerView<'a, Item> {
                 }
             });
 
-        let output = ExplorerOutput {
+        ExplorerOutput {
             is_double_clicked,
             column,
             responses,
-        };
-
-        output
+        }
     }
 
     pub fn handle_key(

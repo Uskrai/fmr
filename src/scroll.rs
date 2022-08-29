@@ -1,3 +1,4 @@
+#![allow(clippy::all)]
 use std::{hash::Hash, ops::RangeInclusive};
 
 #[derive(Copy, Clone, Debug)]

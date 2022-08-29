@@ -26,7 +26,6 @@ impl SplittedTextureHandle {
     }
 
     pub fn size(&self) -> [usize; 2] {
-        let width;
         let mut height = 0;
 
         let mut first_width = 0;
@@ -54,7 +53,7 @@ impl SplittedTextureHandle {
             height += curr_height;
         }
 
-        width = first_width;
+        let width = first_width;
 
         [width, height]
     }
@@ -114,7 +113,7 @@ impl<'a> SplittedTextureWidget<'a> {
             size = egui::Vec2::ZERO;
 
             for horizontal in vertical {
-                size = horizontal.size_vec2() * egui::Vec2::from(scale);
+                size = horizontal.size_vec2() * scale;
                 let rect = egui::Rect::from_min_size(rect.min + egui::vec2(x, y), size);
                 egui::Image::new(horizontal, size).paint_at(ui, rect);
                 x += size.x;
@@ -203,8 +202,8 @@ impl AnimatedTextureHandle {
     pub fn max_size(&self) -> [usize; 2] {
         let mut size = [0usize; 2];
         for it in &self.handles {
-            for i in 0..2 {
-                size[i] = it.handle.size()[i].max(size[i]);
+            for (i, max) in size.iter_mut().enumerate() {
+                *max = it.handle.size()[i].max(*max);
             }
         }
 
@@ -354,7 +353,7 @@ impl LoadingTexture {
     }
 
     pub fn size_2(&self) -> [usize; 2] {
-        let size = self.size.unwrap_or([20.0, 20.0].into());
+        let size = self.size.unwrap_or_else(|| [20.0, 20.0].into());
 
         [size.x as usize, size.y as usize]
     }

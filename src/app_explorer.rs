@@ -44,9 +44,9 @@ impl AppExplorer {
         let loader = ExplorerLoader {
             explorer: explorer.clone(),
             path: path.clone(),
-            selected_entry: selected_entry.clone(),
+            selected_entry,
             setting_receiver,
-            ctx: ctx.clone(),
+            ctx,
         };
 
         let handle = tokio::spawn(loader.load());
@@ -132,7 +132,7 @@ impl AppExplorer {
             explorer.write().scroll_to_current();
 
             futures::pin_mut!(child);
-            while let Some(_) = child.next().await {
+            while (child.next().await).is_some() {
                 tokio::task::yield_now().await;
             }
         }

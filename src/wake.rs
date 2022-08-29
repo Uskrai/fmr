@@ -3,17 +3,18 @@ use std::{sync::Arc, time::Duration};
 use parking_lot::Mutex;
 
 /// call future after specified duration
+#[derive(Default)]
 pub struct EguiWaker {
     pub handle: Arc<Mutex<Option<tokio::task::JoinHandle<()>>>>,
 }
 
-impl Default for EguiWaker {
-    fn default() -> Self {
-        Self {
-            handle: Default::default(),
-        }
-    }
-}
+// impl Default for EguiWaker {
+//     fn default() -> Self {
+//         Self {
+//             handle: Default::default(),
+//         }
+//     }
+// }
 
 impl EguiWaker {
     pub fn call<F, R>(&mut self, duration: Duration, call: F)

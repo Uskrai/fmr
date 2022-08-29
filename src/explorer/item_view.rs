@@ -94,12 +94,10 @@ impl<'a, Item: ExplorerItem> ExplorerItemView<'a, Item> {
                 stroke.width *= 3.0;
             }
             stroke
+        } else if response.hovered() {
+            ui.visuals().widgets.hovered.fg_stroke
         } else {
-            if response.hovered() {
-                ui.visuals().widgets.hovered.fg_stroke
-            } else {
-                ui.visuals().widgets.inactive.fg_stroke
-            }
+            ui.visuals().widgets.inactive.fg_stroke
         };
 
         let response = response.interact(egui::Sense::click());

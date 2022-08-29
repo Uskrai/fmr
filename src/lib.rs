@@ -94,7 +94,7 @@ pub fn setup_custom_fonts(ctx: &egui::Context) {
             .families
             .entry(egui::FontFamily::Monospace)
             .or_default()
-            .push(name.clone());
+            .push(name);
     };
 
     macro_rules! load_adobe {

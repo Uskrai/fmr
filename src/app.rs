@@ -16,8 +16,8 @@ mod path_serde {
 
     use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-    pub fn serialize<S: Serializer>(v: &PathBuf, s: S) -> Result<S::Ok, S::Error> {
-        let os_str = v.as_path().as_os_str();
+    pub fn serialize<S: Serializer>(v: &std::path::Path, s: S) -> Result<S::Ok, S::Error> {
+        let os_str = v.as_os_str();
         let string = v.to_string_lossy();
         (string, os_str).serialize(s)
         // v.as_path().as_os_str().serialize(s)
@@ -67,8 +67,8 @@ pub enum AppMode {
 impl AppMode {
     pub fn path(&self) -> &Path {
         match self {
-            AppMode::Explorer(explorer) => &explorer.path(),
-            AppMode::Reader(reader) => &reader.path(),
+            AppMode::Explorer(explorer) => explorer.path(),
+            AppMode::Reader(reader) => reader.path(),
         }
     }
 }
@@ -77,7 +77,7 @@ impl App {
     pub fn new(context: &eframe::CreationContext) -> Self {
         crate::setup_custom_fonts(&context.egui_ctx);
 
-        let profile = std::env::var("FMR_PROFILE").unwrap_or("default".to_string());
+        let profile = std::env::var("FMR_PROFILE").unwrap_or_else(|_| "default".to_string());
         let storage = crate::storage::FSStorage::prepare("fmr", &profile, "config.ron");
 
         let setting = match &storage {
@@ -320,7 +320,7 @@ impl eframe::App for App {
 
         // if self.mode is Some then it is changed within the match block
         // so don't assign it again
-        if let None = self.mode {
+        if self.mode.is_none() {
             self.mode = mode;
         }
 
@@ -360,7 +360,7 @@ impl eframe::App for App {
                         let parent = path
                             .parent()
                             .map(|it| it.to_path_buf())
-                            .unwrap_or("./".into());
+                            .unwrap_or_else(|| "./".into());
 
                         let parent = if parent.exists() { parent } else { "./".into() };
 

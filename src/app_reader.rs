@@ -90,7 +90,7 @@ impl AppReader {
     }
 
     pub fn change_folder(&mut self, direction: isize, ctx: &egui::Context) -> bool {
-        let path = crate::path::get_natural_sorted_folder_by(self.path.clone(), direction.into());
+        let path = crate::path::get_natural_sorted_folder_by(self.path.clone(), direction);
 
         match path {
             Some(path) => {
@@ -128,7 +128,7 @@ impl AppReader {
             |enable: bool, up: egui::Key, down: egui::Key, reverse: bool| {
                 crate::key::handle_key(
                     enable,
-                    &event,
+                    event,
                     up,
                     down,
                     |it| it.is_none() || it.command_only() || it.shift_only(),

@@ -100,10 +100,8 @@ impl ExplorerLoader {
 
         let mut content = vec![];
 
-        for it in dir {
-            if let Ok(it) = it {
-                content.push(it);
-            }
+        for it in dir.flatten() {
+            content.push(it);
         }
 
         content.sort_by(|a, b| crate::path::compare_natural(&a.file_name(), &b.file_name()));
@@ -385,16 +383,14 @@ where
             let dir = dir.into_iter().filter_map(|it| it.ok());
 
             let dir = futures::stream::unfold(dir, |mut dir| async {
-                let next = tokio::task::spawn_blocking(|| {
+                tokio::task::spawn_blocking(|| {
                     let next = dir.next();
 
                     next.map(|next| (next, dir))
                 })
                 .await
                 .ok()
-                .unwrap();
-
-                next
+                .unwrap()
             });
             futures::pin_mut!(dir);
 
@@ -448,8 +444,7 @@ where
         let image = image.into_egui();
         log::trace!("into egui {:?} in {:?}", path, time.elapsed());
 
-        return Some(image);
-        //
+        Some(image)
     }
 
     async fn search_file(&mut self, path: PathBuf) -> Option<crate::image::ImageData> {

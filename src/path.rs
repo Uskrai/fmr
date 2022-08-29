@@ -28,7 +28,7 @@ pub fn get_folder_by(
         }
     }
 
-    let index = index.checked_add_signed_ext(direction.into())?;
+    let index = index.checked_add_signed_ext(direction)?;
 
     dir.get(index).map(|it| it.path())
 }

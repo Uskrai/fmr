@@ -18,16 +18,14 @@ pub async fn search_image(ctx: egui::Context, path: PathBuf) -> Option<EguiSplit
         let dir = dir.into_iter().filter_map(|it| it.ok());
 
         let dir = futures::stream::unfold(dir, |mut dir| async {
-            let next = tokio::task::spawn_blocking(|| {
+            tokio::task::spawn_blocking(|| {
                 let next = dir.next();
 
                 next.map(|next| (next, dir))
             })
             .await
             .ok()
-            .unwrap();
-
-            next
+            .unwrap()
         });
         futures::pin_mut!(dir);
 
@@ -82,7 +80,7 @@ pub async fn load_path(path: PathBuf, size: u32) -> Option<EguiSplittedImageData
     let image = EguiSplittedImageData::from(image);
     log::trace!("into egui {:?} in {:?}", path, time.elapsed());
 
-    return Some(image);
+    Some(image)
 }
 
 pub async fn search_file(path: impl AsRef<Path>) -> Option<ImageData> {

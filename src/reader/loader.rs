@@ -41,8 +41,7 @@ impl ReaderLoaderSetting {
     pub fn range(&self, max: usize) -> Range<usize> {
         let min = self
             .index
-            .checked_sub(self.preload_prev)
-            .unwrap_or(0)
+            .saturating_sub(self.preload_prev)
             .clamp(0, (self.index).min(max));
 
         let max = self
@@ -155,7 +154,7 @@ impl ReaderLoader {
         R: Future<Output = Option<ImageData>> + Send + 'static,
     {
         // let index= reader.
-        map.sort_by(|(_, a), (_, b)| natord::compare_ignore_case(&a, &b));
+        map.sort_by(|(_, a), (_, b)| natord::compare_ignore_case(a, b));
         let mut entries = vec![];
 
         self.reader.write().images.clear();
@@ -199,7 +198,7 @@ impl ReaderLoader {
                 }
             };
 
-            if let Err(_) = changed {
+            if changed.is_err() {
                 break;
             }
         }
@@ -268,10 +267,8 @@ impl ReaderLoader {
             };
 
             let mut handle = entry.handle.lock();
-            if handle.is_none() {
-                if item.lock().is_loading() {
-                    *handle = Some(crate::spawn_and_abort_on_drop(loader()));
-                }
+            if entry.handle.lock().is_none() && item.lock().is_loading() {
+                *handle = Some(crate::spawn_and_abort_on_drop(loader()));
             }
         };
 
