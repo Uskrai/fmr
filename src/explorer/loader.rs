@@ -14,6 +14,7 @@ use futures::StreamExt;
 use itertools::Itertools;
 use parking_lot::{Mutex, RwLock};
 use serde::{Deserialize, Serialize};
+use sha2::Digest;
 use tokio::{
     sync::{oneshot, watch, OwnedSemaphorePermit, Semaphore},
     task::yield_now,
@@ -414,12 +415,39 @@ where
         let mut image = None;
 
         let _wait = self.waiter.wait().await;
-        if let Ok(reader) = crate::image::Reader::open(&path) {
-            image = reader
-                .into_frames()
-                .into_collector()
-                .collect_as_option_vector()
-                .await;
+        let mut use_cache = false;
+
+        let sha_path = |path: &std::path::Path| {
+            let sha = sha2::Sha256::digest(path.to_string_lossy().as_bytes());
+
+            format!("{:x}", sha)
+        };
+
+        let cache_dir = std::env::var("XDG_CACHE_HOME")
+            .unwrap_or_else(|_| std::env::var("HOME").unwrap());
+        let cache_dir = PathBuf::from(cache_dir).join("fmr");
+        let cache = cache_dir.join(sha_path(&path));
+
+        if image.is_none() && cache.exists() {
+            if let Ok(reader) = crate::image::Reader::open(&cache) {
+                image = reader
+                    .into_frames()
+                    .into_collector()
+                    .collect_as_option_vector()
+                    .await;
+
+                use_cache = image.is_some();
+            }
+        }
+
+        if image.is_none() {
+            if let Ok(reader) = crate::image::Reader::open(&path) {
+                image = reader
+                    .into_frames()
+                    .into_collector()
+                    .collect_as_option_vector()
+                    .await;
+            }
         }
 
         let image = match image {
@@ -435,6 +463,15 @@ where
         yield_now().await;
         let image = image.resize(size.0, size.1, filter);
         log::trace!("resize image {:?} in {:?}", path, time.elapsed());
+
+        // doesn't need to update if already using cache
+        if !use_cache && std::fs::create_dir_all(cache_dir).is_ok() {
+            if let Ok(mut file) = std::fs::File::create(cache) {
+                if let Err(err) = image.write_to(&mut file, image::ImageFormat::Jpeg) {
+                    log::error!("error writing cache: {}", err);
+                }
+            }
+        }
 
         yield_now().await;
         let image = image.into_allocatable(size);

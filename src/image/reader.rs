@@ -15,15 +15,21 @@ pub enum Reader<T: Read> {
 
 impl Reader<BufReader<File>> {
     pub fn open(path: impl AsRef<Path>) -> Result<Self, image::ImageError> {
+        let load_gif = || Self::load_gif(BufReader::new(std::fs::File::open(&path)?));
+
         let reader = match image::ImageFormat::from_path(&path) {
             Ok(image::ImageFormat::Gif) => {
-                Self::load_gif(BufReader::new(std::fs::File::open(path)?))?
+                load_gif()?
             }
             // guess format from memory
             Ok(_) | Err(image::ImageError::Unsupported(_)) => {
-                let reader = image::io::Reader::open(path)?.with_guessed_format()?;
+                let reader = image::io::Reader::open(&path)?.with_guessed_format()?;
 
-                Self::Reader(reader)
+                if let Some(image::ImageFormat::Gif) = reader.format() {
+                    load_gif()?
+                } else {
+                    Self::Reader(reader)
+                }
             }
             Err(err) => return Err(err),
         };

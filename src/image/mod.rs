@@ -48,6 +48,8 @@ impl ImageData {
                 for it in frames {
                     new.push(FrameData {
                         image: it.image.resize(nwidth, nheight, filter),
+                        top: it.top,
+                        left: it.left,
                         delay: it.delay,
                     });
                 }
@@ -55,6 +57,7 @@ impl ImageData {
             }
         }
     }
+
     /// Split image by size (width, height) to make them allocatable
     pub fn into_allocatable(self, max_size: (u32, u32)) -> SplittedImageData {
         match self {
@@ -65,12 +68,39 @@ impl ImageData {
                 images
                     .into_iter()
                     .map(|it| SplittedFrameData {
-                        delay: it.delay,
+                        delay: it.delay.into(),
                         image: SplittedImage::make_allocatable(&it.image, max_size),
                     })
                     .collect(),
             ),
         }
+    }
+
+    pub fn write_to<W, F>(&self, w: &mut W, static_format: F)
+        -> image::ImageResult<()>
+    where
+        W: std::io::Write + Seek,
+        F: Into<image::ImageOutputFormat>,
+        
+    {
+        match self {
+            ImageData::StaticImage(image) => {
+                image.write_to(w, static_format)?;
+            }
+            ImageData::AnimatedImage(image) => {
+                // let mut encode = gif::Encoder;
+                let mut encode = image::codecs::gif::GifEncoder::new(w);
+                // encode.set_repeat(image::codecs::gif::Repeat::Infinite)?;
+
+                for it in image {
+                    let image = it.image.to_rgba8();
+                    let frame = image::Frame::from_parts(image, it.top, it.left, it.delay.into());
+                    encode.encode_frame(frame)?;
+                }
+            }
+        };
+        
+        Ok(())
     }
 }
 
@@ -107,7 +137,7 @@ impl ImageData {
             .into_iter()
             .map(FrameData::from)
             .collect::<Vec<_>>();
-        //
+
         Ok(ImageData::AnimatedImage(frames))
     }
 
@@ -180,7 +210,9 @@ impl ImageData {
 }
 
 pub struct FrameData {
-    delay: Duration,
+    delay: image::Delay,
+    top: u32,
+    left: u32,
     image: image::DynamicImage,
 }
 
@@ -195,12 +227,11 @@ impl std::fmt::Debug for FrameData {
 
 impl From<image::Frame> for FrameData {
     fn from(frame: image::Frame) -> Self {
-        let delay = frame.delay().into();
-        let buffer = frame.into_buffer();
-
         Self {
-            delay,
-            image: image::DynamicImage::from(buffer),
+            delay: frame.delay(),
+            top: frame.top(),
+            left: frame.left(),
+            image: image::DynamicImage::from(frame.into_buffer()),
         }
     }
 }
@@ -338,12 +369,7 @@ impl From<SplittedImageData> for EguiSplittedImageData {
             }
             SplittedImageData::AnimatedImage(image) => {
                 //
-                Self::AnimatedImage(
-                    image
-                        .into_iter()
-                        .map(EguiSplittedFrameData::from)
-                        .collect(),
-                )
+                Self::AnimatedImage(image.into_iter().map(EguiSplittedFrameData::from).collect())
             }
         }
     }
