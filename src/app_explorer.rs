@@ -7,7 +7,7 @@ use tokio::sync::{watch, Semaphore};
 
 use crate::{
     explorer::{
-        loader::{ExplorerLoader, ExplorerLoaderSetting},
+        loader::{ExplorerLoader, ExplorerLoaderSetting, ExplorerLoaderCache},
         Explorer, ExplorerOutput, ExplorerSetting, ExplorerView, PathExplorerItem,
     },
     image_search::search_image,
@@ -24,11 +24,13 @@ pub struct AppExplorer {
     handle: AbortOnDropHandle<()>,
 }
 
-#[derive(Clone, PartialEq, Serialize, Deserialize, Debug, Default)]
+#[derive(Clone, Serialize, Deserialize, Debug, Default)]
 #[serde(default)]
 pub struct AppExplorerSetting {
     pub explorer: ExplorerSetting,
     pub loader: ExplorerLoaderSetting,
+    #[serde(skip)]
+    pub cache: ExplorerLoaderCache,
 }
 
 impl AppExplorer {
@@ -46,6 +48,7 @@ impl AppExplorer {
             path: path.clone(),
             selected_entry,
             setting_receiver,
+            cache: setting.cache,
             ctx,
         };
 

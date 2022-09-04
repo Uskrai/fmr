@@ -65,6 +65,7 @@ pub struct ExplorerLoader {
     pub path: PathBuf,
     pub selected_entry: Option<PathBuf>,
     pub setting_receiver: watch::Receiver<ExplorerLoaderSetting>,
+    pub cache: ExplorerLoaderCache,
     #[derivative(Debug = "ignore")]
     pub ctx: egui::Context,
 }
@@ -91,6 +92,7 @@ impl ExplorerLoader {
             path,
             selected_entry,
             mut setting_receiver,
+            cache,
             ctx,
         } = self.clone();
 
@@ -133,6 +135,7 @@ impl ExplorerLoader {
                 let default_texture = default_texture.clone();
                 let semaphore = semaphore.clone();
                 let entry_setting = entry_setting.clone();
+                let cache = cache.clone();
 
                 child.push(crate::spawn_and_abort_on_drop(async move {
                     let explorer = explorer_;
@@ -144,9 +147,10 @@ impl ExplorerLoader {
 
                     tokio::task::yield_now().await;
                     let _permit = semaphore.acquire(i).await.unwrap();
-                    let image = ExplorerEntryLoader::new(path.clone(), waiter, entry_setting)
-                        .search()
-                        .await;
+                    let image =
+                        ExplorerEntryLoader::new(path.clone(), waiter, entry_setting, cache)
+                            .search()
+                            .await;
 
                     let texture = match image {
                         Some(image) => {
@@ -351,6 +355,7 @@ pub struct ExplorerEntryLoader<W: Wait> {
     pub path: PathBuf,
     pub waiter: W,
     pub setting: Arc<Mutex<ExplorerEntryLoaderSetting>>,
+    pub cache: ExplorerLoaderCache,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Derivative)]
@@ -362,16 +367,62 @@ pub struct ExplorerEntryLoaderSetting {
     pub max_resize: (u32, u32),
 }
 
+pub fn sha_path(path: &std::path::Path) -> String {
+    let sha = sha2::Sha256::digest(path.to_string_lossy().as_bytes());
+
+    format!("{:x}", sha)
+}
+
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
+pub struct ExplorerLoaderCache {
+    pub map: Arc<Mutex<HashMap<String, String>>>,
+}
+
+impl ExplorerLoaderCache {
+    pub fn get_sha(&self, path: &std::path::Path) -> Option<String> {
+        let map = self.map.lock();
+
+        map.get(&sha_path(path)).cloned()
+    }
+
+    pub fn insert_sha(&self, path: &std::path::Path, target: String) {
+        self.map.lock().insert(sha_path(path), target);
+    }
+
+    pub fn insert_sha_recursive(
+        &self,
+        root: &std::path::Path,
+        mut path: &std::path::Path,
+        target: String,
+    ) {
+        while let Some(parent) = path.parent() {
+            path = parent;
+            self.insert_sha(path, target.clone());
+
+            if root == path {
+                break;
+            }
+        }
+        //
+    }
+}
+
 impl<W> ExplorerEntryLoader<W>
 where
     W: Wait,
     W::Output: std::future::Future,
 {
-    pub fn new(path: PathBuf, waiter: W, setting: Arc<Mutex<ExplorerEntryLoaderSetting>>) -> Self {
+    pub fn new(
+        path: PathBuf,
+        waiter: W,
+        setting: Arc<Mutex<ExplorerEntryLoaderSetting>>,
+        cache: ExplorerLoaderCache,
+    ) -> Self {
         Self {
             path,
             waiter,
             setting,
+            cache,
         }
     }
 
@@ -398,10 +449,8 @@ where
             while let Some(entry) = dir.next().await {
                 let entry: walkdir::DirEntry = entry;
 
-                if entry.file_type().is_file() {
-                    if let Some(image) = self.load_path(entry.path().to_path_buf()).await {
-                        return Some(image);
-                    }
+                if let Some(image) = self.load_path(entry.path().to_path_buf()).await {
+                    return Some(image);
                 }
             }
         }
@@ -423,10 +472,30 @@ where
             format!("{:x}", sha)
         };
 
-        let cache_dir = std::env::var("XDG_CACHE_HOME")
-            .unwrap_or_else(|_| std::env::var("HOME").unwrap());
+        let cache_dir =
+            std::env::var("XDG_CACHE_HOME").unwrap_or_else(|_| std::env::var("HOME").unwrap());
         let cache_dir = PathBuf::from(cache_dir).join("fmr");
-        let cache = cache_dir.join(sha_path(&path));
+
+        let (sha, cache) = {
+            let cache = self
+                .cache
+                .get_sha(&path)
+                .map(|it| (cache_dir.join(&it), it));
+
+            match cache.map(|(it, sha)| (it.exists(), sha, it)) {
+                Some((true, sha, it)) => {
+                    log::debug!("using cache from {}", it.display());
+                    (sha, it)
+                }
+                _ => {
+                    log::debug!("no cache found from {}", self.cache.map.lock().len());
+                    let sha = sha_path(&path);
+                    let cache = cache_dir.join(&sha);
+
+                    (sha, cache)
+                }
+            }
+        };
 
         if image.is_none() && cache.exists() {
             if let Ok(reader) = crate::image::Reader::open(&cache) {
@@ -472,6 +541,8 @@ where
                 }
             }
         }
+
+        self.cache.insert_sha_recursive(&self.path, &path, sha);
 
         yield_now().await;
         let image = image.into_allocatable(size);

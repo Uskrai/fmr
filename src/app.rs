@@ -4,7 +4,7 @@ use egui::widgets::DragValue;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    explorer::{loader::FilterType, PathExplorerItem},
+    explorer::{loader::{FilterType, ExplorerLoaderCache}, PathExplorerItem},
     inspection::DebugUI,
     reader::ReaderMode,
     AppExplorer, AppExplorerOnOpen, AppExplorerSetting, AppExplorerView, AppReader,
@@ -54,9 +54,15 @@ pub struct App {
     context: egui::Context, // context used to request repaint
     setting: AppSetting,
     setting_storage: Option<crate::storage::FSStorage>,
+    cache_storage: Option<crate::storage::FSStorage>,
     // path: PathBuf,
     // reader_option: ReaderOption,
     debug_ui: DebugUI,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct Cache {
+    explorer: ExplorerLoaderCache,
 }
 
 pub enum AppMode {
@@ -78,12 +84,21 @@ impl App {
         crate::setup_custom_fonts(&context.egui_ctx);
 
         let profile = std::env::var("FMR_PROFILE").unwrap_or_else(|_| "default".to_string());
-        let storage = crate::storage::FSStorage::prepare("fmr", &profile, "config.ron");
+        let setting_storage = crate::storage::FSStorage::prepare("fmr", &profile, "config.ron");
 
-        let setting = match &storage {
+        let mut setting: AppSetting = match &setting_storage {
             Some(s) => ron::from_str(s.get_content()).unwrap_or_default(),
             None => Default::default(),
         };
+
+        let cache_storage = crate::storage::FSStorage::prepare("fmr", "", "cache.ron");
+
+        let cache: Cache = match &cache_storage {
+            Some(s) => ron::from_str(s.get_content()).unwrap_or_default(),
+            None => Default::default(),
+        };
+
+        setting.explorer.cache = cache.explorer;
 
         if let Some(s) = context.storage {
             if let Some(s) = s.get_string("style") {
@@ -97,7 +112,8 @@ impl App {
         Self {
             mode: Default::default(),
             setting,
-            setting_storage: storage,
+            setting_storage,
+            cache_storage,
             // path,
             context: context.egui_ctx.clone(),
             // reader_option,
@@ -153,6 +169,15 @@ impl eframe::App for App {
     fn save(&mut self, _storage: &mut dyn eframe::Storage) {
         if let Some(storage) = &mut self.setting_storage {
             let setting = ron::ser::to_string_pretty(&self.setting, Default::default()).unwrap();
+            storage.set_content(setting);
+            storage.flush();
+        }
+
+        if let Some(storage) = &mut self.cache_storage {
+            let cache = Cache {
+                explorer: self.setting.explorer.cache.clone()
+            };
+            let setting = ron::ser::to_string_pretty(&cache, Default::default()).unwrap();
             storage.set_content(setting);
             storage.flush();
         }
