@@ -267,7 +267,8 @@ impl ReaderLoader {
             };
 
             let mut handle = entry.handle.lock();
-            if entry.handle.lock().is_none() && item.lock().is_loading() {
+            if handle.is_none() && item.lock().is_loading() {
+                log::trace!("spawn {}", entry.name);
                 *handle = Some(crate::spawn_and_abort_on_drop(loader()));
             }
         };
