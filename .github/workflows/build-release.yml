@@ -34,7 +34,7 @@ jobs:
     - name: Install System Dependency
       if: runner.os == 'Windows'
       run: |
-        vcpkg install libarchive
+        vcpkg install libarchive pkg-config
 
     - name: tmate
       uses: mxschmitt/action-tmate@v3
