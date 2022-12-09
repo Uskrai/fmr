@@ -22,6 +22,15 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: Swatinem/rust-cache@v1
+    - name: Install System Dependency
+      if: runner.os == 'Linux'
+      run: |
+        apt install libarchive-dev
+    - name: Install System Dependency
+      if: runner.os == 'Windows'
+      run: |
+        vpckg install libarchive
+
     - name: tmate
       uses: mxschmitt/action-tmate@v3
       if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
