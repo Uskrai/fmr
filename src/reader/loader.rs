@@ -2,7 +2,7 @@ use std::{
     io::Read,
     ops::Range,
     path::PathBuf,
-    sync::{Arc, Weak},
+    sync::{atomic::AtomicBool, Arc, Weak},
 };
 
 use futures::{Future, FutureExt};
@@ -20,6 +20,7 @@ pub struct ReaderLoader {
     pub reader: Arc<RwLock<Reader>>,
     pub ctx: egui::Context,
     pub setting_receiver: watch::Receiver<ReaderLoaderSetting>,
+    pub is_done_initial_loading: Arc<AtomicBool>,
 }
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
@@ -77,6 +78,11 @@ impl ReaderLoader {
         }
     }
 
+    pub fn mark_done_initial_loading(&self) {
+        self.is_done_initial_loading
+            .store(true, std::sync::atomic::Ordering::Relaxed);
+    }
+
     pub async fn load_folder(self, path: PathBuf) {
         let mut dir = match tokio::fs::read_dir(path).await {
             Ok(dir) => dir,
@@ -86,11 +92,13 @@ impl ReaderLoader {
         let mut entries = vec![];
         while let Ok(Some(it)) = dir.next_entry().await {
             let can_read = ImageData::can_read(&it.file_name().to_string_lossy());
+            let can_read = can_read || crate::image::Reader::open(it.path()).is_ok();
 
             if can_read {
                 entries.push(it);
             }
         }
+        self.mark_done_initial_loading();
 
         entries.sort_by(|a, b| crate::path::compare_natural(&a.file_name(), &b.file_name()));
         let map = entries
@@ -118,16 +126,20 @@ impl ReaderLoader {
     }
 
     pub async fn load_file(self, path: PathBuf) {
-        let file = match std::fs::File::open(path) {
-            Ok(file) => file,
-            Err(_) => return,
-        };
+        if let Ok(file) = std::fs::File::open(path.clone()) {
+            self.mark_done_initial_loading();
+            if let Ok(zip) = zip::ZipArchive::new(file) {
+                return self.load_zip(zip).await;
+            }
+        }
 
-        if let Ok(zip) = zip::ZipArchive::new(file) {
-            self.load_zip(zip).await
+        if crate::tools::archive::can_read(&path) {
+            self.mark_done_initial_loading();
+            return self.load_file_archive(path).await;
         }
     }
 
+    #[tracing::instrument(skip(self, zip))]
     pub async fn load_zip<R: Read + std::io::Seek + 'static>(self, mut zip: zip::ZipArchive<R>) {
         let names = zip
             .file_names()
@@ -148,6 +160,33 @@ impl ReaderLoader {
         .await;
     }
 
+    #[tracing::instrument(skip(self))]
+    pub async fn load_file_archive(self, path: PathBuf) {
+        let open = || crate::tools::archive::open(&path).ok();
+
+        let names = if let Some(reader) = open() {
+            reader
+                .into_iter()
+                .filter_map(|it| it.ok())
+                .filter(|it| it.is_file())
+                .map(|it| it.pathname())
+                .filter_map(|it| it)
+                .collect::<Vec<_>>()
+        } else {
+            return;
+        };
+
+        let map = names.iter().cloned().enumerate().collect::<Vec<_>>();
+
+        self.schedule(map, move |index| {
+            let name = names[index].clone();
+
+            crate::tools::archive::load_path_to_image_from_opt(open(), name)
+        })
+        .await;
+    }
+
+    #[tracing::instrument(skip(self, map, opener))]
     pub async fn schedule<F, R>(mut self, mut map: Vec<(usize, String)>, mut opener: F)
     where
         F: FnMut(usize) -> R,
@@ -204,6 +243,7 @@ impl ReaderLoader {
         }
     }
 
+    #[tracing::instrument(skip(self, entries, opener, semaphore))]
     async fn spawn<F, R>(
         &mut self,
         entries: &Vec<LoaderEntry>,
@@ -214,10 +254,9 @@ impl ReaderLoader {
         R: Future<Output = Option<ImageData>> + Send + 'static,
     {
         let Self {
-            path: _,
-            reader: _,
             ctx,
             setting_receiver,
+            ..
         } = self;
 
         let setting = *setting_receiver.borrow();
@@ -298,6 +337,7 @@ impl ReaderLoader {
     ) -> Option<crate::image::TextureHandle> {
         let time = std::time::Instant::now();
         let image = fut.await?;
+        log::debug!("getting image data {:?} in {:?}", name, time.elapsed());
         let name = name;
         let max_size = ctx.input().max_texture_side as u32;
 

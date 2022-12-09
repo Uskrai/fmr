@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     ops::Range,
     path::PathBuf,
     sync::{
@@ -376,34 +376,55 @@ pub fn sha_path(path: &std::path::Path) -> String {
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct ExplorerLoaderCache {
     pub map: Arc<Mutex<HashMap<String, String>>>,
+    #[serde(default)]
+    pub list: Arc<Mutex<HashMap<String, HashSet<String>>>>,
 }
 
 impl ExplorerLoaderCache {
-    pub fn get_sha(&self, path: &std::path::Path) -> Option<String> {
-        let map = self.map.lock();
+    pub fn get_from_sha(&self, sha: &String) -> Option<String> {
+        self.map.lock().get(sha).cloned()
+    }
 
-        map.get(&sha_path(path)).cloned()
+    pub fn get_from_path(&self, path: &std::path::Path) -> Option<String> {
+        self.get_from_sha(&sha_path(path))
     }
 
     pub fn insert_sha(&self, path: &std::path::Path, target: String) {
-        self.map.lock().insert(sha_path(path), target);
+        log::debug!("insert cache for {} using {}", path.display(), target);
+        self.map.lock().insert(sha_path(path), target.clone());
+        self.list
+            .lock()
+            .entry(target)
+            .or_default()
+            .insert(path.display().to_string());
     }
 
     pub fn insert_sha_recursive(
         &self,
         root: &std::path::Path,
         mut path: &std::path::Path,
-        target: String,
+        target: &str,
     ) {
+        let root = root.canonicalize();
         while let Some(parent) = path.parent() {
-            path = parent;
-            self.insert_sha(path, target.clone());
+            let should_break = root.as_ref().ok() == path.canonicalize().as_ref().ok();
 
-            if root == path {
+            let is_root_file = || matches!(root.as_ref(), Ok(x) if x.extension().is_some());
+
+            // if not should break should always insert
+            // and it should also insert if root is file
+            // it would'nt cache archive file otherwise.
+            let should_insert = !should_break || is_root_file();
+
+            if should_insert {
+                path = parent;
+                self.insert_sha(path, target.to_string());
+            }
+
+            if should_break {
                 break;
             }
         }
-        //
     }
 }
 
@@ -477,9 +498,10 @@ where
         let cache_dir = PathBuf::from(cache_dir).join("fmr");
 
         let (sha, cache) = {
+            let sha = sha_path(&path);
             let cache = self
                 .cache
-                .get_sha(&path)
+                .get_from_sha(&sha)
                 .map(|it| (cache_dir.join(&it), it));
 
             match cache.map(|(it, sha)| (it.exists(), sha, it)) {
@@ -488,7 +510,11 @@ where
                     (sha, it)
                 }
                 _ => {
-                    log::debug!("no cache found from {}", self.cache.map.lock().len());
+                    log::debug!(
+                        "no cache found for {} from {}",
+                        sha,
+                        self.cache.map.lock().len()
+                    );
                     let sha = sha_path(&path);
                     let cache = cache_dir.join(&sha);
 
@@ -542,7 +568,14 @@ where
             }
         }
 
-        self.cache.insert_sha_recursive(&self.path, &path, sha);
+        self.cache.insert_sha_recursive(&self.path, &path, &sha);
+        log::trace!(
+            "insert sha recursive into [{:?}] [{:?}] [{}] in {:?}",
+            self.path,
+            path,
+            sha,
+            time.elapsed()
+        );
 
         yield_now().await;
         let image = image.into_allocatable(size);
@@ -564,6 +597,27 @@ where
                 }
             }
         }
+
+       if crate::tools::archive::can_read(&path) {
+            if let Some(image) = self.search_image_archive(path).await {
+                return Some(image);
+            }
+        }
+
         None
+    }
+
+    async fn search_image_archive(&mut self, path: PathBuf) -> Option<crate::image::ImageData> {
+        let it = {
+            let reader = crate::tools::archive::open(&path)
+                .ok()?
+                .into_iter()
+                .filter_map(|it| it.ok())
+                .find(|it| crate::tools::archive::is_image(it));
+
+            crate::tools::archive::load_image_from_opt_entry(reader)
+        };
+
+        it.await
     }
 }

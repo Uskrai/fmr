@@ -1,4 +1,7 @@
-use std::{path::PathBuf, sync::Arc};
+use std::{
+    path::PathBuf,
+    sync::{atomic::AtomicBool, Arc},
+};
 
 use parking_lot::{RwLock, RwLockReadGuard};
 use serde::{Deserialize, Serialize};
@@ -27,6 +30,7 @@ pub struct AppReader {
     reader: Arc<RwLock<Reader>>,
 
     index_sender: watch::Sender<ReaderLoaderSetting>,
+    is_done_initial_loading: Arc<AtomicBool>,
     #[allow(dead_code)]
     handle: AbortOnDropHandle<()>,
 }
@@ -57,11 +61,14 @@ impl AppReader {
 
         log::info!("open reader in {:?}", path);
 
+        let is_done_initial_loading = Arc::new(AtomicBool::new(false));
+
         let loader = crate::reader::loader::ReaderLoader {
             reader: reader.clone(),
             path: path.clone(),
             ctx,
             setting_receiver: index_receiver,
+            is_done_initial_loading: is_done_initial_loading.clone(),
         };
 
         let handle = tokio::spawn(loader.load());
@@ -71,6 +78,7 @@ impl AppReader {
             reader,
             setting,
             index_sender,
+            is_done_initial_loading,
             handle: AbortOnDropHandle(handle),
         }
     }
@@ -113,6 +121,7 @@ impl AppReader {
             reader,
             handle: _,
             index_sender: _,
+            is_done_initial_loading: _,
         } = self;
 
         if reader.write().handle_event(event) {
@@ -188,10 +197,15 @@ impl<'a> AppReaderView<'a> {
                     step[0] *= !is_vertical as isize;
                     step[0] *= if read_from_right { -1 } else { 1 };
 
-                    match step {
-                        [0, i] | [i, 0] if i != 0 => return !state.change_folder(i, ui.ctx()),
-                        _ => {}
-                    };
+                    if state
+                        .is_done_initial_loading
+                        .load(std::sync::atomic::Ordering::Relaxed)
+                    {
+                        match step {
+                            [0, i] | [i, 0] if i != 0 => return !state.change_folder(i, ui.ctx()),
+                            _ => {}
+                        };
+                    }
                 }
             }
 

@@ -4,6 +4,8 @@ use zip::{read::ZipFile, ZipArchive};
 
 use crate::image::ImageData;
 
+use super::image::load_image_from_memory_as_option;
+
 pub fn read_to_end_when(mut zip: ZipFile, when: impl FnOnce(&ZipFile) -> bool) -> Option<Vec<u8>> {
     if when(&zip) {
         let mut vec = Vec::new();
@@ -31,6 +33,7 @@ where
     load_image_from_memory_as_option(vec)
 }
 
+#[tracing::instrument(skip(archive, zip))]
 pub fn load_image_with_ref<F, Z>(
     archive: &mut ZipArchive<Z>,
     zip: F,
@@ -39,28 +42,14 @@ where
     F: FnOnce(&mut ZipArchive<Z>) -> zip::result::ZipResult<ZipFile<'_>>,
     Z: Read,
 {
+    let time = std::time::Instant::now();
     let vec = zip(archive).ok().and_then(read_to_end_when_image);
+    tracing::trace!("loading memory from zip in {:?}", time.elapsed());
 
-    load_image_from_memory_as_option(vec)
-}
+    async {
+        let res = load_image_from_memory_as_option(vec).await;
+        tracing::trace!("loading image from memory in {:?}", time.elapsed());
 
-async fn load_image_from_memory_as_option(vec: Option<Vec<u8>>) -> Option<ImageData> {
-    load_image_from_memory(vec).await.transpose().ok().flatten()
-}
-
-async fn load_image_from_memory(
-    vec: Option<Vec<u8>>,
-) -> Option<Result<ImageData, image::ImageError>> {
-    let vec = vec?;
-    tokio::task::yield_now().await;
-    let vec = vec;
-
-    let reader = match crate::image::Reader::load_from_memory(vec) {
-        Ok(reader) => reader,
-        Err(err) => {
-            return Some(Err(err));
-        }
-    };
-
-    reader.into_frames().into_collector().collect_vector().await
+        res
+    }
 }

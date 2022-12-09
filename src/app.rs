@@ -4,7 +4,10 @@ use egui::widgets::DragValue;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    explorer::{loader::{FilterType, ExplorerLoaderCache}, PathExplorerItem},
+    explorer::{
+        loader::{ExplorerLoaderCache, FilterType},
+        PathExplorerItem,
+    },
     inspection::DebugUI,
     reader::ReaderMode,
     AppExplorer, AppExplorerOnOpen, AppExplorerSetting, AppExplorerView, AppReader,

@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 # egui = { version = "0.17.0", features = ["multi_threaded"] }
-image = "0.24.1"
+image = "0.24.5"
 tokio = { version = "1", features = ["rt-multi-thread", "sync", "time", "fs"] }
 rfd = "0.8.1"
 parking_lot = { version = "0.12.0", features = ["serde"] }
@@ -17,9 +17,11 @@ ron = "0.7"
 walkdir = "2.3"
 futures = "0.3"
 zip = "0.6"
+libarchive = { git = "https://github.com/uskrai/libarchive-rust", rev = "55b4e74e4aed28dd1edbba24a4842069e6f783a2" }
 log = "0.4"
 tracing = "0.1"
 git-version = "0.3.5"
+tap = "1.0"
 json5 = "0.4"
 directories-next = "2.0"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
@@ -41,27 +43,27 @@ features = ["persistence"]
 # git = "https://github.com/emilk/egui"
 version = "0.18.1"
 
-[profile.dev.package.image]
-opt-level = 3
-[profile.dev.package.color_quant]
-opt-level = 3
-[profile.dev.package.deflate]
-opt-level = 3
-[profile.dev.package.flume]
-opt-level = 3
-[profile.dev.package.gif]
-opt-level = 3
-[profile.dev.package.weezl]
-opt-level = 3
-[profile.dev.package.jpeg-decoder]
-opt-level = 3
-[profile.dev.package.png]
-opt-level = 3
-[profile.dev.package.crc32fast]
-opt-level = 3
-[profile.dev.package.miniz_oxide]
-opt-level = 3
-[profile.dev.package.tiff]
-opt-level = 3
-[profile.dev.package.flate2]
-opt-level = 3
+# [profile.dev.package.image]
+# opt-level = 3
+# [profile.dev.package.color_quant]
+# opt-level = 3
+# [profile.dev.package.deflate]
+# opt-level = 3
+# [profile.dev.package.flume]
+# opt-level = 3
+# [profile.dev.package.gif]
+# opt-level = 3
+# [profile.dev.package.weezl]
+# opt-level = 3
+# [profile.dev.package.jpeg-decoder]
+# opt-level = 3
+# [profile.dev.package.png]
+# opt-level = 3
+# [profile.dev.package.crc32fast]
+# opt-level = 3
+# [profile.dev.package.miniz_oxide]
+# opt-level = 3
+# [profile.dev.package.tiff]
+# opt-level = 3
+# [profile.dev.package.flate2]
+# opt-level = 3

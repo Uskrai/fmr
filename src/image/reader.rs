@@ -114,7 +114,9 @@ impl<'a, T: BufRead + Seek> FramesCollector<'a, T> {
             FramesCollector::SingleImage(image) => {
                 if let SingleImageEither::Reader(reader) = image {
                     if let Some(reader) = reader.take() {
+                        let time = std::time::Instant::now();
                         *image = SingleImageEither::Image(reader.decode()?);
+                        tracing::info!("decoding image in {:?}", time.elapsed());
                     }
                 }
 
