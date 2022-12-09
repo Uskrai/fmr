@@ -13,9 +13,10 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  windows:
-  
-    runs-on: windows-2019
+  build-release:
+    matrix:
+      os: [ubuntu-22.04, windows-2019]
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v3
@@ -28,4 +29,5 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: fmr
-        path: ./target/release/fmr.exe
+        path: |
+          ./target/release/fmr*
