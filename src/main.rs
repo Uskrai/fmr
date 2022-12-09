@@ -23,6 +23,8 @@ fn main() {
         .finish()
         .init();
 
+    tracing::info!("running fmr ({})", git_version::git_version!());
+
     eframe::run_native(
         "fmr",
         options,
