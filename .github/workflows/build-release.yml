@@ -34,7 +34,13 @@ jobs:
     - name: Install System Dependency
       if: runner.os == 'Windows'
       run: |
-        vcpkg install libarchive pkg-config
+        vcpkg install libarchive
+    - name: Install pkgconfig
+      uses: crazy-max/ghaction-chocolatey@v2
+      if: runner.os == 'Windows'
+      with:
+        args: install pkgconfiglite
+
 
     - name: tmate
       uses: mxschmitt/action-tmate@v3
