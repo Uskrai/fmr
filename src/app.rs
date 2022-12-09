@@ -175,11 +175,11 @@ impl eframe::App for App {
 
         if let Some(storage) = &mut self.cache_storage {
             let cache = Cache {
-                explorer: self.setting.explorer.cache.clone()
+                explorer: self.setting.explorer.cache.clone(),
             };
-            let setting = ron::ser::to_string_pretty(&cache, Default::default()).unwrap();
-            storage.set_content(setting);
-            storage.flush();
+
+            storage
+                .flush_content(move || ron::ser::to_string_pretty(&cache, Default::default()).ok());
         }
 
         _storage.set_string("style", ron::ser::to_string(&self.context.style()).unwrap());

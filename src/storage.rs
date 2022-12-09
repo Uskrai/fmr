@@ -67,10 +67,20 @@ impl FSStorage {
 
     pub fn flush(&mut self) {
         if self.dirty {
+            let content = self.content.clone();
+
+            self.flush_content(|| Some(content));
+        }
+    }
+
+    pub fn flush_content<F>(&mut self, content: F)
+    where
+        F: FnOnce() -> Option<String> + Send + 'static,
+    {
+        if self.dirty {
             self.dirty = false;
 
             let path = self.path.clone();
-            let content = self.content.clone();
 
             if let Some(join_handle) = self.last_write_join_handle.take() {
                 // wait previous write.
@@ -78,10 +88,12 @@ impl FSStorage {
             }
 
             let handle = std::thread::spawn(move || {
-                if let Err(err) = std::fs::write(&path, content) {
-                    log::warn!("Writing config to {:?} failed: {}", path, err);
-                } else {
-                    log::trace!("Config written at {:?}", path);
+                if let Some(content) = content() {
+                    if let Err(err) = std::fs::write(&path, content) {
+                        log::warn!("Writing config to {:?} failed: {}", path, err);
+                    } else {
+                        log::trace!("Config written at {:?}", path);
+                    }
                 }
             });
 
