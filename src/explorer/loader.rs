@@ -405,11 +405,13 @@ impl ExplorerLoaderCache {
         mut path: &std::path::Path,
         target: &str,
     ) {
-        let root = root.canonicalize();
-        while let Some(parent) = path.parent() {
-            let should_break = root.as_ref().ok() == path.canonicalize().as_ref().ok();
+        let root = root.to_path_buf();
 
-            let is_root_file = || matches!(root.as_ref(), Ok(x) if x.extension().is_some());
+        while let Some(parent) = path.parent() {
+            let should_break = Some(&root) == path.canonicalize().as_ref().ok();
+
+            let is_root_file = || root.extension().is_some();
+            // let is_root_file = || matches!(root.as_ref(), Ok(x) if x.extension().is_some());
 
             // if not should break should always insert
             // and it should also insert if root is file
@@ -417,8 +419,8 @@ impl ExplorerLoaderCache {
             let should_insert = !should_break || is_root_file();
 
             if should_insert {
-                path = parent;
                 self.insert_sha(path, target.to_string());
+                path = parent;
             }
 
             if should_break {
