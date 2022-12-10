@@ -17,7 +17,7 @@ ron = "0.7"
 walkdir = "2.3"
 futures = "0.3"
 zip = "0.6"
-libarchive = { git = "https://github.com/uskrai/libarchive-rust", rev = "86f1e91223e5d1576fbea0e27850c1fd9ef7c8fe" }
+libarchive = { git = "https://github.com/uskrai/libarchive-rust", rev = "7a5bf66f24b4870cb682024b6c60721de263b847" }
 log = "0.4"
 tracing = "0.1"
 git-version = "0.3.5"
