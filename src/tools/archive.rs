@@ -2,7 +2,6 @@ use std::{io::Read, path::PathBuf};
 
 use futures::Future;
 use libarchive::reader::{ArchiveEntry, ReaderHandle};
-use tap::Tap;
 
 use crate::image::ImageData;
 
