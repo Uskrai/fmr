@@ -133,6 +133,7 @@ impl ReaderLoader {
             }
         }
 
+        #[cfg(feature = "libarchive")]
         if crate::tools::archive::can_read(&path) {
             self.mark_done_initial_loading();
             return self.load_file_archive(path).await;
@@ -160,6 +161,7 @@ impl ReaderLoader {
         .await;
     }
 
+    #[cfg(feature = "libarchive")]
     #[tracing::instrument(skip(self))]
     pub async fn load_file_archive(self, path: PathBuf) {
         let open = || crate::tools::archive::open(&path).ok();

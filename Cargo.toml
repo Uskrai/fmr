@@ -17,7 +17,6 @@ ron = "0.7"
 walkdir = "2.3"
 futures = "0.3"
 zip = "0.6"
-libarchive = { git = "https://github.com/uskrai/libarchive-rust", rev = "7a5bf66f24b4870cb682024b6c60721de263b847" }
 log = "0.4"
 tracing = "0.1"
 git-version = "0.3.5"
@@ -31,8 +30,15 @@ sha2 = "0.10.2"
 turbojpeg = { version = "0.5.1", features = ["image"], optional = true }
 # tracing-appender = "0.2"
 
+[dependencies.libarchive]
+git = "https://github.com/uskrai/libarchive-rust"
+rev = "7a5bf66f24b4870cb682024b6c60721de263b847"
+optional = true
+
 [features]
+default = ["libarchive"]
 turbojpeg = ["dep:turbojpeg"]
+libarchive = ["dep:libarchive"]
 
 [dependencies.eframe]
 # git = "https://github.com/emilk/egui"
