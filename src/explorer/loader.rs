@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashMap,
     ops::Range,
     path::PathBuf,
     sync::{
@@ -14,7 +14,6 @@ use futures::StreamExt;
 use itertools::Itertools;
 use parking_lot::{Mutex, RwLock};
 use serde::{Deserialize, Serialize};
-use sha2::Digest;
 use tokio::{
     sync::{oneshot, watch, OwnedSemaphorePermit, Semaphore},
     task::yield_now,
@@ -22,7 +21,7 @@ use tokio::{
 use tracing::instrument;
 use zip::ZipArchive;
 
-use super::{Explorer, PathExplorerItem};
+use super::{cache::ExplorerLoaderCache, sha_path, Explorer, PathExplorerItem};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Derivative, Serialize, Deserialize)]
 #[derivative(Default)]
@@ -367,69 +366,6 @@ pub struct ExplorerEntryLoaderSetting {
     pub max_resize: (u32, u32),
 }
 
-pub fn sha_path(path: &std::path::Path) -> String {
-    let sha = sha2::Sha256::digest(path.to_string_lossy().as_bytes());
-
-    format!("{:x}", sha)
-}
-
-#[derive(Clone, Default, Debug, Serialize, Deserialize)]
-pub struct ExplorerLoaderCache {
-    pub map: Arc<Mutex<HashMap<String, String>>>,
-    #[serde(default)]
-    pub list: Arc<Mutex<HashMap<String, HashSet<String>>>>,
-}
-
-impl ExplorerLoaderCache {
-    pub fn get_from_sha(&self, sha: &String) -> Option<String> {
-        self.map.lock().get(sha).cloned()
-    }
-
-    pub fn get_from_path(&self, path: &std::path::Path) -> Option<String> {
-        self.get_from_sha(&sha_path(path))
-    }
-
-    pub fn insert_sha(&self, path: &std::path::Path, target: String) {
-        log::debug!("insert cache for {} using {}", path.display(), target);
-        self.map.lock().insert(sha_path(path), target.clone());
-        self.list
-            .lock()
-            .entry(target)
-            .or_default()
-            .insert(path.display().to_string());
-    }
-
-    pub fn insert_sha_recursive(
-        &self,
-        root: &std::path::Path,
-        mut path: &std::path::Path,
-        target: &str,
-    ) {
-        let root = root.to_path_buf();
-
-        while let Some(parent) = path.parent() {
-            let should_break = Some(&root) == path.canonicalize().as_ref().ok();
-
-            let is_root_file = || root.extension().is_some();
-            // let is_root_file = || matches!(root.as_ref(), Ok(x) if x.extension().is_some());
-
-            // if not should break should always insert
-            // and it should also insert if root is file
-            // it would'nt cache archive file otherwise.
-            let should_insert = !should_break || is_root_file();
-
-            if should_insert {
-                self.insert_sha(path, target.to_string());
-                path = parent;
-            }
-
-            if should_break {
-                break;
-            }
-        }
-    }
-}
-
 impl<W> ExplorerEntryLoader<W>
 where
     W: Wait,
@@ -488,12 +424,6 @@ where
 
         let _wait = self.waiter.wait().await;
         let mut use_cache = false;
-
-        let sha_path = |path: &std::path::Path| {
-            let sha = sha2::Sha256::digest(path.to_string_lossy().as_bytes());
-
-            format!("{:x}", sha)
-        };
 
         let cache_dir =
             std::env::var("XDG_CACHE_HOME").unwrap_or_else(|_| std::env::var("HOME").unwrap());
@@ -571,13 +501,6 @@ where
         }
 
         self.cache.insert_sha_recursive(&self.path, &path, &sha);
-        log::trace!(
-            "insert sha recursive into [{:?}] [{:?}] [{}] in {:?}",
-            self.path,
-            path,
-            sha,
-            time.elapsed()
-        );
 
         yield_now().await;
         let image = image.into_allocatable(size);

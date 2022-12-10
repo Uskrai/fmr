@@ -7,8 +7,8 @@ use tokio::sync::{watch, Semaphore};
 
 use crate::{
     explorer::{
-        loader::{ExplorerLoader, ExplorerLoaderSetting, ExplorerLoaderCache},
-        Explorer, ExplorerOutput, ExplorerSetting, ExplorerView, PathExplorerItem,
+        Explorer, ExplorerLoader, ExplorerLoaderCache, ExplorerLoaderSetting, ExplorerOutput,
+        ExplorerSetting, ExplorerView, PathExplorerItem,
     },
     image_search::search_image,
     AbortOnDropHandle,

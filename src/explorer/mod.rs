@@ -1,10 +1,13 @@
+mod cache;
 mod item_view;
-pub mod loader;
+mod loader;
 mod view;
 
 use std::{collections::HashMap, path::PathBuf};
 
+pub use self::cache::*;
 pub use self::item_view::*;
+pub use self::loader::*;
 pub use self::view::*;
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
