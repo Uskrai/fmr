@@ -48,22 +48,22 @@ jobs:
 
     - name: Build
       if: runner.os == 'Windows'
-      run: cargo build --verbose --release --no-default-features
+      run: |
+        cargo build --verbose --release --no-default-features
+        echo "BINARY_PATH=./target/release/fmr.exe" >> $env:GITHUB_ENV
 
     - name: Build
       if: runner.os != 'Windows'
-      run: cargo build --verbose --release
+      run: |
+        cargo build --verbose --release
+        echo "BINARY_PATH=./target/release/fmr" >> $GITHUB_ENV
+
+    - name: Strip
+      run: |
+        strip ${{ env.BINARY_PATH }}
 
     - uses: actions/upload-artifact@v3
-      if: runner.os == 'Linux'
       with:
-        name: fmr-linux
+        name: fmr-${{ runner.os }}
         path: |
-          ./target/release/fmr
-
-    - uses: actions/upload-artifact@v3
-      if: runner.os == 'Windows'
-      with:
-        name: fmr-windows
-        path: |
-          ./target/release/fmr.exe
+          ${{ env.BINARY_PATH }}
