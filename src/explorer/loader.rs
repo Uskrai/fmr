@@ -598,7 +598,8 @@ where
             }
         }
 
-       if crate::tools::archive::can_read(&path) {
+        #[cfg(feature = "libarchive")]
+        if crate::tools::archive::can_read(&path) {
             if let Some(image) = self.search_image_archive(path).await {
                 return Some(image);
             }
@@ -607,6 +608,7 @@ where
         None
     }
 
+    #[cfg(feature = "libarchive")]
     async fn search_image_archive(&mut self, path: PathBuf) -> Option<crate::image::ImageData> {
         let it = {
             let reader = crate::tools::archive::open(&path)

@@ -1327,7 +1327,7 @@ checksum = "03087c2bad5e1034e8cace5926dec053fb3790248370865f5117a7d0213354c8"
 [[package]]
 name = "libarchive"
 version = "0.1.1"
-source = "git+https://github.com/uskrai/libarchive-rust?rev=55b4e74e4aed28dd1edbba24a4842069e6f783a2#55b4e74e4aed28dd1edbba24a4842069e6f783a2"
+source = "git+https://github.com/uskrai/libarchive-rust?rev=7a5bf66f24b4870cb682024b6c60721de263b847#7a5bf66f24b4870cb682024b6c60721de263b847"
 dependencies = [
  "libarchive3-sys",
  "libc",
@@ -1336,11 +1336,11 @@ dependencies = [
 [[package]]
 name = "libarchive3-sys"
 version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3cd3beae8f59a4c7a806523269b5392037577c150446e88d684dfa6de6031ca7"
+source = "git+https://github.com/uskrai/libarchive3-sys?rev=c413ee889db9cddd99b9660718ee7d0f73983408#c413ee889db9cddd99b9660718ee7d0f73983408"
 dependencies = [
  "libc",
  "pkg-config",
+ "vcpkg",
 ]
 
 [[package]]
@@ -2529,6 +2529,12 @@ name = "valuable"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "830b7e5d4d90034032940e4ace0d9a9a057e7a45cd94e6c007832e39edb82f6d"
+
+[[package]]
+name = "vcpkg"
+version = "0.2.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "version-compare"
