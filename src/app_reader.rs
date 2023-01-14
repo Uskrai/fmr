@@ -1,5 +1,5 @@
 use std::{
-    path::PathBuf,
+    path::{Path, PathBuf},
     sync::{atomic::AtomicBool, Arc},
 };
 
@@ -25,6 +25,45 @@ pub struct AppReaderSetting {
     pub preload_next: usize,
     #[serde(default)]
     pub texture_option: TextureOption,
+
+    #[serde(skip)]
+    pub folder_sorter: AppReaderFolderSorter,
+}
+
+#[derive(Clone)]
+pub struct AppReaderFolderSorter(
+    pub Arc<dyn (Fn(&Path, &Path) -> std::cmp::Ordering) + Send + Sync>,
+);
+
+impl PartialEq for AppReaderFolderSorter {
+    fn eq(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.0, &other.0)
+    }
+}
+
+impl Eq for AppReaderFolderSorter {}
+
+impl Default for AppReaderFolderSorter {
+    fn default() -> Self {
+        Self(Arc::new(|a, b| {
+            crate::path::compare_natural(a.file_name().unwrap(), b.file_name().unwrap())
+        }))
+    }
+}
+
+impl AppReaderFolderSorter {
+    pub fn replace(
+        &mut self,
+        fun: impl Fn(&Path, &Path) -> std::cmp::Ordering + Send + Sync + 'static,
+    ) {
+        self.0 = Arc::new(fun);
+    }
+}
+
+impl std::fmt::Debug for AppReaderFolderSorter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("AppReaderFolderSorter").finish()
+    }
 }
 
 pub struct AppReader {
@@ -102,7 +141,9 @@ impl AppReader {
     }
 
     pub fn change_folder(&mut self, direction: isize, ctx: &egui::Context) -> bool {
-        let path = crate::path::get_natural_sorted_folder_by(self.path.clone(), direction);
+        let path = crate::path::get_sorted_folder_by(self.path.clone(), direction, |a, b| {
+            self.setting.folder_sorter.0(&a.path(), &b.path())
+        });
 
         match path {
             Some(path) => {

@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     explorer::{ExplorerLoaderCache, FilterType, PathExplorerItem},
     inspection::DebugUI,
+    path::PathSorterSetting,
     reader::ReaderMode,
     AppExplorer, AppExplorerOnOpen, AppExplorerSetting, AppExplorerView, AppReader,
     AppReaderSetting, AppReaderView,
@@ -47,6 +48,7 @@ pub struct AppSetting {
     path: PathBuf,
     reader: AppReaderSetting,
     explorer: AppExplorerSetting,
+    path_sorter: PathSorterSetting,
 }
 
 pub struct App {
@@ -99,6 +101,17 @@ impl App {
         };
 
         setting.explorer.cache = cache.explorer;
+        let sorter = setting.path_sorter.subscribe();
+        setting
+            .explorer
+            .sorter
+            .replace(move |a, b| sorter.compare_path(a, b));
+
+        let sorter = setting.path_sorter.subscribe();
+        setting
+            .reader
+            .folder_sorter
+            .replace(move |a, b| sorter.compare_path(a, b));
 
         if let Some(s) = context.storage {
             if let Some(s) = s.get_string("style") {
@@ -222,6 +235,16 @@ impl eframe::App for App {
                         egui::DragValue::new(&mut setting.max_resize.1)
                             .prefix("Max Resize Height: "),
                     );
+
+                    ui.menu_button("Path Ordering", |ui| {
+                        let setting = &mut self.setting.path_sorter;
+
+                        ui.checkbox(setting.natural_mut(), "Natural");
+                        ui.checkbox(setting.ascending_mut(), "Ascending");
+                        ui.checkbox(setting.last_modified_mut(), "Last Modified");
+
+                        setting.sync();
+                    });
 
                     ui.menu_button("Scale Filter", |ui| {
                         let filter = &mut setting.filter;

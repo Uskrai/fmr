@@ -1,4 +1,7 @@
-use std::{path::PathBuf, sync::Arc};
+use std::{
+    path::{Path, PathBuf},
+    sync::Arc,
+};
 
 use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
@@ -32,6 +35,34 @@ pub struct AppExplorerSetting {
     pub cache: ExplorerLoaderCache,
     #[serde(default)]
     pub entry: ExplorerEntryLoaderSetting,
+    #[serde(skip)]
+    pub sorter: ExplorerSorter,
+}
+
+#[derive(Clone)]
+pub struct ExplorerSorter(pub Arc<dyn (Fn(&Path, &Path) -> std::cmp::Ordering) + Send + Sync>);
+
+impl Default for ExplorerSorter {
+    fn default() -> Self {
+        Self(Arc::new(|a, b| {
+            crate::path::compare_natural(a.file_name().unwrap(), b.file_name().unwrap())
+        }))
+    }
+}
+
+impl ExplorerSorter {
+    pub fn replace(
+        &mut self,
+        fun: impl Fn(&Path, &Path) -> std::cmp::Ordering + Send + Sync + 'static,
+    ) {
+        self.0 = Arc::new(fun);
+    }
+}
+
+impl std::fmt::Debug for ExplorerSorter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("ExplorerSorter").finish()
+    }
 }
 
 impl AppExplorer {
@@ -50,6 +81,7 @@ impl AppExplorer {
             selected_entry,
             setting_receiver,
             cache: setting.cache,
+            sorter: setting.sorter.0,
             ctx,
         };
 

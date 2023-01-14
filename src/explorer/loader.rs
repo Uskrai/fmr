@@ -1,7 +1,7 @@
 use std::{
     collections::HashMap,
     ops::Range,
-    path::PathBuf,
+    path::{Path, PathBuf},
     sync::{
         atomic::{AtomicUsize, Ordering},
         Arc, Weak,
@@ -68,6 +68,8 @@ pub struct ExplorerLoader {
     pub setting_receiver: watch::Receiver<ExplorerLoaderSetting>,
     pub cache: ExplorerLoaderCache,
     #[derivative(Debug = "ignore")]
+    pub sorter: Arc<dyn (Fn(&Path, &Path) -> std::cmp::Ordering) + Send + Sync>,
+    #[derivative(Debug = "ignore")]
     pub ctx: egui::Context,
 }
 
@@ -92,6 +94,7 @@ impl ExplorerLoader {
             selected_entry,
             mut setting_receiver,
             cache,
+            sorter,
             ctx,
         } = self.clone();
 
@@ -106,7 +109,7 @@ impl ExplorerLoader {
             content.push(it);
         }
 
-        content.sort_by(|a, b| crate::path::compare_natural(&a.file_name(), &b.file_name()));
+        content.sort_by(|a, b| sorter(&a.path(), &b.path()));
         explorer.write().content.reserve(content.len());
         let priority = Arc::new(Mutex::new(PriorityRange::new(0..content.len())));
         let semaphore = PrioritySemaphore::new(4, 0, priority);
