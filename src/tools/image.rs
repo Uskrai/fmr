@@ -10,7 +10,7 @@ pub async fn load_image_from_memory(
 ) -> Option<Result<ImageData, image::ImageError>> {
     let vec = vec?;
     tokio::task::yield_now().await;
-    let time =  std::time::Instant::now();
+    let time = std::time::Instant::now();
     let vec = vec;
 
     let reader = match crate::image::Reader::load_from_memory(vec) {

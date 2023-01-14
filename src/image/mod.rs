@@ -76,12 +76,10 @@ impl ImageData {
         }
     }
 
-    pub fn write_to<W, F>(&self, w: &mut W, static_format: F)
-        -> image::ImageResult<()>
+    pub fn write_to<W, F>(&self, w: &mut W, static_format: F) -> image::ImageResult<()>
     where
         W: std::io::Write + Seek,
         F: Into<image::ImageOutputFormat>,
-        
     {
         match self {
             ImageData::StaticImage(image) => {
@@ -99,7 +97,7 @@ impl ImageData {
                 }
             }
         };
-        
+
         Ok(())
     }
 }

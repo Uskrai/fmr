@@ -18,9 +18,7 @@ impl Reader<BufReader<File>> {
         let load_gif = || Self::load_gif(BufReader::new(std::fs::File::open(&path)?));
 
         let reader = match image::ImageFormat::from_path(&path) {
-            Ok(image::ImageFormat::Gif) => {
-                load_gif()?
-            }
+            Ok(image::ImageFormat::Gif) => load_gif()?,
             // guess format from memory
             Ok(_) | Err(image::ImageError::Unsupported(_)) => {
                 let reader = image::io::Reader::open(&path)?.with_guessed_format()?;

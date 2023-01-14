@@ -1,9 +1,11 @@
-use std::{sync::Arc, collections::{HashMap, HashSet}};
+use std::{
+    collections::{HashMap, HashSet},
+    sync::Arc,
+};
 
 use parking_lot::Mutex;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use sha2::Digest;
-
 
 pub fn sha_path(path: &std::path::Path) -> String {
     let sha = sha2::Sha256::digest(path.to_string_lossy().as_bytes());
