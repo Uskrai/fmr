@@ -1,16 +1,14 @@
 use std::{path::PathBuf, sync::Arc};
 
-use futures::stream::StreamExt;
 use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
-use tokio::sync::{watch, Semaphore};
+use tokio::sync::watch;
 
 use crate::{
     explorer::{
-        Explorer, ExplorerLoader, ExplorerLoaderCache, ExplorerLoaderSetting, ExplorerOutput,
-        ExplorerSetting, ExplorerView, PathExplorerItem,
+        Explorer, ExplorerEntryLoaderSetting, ExplorerLoader, ExplorerLoaderCache,
+        ExplorerLoaderSetting, ExplorerOutput, ExplorerSetting, ExplorerView, PathExplorerItem,
     },
-    image_search::search_image,
     AbortOnDropHandle,
 };
 
@@ -28,9 +26,12 @@ pub struct AppExplorer {
 #[serde(default)]
 pub struct AppExplorerSetting {
     pub explorer: ExplorerSetting,
+    #[serde(skip)]
     pub loader: ExplorerLoaderSetting,
     #[serde(skip)]
     pub cache: ExplorerLoaderCache,
+    #[serde(default)]
+    pub entry: ExplorerEntryLoaderSetting,
 }
 
 impl AppExplorer {
@@ -162,7 +163,7 @@ impl<'a, OnOpen: AppExplorerOnOpen> AppExplorerView<'a, OnOpen> {
 
         let setting = ExplorerLoaderSetting {
             index,
-            ..setting.loader.clone()
+            entry_setting: setting.entry.clone(),
         };
 
         if setting != *explorer.setting_sender.borrow() {

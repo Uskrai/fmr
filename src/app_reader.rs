@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::watch;
 
 use crate::{
+    image::TextureOption,
     reader::{
         loader::ReaderLoaderSetting, PagedReaderState, Reader, ReaderMode, ReaderModeState,
         ReaderSetting, ReaderView,
@@ -22,6 +23,8 @@ pub struct AppReaderSetting {
     pub change_folder_with_scroll_wheel: bool,
     pub preload_prev: usize,
     pub preload_next: usize,
+    #[serde(default)]
+    pub texture_option: TextureOption,
 }
 
 pub struct AppReader {
@@ -55,6 +58,7 @@ impl AppReader {
             index: 0,
             preload_next: setting.preload_next,
             preload_prev: setting.preload_prev,
+            texture_option: setting.texture_option,
         };
         let (index_sender, index_receiver) = watch::channel(current_index);
         index_sender.send(current_index).ok();
@@ -217,6 +221,7 @@ impl<'a> AppReaderView<'a> {
                 index: paged.index,
                 preload_prev: setting.preload_prev,
                 preload_next: setting.preload_next,
+                texture_option: setting.texture_option,
             };
             if *state.index_sender.borrow() != current {
                 state.index_sender.send(current).ok();
@@ -226,6 +231,7 @@ impl<'a> AppReaderView<'a> {
                 index: 0,
                 preload_prev: usize::MAX,
                 preload_next: usize::MAX,
+                texture_option: setting.texture_option,
             };
             if *state.index_sender.borrow() != current {
                 state.index_sender.send(current).ok();

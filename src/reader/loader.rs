@@ -10,7 +10,7 @@ use parking_lot::{Mutex, RwLock};
 use tokio::sync::{watch, OwnedSemaphorePermit, Semaphore};
 
 use crate::{
-    image::{EguiSplittedImageData, ImageData, LoadingTexture, TextureViewState},
+    image::{EguiSplittedImageData, ImageData, LoadingTexture, TextureOption, TextureViewState},
     reader::Reader,
     AbortOnDropHandle,
 };
@@ -28,6 +28,7 @@ pub struct ReaderLoaderSetting {
     pub index: usize,
     pub preload_prev: usize,
     pub preload_next: usize,
+    pub texture_option: TextureOption,
 }
 
 #[derive(Clone)]
@@ -291,11 +292,13 @@ impl ReaderLoader {
                 let entry = entry.clone();
                 let fut = opener(entry.opener_index);
                 let ctx = ctx.clone();
+                let texture_option = setting.texture_option;
 
                 async move {
                     let _permit = permit;
                     log::info!("acquired permit for {} {}", entry.name, entry.opener_index);
-                    let texture = Self::load_texture(entry.name, ctx.clone(), fut).await;
+                    let texture =
+                        Self::load_texture(entry.name, ctx.clone(), fut, texture_option).await;
                     if let Some(texture) = texture {
                         if let Some(item) = entry.item.upgrade() {
                             *item.lock() = texture.into();
@@ -336,6 +339,7 @@ impl ReaderLoader {
         name: String,
         ctx: egui::Context,
         fut: impl Future<Output = Option<ImageData>>,
+        texture_option: TextureOption,
     ) -> Option<crate::image::TextureHandle> {
         let time = std::time::Instant::now();
         let image = fut.await?;
@@ -352,8 +356,12 @@ impl ReaderLoader {
         log::debug!("into egui {:?} in {:?}", name, time.elapsed());
 
         tokio::task::yield_now().await;
-        let texture =
-            crate::image::TextureHandle::from_image(ctx.tex_manager(), name.clone(), image);
+        let texture = crate::image::TextureHandle::from_image(
+            ctx.tex_manager(),
+            name.clone(),
+            image,
+            texture_option,
+        );
 
         Some(texture)
     }

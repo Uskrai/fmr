@@ -42,12 +42,12 @@ libarchive = ["dep:libarchive"]
 
 [dependencies.eframe]
 # git = "https://github.com/emilk/egui"
-version = "0.18.0"
+version = "0.20.1"
 features = ["persistence"]
 # rev = "888cd9c3eb09b44995369aebe0034c5be01f1917"
 [dependencies.egui]
 # git = "https://github.com/emilk/egui"
-version = "0.18.1"
+version = "0.20.1"
 
 # [profile.dev.package.image]
 # opt-level = 3

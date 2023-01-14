@@ -13,6 +13,19 @@ use parking_lot::Mutex;
 use crate::image::EguiSplittedFrameData;
 
 use super::EguiSplittedImageData;
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
+pub struct TextureOption(pub egui::TextureOptions);
+
+impl Default for TextureOption {
+    fn default() -> Self {
+        Self(egui::TextureOptions {
+            magnification: egui::TextureFilter::Linear,
+            minification: egui::TextureFilter::Linear,
+        })
+    }
+}
 
 #[derive(Clone)]
 pub struct SplittedTextureHandle {
@@ -142,13 +155,14 @@ impl TextureHandle {
         tex_mgr: Arc<EguiRwLock<TextureManager>>,
         name: String,
         image: EguiSplittedImageData,
+        option: TextureOption,
     ) -> Self {
         match image {
             EguiSplittedImageData::StaticImage(image) => {
-                TextureHandle::StaticTexture(image.alloc(tex_mgr, name))
+                TextureHandle::StaticTexture(image.alloc(tex_mgr, name, option))
             }
             EguiSplittedImageData::AnimatedImage(frames) => TextureHandle::AnimatedTexture(
-                AnimatedTextureHandle::from_data(tex_mgr, name, frames),
+                AnimatedTextureHandle::from_data(tex_mgr, name, frames, option),
             ),
         }
     }
@@ -180,6 +194,7 @@ impl AnimatedTextureHandle {
         tex_mgr: Arc<EguiRwLock<TextureManager>>,
         name: String,
         frames: Vec<EguiSplittedFrameData>,
+        option: TextureOption,
     ) -> Self {
         let mut vec = Vec::new();
         for (index, frame) in frames.into_iter().enumerate() {
@@ -187,6 +202,7 @@ impl AnimatedTextureHandle {
                 tex_mgr.clone(),
                 format!("{}-{}", name, index),
                 frame,
+                option,
             );
 
             vec.push(handle);
@@ -222,9 +238,10 @@ impl TextureFrameHandle {
         tex_mgr: Arc<EguiRwLock<TextureManager>>,
         name: String,
         frame: EguiSplittedFrameData,
+        option: TextureOption,
     ) -> Self {
         let EguiSplittedFrameData { delay, image } = frame;
-        let handle = image.alloc(tex_mgr, name);
+        let handle = image.alloc(tex_mgr, name, option);
 
         Self { delay, handle }
     }

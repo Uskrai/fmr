@@ -356,8 +356,9 @@ impl EguiSplittedImageData {
         self,
         tex_mgr: Arc<eframe::epaint::mutex::RwLock<TextureManager>>,
         name: String,
+        option: TextureOption,
     ) -> texture::TextureHandle {
-        TextureHandle::from_image(tex_mgr, name, self)
+        TextureHandle::from_image(tex_mgr, name, self, option)
     }
 }
 
@@ -380,6 +381,7 @@ impl EguiSplittedStaticImageData {
         self,
         tex_mgr: Arc<EguiRwLock<TextureManager>>,
         name: String,
+        option: TextureOption,
     ) -> SplittedTextureHandle {
         let vec = self
             .0
@@ -389,7 +391,10 @@ impl EguiSplittedStaticImageData {
                 it.into_iter()
                     .enumerate()
                     .map(|(j, it)| {
-                        let id = tex_mgr.write().alloc(format!("{}-{}x{}", name, i, j), it);
+                        let id =
+                            tex_mgr
+                                .write()
+                                .alloc(format!("{}-{}x{}", name, i, j), it, option.0);
                         egui::TextureHandle::new(tex_mgr.clone(), id)
                     })
                     .collect()

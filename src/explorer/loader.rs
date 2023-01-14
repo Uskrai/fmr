@@ -21,6 +21,8 @@ use tokio::{
 use tracing::instrument;
 use zip::ZipArchive;
 
+use crate::image::TextureOption;
+
 use super::{cache::ExplorerLoaderCache, sha_path, Explorer, PathExplorerItem};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Derivative, Serialize, Deserialize)]
@@ -69,10 +71,8 @@ pub struct ExplorerLoader {
     pub ctx: egui::Context,
 }
 
-#[derive(Clone, PartialEq, Eq, Debug, Default, Serialize, Deserialize)]
-#[serde(default)]
+#[derive(Clone, PartialEq, Eq, Debug, Default)]
 pub struct ExplorerLoaderSetting {
-    #[serde(skip)]
     pub index: usize,
     pub entry_setting: ExplorerEntryLoaderSetting,
 }
@@ -114,15 +114,19 @@ impl ExplorerLoader {
         let mut child = Vec::new();
         let size = 300;
 
+        let entry_setting = Arc::new(Mutex::new(
+            self.setting_receiver.borrow().entry_setting.clone(),
+        ));
+
         let default_texture = image::DynamicImage::new_rgb8(1, 1);
         let default_texture = crate::image::ImageData::StaticImage(default_texture)
             .into_allocatable((size as u32, size as u32))
             .into_egui()
-            .alloc(ctx.tex_manager(), format!("{:?} default", path));
-
-        let entry_setting = Arc::new(Mutex::new(
-            self.setting_receiver.borrow().entry_setting.clone(),
-        ));
+            .alloc(
+                ctx.tex_manager(),
+                format!("{:?} default", path),
+                entry_setting.lock().texture_option.clone(),
+            );
 
         for (i, entry) in content.into_iter().enumerate() {
             if let Some(it) = PathExplorerItem::new(entry.path()) {
@@ -146,15 +150,21 @@ impl ExplorerLoader {
 
                     tokio::task::yield_now().await;
                     let _permit = semaphore.acquire(i).await.unwrap();
-                    let image =
-                        ExplorerEntryLoader::new(path.clone(), waiter, entry_setting, cache)
-                            .search()
-                            .await;
+                    let image = ExplorerEntryLoader::new(
+                        path.clone(),
+                        waiter,
+                        entry_setting.clone(),
+                        cache,
+                    )
+                    .search()
+                    .await;
 
                     let texture = match image {
-                        Some(image) => {
-                            image.alloc(ctx.tex_manager(), path.to_string_lossy().to_string())
-                        }
+                        Some(image) => image.alloc(
+                            ctx.tex_manager(),
+                            path.to_string_lossy().to_string(),
+                            entry_setting.lock().texture_option.clone(),
+                        ),
                         None => default_texture,
                     };
 
@@ -364,6 +374,8 @@ pub struct ExplorerEntryLoaderSetting {
     pub filter: FilterType,
     #[derivative(Default(value = "(300,300)"))]
     pub max_resize: (u32, u32),
+    #[serde(default)]
+    pub texture_option: TextureOption,
 }
 
 impl<W> ExplorerEntryLoader<W>
