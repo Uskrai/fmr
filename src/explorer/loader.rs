@@ -531,8 +531,15 @@ where
     async fn search_file(&mut self, path: PathBuf) -> Option<crate::image::ImageData> {
         let file = std::fs::File::open(&path).ok()?;
         if let Ok(mut zip) = ZipArchive::new(file) {
-            for i in 0..zip.len() {
-                if let Some(image) = crate::tools::zip::load_image(|| zip.by_index(i)).await {
+            let mut names = zip
+                .file_names()
+                .map(|it| it.to_string())
+                .collect::<Vec<_>>();
+
+            names.sort_by(|a, b| natord::compare(a, b));
+
+            for it in names {
+                if let Some(image) = crate::tools::zip::load_image(|| zip.by_name(&it)).await {
                     return Some(image);
                 }
             }
