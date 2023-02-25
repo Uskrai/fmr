@@ -275,7 +275,7 @@ impl eframe::App for App {
 
                         ui.add(
                             DragValue::new(&mut option.fit_to_scale)
-                                .prefix("Scale")
+                                .prefix("Scale: ")
                                 .min_decimals(1)
                                 .max_decimals(150),
                         );
