@@ -15,6 +15,7 @@ pub struct ReaderSetting {
     pub mode: ReaderMode,
     pub paged: ReaderPagedSetting,
 
+    pub sizer: Sizer,
     pub scroll_per_arrow: i32,
     pub scroll_per_page: i32,
 }
@@ -24,7 +25,7 @@ impl Default for ReaderSetting {
         Self {
             mode: Default::default(),
             paged: Default::default(),
-
+            sizer: Sizer::default(),
             scroll_per_page: 900,
             scroll_per_arrow: 300,
         }
@@ -35,7 +36,6 @@ impl Default for ReaderSetting {
 #[serde(default)]
 pub struct ReaderPagedSetting {
     pub read_from_right: bool,
-    pub sizer: Sizer,
 }
 
 #[derive(Clone, PartialEq, Eq, Deserialize, Serialize, Debug)]
@@ -127,12 +127,13 @@ impl<'a> ReaderView<'a> {
         let Self { reader, setting } = self;
         match &mut reader.state {
             ReaderModeState::Vertical(state) => {
+                state.sizer = setting.sizer.clone();
                 state.scroll_state.scroll_per_page = setting.scroll_per_page as f32;
                 state.scroll_state.scroll_per_arrow = setting.scroll_per_arrow as f32;
                 VerticalReader::new(&mut reader.images, state).show(ui)
             }
             ReaderModeState::Paged(state) => {
-                state.sizer = setting.paged.sizer.clone();
+                state.sizer = setting.sizer.clone();
                 state.read_from_right = setting.paged.read_from_right;
                 state.scroll.scroll_per_page = setting.scroll_per_page as f32;
                 state.scroll.scroll_per_arrow = setting.scroll_per_arrow as f32;

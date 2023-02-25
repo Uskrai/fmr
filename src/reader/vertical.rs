@@ -3,9 +3,13 @@ use crate::{
     scroll::ScrollState,
 };
 
+use super::Sizer;
+
 #[derive(Default)]
 pub struct VerticalReaderState {
     pub scroll_state: ScrollState,
+
+    pub sizer: Sizer,
 }
 
 impl VerticalReaderState {
@@ -47,16 +51,17 @@ impl<'a> VerticalReader<'a> {
                     ui.centered_and_justified(|ui| {
                         ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                             for it in images.iter_mut() {
-                                let available_size = ui.available_size();
+                                let image_max_size = it.max_size().map(|it| it as f32);
+                                let available_size = ui.available_size() - egui::vec2(1.0, 1.0);
+                                let scale = state.sizer.calc_range(
+                                    image_max_size.into(),
+                                    available_size,
+                                    [true, false],
+                                );
 
                                 TextureView::new(it).show(ui, |_, handle| {
-                                    let size = handle.size_vec2();
-
-                                    let max = size.x.min(available_size.x);
-
                                     crate::image::SplittedTextureWidget::new_with_scale(
-                                        handle,
-                                        max / size.x,
+                                        handle, scale,
                                     )
                                 });
                             }
