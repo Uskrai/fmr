@@ -266,15 +266,23 @@ impl eframe::App for App {
                         ui.radio_value(mode, ReaderMode::Vertical, "Vertical");
                     });
 
-                    ui.menu_button("Paged Option", |ui| {
-                        let option = &mut setting.paged;
-                        ui.checkbox(&mut option.read_from_right, "Read From Right");
-
-                        let option = &mut option.sizer;
+                    ui.menu_button("Scale Option", |ui| {
+                        let option = &mut setting.sizer;
                         ui.checkbox(option.fit_horizontal_mut(), "Fit Width");
                         ui.checkbox(option.fit_vertical_mut(), "Fit Height");
                         ui.checkbox(&mut option.shrink, "Shrink");
                         ui.checkbox(&mut option.enlarge, "Enlarge");
+
+                        ui.add(
+                            DragValue::new(&mut option.fit_to_scale)
+                                .prefix("Scale")
+                                .min_decimals(1)
+                                .max_decimals(150),
+                        );
+                    });
+                    ui.menu_button("Paged Option", |ui| {
+                        let option = &mut setting.paged;
+                        ui.checkbox(&mut option.read_from_right, "Read From Right");
                     });
 
                     ui.menu_button("Scroll", |ui| {

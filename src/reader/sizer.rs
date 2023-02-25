@@ -1,10 +1,23 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Default, Debug)]
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
+#[serde(default)]
 pub struct Sizer {
     pub shrink: bool,
     pub enlarge: bool,
+    pub fit_to_scale: u64,
     fit: [bool; 2],
+}
+
+impl Default for Sizer {
+    fn default() -> Self {
+        Self {
+            shrink: false,
+            enlarge: false,
+            fit_to_scale: 100,
+            fit: [false, false],
+        }
+    }
 }
 
 impl Sizer {
@@ -25,13 +38,19 @@ impl Sizer {
     }
 
     pub fn calc(&self, size: egui::Vec2, fit_to: egui::Vec2) -> f32 {
+        self.calc_range(size, fit_to, [true, true])
+    }
+
+    pub fn calc_range(&self, size: egui::Vec2, fit_to: egui::Vec2, range: [bool; 2]) -> f32 {
         let mut scale = [None; 2];
-        for i in 0..2 {
-            scale[i] = if self.fit[i] {
-                self.calc_side(size[i], fit_to[i])
-            } else {
-                None
-            };
+        for (i, it) in range.iter().enumerate() {
+            if *it {
+                scale[i] = if self.fit[i] {
+                    self.calc_side(size[i], fit_to[i])
+                } else {
+                    None
+                }
+            }
         }
 
         match scale {
@@ -54,7 +73,8 @@ impl Sizer {
         let should_enlarge = self.enlarge && cmp.is_lt();
 
         if should_shrink || should_enlarge {
-            Some((fit_to) / size)
+            let fit_to_scale = (self.fit_to_scale as f32) / 100f32;
+            Some((fit_to * fit_to_scale) / size)
         } else {
             None
         }
