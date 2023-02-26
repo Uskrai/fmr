@@ -14,8 +14,7 @@ pub fn get_folder_by(
     direction: isize,
     sorter: impl FnOnce(&mut Vec<DirEntry>),
 ) -> Option<PathBuf> {
-    let canonicalized = path.as_ref().canonicalize().ok()?;
-    let parent = canonicalized.parent()?;
+    let parent = path.as_ref().parent()?;
 
     let dir = std::fs::read_dir(parent).ok()?;
 
@@ -26,7 +25,7 @@ pub fn get_folder_by(
     let mut index = 0;
 
     for (i, it) in dir.iter().enumerate() {
-        if it.path() == canonicalized {
+        if it.path() == path.as_ref() {
             index = i;
         }
     }
