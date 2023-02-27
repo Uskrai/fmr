@@ -416,7 +416,7 @@ where
                 })
                 .await
                 .ok()
-                .unwrap()
+                .flatten()
             });
             futures::pin_mut!(dir);
 
