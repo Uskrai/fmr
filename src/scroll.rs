@@ -332,7 +332,7 @@ impl ScrollArea {
         }
 
         if scrolling_enabled {
-            if response.hovered() && !response.dragged() {
+            if response.hovered() && !ui.input().pointer.any_down() {
                 let size = ui.input().events.len();
                 ui.input_mut().events.retain(|event| {
                     if let egui::Event::Scroll(scroll) = event {

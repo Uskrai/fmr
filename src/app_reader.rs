@@ -235,27 +235,42 @@ impl<'a> AppReaderView<'a> {
             })
             .inner;
 
-        ui.input_mut().events.retain(|event| {
-            if setting.change_folder_with_scroll_wheel && response.hovered() {
-                if let egui::Event::Scroll(scroll) = event {
-                    let mut step = scroll.to_step();
-                    step[0] *= !is_vertical as isize;
-                    step[0] *= if read_from_right { -1 } else { 1 };
+        {
+            let mut input = ui.input_mut();
+            let pointer = &input.pointer;
+            let any_down = pointer.any_down();
+            let secondary_down = pointer.button_down(egui::PointerButton::Secondary);
 
-                    if state
-                        .is_done_initial_loading
-                        .load(std::sync::atomic::Ordering::Relaxed)
-                    {
-                        match step {
-                            [0, i] | [i, 0] if i != 0 => return !state.change_folder(i, ui.ctx()),
-                            _ => {}
-                        };
+            let change_folder_with_scroll_wheel =
+                setting.change_folder_with_scroll_wheel && !any_down;
+
+            let should_change_folder =
+                (change_folder_with_scroll_wheel || secondary_down) && response.hovered();
+
+            input.events.retain(|event| {
+                if should_change_folder {
+                    if let egui::Event::Scroll(scroll) = event {
+                        let mut step = scroll.to_step();
+                        step[0] *= !is_vertical as isize;
+                        step[0] *= if read_from_right { -1 } else { 1 };
+
+                        if state
+                            .is_done_initial_loading
+                            .load(std::sync::atomic::Ordering::Relaxed)
+                        {
+                            match step {
+                                [0, i] | [i, 0] if i != 0 => {
+                                    return !state.change_folder(i, ui.ctx())
+                                }
+                                _ => {}
+                            };
+                        }
                     }
                 }
-            }
 
-            true
-        });
+                true
+            })
+        }
 
         if let ReaderModeState::Paged(paged) = &state.reader().state {
             let current = ReaderLoaderSetting {
