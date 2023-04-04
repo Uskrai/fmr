@@ -36,7 +36,7 @@ impl DebugUI {
             .open(&mut self.memory_ui)
             .show(ctx, |ui| {
                 ctx.memory_ui(ui);
-                ui.label(format!("Focus: {:?}", ctx.memory().focus()));
+                ui.label(format!("Focus: {:?}", ctx.memory(|memory| memory.focus())));
             });
         egui::Window::new("style-ui")
             .open(&mut self.style_ui)

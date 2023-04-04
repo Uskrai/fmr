@@ -179,23 +179,35 @@ impl<'a> PagedReader<'a> {
 
         // TODO: change this to response.has_focus()
         if true {
-            let size = ui.input().events.len();
-            ui.input_mut().events.retain(|event| {
-                if let egui::Event::Scroll(scroll) = event {
-                    let mut step = scroll.to_step();
-                    step[0] *= if self.state.read_from_right { -1 } else { 1 };
+            let size = ui.input(|input| input.events.len());
 
-                    let ret = match step {
-                        [0, i] | [i, 0] => !self.change_index_by(i),
-                        _ => true,
-                    };
-                    return ret;
-                }
+            ui.input_mut(|input| {
+                let any_down = input.pointer.any_down();
+                let primary_down = input.pointer.primary_down();
+                let secondary_down = input.pointer.secondary_down();
 
-                true
+                let should_change_page =
+                    !primary_down && (!any_down || secondary_down) && response.hovered();
+
+                input.events.retain(|event| {
+                    if should_change_page {
+                        if let egui::Event::Scroll(scroll) = event {
+                            let mut step = scroll.to_step();
+                            step[0] *= if self.state.read_from_right { -1 } else { 1 };
+
+                            let ret = match step {
+                                [0, i] | [i, 0] => !self.change_index_by(i),
+                                _ => true,
+                            };
+                            return ret;
+                        }
+                    }
+
+                    true
+                });
             });
 
-            if ui.input().events.len() != size {
+            if ui.input(|input| input.events.len()) != size {
                 ui.ctx().request_repaint();
             }
         }

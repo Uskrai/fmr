@@ -111,6 +111,7 @@ impl AppExplorer {
             key: egui::Key::Enter,
             pressed: true,
             modifiers,
+            ..
         } = event
         {
             let inner = self.inner.read();
@@ -203,7 +204,7 @@ impl<'a, OnOpen: AppExplorerOnOpen> AppExplorerView<'a, OnOpen> {
         }
 
         if response.gained_focus() {
-            ui.memory().lock_focus(response.id, true);
+            ui.memory_mut(|memory| memory.lock_focus(response.id, true));
         }
 
         response

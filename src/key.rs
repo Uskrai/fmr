@@ -25,6 +25,7 @@ where
             key,
             modifiers,
             pressed: true,
+            repeat: _,
         } = event
         {
             let step = if *key == up {

@@ -345,7 +345,7 @@ impl ReaderLoader {
         let image = fut.await?;
         log::debug!("getting image data {:?} in {:?}", name, time.elapsed());
         let name = name;
-        let max_size = ctx.input().max_texture_side as u32;
+        let max_size = ctx.input(|input| input.max_texture_side)as u32;
 
         tokio::task::yield_now().await;
         let image = image.into_allocatable((max_size, max_size));

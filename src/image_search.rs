@@ -29,7 +29,7 @@ pub async fn search_image(ctx: egui::Context, path: PathBuf) -> Option<EguiSplit
         });
         futures::pin_mut!(dir);
 
-        let size = ctx.input().max_texture_side as u32;
+        let size = ctx.input(|input| input.max_texture_side) as u32;
 
         while let Some(entry) = dir.next().await {
             let entry: walkdir::DirEntry = entry;

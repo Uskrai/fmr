@@ -357,20 +357,24 @@ impl eframe::App for App {
 
         let response = inner.response.interact(egui::Sense::click_and_drag());
         let mut mode = inner.inner;
-        let input_event_len = ctx.input().events.len();
+        let input_event_len = ctx.input(|i| i.events.len());
 
         if let (true, Some(mode)) = (response.hovered(), &mut mode) {
-            ctx.input_mut().events.retain(|it| {
-                let mut handled = false;
+            ctx.input_mut(|i| {
+                i.events.retain(|it| {
+                    let mut handled = false;
 
-                handled |= match mode {
-                    AppMode::Explorer(explorer) => {
-                        explorer.handle_event(Some(OnOpen { app: self }), it)
-                    }
-                    AppMode::Reader(reader) => reader.handle_event(&self.setting.reader, ctx, it),
-                };
+                    handled |= match mode {
+                        AppMode::Explorer(explorer) => {
+                            explorer.handle_event(Some(OnOpen { app: self }), it)
+                        }
+                        AppMode::Reader(reader) => {
+                            reader.handle_event(&self.setting.reader, ctx, it)
+                        }
+                    };
 
-                !handled
+                    !handled
+                })
             });
         }
 
@@ -387,51 +391,54 @@ impl eframe::App for App {
         }
 
         if response.hovered() {
-            ctx.input_mut().events.retain(|it| {
-                if let egui::Event::Key {
-                    pressed: true,
-                    key,
-                    modifiers,
-                } = it
-                {
-                    if *key == egui::Key::O && modifiers.command_only() {
-                        self.open_file_dialog();
+            ctx.input_mut(|input| {
+                input.events.retain(|it| {
+                    if let egui::Event::Key {
+                        pressed: true,
+                        key,
+                        modifiers,
+                        repeat: _,
+                    } = it
+                    {
+                        if *key == egui::Key::O && modifiers.command_only() {
+                            self.open_file_dialog();
 
-                        return false;
+                            return false;
+                        }
+
+                        if *key == egui::Key::Backspace {
+                            let path = match &self.mode {
+                                Some(mode) => mode.path().to_path_buf(),
+                                None => self.setting.path.clone(),
+                            };
+
+                            // resolve symlink and make absolute when shift is pressed or path is relative
+                            let path = if modifiers.shift_only() || path.is_relative() {
+                                path.canonicalize().unwrap_or(path)
+                            } else {
+                                path
+                            };
+
+                            let parent = path
+                                .parent()
+                                .map(|it| it.to_path_buf())
+                                .unwrap_or_else(|| "./".into());
+
+                            let parent = if parent.exists() { parent } else { "./".into() };
+
+                            self.open_explorer(parent, Some(path));
+                            return false;
+                        }
                     }
 
-                    if *key == egui::Key::Backspace {
-                        let path = match &self.mode {
-                            Some(mode) => mode.path().to_path_buf(),
-                            None => self.setting.path.clone(),
-                        };
-
-                        // resolve symlink and make absolute when shift is pressed or path is relative
-                        let path = if modifiers.shift_only() || path.is_relative() {
-                            path.canonicalize().unwrap_or(path)
-                        } else {
-                            path
-                        };
-
-                        let parent = path
-                            .parent()
-                            .map(|it| it.to_path_buf())
-                            .unwrap_or_else(|| "./".into());
-
-                        let parent = if parent.exists() { parent } else { "./".into() };
-
-                        self.open_explorer(parent, Some(path));
-                        return false;
-                    }
-                }
-
-                true
+                    true
+                })
             });
         }
 
-        if input_event_len != ctx.input().events.len() {
+        if input_event_len != ctx.input(|i| i.events.len()) {
             ctx.request_repaint();
-            ctx.memory().stop_text_input();
+            ctx.memory_mut(|memory| memory.stop_text_input());
         }
 
         self.debug_ui.show_window(ctx);

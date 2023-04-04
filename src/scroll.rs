@@ -332,27 +332,29 @@ impl ScrollArea {
         }
 
         if scrolling_enabled {
-            if response.hovered() && !ui.input().pointer.any_down() {
-                let size = ui.input().events.len();
-                ui.input_mut().events.retain(|event| {
-                    if let egui::Event::Scroll(scroll) = event {
-                        let mut scroll_by = [0.0; 2];
+            if response.hovered() && !ui.input(|input| input.pointer.any_down()) {
+                let size = ui.input(|input| input.events.len());
+                ui.input_mut(|input| {
+                    input.events.retain(|event| {
+                        if let egui::Event::Scroll(scroll) = event {
+                            let mut scroll_by = [0.0; 2];
 
-                        for i in 0..2 {
-                            let step = scroll[i] / 50.0 * -1.0;
-                            let decrease_by = step.abs() * 50.0;
-                            scroll_by[i] = step * scroll_per_wheel[i] - decrease_by;
+                            for i in 0..2 {
+                                let step = scroll[i] / 50.0 * -1.0;
+                                let decrease_by = step.abs() * 50.0;
+                                scroll_by[i] = step * scroll_per_wheel[i] - decrease_by;
+                            }
+
+                            return !state
+                                .scroll_by(egui::vec2(scroll_by[0], scroll_by[1]))
+                                .changed;
                         }
 
-                        return !state
-                            .scroll_by(egui::vec2(scroll_by[0], scroll_by[1]))
-                            .changed;
-                    }
-
-                    true
+                        true
+                    })
                 });
 
-                if size != ui.input().events.len() {
+                if size != ui.input(|input| input.events.len()) {
                     ui.ctx().request_repaint();
                 }
             }
@@ -360,9 +362,11 @@ impl ScrollArea {
             if !state.is_stable && response.dragged() {
                 for d in 0..2 {
                     if has_bar[d] {
-                        state.offset[d] -= ui.input().pointer.delta()[d];
-                        state.vel[d] = ui.input().pointer.velocity()[d];
-                        state.scroll_stuck_to_end[d] = false;
+                        ui.input(|input| {
+                            state.offset[d] -= input.pointer.delta()[d];
+                            state.vel[d] = input.pointer.velocity()[d];
+                            state.scroll_stuck_to_end[d] = false;
+                        });
                     } else {
                         state.vel[d] = 0.0;
                     }
@@ -370,7 +374,7 @@ impl ScrollArea {
             } else {
                 let stop_speed = 20.0; // Pixels per second.
                 let friction_coeff = 1000.0; // Pixels per second squared.
-                let dt = ui.input().unstable_dt;
+                let dt = ui.input(|input| input.unstable_dt);
 
                 let friction = friction_coeff * dt;
                 if friction > state.vel.length() || state.vel.length() < stop_speed {
