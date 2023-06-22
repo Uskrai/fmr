@@ -16,13 +16,14 @@ use crate::{
     AbortOnDropHandle, Vec2Ext,
 };
 
-#[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Default, Debug)]
+#[derive(Clone, Serialize, Deserialize, Default, Debug)]
 #[serde(default)]
 pub struct AppReaderSetting {
     pub reader: ReaderSetting,
     pub change_folder_with_scroll_wheel: bool,
     pub preload_prev: usize,
     pub preload_next: usize,
+
     #[serde(default)]
     pub texture_option: TextureOption,
 
@@ -69,16 +70,24 @@ impl std::fmt::Debug for AppReaderFolderSorter {
 pub struct AppReader {
     pub path: PathBuf,
     pub setting: AppReaderSetting,
+    pub index_receiver: watch::Receiver<ReaderLoaderSetting>,
     reader: Arc<RwLock<Reader>>,
 
     index_sender: watch::Sender<ReaderLoaderSetting>,
     is_done_initial_loading: Arc<AtomicBool>,
+
+    pub reading_progress: crate::ReadingProgress,
     #[allow(dead_code)]
     handle: AbortOnDropHandle<()>,
 }
 
 impl AppReader {
-    pub fn new(path: PathBuf, setting: AppReaderSetting, ctx: egui::Context) -> Self {
+    pub fn new(
+        path: PathBuf,
+        setting: AppReaderSetting,
+        reading_progress: crate::ReadingProgress,
+        ctx: egui::Context,
+    ) -> Self {
         let images = Vec::new();
 
         let mode = match setting.reader.mode {
@@ -110,7 +119,7 @@ impl AppReader {
             reader: reader.clone(),
             path: path.clone(),
             ctx,
-            setting_receiver: index_receiver,
+            setting_receiver: index_receiver.clone(),
             is_done_initial_loading: is_done_initial_loading.clone(),
         };
 
@@ -120,18 +129,52 @@ impl AppReader {
             path,
             reader,
             setting,
+            reading_progress,
             index_sender,
+            index_receiver,
             is_done_initial_loading,
             handle: AbortOnDropHandle(handle),
         }
     }
 
+    pub fn change_scale(&mut self, before: u64, after: u64) {
+        let mut reader = self.reader_mut();
+
+        let scroll_state = match &mut reader.state {
+            ReaderModeState::Vertical(state) => &mut state.scroll_state,
+            ReaderModeState::Paged(state) => &mut state.scroll,
+        };
+
+        let scale = after as f32 / before as f32;
+        for it in 0..2 {
+            let new_offset = scroll_state.offset[it] * scale as f32;
+            dbg!(
+                scroll_state.offset[it],
+                new_offset,
+                it,
+                before,
+                after,
+                scale
+            );
+            scroll_state.offset[it] = new_offset;
+        }
+    }
+
     pub fn open(&mut self, path: PathBuf, ctx: egui::Context) {
-        *self = Self::new(path, self.setting.clone(), ctx);
+        *self = Self::new(
+            path,
+            self.setting.clone(),
+            self.reading_progress.clone(),
+            ctx,
+        );
     }
 
     pub fn reader(&self) -> RwLockReadGuard<'_, Reader> {
         self.reader.read()
+    }
+
+    pub fn reader_mut(&self) -> parking_lot::RwLockWriteGuard<'_, Reader> {
+        self.reader.write()
     }
 
     /// Get a reference to the app reader's path.
@@ -147,6 +190,7 @@ impl AppReader {
 
         match path {
             Some(path) => {
+                self.reading_progress.insert_finish(&self.path);
                 self.open(path, ctx.clone());
                 true
             }
@@ -160,14 +204,7 @@ impl AppReader {
         ctx: &egui::Context,
         event: &egui::Event,
     ) -> bool {
-        let Self {
-            path: _,
-            setting: _,
-            reader,
-            handle: _,
-            index_sender: _,
-            is_done_initial_loading: _,
-        } = self;
+        let Self { reader, .. } = self;
 
         if reader.write().handle_event(event) {
             return true;
@@ -211,11 +248,11 @@ impl AppReader {
 
 pub struct AppReaderView<'a> {
     state: &'a mut AppReader,
-    setting: &'a AppReaderSetting,
+    setting: &'a mut AppReaderSetting,
 }
 
 impl<'a> AppReaderView<'a> {
-    pub fn new(state: &'a mut AppReader, setting: &'a AppReaderSetting) -> Self {
+    pub fn new(state: &'a mut AppReader, setting: &'a mut AppReaderSetting) -> Self {
         Self { state, setting }
     }
 
@@ -231,9 +268,10 @@ impl<'a> AppReaderView<'a> {
                 read_from_right = reader.is_read_from_right();
                 is_vertical = reader.state.is_vertical();
 
-                ReaderView::new(&mut reader, &setting.reader).show(ui)
+                ReaderView::new(&mut reader, &mut setting.reader).show(ui)
             })
-            .inner;
+            .inner
+            .interact(egui::Sense::click_and_drag());
 
         {
             ui.input_mut(|input| {
@@ -273,7 +311,8 @@ impl<'a> AppReaderView<'a> {
             });
         }
 
-        if let ReaderModeState::Paged(paged) = &state.reader().state {
+        let reader = state.reader();
+        if let ReaderModeState::Paged(paged) = &reader.state {
             let current = ReaderLoaderSetting {
                 index: paged.index,
                 preload_prev: setting.preload_prev,
@@ -282,6 +321,10 @@ impl<'a> AppReaderView<'a> {
             };
             if *state.index_sender.borrow() != current {
                 state.index_sender.send(current).ok();
+                state.reading_progress.insert(
+                    &state.path,
+                    crate::ReadingProgressValue::new(paged.index + 1, reader.images.len()),
+                );
             }
         } else {
             let current = ReaderLoaderSetting {
@@ -292,12 +335,16 @@ impl<'a> AppReaderView<'a> {
             };
             if *state.index_sender.borrow() != current {
                 state.index_sender.send(current).ok();
+                state
+                    .reading_progress
+                    .insert(&state.path, crate::ReadingProgressValue::new(0, 1))
+                // state.reading_progress.insert()
             }
         }
 
-        if response.gained_focus() {
-            ui.memory_mut(|memory| memory.lock_focus(response.id ,true));
-        }
+        // if response.gained_focus() {
+        //     ui.memory_mut(|memory| memory.lock_focus(response.id ,true));
+        // }
 
         response
     }

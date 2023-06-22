@@ -5,7 +5,8 @@ fn main() {
         .enable_all()
         .build()
         .unwrap();
-    let _guard = runtime.enter();
+    let handle = runtime.handle().clone();
+    let _guard = handle.enter();
 
     let options = eframe::NativeOptions::default();
 
@@ -30,7 +31,8 @@ fn main() {
         options,
         Box::new(|it| {
             it.egui_ctx.set_visuals(egui::Visuals::dark());
-            Box::new(fmr::App::new(it))
+            Box::new(fmr::App::new(it, runtime))
         }),
-    );
+    )
+    .unwrap();
 }

@@ -12,6 +12,8 @@ pub mod scroll;
 mod storage;
 mod tools;
 mod wake;
+use std::{collections::BTreeMap, sync::Arc};
+
 pub use app::*;
 pub use app_explorer::*;
 pub use app_reader::*;
@@ -69,6 +71,7 @@ where
 }
 
 pub use app::{App, AppMode};
+use parking_lot::Mutex;
 
 impl<T> Drop for AbortOnDropHandle<T> {
     fn drop(&mut self) {
@@ -127,11 +130,75 @@ fn split_and_interleave_at(
     use itertools::Itertools;
     (index..range.end).interleave((range.start..index).rev())
 }
-// }
 
-// pub trait
-//         let index = if step < 0 {
-//             self.state.index.checked_sub(step.wrapping_abs() as usize)
-//         } else {
-//             self.state.index.checked_add(step as usize)
-//         };
+#[derive(Debug, Default, Clone, serde::Serialize, serde::Deserialize)]
+pub struct ReadingProgress {
+    pub progress: Arc<Mutex<BTreeMap<String, ReadingProgressValue>>>,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct ReadingProgressValue {
+    pub page: usize,
+    pub total_page: usize,
+    pub time: std::time::SystemTime,
+
+    #[serde(default)]
+    pub is_finished: bool,
+}
+
+impl Default for ReadingProgressValue {
+    fn default() -> Self {
+        Self {
+            page: 0,
+            total_page: 0,
+            time: std::time::SystemTime::now(),
+            is_finished: false,
+        }
+    }
+}
+
+impl ReadingProgress {
+    pub fn insert(&self, path: &std::path::Path, mut value: ReadingProgressValue) {
+        if let Some(it) = path.as_os_str().to_str() {
+            match self.progress.lock().entry(it.to_string()) {
+                std::collections::btree_map::Entry::Vacant(entry) => {
+                    entry.insert(value);
+                }
+                std::collections::btree_map::Entry::Occupied(mut entry) => {
+                    let entry = entry.get_mut();
+
+                    if value.page < entry.page {
+                        value.page = entry.page;
+                    }
+
+                    value.is_finished = entry.is_finished || value.is_finished;
+
+                    *entry = value;
+                }
+            }
+        }
+    }
+
+    pub fn insert_finish(&self, path: &std::path::Path) {
+        if let Some(it) = path.as_os_str().to_str() {
+            match self.progress.lock().entry(it.to_string()) {
+                std::collections::btree_map::Entry::Vacant(_) => {}
+                std::collections::btree_map::Entry::Occupied(mut item) => {
+                    item.get_mut().page = item.get().total_page;
+                    item.get_mut().is_finished = true;
+                }
+            }
+        }
+    }
+}
+
+impl ReadingProgressValue {
+    pub fn new(page: usize, total_page: usize) -> Self {
+        Self {
+            page,
+            total_page,
+            time: std::time::SystemTime::now(),
+            is_finished: false,
+        }
+    }
+}

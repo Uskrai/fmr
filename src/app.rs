@@ -26,16 +26,30 @@ pub struct App {
     mode: Option<AppMode>,
     context: egui::Context, // context used to request repaint
     setting: AppSetting,
+    reading_progress: crate::ReadingProgress,
     setting_storage: Option<crate::storage::FSStorage>,
     cache_storage: Option<crate::storage::FSStorage>,
+    data_storage: Option<crate::storage::FSStorage>,
     // path: PathBuf,
     // reader_option: ReaderOption,
+    tokio_runtime: tokio::runtime::Runtime,
     debug_ui: DebugUI,
 }
 
+impl Drop for App {
+    fn drop(&mut self) {
+        tracing::info!("exiting apps");
+    }
+}
+
 #[derive(Debug, Default, Serialize, Deserialize)]
-pub struct Cache {
-    explorer: ExplorerLoaderCache,
+pub struct AppCache {
+    explorer_cache: ExplorerLoaderCache,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct AppData {
+    pub reading_progress: crate::ReadingProgress,
 }
 
 pub enum AppMode {
@@ -53,7 +67,7 @@ impl AppMode {
 }
 
 impl App {
-    pub fn new(context: &eframe::CreationContext) -> Self {
+    pub fn new(context: &eframe::CreationContext, tokio_runtime: tokio::runtime::Runtime) -> Self {
         crate::setup_custom_fonts(&context.egui_ctx);
 
         let profile = std::env::var("FMR_PROFILE").unwrap_or_else(|_| "default".to_string());
@@ -65,13 +79,19 @@ impl App {
         };
 
         let cache_storage = crate::storage::FSStorage::prepare("fmr", "", "cache.ron");
+        let data_storage = crate::storage::FSStorage::prepare("fmr", "", "data.ron");
 
-        let cache: Cache = match &cache_storage {
+        let cache: AppCache = match &cache_storage {
             Some(s) => ron::from_str(s.get_content()).unwrap_or_default(),
             None => Default::default(),
         };
 
-        setting.explorer.cache = cache.explorer;
+        let data: AppData = match &data_storage {
+            Some(s) => ron::from_str(s.get_content()).unwrap_or_default(),
+            None => Default::default(),
+        };
+
+        setting.explorer.cache = cache.explorer_cache;
         let sorter = setting.path_sorter.subscribe();
         setting
             .explorer
@@ -96,12 +116,15 @@ impl App {
         Self {
             mode: Default::default(),
             setting,
+            reading_progress: data.reading_progress,
             setting_storage,
             cache_storage,
+            data_storage,
             // path,
             context: context.egui_ctx.clone(),
             // reader_option,
             debug_ui: Default::default(),
+            tokio_runtime,
         }
     }
 
@@ -133,7 +156,12 @@ impl App {
     }
 
     pub fn open_reader(&mut self, path: PathBuf) {
-        let reader = AppReader::new(path, self.setting.reader.clone(), self.context());
+        let reader = AppReader::new(
+            path,
+            self.setting.reader.clone(),
+            self.reading_progress.clone(),
+            self.context(),
+        );
         self.mode = Some(AppMode::Reader(reader));
     }
 
@@ -151,19 +179,28 @@ impl App {
 
 impl eframe::App for App {
     fn save(&mut self, _storage: &mut dyn eframe::Storage) {
-        if let Some(storage) = &mut self.setting_storage {
+        if let Some(storage) = self.setting_storage.as_mut() {
             let setting = ron::ser::to_string_pretty(&self.setting, Default::default()).unwrap();
             storage.set_content(setting);
             storage.flush();
         }
 
-        if let Some(storage) = &mut self.cache_storage {
-            let cache = Cache {
-                explorer: self.setting.explorer.cache.clone(),
+        if let Some(storage) = self.cache_storage.as_mut() {
+            let cache = AppCache {
+                explorer_cache: self.setting.explorer.cache.clone(),
             };
 
             storage
                 .flush_content(move || ron::ser::to_string_pretty(&cache, Default::default()).ok());
+        }
+
+        if let Some(storage) = self.data_storage.as_mut() {
+            let data = AppData {
+                reading_progress: self.reading_progress.clone(),
+            };
+
+            storage
+                .flush_content(move || ron::ser::to_string_pretty(&data, Default::default()).ok());
         }
 
         _storage.set_string("style", ron::ser::to_string(&self.context.style()).unwrap());
@@ -319,7 +356,7 @@ impl eframe::App for App {
                 Some(AppMode::Explorer(explorer))
             }
             Some(AppMode::Reader(mut reader)) => {
-                AppReaderView::new(&mut reader, &self.setting.reader).show(ui);
+                AppReaderView::new(&mut reader, &mut self.setting.reader).show(ui);
 
                 Some(AppMode::Reader(reader))
             }
