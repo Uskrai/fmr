@@ -322,6 +322,31 @@ impl eframe::App for App {
                                 .clamp_range(usize::MIN..=usize::MAX),
                         );
                     });
+
+                    if let Some(AppMode::Reader(reader)) = &self.mode {
+                        let mut reader = reader.reader_mut();
+                        let image_len = reader.images.len();
+                        match &mut reader.state {
+                            crate::reader::ReaderModeState::Vertical(_) => {
+                                ui.add_enabled(false, DragValue::new(&mut 0_u64).prefix("Pages: "));
+                            }
+                            crate::reader::ReaderModeState::Paged(state) => {
+                                let mut it = state.index + 1;
+
+                                ui.add(
+                                    DragValue::new(&mut it)
+                                        .prefix("Pages: ")
+                                        .clamp_range(1..=image_len),
+                                );
+
+                                let new_index = it - 1;
+                                if state.index != new_index {
+                                    state.index = new_index;
+                                    state.reset(0);
+                                }
+                            }
+                        }
+                    }
                 });
 
                 ui.menu_button("Debug", |ui| {
