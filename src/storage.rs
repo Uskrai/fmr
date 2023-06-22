@@ -1,5 +1,6 @@
 use std::{io::Read, path::PathBuf};
 
+#[derive(Debug)]
 pub struct FSStorage {
     path: PathBuf,
     content: String,
@@ -69,6 +70,7 @@ impl FSStorage {
         if self.dirty {
             let content = self.content.clone();
 
+            self.dirty = false;
             self.flush_content(|| Some(content));
         }
     }
@@ -77,27 +79,26 @@ impl FSStorage {
     where
         F: FnOnce() -> Option<String> + Send + 'static,
     {
-        if self.dirty {
-            self.dirty = false;
+        let path = self.path.clone();
 
-            let path = self.path.clone();
+        let last_write = self.last_write_join_handle.take();
 
-            if let Some(join_handle) = self.last_write_join_handle.take() {
+        let handle = std::thread::spawn(move || {
+            if let Some(join_handle) = last_write {
                 // wait previous write.
                 join_handle.join().ok();
             }
 
-            let handle = std::thread::spawn(move || {
-                if let Some(content) = content() {
-                    if let Err(err) = std::fs::write(&path, content) {
-                        log::warn!("Writing config to {:?} failed: {}", path, err);
-                    } else {
-                        log::trace!("Config written at {:?}", path);
-                    }
+            if let Some(content) = content() {
+                log::debug!("Writing config to {:?}", path);
+                if let Err(err) = std::fs::write(&path, content) {
+                    log::warn!("Writing config to {:?} failed: {}", path, err);
+                } else {
+                    log::debug!("Config written at {:?}", path);
                 }
-            });
+            }
+        });
 
-            self.last_write_join_handle = Some(handle);
-        }
+        self.last_write_join_handle = Some(handle);
     }
 }
