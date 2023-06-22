@@ -281,12 +281,19 @@ impl eframe::App for App {
                         ui.checkbox(&mut option.shrink, "Shrink");
                         ui.checkbox(&mut option.enlarge, "Enlarge");
 
+                        let before_fit_to_scale = option.fit_to_scale;
                         ui.add(
                             DragValue::new(&mut option.fit_to_scale)
                                 .prefix("Scale: ")
                                 .min_decimals(1)
                                 .max_decimals(150),
                         );
+
+                        if before_fit_to_scale != option.fit_to_scale {
+                            if let Some(AppMode::Reader(reader)) = &mut self.mode {
+                                reader.change_scale(before_fit_to_scale, option.fit_to_scale);
+                            }
+                        }
                     });
                     ui.menu_button("Paged Option", |ui| {
                         let option = &mut setting.paged;
