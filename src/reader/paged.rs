@@ -143,24 +143,35 @@ impl<'a> PagedReader<'a> {
 
         let response = if state.index < images.len() {
             let image = &mut images[state.index];
-            let output = crate::scroll::ScrollArea::both(state.scroll).show(ui, |ui| {
-                let image_max_size = image.max_size().map(|it| it as f32);
-                let available_size = ui.available_size() - egui::vec2(1.0, 1.0);
-                let scale = state.sizer.calc(image_max_size.into(), available_size);
-                let image_size = egui::Vec2::from(image_max_size) * scale;
 
-                let show_image = |ui: &mut egui::Ui| {
-                    TextureView::new(image).show(ui, |_, handle| {
-                        crate::image::SplittedTextureWidget::new_with_scale(handle, scale)
-                    })
-                };
+            let output = crate::scroll::ScrollArea::both(state.scroll)
+                // .scroll_bar_visibility(scroll_bar_visibility)
+                .show(ui, |ui| {
+                    let scroll_bar_width = ui.spacing().scroll_bar_inner_margin
+                        + ui.spacing().scroll_bar_width
+                        + ui.spacing().scroll_bar_outer_margin;
 
-                if image_size.x <= available_size.x {
-                    ui.centered_and_justified(show_image).inner
-                } else {
-                    ui.vertical(show_image).inner
-                }
-            });
+                    // let image_max_size = [1200.0, 638.0];
+                    let image_max_size = image.max_size().map(|it| it as f32);
+                    // let available_size =
+                    //     ui.available_size() - egui::vec2(1.0,1.0);
+                    let available_size =
+                        ui.available_size() - egui::vec2(scroll_bar_width, scroll_bar_width);
+                    let scale = state.sizer.calc(image_max_size.into(), available_size);
+                    let image_size = egui::Vec2::from(image_max_size) * scale;
+
+                    let show_image = |ui: &mut egui::Ui| {
+                        TextureView::new(image).show(ui, |_, handle| {
+                            crate::image::SplittedTextureWidget::new_with_scale(handle, scale)
+                        })
+                    };
+
+                    if image_size.x <= available_size.x {
+                        ui.centered_and_justified(show_image).inner
+                    } else {
+                        ui.vertical(show_image).inner
+                    }
+                });
 
             state.scroll = output.state;
 
