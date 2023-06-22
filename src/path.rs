@@ -220,3 +220,31 @@ impl PathSorterSetting {
         &mut self.inner.ascending
     }
 }
+
+pub mod path_serde {
+    use std::{ffi::OsString, path::PathBuf};
+
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    #[derive(Deserialize, Serialize)]
+    pub enum StringOrOsStr<'a> {
+        String(&'a str),
+        OsString(OsString),
+    }
+
+    pub fn serialize<S: Serializer>(v: &std::path::Path, s: S) -> Result<S::Ok, S::Error> {
+        let os_str = v.as_os_str();
+        if let Some(v) = v.to_str() {
+            StringOrOsStr::String(v).serialize(s)
+        } else {
+            StringOrOsStr::OsString(os_str.to_os_string()).serialize(s)
+        }
+    }
+
+    pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<PathBuf, D::Error> {
+        match StringOrOsStr::deserialize(d)? {
+            StringOrOsStr::String(s) => Ok(PathBuf::from(s)),
+            StringOrOsStr::OsString(s) => Ok(PathBuf::from(s)),
+        }
+    }
+}

@@ -6,40 +6,11 @@ use serde::{Deserialize, Serialize};
 use crate::{
     explorer::{ExplorerLoaderCache, FilterType, PathExplorerItem},
     inspection::DebugUI,
-    path::PathSorterSetting,
+    path::{path_serde, PathSorterSetting},
     reader::ReaderMode,
     AppExplorer, AppExplorerOnOpen, AppExplorerSetting, AppExplorerView, AppReader,
     AppReaderSetting, AppReaderView,
 };
-
-mod path_serde {
-    use std::{ffi::OsString, path::PathBuf};
-
-    use serde::{Deserialize, Deserializer, Serialize, Serializer};
-
-    pub fn serialize<S: Serializer>(v: &std::path::Path, s: S) -> Result<S::Ok, S::Error> {
-        let os_str = v.as_os_str();
-        let string = v.to_string_lossy();
-        (string, os_str).serialize(s)
-        // v.as_path().as_os_str().serialize(s)
-    }
-
-    pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<PathBuf, D::Error> {
-        let result: Result<(String, OsString), D::Error> = Deserialize::deserialize(d);
-        let (s, os) = result?;
-        // let (s, os): (String, OsString) = Deserialize::deserialize(d)?;
-
-        let lossy = os.to_string_lossy();
-
-        // if string is changed by user,then use the string,
-        // if not use the OsString.
-        if s != lossy {
-            Ok(PathBuf::from(s))
-        } else {
-            Ok(PathBuf::from(os))
-        }
-    }
-}
 
 #[derive(Default, Serialize, Deserialize, Debug)]
 #[serde(default)]
