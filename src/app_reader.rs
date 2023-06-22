@@ -236,14 +236,7 @@ impl<'a> AppReaderView<'a> {
             .inner;
 
         ui.input_mut().events.retain(|event| {
-            let change_folder_with_scroll_wheel =
-                setting.change_folder_with_scroll_wheel && !response.dragged();
-
-            let should_change_folder = (change_folder_with_scroll_wheel
-                || response.dragged_by(egui::PointerButton::Secondary))
-                && response.hovered();
-
-            if should_change_folder {
+            if setting.change_folder_with_scroll_wheel && response.hovered() {
                 if let egui::Event::Scroll(scroll) = event {
                     let mut step = scroll.to_step();
                     step[0] *= !is_vertical as isize;
