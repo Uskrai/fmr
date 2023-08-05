@@ -81,6 +81,11 @@ impl FSStorage {
     {
         let path = self.path.clone();
 
+        let mut tmp_ext = path.extension().unwrap_or_default().to_os_string();
+        tmp_ext.push(".tmp");
+
+        let tmp_path = path.with_extension(tmp_ext);
+
         let last_write = self.last_write_join_handle.take();
 
         let handle = std::thread::spawn(move || {
@@ -89,12 +94,31 @@ impl FSStorage {
                 join_handle.join().ok();
             }
 
+            while let Ok(metadata) = std::fs::metadata(&tmp_path) {
+                if let Some(elapsed) = metadata
+                    .created()
+                    .map(|it| it.elapsed().ok())
+                    .ok()
+                    .flatten()
+                {
+                    if elapsed > std::time::Duration::from_secs(10) {
+                        break;
+                    }
+                }
+
+                std::thread::sleep(std::time::Duration::from_secs(1));
+            }
+
             if let Some(content) = content() {
                 log::debug!("Writing config to {:?}", path);
-                if let Err(err) = std::fs::write(&path, content) {
+                if let Err(err) = std::fs::write(&tmp_path, content) {
                     log::warn!("Writing config to {:?} failed: {}", path, err);
                 } else {
-                    log::debug!("Config written at {:?}", path);
+                    if let Err(err) = std::fs::rename(&tmp_path, &path) {
+                        log::warn!("Renaming config from {tmp_path:?} to {path:?} failed: {err}");
+                    } else {
+                        log::debug!("Config written at {:?}", path);
+                    }
                 }
             }
         });
