@@ -26,7 +26,7 @@ impl ToEguiImage for image::DynamicImage {
         let pixels = image_buffer.as_flat_samples();
 
         let color = egui::ColorImage::from_rgba_unmultiplied(size, pixels.as_slice());
-        egui::ImageData::Color(color)
+        egui::ImageData::Color(color.into())
     }
 }
 

@@ -102,6 +102,14 @@ impl AppExplorer {
         &self.path
     }
 
+    pub fn all_child_paths(&self) -> Vec<PathBuf> {
+        self.inner.read().items().iter().map(|it| it.path.clone()).collect()
+    }
+
+    pub fn selected_path(&self) -> Option<PathBuf> {
+        self.inner.read().current_item().map(|it| it.path.clone())
+    }
+
     pub fn handle_event(
         &mut self,
         mut on_open: Option<impl AppExplorerOnOpen>,
@@ -192,6 +200,8 @@ impl<'a, OnOpen: AppExplorerOnOpen> AppExplorerView<'a, OnOpen> {
             })
             .response;
 
+        // dbg!(response.interact(egui::Sense::hover()).hovered());
+
         let index = explorer.inner.read().current_index();
 
         let setting = ExplorerLoaderSetting {
@@ -204,7 +214,7 @@ impl<'a, OnOpen: AppExplorerOnOpen> AppExplorerView<'a, OnOpen> {
         }
 
         if response.gained_focus() {
-            ui.memory_mut(|memory| memory.lock_focus(response.id, true));
+            // ui.memory_mut(|memory| memory.request_focus(response.id));
         }
 
         response

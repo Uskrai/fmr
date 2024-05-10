@@ -147,9 +147,9 @@ impl<'a> PagedReader<'a> {
             let output = crate::scroll::ScrollArea::both(state.scroll)
                 // .scroll_bar_visibility(scroll_bar_visibility)
                 .show(ui, |ui| {
-                    let scroll_bar_width = ui.spacing().scroll_bar_inner_margin
-                        + ui.spacing().scroll_bar_width
-                        + ui.spacing().scroll_bar_outer_margin;
+                    let scroll_bar_width = ui.spacing().scroll.bar_inner_margin
+                        + ui.spacing().scroll.bar_width
+                        + ui.spacing().scroll.bar_outer_margin;
 
                     // let image_max_size = [1200.0, 638.0];
                     let image_max_size = image.max_size().map(|it| it as f32);
@@ -242,14 +242,12 @@ impl<'a> PagedReader<'a> {
             .monospace()
             .color(egui::Color32::BLACK);
 
-        let galley = egui::WidgetText::RichText(text)
-            .into_galley(
-                ui,
-                None,
-                ui.available_width(),
-                egui::FontSelection::FontId(egui::FontId::proportional(24.0)),
-            )
-            .galley;
+        let galley = egui::WidgetText::RichText(text).into_galley(
+            ui,
+            None,
+            ui.available_width(),
+            egui::FontSelection::FontId(egui::FontId::proportional(24.0)),
+        );
 
         let rect = state.scroll.inner_rect;
         if let Some(rect) = rect {
@@ -258,7 +256,7 @@ impl<'a> PagedReader<'a> {
                 rect.max,
             );
             let pos = rect.center() - (galley.size() / 2.0);
-            ui.painter().galley(pos, galley);
+            ui.painter().galley(pos, galley, egui::Color32::TRANSPARENT);
 
             let ctx = ui.ctx().clone();
             state

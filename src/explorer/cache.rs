@@ -39,6 +39,11 @@ impl ExplorerLoaderCache {
             .insert(path.display().to_string());
     }
 
+    pub fn remove_path(&self, path: &std::path::Path) {
+        let lock = self.map.lock().remove(&sha_path(path));
+        // dbg!(path, lock);
+    }
+
     pub fn insert_sha_recursive(
         &self,
         root: &std::path::Path,
@@ -54,22 +59,25 @@ impl ExplorerLoaderCache {
 
         let root = root.canonicalize().ok();
 
+        // check if passed root is file or not
+        let is_root_file = {
+            root.as_ref()
+                .map(|it| it.extension().is_some())
+                .unwrap_or(false)
+        };
+
         while let Some(parent) = path.parent() {
             let should_break = root.as_ref() == path.canonicalize().as_ref().ok();
+           
 
-            let is_root_file = || {
-                root.as_ref()
-                    .map(|it| it.extension().is_some())
-                    .unwrap_or(false)
-            };
             // let is_root_file = || matches!(root.as_ref(), Ok(x) if x.extension().is_some());
 
             // if should_break is false it should always insert
             // and it should also insert if root is file
             // if it doesnt, it wouldn't cache archive file.
-            let should_insert = !should_break || is_root_file();
+            let should_insert = !should_break || is_root_file;
 
-            if should_insert {
+            if should_insert || true {
                 self.insert_sha(path, target.to_string());
                 path = parent;
             }

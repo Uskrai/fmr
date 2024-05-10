@@ -42,7 +42,8 @@ impl<'a, Item: ExplorerItem> ExplorerView<'a, Item> {
 
         if self.explorer.scroll_to_index {
             if let Some(response) = output.responses.get(self.explorer.current) {
-                self.explorer.scroll.scroll_to_rect(response.rect, None);
+                // self.explorer.scroll_to_index
+                // self.explorer.scroll.scroll_to_rect(response.rect, None);
                 ui.ctx().request_repaint();
                 self.explorer.scroll_to_index = false;
             }
@@ -103,6 +104,7 @@ impl<'a, Item: ExplorerItem> ExplorerView<'a, Item> {
                         *size = response.rect.size().max(*size);
 
                         if response.clicked() {
+                            dbg!(response.clicked());
                             explorer.current = i;
                             ui.ctx().request_repaint();
                         }
@@ -110,6 +112,10 @@ impl<'a, Item: ExplorerItem> ExplorerView<'a, Item> {
                         if response.double_clicked() {
                             is_double_clicked = true;
                         }
+
+                        // if is_double_clicked || response.clicked_by(egui::PointerButton::Extra2) {
+                        //     is_double_clicked = true;
+                        // }
 
                         responses.push(response);
                     });
@@ -141,6 +147,7 @@ impl<'a, Item: ExplorerItem> ExplorerView<'a, Item> {
 
             if changed {
                 if let Some(response) = output.responses.get(explorer.current) {
+                    // response.scroll_to_me(None);
                     explorer.scroll.scroll_to_rect(response.rect, None);
                 }
             }

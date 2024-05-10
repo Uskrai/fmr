@@ -148,14 +148,6 @@ impl AppReader {
         let scale = after as f32 / before as f32;
         for it in 0..2 {
             let new_offset = scroll_state.offset[it] * scale as f32;
-            dbg!(
-                scroll_state.offset[it],
-                new_offset,
-                it,
-                before,
-                after,
-                scale
-            );
             scroll_state.offset[it] = new_offset;
         }
     }

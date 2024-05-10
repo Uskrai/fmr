@@ -450,6 +450,7 @@ where
                 .cache
                 .get_from_sha(&sha)
                 .map(|it| (cache_dir.join(&it), it));
+            // dbg!(&path, &cache);
 
             match cache.map(|(it, sha)| (it.exists(), sha, it)) {
                 Some((true, sha, it)) => {
