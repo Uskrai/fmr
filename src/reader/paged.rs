@@ -57,6 +57,7 @@ impl HideTextState {
 }
 
 impl PagedReaderState {
+    // return true if changed
     pub fn change_index_by(&mut self, step: isize, limit: usize) -> bool {
         let index = self.index.checked_add_signed_ext(step);
 
@@ -144,12 +145,12 @@ impl<'a> PagedReader<'a> {
         let response = if state.index < images.len() {
             let image = &mut images[state.index];
 
-            let output = crate::scroll::ScrollArea::both(state.scroll)
+            let output = crate::scroll::ScrollArea::both(state.scroll.clone())
                 // .scroll_bar_visibility(scroll_bar_visibility)
-                .show(ui, |ui| {
-                    let scroll_bar_width = ui.spacing().scroll_bar_inner_margin
-                        + ui.spacing().scroll_bar_width
-                        + ui.spacing().scroll_bar_outer_margin;
+                .show(ui, |ui, _| {
+                    let scroll_bar_width = ui.spacing().scroll.bar_inner_margin
+                        + ui.spacing().scroll.bar_width
+                        + ui.spacing().scroll.bar_outer_margin;
 
                     // let image_max_size = [1200.0, 638.0];
                     let image_max_size = image.max_size().map(|it| it as f32);
@@ -189,33 +190,30 @@ impl<'a> PagedReader<'a> {
         };
 
         // TODO: change this to response.has_focus()
-        if true {
+        if response.contains_pointer() {
             let size = ui.input(|input| input.events.len());
+            let any_down = ui.input(|it| it.pointer.any_down());
+            let primary_down = ui.input(|it| it.pointer.primary_down());
+            let secondary_down = ui.input(|it| it.pointer.secondary_down());
 
-            ui.input_mut(|input| {
-                let any_down = input.pointer.any_down();
-                let primary_down = input.pointer.primary_down();
-                let secondary_down = input.pointer.secondary_down();
+            let should_change_page =
+                !primary_down && (!any_down || secondary_down) && response.contains_pointer();
 
-                let should_change_page =
-                    !primary_down && (!any_down || secondary_down) && response.hovered();
+            crate::egui_event::handles(ui.ctx(), |event| {
+                if should_change_page {
+                    if let egui::Event::Scroll(scroll) = event {
+                        let mut step = scroll.to_step();
+                        step[0] *= if self.state.read_from_right { -1 } else { 1 };
 
-                input.events.retain(|event| {
-                    if should_change_page {
-                        if let egui::Event::Scroll(scroll) = event {
-                            let mut step = scroll.to_step();
-                            step[0] *= if self.state.read_from_right { -1 } else { 1 };
-
-                            let ret = match step {
-                                [0, i] | [i, 0] => !self.change_index_by(i),
-                                _ => true,
-                            };
-                            return ret;
-                        }
+                        let ret = match step {
+                            [0, i] | [i, 0] => self.change_index_by(i),
+                            _ => false,
+                        };
+                        return ret;
                     }
+                }
 
-                    true
-                });
+                false
             });
 
             if ui.input(|input| input.events.len()) != size {
@@ -242,14 +240,12 @@ impl<'a> PagedReader<'a> {
             .monospace()
             .color(egui::Color32::BLACK);
 
-        let galley = egui::WidgetText::RichText(text)
-            .into_galley(
-                ui,
-                None,
-                ui.available_width(),
-                egui::FontSelection::FontId(egui::FontId::proportional(24.0)),
-            )
-            .galley;
+        let galley = egui::WidgetText::RichText(text).into_galley(
+            ui,
+            None,
+            ui.available_width(),
+            egui::FontSelection::FontId(egui::FontId::proportional(24.0)),
+        );
 
         let rect = state.scroll.inner_rect;
         if let Some(rect) = rect {
@@ -258,7 +254,7 @@ impl<'a> PagedReader<'a> {
                 rect.max,
             );
             let pos = rect.center() - (galley.size() / 2.0);
-            ui.painter().galley(pos, galley);
+            ui.painter().galley(pos, galley, egui::Color32::TRANSPARENT);
 
             let ctx = ui.ctx().clone();
             state

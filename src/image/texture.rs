@@ -23,6 +23,7 @@ impl Default for TextureOption {
         Self(egui::TextureOptions {
             magnification: egui::TextureFilter::Linear,
             minification: egui::TextureFilter::Linear,
+            wrap_mode: egui::TextureWrapMode::default()
         })
     }
 }
@@ -128,7 +129,7 @@ impl<'a> SplittedTextureWidget<'a> {
             for horizontal in vertical {
                 size = horizontal.size_vec2() * scale;
                 let rect = egui::Rect::from_min_size(rect.min + egui::vec2(x, y), size);
-                egui::Image::new(horizontal, size).paint_at(ui, rect);
+                egui::Image::new(horizontal).paint_at(ui, rect);
                 x += size.x;
             }
 

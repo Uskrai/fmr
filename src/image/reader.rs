@@ -9,8 +9,8 @@ use image::AnimationDecoder;
 use super::ImageData;
 
 pub enum Reader<T: Read> {
-    Reader(image::io::Reader<T>),
-    Gif(image::codecs::gif::GifDecoder<T>),
+    Reader(Box<image::io::Reader<T>>),
+    Gif(Box<image::codecs::gif::GifDecoder<T>>),
 }
 
 impl Reader<BufReader<File>> {
@@ -26,7 +26,7 @@ impl Reader<BufReader<File>> {
                 if let Some(image::ImageFormat::Gif) = reader.format() {
                     load_gif()?
                 } else {
-                    Self::Reader(reader)
+                    Self::Reader(Box::new(reader))
                 }
             }
             Err(err) => return Err(err),
@@ -43,7 +43,7 @@ impl<T: AsRef<[u8]>> Reader<Cursor<T>> {
             format => {
                 let reader = image::io::Reader::with_format(Cursor::new(memory), format)
                     .with_guessed_format()?;
-                Self::Reader(reader)
+                Self::Reader(Box::new(reader))
             }
         };
 
@@ -55,7 +55,7 @@ impl<T: Read> Reader<T> {
     pub fn load_gif(read: T) -> Result<Self, image::ImageError> {
         let decoder = image::codecs::gif::GifDecoder::new(read)?;
 
-        Ok(Self::Gif(decoder))
+        Ok(Self::Gif(Box::new(decoder)))
     }
 }
 
@@ -69,7 +69,7 @@ impl<'a, T: Read + 'a> Reader<T> {
 }
 
 pub enum Frames<'a, T: Read + 'a> {
-    SingleImage(image::io::Reader<T>),
+    SingleImage(Box<image::io::Reader<T>>),
     Frames(image::Frames<'a>),
 }
 
@@ -88,7 +88,7 @@ impl<'a, T: BufRead + Seek> Frames<'a, T> {
 }
 
 pub enum SingleImageEither<T: Read> {
-    Reader(Option<image::io::Reader<T>>),
+    Reader(Option<Box<image::io::Reader<T>>>),
     Image(image::DynamicImage),
 }
 

@@ -227,8 +227,8 @@ pub mod path_serde {
     use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
     #[derive(Deserialize, Serialize, Debug)]
-    pub enum StringOrOsStr<'a> {
-        String(&'a str),
+    pub enum StringOrOsStr {
+        String(String),
         OsString(OsString),
     }
 
@@ -236,7 +236,7 @@ pub mod path_serde {
         let os_str = v.as_os_str();
 
         let it = if let Some(v) = v.to_str() {
-            StringOrOsStr::String(v)
+            StringOrOsStr::String(v.to_string())
         } else {
             StringOrOsStr::OsString(os_str.to_os_string())
         };
@@ -247,7 +247,12 @@ pub mod path_serde {
     }
 
     pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<PathBuf, D::Error> {
-        match StringOrOsStr::deserialize(d)? {
+        let it = StringOrOsStr::deserialize(d);
+
+        log::info!("deserialize as {it:?}");
+
+        match it? {
+            // StringOrOsStr::Str(s) => Ok(PathBuf::from(s)),
             StringOrOsStr::String(s) => Ok(PathBuf::from(s)),
             StringOrOsStr::OsString(s) => Ok(PathBuf::from(s)),
         }

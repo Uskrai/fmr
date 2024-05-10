@@ -76,6 +76,10 @@ impl<Item: ExplorerItem> Explorer<Item> {
         self.scroll_to_index = true;
     }
 
+    pub fn items(&self) -> &Vec<Item> {
+        &self.content
+    }
+
     pub fn current_item(&self) -> Option<&Item> {
         self.content.get(self.current)
     }

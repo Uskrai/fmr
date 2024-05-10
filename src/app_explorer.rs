@@ -102,6 +102,19 @@ impl AppExplorer {
         &self.path
     }
 
+    pub fn all_child_paths(&self) -> Vec<PathBuf> {
+        self.inner
+            .read()
+            .items()
+            .iter()
+            .map(|it| it.path.clone())
+            .collect()
+    }
+
+    pub fn selected_path(&self) -> Option<PathBuf> {
+        self.inner.read().current_item().map(|it| it.path.clone())
+    }
+
     pub fn handle_event(
         &mut self,
         mut on_open: Option<impl AppExplorerOnOpen>,
@@ -126,12 +139,6 @@ impl AppExplorer {
                     Some(false)
                 }
                 .unwrap_or(false);
-            }
-        }
-
-        if let Some(output) = &self.prev_output {
-            if ExplorerView::handle_key(&mut self.inner.write(), output, event) {
-                return true;
             }
         }
 
@@ -188,7 +195,7 @@ impl<'a, OnOpen: AppExplorerOnOpen> AppExplorerView<'a, OnOpen> {
                         }
                     }
                     explorer.prev_output = Some(output);
-                });
+                })
             })
             .response;
 
@@ -204,7 +211,7 @@ impl<'a, OnOpen: AppExplorerOnOpen> AppExplorerView<'a, OnOpen> {
         }
 
         if response.gained_focus() {
-            ui.memory_mut(|memory| memory.lock_focus(response.id, true));
+            // ui.memory_mut(|memory| memory.request_focus(response.id));
         }
 
         response

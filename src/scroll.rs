@@ -1,15 +1,15 @@
 #![allow(clippy::all)]
 use std::{hash::Hash, ops::RangeInclusive};
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct ScrollState {
     pub offset: egui::Vec2,             // offset of the scroll
     pub size: Option<egui::Vec2>,       // size of the scrollable area
     pub inner_rect: Option<egui::Rect>, // size of viewable area
     pub is_stable: bool,
+    pub vel: egui::Vec2,
     pub scroll_per_arrow: f32,
     pub scroll_per_page: f32,
-    pub vel: egui::Vec2,
     pub scroll_stuck_to_end: [bool; 2],
 }
 
@@ -34,6 +34,7 @@ impl ScrollState {
         self.size.take();
         self.offset = egui::Vec2::ZERO;
         self.is_stable = false;
+        self.vel = egui::Vec2::ZERO;
     }
 
     pub fn clamp_scroll(&mut self) -> ClampResult {
@@ -55,6 +56,7 @@ impl ScrollState {
     }
 
     pub fn scroll_by(&mut self, scroll_by: egui::Vec2) -> ScrollByResult {
+        self.clamp_scroll();
         let scroll_offset = self.offset;
         self.offset += scroll_by;
         let clamped = self.clamp_scroll().clamped;
@@ -79,6 +81,10 @@ impl ScrollState {
 
             self.scroll_to(d, range, align);
         }
+    }
+
+    pub fn scroll_to_response(&mut self, response: &egui::Response, align: Option<egui::Align>) {
+        self.scroll_to_rect(response.rect, align)
     }
 
     pub fn min_rect(&self) -> egui::Rect {
@@ -150,6 +156,7 @@ impl ScrollState {
     }
 
     /// handle key (arrow, page, home or end)
+    /// return true if event is handled
     pub fn handle_key_event(&mut self, event: &egui::Event) -> bool {
         self.handle_key_event_result(event)
             .map(|it| it.changed)
@@ -294,7 +301,7 @@ impl ScrollArea {
 
     pub fn show<F, R>(self, ui: &mut egui::Ui, add_content: F) -> ScrollOutput<R>
     where
-        F: FnOnce(&mut egui::Ui) -> R,
+        F: FnOnce(&mut egui::Ui, &mut ScrollState) -> R,
     {
         let Self {
             id,
@@ -303,23 +310,26 @@ impl ScrollArea {
             scroll_per_wheel,
             scrolling_enabled,
         } = self;
-        // state.clamp_scroll();
+        state.clamp_scroll();
 
+        let scroll_offset = state.clamped_scroll().unwrap_or(egui::Vec2::ZERO);
         let output = egui::ScrollArea::new(has_bar)
-            .scroll_offset(state.clamped_scroll().unwrap_or(egui::Vec2::ZERO))
+            .scroll_offset(scroll_offset)
             .id_source(id)
             .enable_scrolling(true)
             .show(ui, |ui| {
-                let output = ui.allocate_ui(ui.available_size(), add_content);
+                let output = ui.allocate_ui(ui.available_size(), |ui| add_content(ui, &mut state));
 
                 output
             });
 
-        state.is_stable = state.inner_rect == Some(output.inner_rect);
+        state.is_stable = state.inner_rect == Some(output.inner_rect)
+            // prevent scrolled from egui when it isn't stable yet
+            && (state.is_stable || output.state.offset == state.offset);
         state.inner_rect = Some(output.inner_rect);
         state.size = Some(output.inner.response.rect.size());
 
-        let sense = if scrolling_enabled {
+        let sense = if false {
             egui::Sense::drag()
         } else {
             egui::Sense::hover()
@@ -327,31 +337,26 @@ impl ScrollArea {
 
         let response = output.inner.response.interact(sense);
 
-        if state.is_stable {
-            state.offset = output.state.offset;
-        }
-
+        let offset_before = state.offset;
         if scrolling_enabled {
-            if response.hovered() && !ui.input(|input| input.pointer.any_down()) {
+            if response.contains_pointer() && !ui.input(|input| input.pointer.any_down()) {
                 let size = ui.input(|input| input.events.len());
-                ui.input_mut(|input| {
-                    input.events.retain(|event| {
-                        if let egui::Event::Scroll(scroll) = event {
-                            let mut scroll_by = [0.0; 2];
+                crate::egui_event::handles(ui.ctx(), |event| {
+                    if let egui::Event::Scroll(scroll) = event {
+                        let mut scroll_by = [0.0; 2];
 
-                            for i in 0..2 {
-                                let step = scroll[i] / 50.0 * -1.0;
-                                let decrease_by = step.abs() * 50.0;
-                                scroll_by[i] = step * scroll_per_wheel[i] - decrease_by;
-                            }
-
-                            return !state
-                                .scroll_by(egui::vec2(scroll_by[0], scroll_by[1]))
-                                .changed;
+                        for i in 0..2 {
+                            let step = scroll[i] / 50.0 * -1.0;
+                            let decrease_by = step.abs() * 50.0;
+                            scroll_by[i] = step * scroll_per_wheel[i] - decrease_by;
                         }
 
-                        true
-                    })
+                        return state
+                            .scroll_by(egui::vec2(scroll_by[0], scroll_by[1]))
+                            .changed;
+                    }
+
+                    false
                 });
 
                 if size != ui.input(|input| input.events.len()) {
@@ -387,6 +392,10 @@ impl ScrollArea {
                     ui.ctx().request_repaint();
                 }
             }
+        }
+
+        if state.is_stable && state.offset == offset_before {
+            state.offset = output.state.offset;
         }
 
         if state.is_stable {

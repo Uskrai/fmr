@@ -27,6 +27,7 @@ impl FSStorage {
                 fn inner(path: &PathBuf) -> std::io::Result<String> {
                     let mut file = std::fs::File::options()
                         .create(true)
+                        .truncate(false)
                         .write(true)
                         .read(true)
                         .open(path)?;
@@ -113,12 +114,10 @@ impl FSStorage {
                 log::debug!("Writing config to {:?}", path);
                 if let Err(err) = std::fs::write(&tmp_path, content) {
                     log::warn!("Writing config to {:?} failed: {}", path, err);
+                } else if let Err(err) = std::fs::rename(&tmp_path, &path) {
+                    log::warn!("Renaming config from {tmp_path:?} to {path:?} failed: {err}");
                 } else {
-                    if let Err(err) = std::fs::rename(&tmp_path, &path) {
-                        log::warn!("Renaming config from {tmp_path:?} to {path:?} failed: {err}");
-                    } else {
-                        log::debug!("Config written at {:?}", path);
-                    }
+                    log::debug!("Config written at {:?}", path);
                 }
             }
         });

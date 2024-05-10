@@ -1,6 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use egui::widgets::DragValue;
+use path_absolutize::Absolutize;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -32,6 +33,7 @@ pub struct App {
     data_storage: Option<crate::storage::FSStorage>,
     // path: PathBuf,
     // reader_option: ReaderOption,
+    #[allow(dead_code)]
     tokio_runtime: tokio::runtime::Runtime,
     debug_ui: DebugUI,
 }
@@ -72,9 +74,13 @@ impl App {
 
         let profile = std::env::var("FMR_PROFILE").unwrap_or_else(|_| "default".to_string());
         let setting_storage = crate::storage::FSStorage::prepare("fmr", &profile, "config.ron");
+        dbg!(profile, &setting_storage);
 
         let mut setting: AppSetting = match &setting_storage {
-            Some(s) => ron::from_str(s.get_content()).unwrap_or_default(),
+            Some(s) => {
+                log::info!("config read: {}", s.get_content());
+                ron::from_str(s.get_content()).unwrap_or_default()
+            }
             None => Default::default(),
         };
 
@@ -175,10 +181,92 @@ impl App {
 
         self.mode = Some(AppMode::Explorer(explorer));
     }
+
+    // returns true if success
+    pub fn open_parent(&mut self, setting: AppOpenParentSetting) -> bool {
+        let path = match &self.mode {
+            Some(mode) => mode.path().to_path_buf(),
+            None => self.setting.path.clone(),
+        };
+
+        // resolve symlink and make absolute when shift is pressed or path is relative
+        let path = if setting.canonicalize_path || path.is_relative() {
+            path.canonicalize().unwrap_or(path)
+        } else {
+            path
+        };
+
+        let parent = path
+            .parent()
+            .map(|it| it.to_path_buf())
+            .unwrap_or_else(|| "./".into());
+
+        let parent = if parent.exists() { parent } else { "./".into() };
+
+        self.open_explorer(parent, Some(path));
+
+        true
+    }
+
+    // returns true if event handled
+    pub fn handle_key_explorer(&mut self, event: &egui::Event) -> bool {
+        if let egui::Event::Key {
+            pressed: true,
+            key,
+            modifiers,
+            repeat: _,
+            physical_key: _,
+        } = event
+        {
+            if let Some(AppMode::Explorer(explorer)) = &self.mode {
+                if *key == egui::Key::F5 {
+                    if modifiers.is_none() {
+                        let Some(path) = explorer.selected_path() else {
+                            return false;
+                        };
+
+                        self.setting.explorer.cache.remove_path(&path);
+                        return true;
+                    } else if modifiers.shift_only() {
+                        for it in explorer.all_child_paths() {
+                            self.setting.explorer.cache.remove_path(&it);
+                        }
+                        return true;
+                    }
+                }
+
+                if *key == egui::Key::F4 {
+                    let cache = &self.setting.explorer.cache;
+
+                    let Some(path) = explorer.selected_path() else {
+                        return false;
+                    };
+
+                    let Some(sha) = cache.get_from_path(&path) else {
+                        return false;
+                    };
+
+                    let Some(parent) = path.parent() else {
+                        return false;
+                    };
+
+                    cache.insert_sha(parent, sha);
+                    return true;
+                }
+            }
+        }
+
+        false
+    }
+}
+
+pub struct AppOpenParentSetting {
+    canonicalize_path: bool,
 }
 
 impl eframe::App for App {
     fn save(&mut self, _storage: &mut dyn eframe::Storage) {
+        log::info!("path: {}", self.setting.path.display());
         if let Some(storage) = self.setting_storage.as_mut() {
             let setting = ron::ser::to_string_pretty(&self.setting, Default::default()).unwrap();
             storage.set_content(setting);
@@ -395,26 +483,23 @@ impl eframe::App for App {
             None => None,
         });
 
-        let response = inner.response.interact(egui::Sense::click_and_drag());
+        // let response = inner.response.interact(egui::Sense::click_and_drag());
+        let response = inner.response;
         let mut mode = inner.inner;
         let input_event_len = ctx.input(|i| i.events.len());
 
         if let (true, Some(mode)) = (response.hovered(), &mut mode) {
-            ctx.input_mut(|i| {
-                i.events.retain(|it| {
-                    let mut handled = false;
+            crate::egui_event::handles(ctx, |it| {
+                let mut handled = false;
 
-                    handled |= match mode {
-                        AppMode::Explorer(explorer) => {
-                            explorer.handle_event(Some(OnOpen { app: self }), it)
-                        }
-                        AppMode::Reader(reader) => {
-                            reader.handle_event(&self.setting.reader, ctx, it)
-                        }
-                    };
+                handled |= match mode {
+                    AppMode::Explorer(explorer) => {
+                        explorer.handle_event(Some(OnOpen { app: self }), it)
+                    }
+                    AppMode::Reader(reader) => reader.handle_event(&self.setting.reader, ctx, it),
+                };
 
-                    !handled
-                })
+                handled
             });
         }
 
@@ -424,55 +509,81 @@ impl eframe::App for App {
             self.mode = mode;
         }
 
-        if let Some(AppMode::Reader(reader)) = &self.mode {
+        if let Some(AppMode::Reader(reader)) = &mut self.mode {
             if self.setting.path != reader.path {
-                self.setting.path = reader.path.clone();
+                if reader.path.is_relative() {
+                    let absolutize = {
+                        if let Ok(pwd) = std::env::var("PWD") {
+                            reader.path.absolutize_from(pwd)
+                        } else {
+                            reader.path.absolutize()
+                        }
+                        .map(|it| it.to_path_buf())
+                        .unwrap_or_else(|_| reader.path.clone())
+                    };
+
+                    println!(
+                        "{absolutize:?} cwd:{}",
+                        std::env::current_dir().unwrap().display()
+                    );
+                    self.setting.path.clone_from(&absolutize);
+                    reader.path = absolutize;
+                } else {
+                    self.setting.path.clone_from(&reader.path);
+                }
             }
         }
 
         if response.hovered() {
             ctx.input_mut(|input| {
-                input.events.retain(|it| {
-                    if let egui::Event::Key {
-                        pressed: true,
-                        key,
-                        modifiers,
-                        repeat: _,
-                    } = it
-                    {
-                        if *key == egui::Key::O && modifiers.command_only() {
-                            self.open_file_dialog();
+                if input.pointer.button_clicked(egui::PointerButton::Primary)
+                    && input.pointer.button_clicked(egui::PointerButton::Secondary)
+                {
+                    // input.events.retain(|it| {
+                    //     if let egui::Event::MouseWheel { delta, .. } = it {
+                    //         // dbg!(delta);
+                    //
+                    //         return true;
+                    //     }
+                    //
+                    //     false
+                    // });
+                    let is_changed = self.open_parent(AppOpenParentSetting {
+                        canonicalize_path: false,
+                    });
+                    if is_changed {
+                        return;
+                    }
+                }
+                if input.pointer.button_clicked(egui::PointerButton::Extra1) {
+                    self.open_parent(AppOpenParentSetting {
+                        canonicalize_path: input.modifiers.shift_only(),
+                    });
+                }
+            });
 
-                            return false;
-                        }
-
-                        if *key == egui::Key::Backspace {
-                            let path = match &self.mode {
-                                Some(mode) => mode.path().to_path_buf(),
-                                None => self.setting.path.clone(),
-                            };
-
-                            // resolve symlink and make absolute when shift is pressed or path is relative
-                            let path = if modifiers.shift_only() || path.is_relative() {
-                                path.canonicalize().unwrap_or(path)
-                            } else {
-                                path
-                            };
-
-                            let parent = path
-                                .parent()
-                                .map(|it| it.to_path_buf())
-                                .unwrap_or_else(|| "./".into());
-
-                            let parent = if parent.exists() { parent } else { "./".into() };
-
-                            self.open_explorer(parent, Some(path));
-                            return false;
-                        }
+            crate::egui_event::handles(ctx, |it| {
+                if let egui::Event::Key {
+                    pressed: true,
+                    key,
+                    modifiers,
+                    repeat: _,
+                    physical_key: _,
+                } = it
+                {
+                    if *key == egui::Key::O && modifiers.command_only() {
+                        self.open_file_dialog();
+                        return true;
                     }
 
-                    true
-                })
+                    if *key == egui::Key::Backspace {
+                        return self.open_parent(AppOpenParentSetting {
+                            canonicalize_path: modifiers.shift_only(),
+                        });
+                    }
+                }
+
+                self.handle_key_explorer(it)
             });
         }
 

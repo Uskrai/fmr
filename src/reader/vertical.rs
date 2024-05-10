@@ -45,9 +45,9 @@ impl<'a> VerticalReader<'a> {
             state,
         } = self;
         ui.scope(|ui| {
-            let scroll = crate::scroll::ScrollArea::both(state.scroll_state)
+            let scroll = crate::scroll::ScrollArea::both(state.scroll_state.clone())
                 .id_source(source_id)
-                .show(ui, |ui| {
+                .show(ui, |ui, _| {
                     ui.centered_and_justified(|ui| {
                         ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                             for it in images.iter_mut() {
@@ -70,11 +70,6 @@ impl<'a> VerticalReader<'a> {
                 });
 
             state.scroll_state = scroll.state;
-
-            // scroll
-            //     .inner
-            //     .response
-            //     .widget_info(|| egui::WidgetInfo::new(egui::WidgetType::Other));
 
             scroll.inner.response
         })

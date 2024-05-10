@@ -59,32 +59,32 @@ impl<'a, Item: ExplorerItem> ExplorerItemView<'a, Item> {
             image_container_size,
         } = self;
 
-        let response = ui
-            .vertical_centered(|ui| {
-                ui.allocate_ui(container_size, |ui| {
-                    ui.allocate_ui(image_container_size, |ui| {
-                        ui.centered_and_justified(|ui| {
-                            TextureView::new(item.thumbnail()).show(ui, |_, handle| {
-                                let scale = image_size / handle.size_vec2();
-                                SplittedTextureWidget::new_with_scale(handle, scale.min_elem())
-                            });
-                        })
-                    });
-
-                    ui.allocate_ui(egui::vec2(ui.available_width() * 0.8, 0.0), |ui| {
-                        ui.centered_and_justified(|ui| {
-                            ui.add(egui::Label::new(item.name()).wrap(true));
-
-                            ui.add_space(10.0);
+        let response = ui.vertical_centered(|ui| {
+            ui.allocate_ui(container_size, |ui| {
+                ui.allocate_ui(image_container_size, |ui| {
+                    ui.centered_and_justified(|ui| {
+                        TextureView::new(item.thumbnail()).show(ui, |_, handle| {
+                            let scale = image_size / handle.size_vec2();
+                            SplittedTextureWidget::new_with_scale(handle, scale.min_elem())
                         });
-                    });
-
-                    ui.add_space(ui.available_height());
+                    })
                 });
-            })
-            .response;
 
-        let response = response.interact(egui::Sense::hover());
+                ui.allocate_ui(egui::vec2(ui.available_width() * 0.8, 0.0), |ui| {
+                    ui.centered_and_justified(|ui| {
+                        ui.add(egui::Label::new(item.name()).wrap(true));
+
+                        ui.add_space(10.0);
+                    });
+                });
+
+                ui.add_space(ui.available_height());
+            })
+            .response
+        });
+        // .response;
+
+        let response = response.response.interact(egui::Sense::hover());
         let painter = ui.painter();
 
         let stroke = if selected {
@@ -94,13 +94,12 @@ impl<'a, Item: ExplorerItem> ExplorerItemView<'a, Item> {
                 stroke.width *= 3.0;
             }
             stroke
-        } else if response.hovered() {
+        } else if response.contains_pointer() {
             ui.visuals().widgets.hovered.fg_stroke
         } else {
             ui.visuals().widgets.inactive.fg_stroke
         };
 
-        let response = response.interact(egui::Sense::click());
         let mut visuals = ui.style().interact_selectable(&response, selected);
 
         if selected {

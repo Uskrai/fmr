@@ -17,7 +17,7 @@ fn main() {
 
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
-        // .pretty()
+        .pretty()
         // .with_ansi(false)
         // .fmt_fields(tracing_subscriber::fmt)
         // .event_format(format)

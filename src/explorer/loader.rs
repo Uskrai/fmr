@@ -21,7 +21,7 @@ use tokio::{
 use tracing::instrument;
 use zip::ZipArchive;
 
-use crate::image::TextureOption;
+use crate::{image::TextureOption, AbortOnDropHandle};
 
 use super::{cache::ExplorerLoaderCache, sha_path, Explorer, PathExplorerItem};
 
@@ -93,9 +93,9 @@ impl ExplorerLoader {
             path,
             selected_entry,
             mut setting_receiver,
-            cache,
             sorter,
             ctx,
+            cache: _,
         } = self.clone();
 
         let dir = match std::fs::read_dir(&path) {
@@ -128,53 +128,20 @@ impl ExplorerLoader {
             .alloc(
                 ctx.tex_manager(),
                 format!("{:?} default", path),
-                entry_setting.lock().texture_option.clone(),
+                entry_setting.lock().texture_option,
             );
 
         for (i, entry) in content.into_iter().enumerate() {
-            if let Some(it) = PathExplorerItem::new(entry.path()) {
-                explorer.write().content.push(it);
+            let future = self.load_entry(
+                i,
+                &entry,
+                default_texture.clone(),
+                semaphore.clone(),
+                entry_setting.clone(),
+            );
 
-                let explorer_ = explorer.clone();
-                let path = entry.path();
-                let ctx = ctx.clone();
-                let default_texture = default_texture.clone();
-                let semaphore = semaphore.clone();
-                let entry_setting = entry_setting.clone();
-                let cache = cache.clone();
-
-                child.push(crate::spawn_and_abort_on_drop(async move {
-                    let explorer = explorer_;
-                    let waiter = wait_fn(move || {
-                        // let semaphore = semaphore.clone();
-
-                        async {}
-                    });
-
-                    tokio::task::yield_now().await;
-                    let _permit = semaphore.acquire(i).await.unwrap();
-                    let image = ExplorerEntryLoader::new(
-                        path.clone(),
-                        waiter,
-                        entry_setting.clone(),
-                        cache,
-                    )
-                    .search()
-                    .await;
-
-                    let texture = match image {
-                        Some(image) => image.alloc(
-                            ctx.tex_manager(),
-                            path.to_string_lossy().to_string(),
-                            entry_setting.lock().texture_option.clone(),
-                        ),
-                        None => default_texture,
-                    };
-
-                    explorer.write().content[i].thumbnail = texture.into_view_state();
-                    ctx.request_repaint();
-                }));
-
+            if let Some(it) = future {
+                child.push(it);
                 if Some(entry.path()) == selected_entry {
                     explorer.write().set_index(i);
                 }
@@ -196,6 +163,57 @@ impl ExplorerLoader {
                 break;
             }
         }
+    }
+
+    pub fn load_entry(
+        &self,
+        index: usize,
+        entry: &std::fs::DirEntry,
+        default_texture: crate::image::TextureHandle,
+        semaphore: PrioritySemaphore,
+        entry_setting: Arc<Mutex<ExplorerEntryLoaderSetting>>,
+    ) -> Option<AbortOnDropHandle<()>> {
+        let Self {
+            explorer,
+            cache,
+            ctx,
+            sorter: _,
+            path: _,
+            selected_entry: _,
+            setting_receiver: _,
+        } = self.clone();
+
+        let it = PathExplorerItem::new(entry.path())?;
+
+        explorer.write().content.push(it);
+
+        let path = entry.path();
+
+        Some(crate::spawn_and_abort_on_drop(async move {
+            let waiter = wait_fn(move || {
+                // let semaphore = semaphore.clone();
+                async {}
+            });
+
+            tokio::task::yield_now().await;
+            let _permit = semaphore.acquire(index).await.unwrap();
+            let image =
+                ExplorerEntryLoader::new(path.clone(), waiter, entry_setting.clone(), cache)
+                    .search()
+                    .await;
+
+            let texture = match image {
+                Some(image) => image.alloc(
+                    ctx.tex_manager(),
+                    path.to_string_lossy().to_string(),
+                    entry_setting.lock().texture_option,
+                ),
+                None => default_texture,
+            };
+
+            explorer.write().content[index].thumbnail = texture.into_view_state();
+            ctx.request_repaint();
+        }))
     }
 }
 
@@ -450,6 +468,7 @@ where
                 .cache
                 .get_from_sha(&sha)
                 .map(|it| (cache_dir.join(&it), it));
+            // dbg!(&path, &cache);
 
             match cache.map(|(it, sha)| (it.exists(), sha, it)) {
                 Some((true, sha, it)) => {
@@ -562,7 +581,7 @@ where
                 .ok()?
                 .into_iter()
                 .filter_map(|it| it.ok())
-                .find(|it| crate::tools::archive::is_image(it));
+                .find(crate::tools::archive::is_image);
 
             crate::tools::archive::load_image_from_opt_entry(reader)
         };
