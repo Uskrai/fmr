@@ -40,8 +40,7 @@ impl ExplorerLoaderCache {
     }
 
     pub fn remove_path(&self, path: &std::path::Path) {
-        let lock = self.map.lock().remove(&sha_path(path));
-        // dbg!(path, lock);
+        self.map.lock().remove(&sha_path(path));
     }
 
     pub fn insert_sha_recursive(
@@ -68,7 +67,6 @@ impl ExplorerLoaderCache {
 
         while let Some(parent) = path.parent() {
             let should_break = root.as_ref() == path.canonicalize().as_ref().ok();
-           
 
             // let is_root_file = || matches!(root.as_ref(), Ok(x) if x.extension().is_some());
 
@@ -77,7 +75,7 @@ impl ExplorerLoaderCache {
             // if it doesnt, it wouldn't cache archive file.
             let should_insert = !should_break || is_root_file;
 
-            if should_insert || true {
+            if should_insert {
                 self.insert_sha(path, target.to_string());
                 path = parent;
             }

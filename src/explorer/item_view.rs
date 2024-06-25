@@ -86,22 +86,6 @@ impl<'a, Item: ExplorerItem> ExplorerItemView<'a, Item> {
 
         let response = response.response.interact(egui::Sense::hover());
         let painter = ui.painter();
-        // let contains = ui
-        //     .ctx()
-        //     .input(|it| it.pointer.interact_pos())
-        //     .map(|it| response.rect.contains(it));
-        //
-        // if let Some(true) = contains {
-        //     dbg!(
-        //         response.contains_pointer()
-        //         // ui.ctx().input(|it| it.pointer.interact_pos()),
-        //         // contains,
-        //         // response.rect,
-        //         // response.hovered()
-        //     );
-        // }
-
-        // print!("{}\n", response.hovered());
 
         let stroke = if selected {
             let mut stroke = ui.visuals().selection.stroke;
@@ -116,7 +100,6 @@ impl<'a, Item: ExplorerItem> ExplorerItemView<'a, Item> {
             ui.visuals().widgets.inactive.fg_stroke
         };
 
-        let response = response.interact(egui::Sense::click());
         let mut visuals = ui.style().interact_selectable(&response, selected);
 
         if selected {

@@ -14,6 +14,8 @@ pub struct ExplorerOutput {
 
     pub column: usize,
 
+    pub grid_response: egui::Response,
+
     responses: Vec<egui::Response>,
 }
 
@@ -32,24 +34,35 @@ impl<'a, Item: ExplorerItem> ExplorerView<'a, Item> {
     }
 
     pub fn show(mut self, ui: &mut egui::Ui) -> ExplorerOutput {
-        let scroll = crate::scroll::ScrollArea::vertical(self.explorer.scroll)
+        let scroll = crate::scroll::ScrollArea::vertical(self.explorer.scroll.clone())
             .id_source(self.id.with("scroll-area"))
-            .show(ui, |ui| self.show_grid(ui));
-
-        let output = scroll.inner;
+            // .enable_scrolling(true)
+            .show(ui, |ui, _| self.show_grid(ui));
 
         self.explorer.scroll = scroll.state;
-
         if self.explorer.scroll_to_index {
-            if let Some(response) = output.responses.get(self.explorer.current) {
-                // self.explorer.scroll_to_index
-                // self.explorer.scroll.scroll_to_rect(response.rect, None);
+            if let Some(response) = scroll.inner.responses.get(self.explorer.current) {
+                // self.explorer.scroll
+                // println!("scroll to me");
+                // response.scroll_to_me(None);
+                self.explorer.scroll.scroll_to_response(response, None);
                 ui.ctx().request_repaint();
                 self.explorer.scroll_to_index = false;
             }
         }
 
-        output
+        crate::egui_event::handles_ui(ui, |ui, event| {
+            Self::handle_key(self.explorer, &scroll.inner, ui, event)
+        });
+        crate::egui_event::handles_ui(ui, |ui, event| {
+            let handled = self.explorer.scroll.handle_key_event(event);
+            if handled {
+                ui.ctx().request_repaint();
+            }
+            handled
+        });
+
+        scroll.inner
     }
 
     fn show_grid(&mut self, ui: &mut egui::Ui) -> ExplorerOutput {
@@ -74,7 +87,7 @@ impl<'a, Item: ExplorerItem> ExplorerView<'a, Item> {
         let mut is_double_clicked = false;
         let mut responses = vec![];
 
-        egui::Grid::new(id.with("grid"))
+        let grid = egui::Grid::new(id.with("grid"))
             .max_col_width(width)
             .show(ui, |ui| {
                 let mut row = 0;
@@ -104,7 +117,6 @@ impl<'a, Item: ExplorerItem> ExplorerView<'a, Item> {
                         *size = response.rect.size().max(*size);
 
                         if response.clicked() {
-                            dbg!(response.clicked());
                             explorer.current = i;
                             ui.ctx().request_repaint();
                         }
@@ -131,13 +143,16 @@ impl<'a, Item: ExplorerItem> ExplorerView<'a, Item> {
         ExplorerOutput {
             is_double_clicked,
             column,
+            grid_response: grid.response,
             responses,
         }
     }
 
+    // return true if event is handled
     pub fn handle_key(
         explorer: &mut Explorer<Item>,
         output: &ExplorerOutput,
+        ui: &mut egui::Ui,
         event: &egui::Event,
     ) -> bool {
         let mut handled = false;
@@ -147,8 +162,10 @@ impl<'a, Item: ExplorerItem> ExplorerView<'a, Item> {
 
             if changed {
                 if let Some(response) = output.responses.get(explorer.current) {
+                    explorer.scroll.scroll_to_response(response, None);
+                    // println!("scroll to me");
                     // response.scroll_to_me(None);
-                    explorer.scroll.scroll_to_rect(response.rect, None);
+                    ui.ctx().request_repaint();
                 }
             }
 
@@ -175,10 +192,6 @@ impl<'a, Item: ExplorerItem> ExplorerView<'a, Item> {
             |it| it.is_none(),
             |step| move_by(step as isize),
         );
-
-        if !handled {
-            handled |= explorer.scroll.handle_key_event(event);
-        }
 
         handled
     }

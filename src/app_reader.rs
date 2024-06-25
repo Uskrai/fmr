@@ -260,46 +260,43 @@ impl<'a> AppReaderView<'a> {
                 read_from_right = reader.is_read_from_right();
                 is_vertical = reader.state.is_vertical();
 
-                ReaderView::new(&mut reader, &mut setting.reader).show(ui)
+                ReaderView::new(&mut reader, &setting.reader).show(ui)
             })
-            .inner
-            .interact(egui::Sense::click_and_drag());
+            .inner;
 
         {
-            ui.input_mut(|input| {
-                let pointer = &input.pointer;
-                let any_down = pointer.any_down();
-                let secondary_down = pointer.button_down(egui::PointerButton::Secondary);
+            let pointer = ui.input(|it| it.pointer.clone());
+            let any_down = pointer.any_down();
+            let secondary_down = pointer.button_down(egui::PointerButton::Secondary);
 
-                let change_folder_with_scroll_wheel =
-                    setting.change_folder_with_scroll_wheel && !any_down;
+            let change_folder_with_scroll_wheel =
+                setting.change_folder_with_scroll_wheel && !any_down;
 
-                let should_change_folder =
-                    (change_folder_with_scroll_wheel || secondary_down) && response.hovered();
+            let should_change_folder =
+                (change_folder_with_scroll_wheel || secondary_down) && response.hovered();
 
-                input.events.retain(|event| {
-                    if should_change_folder {
-                        if let egui::Event::Scroll(scroll) = event {
-                            let mut step = scroll.to_step();
-                            step[0] *= !is_vertical as isize;
-                            step[0] *= if read_from_right { -1 } else { 1 };
+            crate::egui_event::retains(ui.ctx(), |event| {
+                if should_change_folder {
+                    if let egui::Event::Scroll(scroll) = event {
+                        let mut step = scroll.to_step();
+                        step[0] *= !is_vertical as isize;
+                        step[0] *= if read_from_right { -1 } else { 1 };
 
-                            if state
-                                .is_done_initial_loading
-                                .load(std::sync::atomic::Ordering::Relaxed)
-                            {
-                                match step {
-                                    [0, i] | [i, 0] if i != 0 => {
-                                        return !state.change_folder(i, ui.ctx())
-                                    }
-                                    _ => {}
-                                };
-                            }
+                        if state
+                            .is_done_initial_loading
+                            .load(std::sync::atomic::Ordering::Relaxed)
+                        {
+                            match step {
+                                [0, i] | [i, 0] if i != 0 => {
+                                    return !state.change_folder(i, ui.ctx())
+                                }
+                                _ => {}
+                            };
                         }
                     }
+                }
 
-                    true
-                })
+                true
             });
         }
 

@@ -33,6 +33,7 @@ pub struct App {
     data_storage: Option<crate::storage::FSStorage>,
     // path: PathBuf,
     // reader_option: ReaderOption,
+    #[allow(dead_code)]
     tokio_runtime: tokio::runtime::Runtime,
     debug_ui: DebugUI,
 }
@@ -73,6 +74,7 @@ impl App {
 
         let profile = std::env::var("FMR_PROFILE").unwrap_or_else(|_| "default".to_string());
         let setting_storage = crate::storage::FSStorage::prepare("fmr", &profile, "config.ron");
+        dbg!(profile, &setting_storage);
 
         let mut setting: AppSetting = match &setting_storage {
             Some(s) => {
@@ -180,6 +182,7 @@ impl App {
         self.mode = Some(AppMode::Explorer(explorer));
     }
 
+    // returns true if success
     pub fn open_parent(&mut self, setting: AppOpenParentSetting) -> bool {
         let path = match &self.mode {
             Some(mode) => mode.path().to_path_buf(),
@@ -202,9 +205,10 @@ impl App {
 
         self.open_explorer(parent, Some(path));
 
-        false
+        true
     }
 
+    // returns true if event handled
     pub fn handle_key_explorer(&mut self, event: &egui::Event) -> bool {
         if let egui::Event::Key {
             pressed: true,
@@ -222,10 +226,12 @@ impl App {
                         };
 
                         self.setting.explorer.cache.remove_path(&path);
+                        return true;
                     } else if modifiers.shift_only() {
                         for it in explorer.all_child_paths() {
                             self.setting.explorer.cache.remove_path(&it);
                         }
+                        return true;
                     }
                 }
 
@@ -245,6 +251,7 @@ impl App {
                     };
 
                     cache.insert_sha(parent, sha);
+                    return true;
                 }
             }
         }
@@ -476,27 +483,23 @@ impl eframe::App for App {
             None => None,
         });
 
-        let response = inner.response.interact(egui::Sense::click_and_drag());
-        // dbg!(inner.response.sense, response.sense, inner.response.hovered());
+        // let response = inner.response.interact(egui::Sense::click_and_drag());
+        let response = inner.response;
         let mut mode = inner.inner;
         let input_event_len = ctx.input(|i| i.events.len());
 
         if let (true, Some(mode)) = (response.hovered(), &mut mode) {
-            ctx.input_mut(|i| {
-                i.events.retain(|it| {
-                    let mut handled = false;
+            crate::egui_event::handles(ctx, |it| {
+                let mut handled = false;
 
-                    handled |= match mode {
-                        AppMode::Explorer(explorer) => {
-                            explorer.handle_event(Some(OnOpen { app: self }), it)
-                        }
-                        AppMode::Reader(reader) => {
-                            reader.handle_event(&self.setting.reader, ctx, it)
-                        }
-                    };
+                handled |= match mode {
+                    AppMode::Explorer(explorer) => {
+                        explorer.handle_event(Some(OnOpen { app: self }), it)
+                    }
+                    AppMode::Reader(reader) => reader.handle_event(&self.setting.reader, ctx, it),
+                };
 
-                    !handled
-                })
+                handled
             });
         }
 
@@ -523,34 +526,28 @@ impl eframe::App for App {
                         "{absolutize:?} cwd:{}",
                         std::env::current_dir().unwrap().display()
                     );
-                    self.setting.path = absolutize.clone();
+                    self.setting.path.clone_from(&absolutize);
                     reader.path = absolutize;
                 } else {
-                    self.setting.path = reader.path.clone();
+                    self.setting.path.clone_from(&reader.path);
                 }
             }
         }
 
         if response.hovered() {
             ctx.input_mut(|input| {
-                if input.pointer.any_click()
-                    || input.pointer.any_down()
-                    || input.pointer.any_pressed()
-                {
-                    // println!("any");
-                }
                 if input.pointer.button_clicked(egui::PointerButton::Primary)
                     && input.pointer.button_clicked(egui::PointerButton::Secondary)
                 {
-                    input.events.retain(|it| {
-                        if let egui::Event::MouseWheel { delta, .. } = it {
-                            // dbg!(delta);
-
-                            return true;
-                        }
-
-                        false
-                    });
+                    // input.events.retain(|it| {
+                    //     if let egui::Event::MouseWheel { delta, .. } = it {
+                    //         // dbg!(delta);
+                    //
+                    //         return true;
+                    //     }
+                    //
+                    //     false
+                    // });
                     let is_changed = self.open_parent(AppOpenParentSetting {
                         canonicalize_path: false,
                     });
@@ -559,34 +556,34 @@ impl eframe::App for App {
                     }
                 }
                 if input.pointer.button_clicked(egui::PointerButton::Extra1) {
-                    println!("back");
+                    self.open_parent(AppOpenParentSetting {
+                        canonicalize_path: input.modifiers.shift_only(),
+                    });
                 }
+            });
 
-                input.events.retain(|it| {
-                    if let egui::Event::Key {
-                        pressed: true,
-                        key,
-                        modifiers,
-                        repeat: _,
-                        physical_key: _,
-                    } = it
-                    {
-                        if *key == egui::Key::O && modifiers.command_only() {
-                            self.open_file_dialog();
-                            return false;
-                        }
-
-                        if *key == egui::Key::Backspace {
-                            return self.open_parent(AppOpenParentSetting {
-                                canonicalize_path: modifiers.shift_only(),
-                            });
-                        }
+            crate::egui_event::handles(ctx, |it| {
+                if let egui::Event::Key {
+                    pressed: true,
+                    key,
+                    modifiers,
+                    repeat: _,
+                    physical_key: _,
+                } = it
+                {
+                    if *key == egui::Key::O && modifiers.command_only() {
+                        self.open_file_dialog();
+                        return true;
                     }
 
-                    self.handle_key_explorer(it);
+                    if *key == egui::Key::Backspace {
+                        return self.open_parent(AppOpenParentSetting {
+                            canonicalize_path: modifiers.shift_only(),
+                        });
+                    }
+                }
 
-                    true
-                })
+                self.handle_key_explorer(it)
             });
         }
 

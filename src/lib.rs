@@ -12,6 +12,7 @@ pub mod scroll;
 mod storage;
 mod tools;
 mod wake;
+pub mod egui_event;
 use std::{collections::BTreeMap, sync::Arc};
 
 pub use app::*;

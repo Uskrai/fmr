@@ -28,6 +28,7 @@ itertools = "0.10"
 derivative = "2.2"
 sha2 = "0.10.2"
 turbojpeg = { version = "0.5.1", features = ["image"], optional = true }
+path-absolutize = "3.1.0"
 # tracing-appender = "0.2"
 
 [dependencies.libarchive]
@@ -42,13 +43,13 @@ libarchive = ["dep:libarchive"]
 
 [dependencies.eframe]
 # git = "https://github.com/emilk/egui"
-version = "0.22.0"
+version = "0.27.0"
 features = ["persistence"]
 # rev = "888cd9c3eb09b44995369aebe0034c5be01f1917"
 [dependencies.egui]
 # git = "https://github.com/emilk/egui"
 features = ['serde']
-version = "0.22.0"
+version = "0.27.0"
 
 # [profile.dev.package.image]
 # opt-level = 3

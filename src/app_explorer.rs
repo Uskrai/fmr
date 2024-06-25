@@ -103,7 +103,12 @@ impl AppExplorer {
     }
 
     pub fn all_child_paths(&self) -> Vec<PathBuf> {
-        self.inner.read().items().iter().map(|it| it.path.clone()).collect()
+        self.inner
+            .read()
+            .items()
+            .iter()
+            .map(|it| it.path.clone())
+            .collect()
     }
 
     pub fn selected_path(&self) -> Option<PathBuf> {
@@ -134,12 +139,6 @@ impl AppExplorer {
                     Some(false)
                 }
                 .unwrap_or(false);
-            }
-        }
-
-        if let Some(output) = &self.prev_output {
-            if ExplorerView::handle_key(&mut self.inner.write(), output, event) {
-                return true;
             }
         }
 
@@ -196,11 +195,9 @@ impl<'a, OnOpen: AppExplorerOnOpen> AppExplorerView<'a, OnOpen> {
                         }
                     }
                     explorer.prev_output = Some(output);
-                });
+                })
             })
             .response;
-
-        // dbg!(response.interact(egui::Sense::hover()).hovered());
 
         let index = explorer.inner.read().current_index();
 
