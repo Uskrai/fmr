@@ -11,7 +11,6 @@ pub async fn load_image_from_memory(
     let vec = vec?;
     tokio::task::yield_now().await;
     let time = std::time::Instant::now();
-    let vec = vec;
 
     let reader = match crate::image::Reader::load_from_memory(vec) {
         Ok(reader) => reader,

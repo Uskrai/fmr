@@ -1,7 +1,7 @@
 use std::{
     collections::HashMap,
     ops::Range,
-    path::{Path, PathBuf},
+    path::{PathBuf},
     sync::{
         atomic::{AtomicUsize, Ordering},
         Arc, Weak,
@@ -21,7 +21,7 @@ use tokio::{
 use tracing::instrument;
 use zip::ZipArchive;
 
-use crate::{image::TextureOption, AbortOnDropHandle};
+use crate::{image::TextureOption, path::PathSorterType, AbortOnDropHandle};
 
 use super::{cache::ExplorerLoaderCache, sha_path, Explorer, PathExplorerItem};
 
@@ -68,7 +68,7 @@ pub struct ExplorerLoader {
     pub setting_receiver: watch::Receiver<ExplorerLoaderSetting>,
     pub cache: ExplorerLoaderCache,
     #[derivative(Debug = "ignore")]
-    pub sorter: Arc<dyn (Fn(&Path, &Path) -> std::cmp::Ordering) + Send + Sync>,
+    pub sorter: PathSorterType,
     #[derivative(Debug = "ignore")]
     pub ctx: egui::Context,
 }

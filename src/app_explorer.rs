@@ -11,8 +11,7 @@ use crate::{
     explorer::{
         Explorer, ExplorerEntryLoaderSetting, ExplorerLoader, ExplorerLoaderCache,
         ExplorerLoaderSetting, ExplorerOutput, ExplorerSetting, ExplorerView, PathExplorerItem,
-    },
-    AbortOnDropHandle,
+    }, path::PathSorterType, AbortOnDropHandle
 };
 
 pub struct AppExplorer {
@@ -40,7 +39,7 @@ pub struct AppExplorerSetting {
 }
 
 #[derive(Clone)]
-pub struct ExplorerSorter(pub Arc<dyn (Fn(&Path, &Path) -> std::cmp::Ordering) + Send + Sync>);
+pub struct ExplorerSorter(pub PathSorterType);
 
 impl Default for ExplorerSorter {
     fn default() -> Self {

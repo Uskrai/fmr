@@ -88,7 +88,7 @@ impl PagedReaderState {
         }
     }
 
-    pub fn handle_event(&mut self, images: &Vec<TextureViewState>, event: &egui::Event) -> bool {
+    pub fn handle_event(&mut self, images: &[TextureViewState], event: &egui::Event) -> bool {
         let mut handled = false;
         let mut first = true;
 

@@ -1,31 +1,29 @@
-use std::{io::Read, path::PathBuf};
-
 use futures::Future;
 use libarchive::reader::{ArchiveEntry, ReaderHandle};
+use std::{io::Read, path::Path};
 
 use crate::image::ImageData;
 
 use super::image::load_image_from_memory_as_option;
 
-pub fn can_read(path: &PathBuf) -> bool {
-    open(&path).is_ok()
+pub fn can_read(path: &Path) -> bool {
+    open(path).is_ok()
 }
 
-pub fn open(path: &PathBuf) -> Result<ReaderHandle, libarchive::error::ArchiveError> {
+pub fn open(path: &Path) -> Result<ReaderHandle, libarchive::error::ArchiveError> {
     libarchive::reader::Builder::new()
         .support_all()
-        .and_then(|it| it.open_file(path.clone()))
+        .and_then(|it| it.open_file(path))
 }
 
 pub fn is_image(entry: &ArchiveEntry) -> bool {
     let name = entry.pathname();
     let isfile = entry.is_file();
 
-    let should = isfile
+    isfile
         && name
             .map(|pathname| crate::image::ImageData::can_read(&pathname))
-            .unwrap_or(false);
-    should
+            .unwrap_or(false)
 }
 
 pub fn read_to_end_when(
@@ -67,7 +65,7 @@ where
 pub fn load_image_from_opt_entry(
     zip: Option<ArchiveEntry>,
 ) -> impl Future<Output = Option<ImageData>> + Send {
-    let it = zip.map(|zip| load_image_from_entry(zip));
+    let it = zip.map(load_image_from_entry);
 
     flatten_future(it)
 }
@@ -78,10 +76,10 @@ pub fn load_path_to_image(
 ) -> impl Future<Output = Option<ImageData>> + Send {
     let time = std::time::Instant::now();
 
-    let it = reader.into_iter().filter_map(|it| it.ok()).find(|it| {
-        let s = it.pathname() == Some(name.clone());
-        s
-    });
+    let it = reader
+        .into_iter()
+        .filter_map(|it| it.ok())
+        .find(|it| it.pathname() == Some(name.clone()));
     tracing::trace!("finding archive entry in {:?}", time.elapsed());
 
     load_image_from_opt_entry(it)

@@ -137,7 +137,7 @@ impl ReaderLoader {
         #[cfg(feature = "libarchive")]
         if crate::tools::archive::can_read(&path) {
             self.mark_done_initial_loading();
-            return self.load_file_archive(path).await;
+            self.load_file_archive(path).await
         }
     }
 
@@ -172,8 +172,7 @@ impl ReaderLoader {
                 .into_iter()
                 .filter_map(|it| it.ok())
                 .filter(|it| it.is_file())
-                .map(|it| it.pathname())
-                .filter_map(|it| it)
+                .filter_map(|it| it.pathname())
                 .collect::<Vec<_>>()
         } else {
             return;
@@ -249,7 +248,7 @@ impl ReaderLoader {
     #[tracing::instrument(skip(self, entries, opener, semaphore))]
     async fn spawn<F, R>(
         &mut self,
-        entries: &Vec<LoaderEntry>,
+        entries: &[LoaderEntry],
         opener: &mut F,
         semaphore: Arc<Semaphore>,
     ) where
@@ -344,8 +343,7 @@ impl ReaderLoader {
         let time = std::time::Instant::now();
         let image = fut.await?;
         log::debug!("getting image data {:?} in {:?}", name, time.elapsed());
-        let name = name;
-        let max_size = ctx.input(|input| input.max_texture_side)as u32;
+        let max_size = ctx.input(|input| input.max_texture_side) as u32;
 
         tokio::task::yield_now().await;
         let image = image.into_allocatable((max_size, max_size));

@@ -9,6 +9,7 @@ use tokio::sync::watch;
 
 use crate::{
     image::TextureOption,
+    path::PathSorterType,
     reader::{
         loader::ReaderLoaderSetting, PagedReaderState, Reader, ReaderMode, ReaderModeState,
         ReaderSetting, ReaderView,
@@ -32,9 +33,7 @@ pub struct AppReaderSetting {
 }
 
 #[derive(Clone)]
-pub struct AppReaderFolderSorter(
-    pub Arc<dyn (Fn(&Path, &Path) -> std::cmp::Ordering) + Send + Sync>,
-);
+pub struct AppReaderFolderSorter(pub PathSorterType);
 
 impl PartialEq for AppReaderFolderSorter {
     fn eq(&self, other: &Self) -> bool {
@@ -147,7 +146,7 @@ impl AppReader {
 
         let scale = after as f32 / before as f32;
         for it in 0..2 {
-            let new_offset = scroll_state.offset[it] * scale as f32;
+            let new_offset = scroll_state.offset[it] * scale;
             scroll_state.offset[it] = new_offset;
         }
     }
