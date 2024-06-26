@@ -92,7 +92,7 @@ impl ImageData {
 
                 for it in image {
                     let image = it.image.to_rgba8();
-                    let frame = image::Frame::from_parts(image, it.top, it.left, it.delay.into());
+                    let frame = image::Frame::from_parts(image, it.top, it.left, it.delay);
                     encode.encode_frame(frame)?;
                 }
             }

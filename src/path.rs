@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::UnsignedExt;
 
+pub type PathSorterType = Arc<dyn (Fn(&Path, &Path) -> std::cmp::Ordering) + Send + Sync>;
+
 pub fn get_folder_by(
     path: impl AsRef<Path>,
     direction: isize,

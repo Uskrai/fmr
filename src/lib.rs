@@ -1,6 +1,7 @@
 mod app;
 mod app_explorer;
 mod app_reader;
+pub mod egui_event;
 pub mod explorer;
 pub mod image;
 pub mod image_search;
@@ -12,7 +13,6 @@ pub mod scroll;
 mod storage;
 mod tools;
 mod wake;
-pub mod egui_event;
 use std::{collections::BTreeMap, sync::Arc};
 
 pub use app::*;
