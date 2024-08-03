@@ -1,0 +1,24 @@
+[package]
+name = "fmr_reader"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+egui.workspace = true
+fmr_core.workspace = true
+fmr_egui.workspace = true
+fmr_frame.workspace = true
+fmr_scroll.workspace = true
+futures.workspace = true
+image.workspace = true
+log.workspace = true
+natord.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+zip.workspace = true
+
+[features]
+turbojpeg = ["fmr_frame/turbojpeg"]
+libarchive = ["fmr_egui/libarchive"]
