@@ -1,0 +1,31 @@
+[package]
+name = "fmr_explorer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fmr_frame.workspace = true
+fmr_scroll.workspace = true
+fmr_egui.workspace = true
+fmr_core.workspace = true
+
+libarchive = { workspace = true, optional = true }
+
+serde.workspace = true
+egui.workspace = true
+futures.workspace = true
+itertools.workspace = true
+parking_lot.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+walkdir.workspace = true
+derivative.workspace = true
+natord.workspace = true
+zip.workspace = true
+image.workspace = true
+sha2.workspace = true
+log.workspace = true
+
+[features]
+libarchive = ["dep:libarchive", "fmr_egui/libarchive"]
+turbojpeg = ["fmr_frame/turbojpeg"]
