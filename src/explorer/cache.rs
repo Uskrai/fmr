@@ -65,22 +65,24 @@ impl ExplorerLoaderCache {
                 .unwrap_or(false)
         };
 
+        // TODO: test these.
         while let Some(parent) = path.parent() {
-            let should_break = root.as_ref() == path.canonicalize().as_ref().ok();
+            let is_root = root.as_ref() == path.canonicalize().as_ref().ok();
 
             // let is_root_file = || matches!(root.as_ref(), Ok(x) if x.extension().is_some());
 
-            // if should_break is false it should always insert
+            // if is_root is false it should always insert
             // and it should also insert if root is file
             // if it doesnt, it wouldn't cache archive file.
-            let should_insert = !should_break || is_root_file;
+            // let should_insert = !is_root && (is_root || is_root_file);
+            //
+            // dbg!(&path, &root, is_root, is_root_file, should_insert);
+            // if should_insert {
+            self.insert_sha(path, target.to_string());
+            // }
+            path = parent;
 
-            if should_insert {
-                self.insert_sha(path, target.to_string());
-                path = parent;
-            }
-
-            if should_break {
+            if is_root {
                 break;
             }
         }
