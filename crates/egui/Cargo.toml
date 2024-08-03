@@ -1,0 +1,17 @@
+[package]
+name = "fmr_egui"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+egui.workspace = true
+fmr_frame.workspace = true
+image.workspace = true
+
+libarchive = { workspace = true, optional = true }
+tokio.workspace = true
+tracing.workspace = true
+zip.workspace = true
+[features]
+libarchive = ["dep:libarchive"]
+turbojpeg = ["fmr_frame/turbojpeg"]

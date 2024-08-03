@@ -1,0 +1,12 @@
+[package]
+name = "fmr_core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+futures.workspace = true
+itertools.workspace = true
+log.workspace = true
+natord.workspace = true
+serde.workspace = true
+tokio.workspace = true

@@ -1,0 +1,8 @@
+[package]
+name = "fmr_scroll"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+egui.workspace = true
+fmr_egui.workspace = true

@@ -1,0 +1,31 @@
+[package]
+name = "fmr"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fmr_explorer.workspace = true
+fmr_core.workspace = true
+fmr_reader.workspace = true
+fmr_egui.workspace = true
+fmr_frame.workspace = true
+
+tokio = { workspace = true, features = ["rt-multi-thread"] }
+
+eframe.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+git-version.workspace = true
+parking_lot.workspace = true
+walkdir.workspace = true
+serde.workspace = true
+path-absolutize.workspace = true
+log.workspace = true
+ron.workspace = true
+rfd.workspace = true
+directories-next.workspace = true
+
+[features]
+default = ["libarchive"]
+libarchive = ["fmr_explorer/libarchive", "fmr_egui/libarchive"]
+turbojpeg = ["fmr_explorer/turbojpeg", "fmr_reader/turbojpeg", "fmr_egui/turbojpeg", "fmr_frame/turbojpeg"]
