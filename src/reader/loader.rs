@@ -287,7 +287,7 @@ impl ReaderLoader {
             };
 
             let loader = || {
-                log::info!("loading {} {}", entry.name, entry.opener_index);
+                log::debug!("loading {} {}", entry.name, entry.opener_index);
                 let entry = entry.clone();
                 let fut = opener(entry.opener_index);
                 let ctx = ctx.clone();
@@ -295,7 +295,7 @@ impl ReaderLoader {
 
                 async move {
                     let _permit = permit;
-                    log::info!("acquired permit for {} {}", entry.name, entry.opener_index);
+                    log::trace!("acquired permit for {} {}", entry.name, entry.opener_index);
                     let texture =
                         Self::load_texture(entry.name, ctx.clone(), fut, texture_option).await;
                     if let Some(texture) = texture {
@@ -342,16 +342,16 @@ impl ReaderLoader {
     ) -> Option<crate::image::TextureHandle> {
         let time = std::time::Instant::now();
         let image = fut.await?;
-        log::debug!("getting image data {:?} in {:?}", name, time.elapsed());
+        log::trace!("getting image data {:?} in {:?}", name, time.elapsed());
         let max_size = ctx.input(|input| input.max_texture_side) as u32;
 
         tokio::task::yield_now().await;
         let image = image.into_allocatable((max_size, max_size));
-        log::debug!("splitting {:?} in {:?}", name, time.elapsed());
+        log::trace!("splitting {:?} in {:?}", name, time.elapsed());
 
         tokio::task::yield_now().await;
         let image = EguiSplittedImageData::from(image);
-        log::debug!("into egui {:?} in {:?}", name, time.elapsed());
+        log::trace!("into egui {:?} in {:?}", name, time.elapsed());
 
         tokio::task::yield_now().await;
         let texture = crate::image::TextureHandle::from_image(
