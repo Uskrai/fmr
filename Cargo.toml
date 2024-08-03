@@ -1,18 +1,38 @@
-[package]
-name = "fmr"
-version = "0.1.0"
-edition = "2021"
+# [package]
+# name = "fmr"
+# version = "0.1.0"
+# edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
+[workspace]
+resolver = "2"
+members = [
+  "crates/cache",
+  "crates/core",
+  "crates/egui",
+  "crates/explorer",
+  "crates/frame",
+  "crates/main",
+  "crates/reader",
+  "crates/scroll",
+]
+default-members = ["crates/main"]
+
+[workspace.dependencies]
+fmr_frame = { version = "0.1.0", path = "crates/frame" }
+fmr_egui = { version = "0.1.0", path = "crates/egui" }
+fmr_scroll = { version = "0.1.0", path = "crates/scroll" }
+fmr_core = { version = "0.1.0", path = "crates/core" }
+fmr_explorer = { version = "0.1.0", path = "crates/explorer" }
+fmr_reader = { version = "0.1.0", path = "crates/reader" }
 # egui = { version = "0.17.0", features = ["multi_threaded"] }
 image = "0.24.5"
-tokio = { version = "1", features = ["rt-multi-thread", "sync", "time", "fs"] }
+tokio = { version = "1", features = ["rt", "sync", "time", "fs"] }
 rfd = "0.8.1"
 parking_lot = { version = "0.12.0", features = ["serde"] }
 natord = "1.0.9"
-serde = "1.0"
+serde = { version = "1.0", features = ["derive"] }
 ron = "0.7"
 walkdir = "2.3"
 futures = "0.3"
@@ -27,27 +47,26 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 itertools = "0.10"
 derivative = "2.2"
 sha2 = "0.10.2"
-turbojpeg = { version = "0.5.1", features = ["image"], optional = true }
+turbojpeg = { version = "0.5.1", features = ["image"] }
 path-absolutize = "3.1.0"
 egui-video = "0.6.0"
 # tracing-appender = "0.2"
 
-[dependencies.libarchive]
+[workspace.dependencies.libarchive]
 git = "https://github.com/uskrai/libarchive-rust"
 rev = "7a5bf66f24b4870cb682024b6c60721de263b847"
-optional = true
+# optional = true
 
-[features]
-default = ["libarchive"]
-turbojpeg = ["dep:turbojpeg"]
-libarchive = ["dep:libarchive"]
+# [features]
+# default = ["libarchive"]
+# libarchive = ["dep:libarchive"]
 
-[dependencies.eframe]
+[workspace.dependencies.eframe]
 # git = "https://github.com/emilk/egui"
 version = "0.27.0"
 features = ["persistence"]
 # rev = "888cd9c3eb09b44995369aebe0034c5be01f1917"
-[dependencies.egui]
+[workspace.dependencies.egui]
 # git = "https://github.com/emilk/egui"
 features = ['serde']
 version = "0.27.0"
