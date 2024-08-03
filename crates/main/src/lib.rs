@@ -14,20 +14,6 @@ pub use app_reader::*;
 use eframe::egui;
 use parking_lot::Mutex;
 
-pub trait UnsignedExt {
-    fn checked_add_signed_ext(self, rhs: isize) -> Option<usize>;
-}
-
-impl UnsignedExt for usize {
-    fn checked_add_signed_ext(self, rhs: isize) -> Option<usize> {
-        if rhs < 0 {
-            self.checked_sub(rhs.wrapping_abs() as usize)
-        } else {
-            self.checked_add(rhs as usize)
-        }
-    }
-}
-
 pub fn setup_custom_fonts(ctx: &egui::Context) {
     let mut fonts = egui::FontDefinitions::default();
 
