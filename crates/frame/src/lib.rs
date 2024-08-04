@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::{
     io::{BufRead, Cursor, Read, Seek},
     path::Path,
@@ -15,6 +16,38 @@ pub use reader::*;
 pub use texture::*;
 
 use image::AnimationDecoder;
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default, Serialize, Deserialize)]
+pub enum FilterType {
+    /// Nearest Neighbor
+    #[default]
+    Nearest,
+
+    /// Linear Filter
+    Triangle,
+
+    /// Cubic Filter
+    CatmullRom,
+
+    /// Gaussian Filter
+    Gaussian,
+
+    /// Lanczos with window 3
+    Lanczos3,
+}
+
+impl From<FilterType> for image::imageops::FilterType {
+    fn from(value: FilterType) -> Self {
+        use image::imageops::FilterType as F;
+        match value {
+            FilterType::Nearest => F::Nearest,
+            FilterType::Triangle => F::Triangle,
+            FilterType::CatmullRom => F::CatmullRom,
+            FilterType::Gaussian => F::Gaussian,
+            FilterType::Lanczos3 => F::Lanczos3,
+        }
+    }
+}
 
 pub trait ToEguiImage {
     fn to_egui_image(&self) -> egui::ImageData;
@@ -41,14 +74,16 @@ impl ImageData {
     /// Returns a new image. The image's aspect ratio is preserved.
     /// The image is scaled to the maximum possible size that fits
     /// within the bounds specified by `nwidth` and `nheight`.
-    pub fn resize(&self, nwidth: u32, nheight: u32, filter: image::imageops::FilterType) -> Self {
+    pub fn resize(&self, nwidth: u32, nheight: u32, filter: FilterType) -> Self {
         match self {
-            Self::StaticImage(image) => Self::StaticImage(image.resize(nwidth, nheight, filter)),
+            Self::StaticImage(image) => {
+                Self::StaticImage(image.resize(nwidth, nheight, filter.into()))
+            }
             Self::AnimatedImage(frames) => {
                 let mut new = vec![];
                 for it in frames {
                     new.push(FrameData {
-                        image: it.image.resize(nwidth, nheight, filter),
+                        image: it.image.resize(nwidth, nheight, filter.into()),
                         top: it.top,
                         left: it.left,
                         delay: it.delay,

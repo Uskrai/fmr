@@ -11,7 +11,8 @@ use crate::{
     AppReader, AppReaderSetting, AppReaderView,
 };
 use fmr_core::path::{path_serde, PathSorterSetting};
-use fmr_explorer::{ExplorerLoaderCache, FilterType, PathExplorerItem};
+use fmr_explorer::{ExplorerLoaderCache, PathExplorerItem};
+use fmr_frame::FilterType;
 use fmr_reader::{ReaderMode, ReaderModeState};
 
 #[derive(Default, Serialize, Deserialize, Debug)]
