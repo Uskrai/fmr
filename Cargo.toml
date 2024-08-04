@@ -8,7 +8,6 @@
 [workspace]
 resolver = "2"
 members = [
-  "crates/cache",
   "crates/core",
   "crates/egui",
   "crates/explorer",

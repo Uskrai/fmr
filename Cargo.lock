@@ -1473,10 +1473,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fmr_cache"
-version = "0.1.0"
-
-[[package]]
 name = "fmr_core"
 version = "0.1.0"
 dependencies = [
