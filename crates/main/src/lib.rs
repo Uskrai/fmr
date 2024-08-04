@@ -4,7 +4,6 @@ mod app_reader;
 // pub mod image_search;
 pub mod inspection;
 mod storage;
-mod wake;
 use std::{collections::BTreeMap, sync::Arc};
 
 pub use app::*;
