@@ -27,39 +27,7 @@ use fmr_core::{
 use fmr_frame::TextureOption;
 
 use super::{cache::ExplorerLoaderCache, sha_path, Explorer, PathExplorerItem};
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Derivative, Serialize, Deserialize)]
-#[derivative(Default)]
-pub enum FilterType {
-    /// Nearest Neighbor
-    #[derivative(Default)]
-    Nearest,
-
-    /// Linear Filter
-    Triangle,
-
-    /// Cubic Filter
-    CatmullRom,
-
-    /// Gaussian Filter
-    Gaussian,
-
-    /// Lanczos with window 3
-    Lanczos3,
-}
-
-impl FilterType {
-    pub fn to_image(self) -> image::imageops::FilterType {
-        use image::imageops::FilterType as F;
-        match self {
-            FilterType::Nearest => F::Nearest,
-            FilterType::Triangle => F::Triangle,
-            FilterType::CatmullRom => F::CatmullRom,
-            FilterType::Gaussian => F::Gaussian,
-            FilterType::Lanczos3 => F::Lanczos3,
-        }
-    }
-}
+use fmr_frame::FilterType;
 
 #[derive(Clone, Derivative)]
 #[derivative(Debug)]
@@ -520,7 +488,7 @@ where
         };
 
         let size = self.setting.lock().max_resize;
-        let filter = self.setting.lock().filter.to_image();
+        let filter = self.setting.lock().filter;
 
         log::trace!("loading image {:?} in {:?}", path, time.elapsed());
 
