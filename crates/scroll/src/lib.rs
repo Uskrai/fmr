@@ -342,11 +342,19 @@ impl ScrollArea {
             if response.contains_pointer() && !ui.input(|input| input.pointer.any_down()) {
                 let size = ui.input(|input| input.events.len());
                 fmr_egui::event::handles(ui.ctx(), |event| {
-                    if let egui::Event::Scroll(scroll) = event {
+                    if let egui::Event::MouseWheel {
+                        unit: _,
+                        delta,
+                        modifiers,
+                    } = event
+                    {
+                        if modifiers.ctrl || modifiers.command {
+                            return false;
+                        }
                         let mut scroll_by = [0.0; 2];
 
                         for i in 0..2 {
-                            let step = scroll[i] / 50.0 * -1.0;
+                            let step = delta[i] * -1.0;
                             let decrease_by = step.abs() * 50.0;
                             scroll_by[i] = step * scroll_per_wheel[i] - decrease_by;
                         }
