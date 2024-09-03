@@ -31,7 +31,7 @@ fn main() {
         options,
         Box::new(|it| {
             it.egui_ctx.set_visuals(eframe::egui::Visuals::dark());
-            Box::new(fmr::App::new(it, runtime))
+            Ok(Box::new(fmr::App::new(it, runtime)))
         }),
     )
     .unwrap();

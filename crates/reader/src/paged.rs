@@ -197,8 +197,17 @@ impl<'a> PagedReader<'a> {
 
             fmr_egui::event::handles(ui.ctx(), |event| {
                 if should_change_page {
-                    if let egui::Event::Scroll(scroll) = event {
-                        let mut step = scroll.to_step();
+                    if let egui::Event::MouseWheel {
+                        unit: _,
+                        delta,
+                        modifiers,
+                    } = event
+                    {
+                        if modifiers.ctrl | modifiers.command {
+                            return false;
+                        }
+
+                        let mut step = delta.to_step();
                         step[0] *= if self.state.read_from_right { -1 } else { 1 };
 
                         let ret = match step {

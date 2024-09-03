@@ -276,8 +276,17 @@ impl<'a> AppReaderView<'a> {
 
             fmr_egui::event::retains(ui.ctx(), |event| {
                 if should_change_folder {
-                    if let egui::Event::Scroll(scroll) = event {
-                        let mut step = scroll.to_step();
+                    if let egui::Event::MouseWheel {
+                        unit: _,
+                        delta,
+                        modifiers,
+                    } = event
+                    {
+                        if modifiers.ctrl || modifiers.command {
+                            return true;
+                        }
+
+                        let mut step = delta.to_step();
                         step[0] *= !is_vertical as isize;
                         step[0] *= if read_from_right { -1 } else { 1 };
 

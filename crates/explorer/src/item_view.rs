@@ -72,7 +72,7 @@ impl<'a, Item: ExplorerItem> ExplorerItemView<'a, Item> {
 
                 ui.allocate_ui(egui::vec2(ui.available_width() * 0.8, 0.0), |ui| {
                     ui.centered_and_justified(|ui| {
-                        ui.add(egui::Label::new(item.name()).wrap(true));
+                        ui.add(egui::Label::new(item.name()).wrap());
 
                         ui.add_space(10.0);
                     });

@@ -372,13 +372,16 @@ impl eframe::App for App {
                         ui.checkbox(&mut option.enlarge, "Enlarge");
 
                         let before_fit_to_scale = option.fit_to_scale;
+                        let mut fit_to_scale = option.fit_to_scale as f64 / 100f64;
                         ui.add(
-                            DragValue::new(&mut option.fit_to_scale)
+                            DragValue::new(&mut fit_to_scale)
                                 .prefix("Scale: ")
-                                .min_decimals(1)
-                                .max_decimals(150),
+                                .speed(0.1)
+                                .min_decimals(0)
+                                .max_decimals(2),
                         );
 
+                        option.fit_to_scale = (fit_to_scale * 100.0) as u64;
                         if before_fit_to_scale != option.fit_to_scale {
                             if let Some(AppMode::Reader(reader)) = &mut self.mode {
                                 reader.change_scale(before_fit_to_scale, option.fit_to_scale);
@@ -411,12 +414,12 @@ impl eframe::App for App {
                         ui.add(
                             DragValue::new(&mut app_setting.preload_prev)
                                 .prefix("Preload Previous image: ")
-                                .clamp_range(usize::MIN..=usize::MAX),
+                                .range(usize::MIN..=usize::MAX),
                         );
                         ui.add(
                             DragValue::new(&mut app_setting.preload_next)
                                 .prefix("Preload Next Image: ")
-                                .clamp_range(usize::MIN..=usize::MAX),
+                                .range(usize::MIN..=usize::MAX),
                         );
                     });
 
@@ -433,7 +436,7 @@ impl eframe::App for App {
                                 ui.add(
                                     DragValue::new(&mut it)
                                         .prefix("Pages: ")
-                                        .clamp_range(1..=image_len),
+                                        .range(1..=image_len),
                                 );
 
                                 let new_index = it - 1;
