@@ -597,6 +597,6 @@ impl eframe::App for App {
             ctx.memory_mut(|memory| memory.stop_text_input());
         }
 
-        self.debug_ui.show_window(ctx);
+        self.debug_ui.show_window(ctx, ctx.theme());
     }
 }
