@@ -24,7 +24,7 @@ impl DebugUI {
         open(&mut self.setting_ui, "Setting UI");
     }
 
-    pub fn show_window(&mut self, ctx: &egui::Context) {
+    pub fn show_window(&mut self, ctx: &egui::Context, theme: egui::Theme) {
         egui::Window::new("texture-ui")
             .open(&mut self.texture_ui)
             .show(ctx, |ui| ctx.texture_ui(ui));
@@ -40,8 +40,9 @@ impl DebugUI {
                 ctx.memory_ui(ui);
                 // ui.label(format!("Focus: {:?}", ctx.memory(|memory| memory.focus())));
             });
+
         egui::Window::new("style-ui")
             .open(&mut self.style_ui)
-            .show(ctx, |ui| ctx.style_ui(ui));
+            .show(ctx, |ui| ctx.style_ui(ui, theme));
     }
 }
