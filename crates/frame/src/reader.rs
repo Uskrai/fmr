@@ -8,31 +8,87 @@ use image::AnimationDecoder;
 
 use crate::ImageData;
 
-pub enum Reader<T: Read> {
-    Reader(Box<image::io::Reader<T>>),
-    Gif(Box<image::codecs::gif::GifDecoder<T>>),
+pub struct ReaderBuilder {
+    video: bool,
+    animated: bool,
+    writable: bool,
 }
 
-impl Reader<BufReader<File>> {
-    pub fn open(path: impl AsRef<Path>) -> Result<Self, image::ImageError> {
-        let load_gif = || Self::load_gif(BufReader::new(std::fs::File::open(&path)?));
+impl Default for ReaderBuilder {
+    fn default() -> Self {
+        Self {
+            video: true,
+            animated: true,
+            writable: false,
+        }
+    }
+}
+
+impl ReaderBuilder {
+    // only open if file is writable as image.
+    pub fn writable(mut self, enable: bool) -> Self {
+        self.writable = enable;
+        self
+    }
+
+    pub fn animated(mut self, enable: bool) -> Self {
+        self.animated = enable;
+        self
+    }
+
+    pub fn video(mut self, enable: bool) -> Self {
+        self.video = enable;
+        self
+    }
+
+    pub fn open(
+        self,
+        path: impl AsRef<Path>,
+    ) -> Result<Reader<BufReader<File>>, image::ImageError> {
+        let load_gif = || Reader::load_gif(BufReader::new(std::fs::File::open(&path)?));
+        let ext = path.as_ref().extension().and_then(|it| it.to_str());
+
+        let is_video = matches!(ext, Some("mp4" | "mkv"));
+
+        let load_memory = || {
+            let reader = image::io::Reader::open(&path)?.with_guessed_format()?;
+
+            match reader.format() {
+                Some(image::ImageFormat::Gif) if self.animated => load_gif(),
+                // can't write video as image so check if isn't writable
+                None if is_video && !self.writable => {
+                    Ok(Reader::VideoPath(path.as_ref().to_path_buf()))
+                }
+                _ => Ok(Reader::Reader(Box::new(reader))),
+            }
+        };
 
         let reader = match image::ImageFormat::from_path(&path) {
             Ok(image::ImageFormat::Gif) => load_gif()?,
             // guess format from memory
-            Ok(_) | Err(image::ImageError::Unsupported(_)) => {
-                let reader = image::io::Reader::open(&path)?.with_guessed_format()?;
-
-                if let Some(image::ImageFormat::Gif) = reader.format() {
-                    load_gif()?
-                } else {
-                    Self::Reader(Box::new(reader))
-                }
+            Ok(_) | Err(image::ImageError::Unsupported(_)) => load_memory()?,
+            Err(err) => {
+                return Err(err);
             }
-            Err(err) => return Err(err),
         };
 
         Ok(reader)
+    }
+}
+
+pub enum Reader<T: Read> {
+    Reader(Box<image::io::Reader<T>>),
+    VideoPath(std::path::PathBuf),
+    Gif(Box<image::codecs::gif::GifDecoder<T>>),
+}
+
+impl Reader<BufReader<File>> {
+    pub fn builder() -> ReaderBuilder {
+        ReaderBuilder::default()
+    }
+
+    pub fn open(path: impl AsRef<Path>) -> Result<Self, image::ImageError> {
+        ReaderBuilder::default().open(path)
     }
 }
 
@@ -64,6 +120,7 @@ impl<'a, T: Read + 'a> Reader<T> {
         match self {
             Reader::Reader(reader) => Frames::SingleImage(reader),
             Reader::Gif(frames) => Frames::Frames(frames.into_frames()),
+            Reader::VideoPath(path) => Frames::VideoPath(path),
         }
     }
 }
@@ -71,6 +128,7 @@ impl<'a, T: Read + 'a> Reader<T> {
 pub enum Frames<'a, T: Read + 'a> {
     SingleImage(Box<image::io::Reader<T>>),
     Frames(image::Frames<'a>),
+    VideoPath(std::path::PathBuf),
 }
 
 impl<'a, T: BufRead + Seek> Frames<'a, T> {
@@ -83,6 +141,7 @@ impl<'a, T: BufRead + Seek> Frames<'a, T> {
                 frames,
                 collected: Vec::new(),
             },
+            Self::VideoPath(path) => FramesCollector::VideoPath(path),
         }
     }
 }
@@ -101,6 +160,7 @@ pub enum FramesCollector<'a, T: Read + 'a> {
         frames: image::Frames<'a>,
         collected: Vec<super::FrameData>,
     },
+    VideoPath(std::path::PathBuf),
 }
 
 unsafe impl<'a, T: Read + Send + 'a> Send for Frames<'a, T> {}
@@ -130,6 +190,10 @@ impl<'a, T: BufRead + Seek> FramesCollector<'a, T> {
                     Ok(false)
                 }
             }
+            FramesCollector::VideoPath(_) => {
+                tracing::info!("loading video");
+                Ok(false)
+            }
         }
     }
 
@@ -140,6 +204,7 @@ impl<'a, T: BufRead + Seek> FramesCollector<'a, T> {
                 SingleImageEither::Image(image) => Some(ImageData::StaticImage(image)),
             },
             FramesCollector::Frames { collected, .. } => Some(ImageData::AnimatedImage(collected)),
+            FramesCollector::VideoPath(path) => Some(ImageData::VideoPath(path)),
         }
     }
 

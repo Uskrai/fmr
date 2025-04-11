@@ -461,7 +461,7 @@ where
         };
 
         if image.is_none() && cache.exists() {
-            if let Ok(reader) = fmr_frame::Reader::open(&cache) {
+            if let Ok(reader) = fmr_frame::Reader::builder().writable(true).open(&cache) {
                 image = reader
                     .into_frames()
                     .into_collector()
@@ -473,7 +473,7 @@ where
         }
 
         if image.is_none() {
-            if let Ok(reader) = fmr_frame::Reader::open(&path) {
+            if let Ok(reader) = fmr_frame::Reader::builder().writable(true).open(&path) {
                 image = reader
                     .into_frames()
                     .into_collector()
