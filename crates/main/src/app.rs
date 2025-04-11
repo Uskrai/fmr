@@ -61,6 +61,12 @@ pub enum AppMode {
     Reader(AppReader),
 }
 
+pub enum ForceMode {
+    Reader,
+    Explorer,
+    Auto,
+}
+
 impl AppMode {
     pub fn path(&self) -> &Path {
         match self {
@@ -153,13 +159,19 @@ impl App {
         }
     }
 
-    pub fn open(&mut self, path: &Path, select_entry: Option<PathBuf>) {
-        if path.exists() {
-            if path.is_file() {
-                self.open_reader(path.to_path_buf());
-            } else if path.is_dir() {
-                self.open_explorer(path.to_path_buf(), select_entry);
-            }
+    pub fn open(&mut self, path: &Path, select_entry: Option<PathBuf>, force: ForceMode) {
+        if !path.exists() {
+            return;
+        }
+
+        if matches!(force, ForceMode::Reader)
+            || (matches!(force, ForceMode::Auto) && path.is_file())
+        {
+            self.open_reader(path.to_path_buf());
+        } else if matches!(force, ForceMode::Explorer)
+            || (matches!(force, ForceMode::Auto) && path.is_dir())
+        {
+            self.open_explorer(path.to_path_buf(), select_entry);
         }
     }
 
@@ -461,7 +473,7 @@ impl eframe::App for App {
 
         impl<'a> AppExplorerOnOpen for OnOpen<'a> {
             fn on_open(&mut self, it: &PathExplorerItem) -> bool {
-                self.app.open(&it.path, None);
+                self.app.open(&it.path, None, ForceMode::Auto);
                 true
             }
 
@@ -539,20 +551,11 @@ impl eframe::App for App {
             }
         }
 
-        if response.hovered() {
+        if response.contains_pointer() {
             ctx.input_mut(|input| {
                 if input.pointer.button_clicked(egui::PointerButton::Primary)
                     && input.pointer.button_clicked(egui::PointerButton::Secondary)
                 {
-                    // input.events.retain(|it| {
-                    //     if let egui::Event::MouseWheel { delta, .. } = it {
-                    //         // dbg!(delta);
-                    //
-                    //         return true;
-                    //     }
-                    //
-                    //     false
-                    // });
                     let is_changed = self.open_parent(AppOpenParentSetting {
                         canonicalize_path: false,
                     });
@@ -564,6 +567,14 @@ impl eframe::App for App {
                     self.open_parent(AppOpenParentSetting {
                         canonicalize_path: input.modifiers.shift_only(),
                     });
+                }
+
+                if let Some(AppMode::Explorer(mode)) = &self.mode {
+                    if let Some(selected) = mode.selected_path() {
+                        if input.pointer.button_clicked(egui::PointerButton::Extra2) {
+                            self.open(&selected, None, ForceMode::Reader)
+                        }
+                    }
                 }
             });
 

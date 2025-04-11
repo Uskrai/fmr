@@ -272,7 +272,7 @@ impl<'a> AppReaderView<'a> {
                 setting.change_folder_with_scroll_wheel && !any_down;
 
             let should_change_folder =
-                (change_folder_with_scroll_wheel || secondary_down) && response.hovered();
+                (change_folder_with_scroll_wheel || secondary_down) && response.contains_pointer();
 
             fmr_egui::event::retains(ui.ctx(), |event| {
                 if should_change_folder {
