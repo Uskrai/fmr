@@ -60,11 +60,7 @@ impl ReaderLoader {
     pub async fn load(self) {
         let open_path = self.path.clone();
         if open_path.exists() {
-            let path = if open_path.is_file()
-                && image::ImageFormat::from_path(&open_path)
-                    .map(|it| it.can_read())
-                    .unwrap_or(false)
-            {
+            let path = if open_path.is_file() && ImageData::can_read(&open_path) {
                 open_path.parent().unwrap().to_path_buf()
             } else {
                 open_path.clone()
@@ -92,7 +88,7 @@ impl ReaderLoader {
 
         let mut entries = vec![];
         while let Ok(Some(it)) = dir.next_entry().await {
-            let can_read = ImageData::can_read(&it.file_name().to_string_lossy());
+            let can_read = ImageData::can_read(it.file_name());
             let can_read = can_read || fmr_frame::Reader::open(it.path()).is_ok();
 
             if can_read {

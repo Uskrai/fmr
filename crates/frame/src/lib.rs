@@ -67,6 +67,7 @@ impl ToEguiImage for image::DynamicImage {
 pub enum ImageData {
     StaticImage(image::DynamicImage),
     AnimatedImage(Vec<FrameData>),
+    VideoPath(std::path::PathBuf),
 }
 
 impl ImageData {
@@ -91,6 +92,7 @@ impl ImageData {
                 }
                 Self::AnimatedImage(new)
             }
+            Self::VideoPath(path) => Self::VideoPath(path.clone()),
         }
     }
 
@@ -109,6 +111,7 @@ impl ImageData {
                     })
                     .collect(),
             ),
+            ImageData::VideoPath(path) => SplittedImageData::VideoPath(path),
         }
     }
 
@@ -132,6 +135,9 @@ impl ImageData {
                     encode.encode_frame(frame)?;
                 }
             }
+            ImageData::VideoPath(_) => {
+                //
+            }
         };
 
         Ok(())
@@ -139,7 +145,7 @@ impl ImageData {
 }
 
 impl ImageData {
-    pub fn can_read(name: &str) -> bool {
+    pub fn can_read(name: impl AsRef<Path>) -> bool {
         image::ImageFormat::from_path(name)
             .map(|it| it.can_read())
             .unwrap_or(false)
@@ -343,6 +349,7 @@ pub struct SplittedFrameData {
 pub enum SplittedImageData {
     StaticImage(SplittedImage),
     AnimatedImage(Vec<SplittedFrameData>),
+    VideoPath(std::path::PathBuf),
 }
 
 impl SplittedImageData {
@@ -383,6 +390,7 @@ impl From<SplittedFrameData> for EguiSplittedFrameData {
 pub enum EguiSplittedImageData {
     StaticImage(EguiSplittedStaticImageData),
     AnimatedImage(Vec<EguiSplittedFrameData>),
+    VideoPath(std::path::PathBuf),
 }
 
 impl EguiSplittedImageData {
@@ -406,6 +414,7 @@ impl From<SplittedImageData> for EguiSplittedImageData {
                 //
                 Self::AnimatedImage(image.into_iter().map(EguiSplittedFrameData::from).collect())
             }
+            SplittedImageData::VideoPath(path) => Self::VideoPath(path),
         }
     }
 }

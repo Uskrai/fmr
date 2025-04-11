@@ -24,6 +24,7 @@ impl Default for TextureOption {
         Self(egui::TextureOptions {
             magnification: egui::TextureFilter::Linear,
             minification: egui::TextureFilter::Linear,
+            mipmap_mode: Some(egui::TextureFilter::Linear),
             wrap_mode: egui::TextureWrapMode::default(),
         })
     }
@@ -150,6 +151,7 @@ impl<'a> SplittedTextureWidget<'a> {
 pub enum TextureHandle {
     StaticTexture(SplittedTextureHandle),
     AnimatedTexture(AnimatedTextureHandle),
+    VideoPath(std::path::PathBuf),
 }
 
 impl TextureHandle {
@@ -166,6 +168,7 @@ impl TextureHandle {
             EguiSplittedImageData::AnimatedImage(frames) => TextureHandle::AnimatedTexture(
                 AnimatedTextureHandle::from_data(tex_mgr, name, frames, option),
             ),
+            EguiSplittedImageData::VideoPath(path) => TextureHandle::VideoPath(path),
         }
     }
 
@@ -177,6 +180,7 @@ impl TextureHandle {
         match self {
             TextureHandle::StaticTexture(handle) => handle.size(),
             TextureHandle::AnimatedTexture(handle) => handle.max_size(),
+            TextureHandle::VideoPath(_) => [0, 0],
         }
     }
 }
@@ -260,6 +264,7 @@ impl TextureFrameHandle {
 pub enum TextureViewState {
     StaticTexture(StaticTextureViewState),
     AnimatedTexture(AnimatedTextureViewState),
+    VideoPath(VideoPathViewState),
     Loading(LoadingTexture),
     Mutable(Arc<Mutex<Self>>),
 }
@@ -269,6 +274,7 @@ impl TextureViewState {
         match self {
             TextureViewState::StaticTexture(state) => state.handle.size(),
             TextureViewState::AnimatedTexture(state) => state.handles.max_size(),
+            TextureViewState::VideoPath(_) => [0, 0],
             TextureViewState::Loading(loading) => loading.size_2(),
             TextureViewState::Mutable(state) => state.lock().max_size(),
         }
@@ -307,6 +313,7 @@ impl TextureViewState {
         match self {
             TextureViewState::StaticTexture(state) => state.handle.name.clone(),
             TextureViewState::AnimatedTexture(state) => state.handles.name.clone(),
+            TextureViewState::VideoPath(state) => state.filename.clone(),
             TextureViewState::Loading(state) => state.name.clone(),
             TextureViewState::Mutable(state) => state.lock().name(),
             //
@@ -323,6 +330,7 @@ impl From<TextureHandle> for TextureViewState {
             TextureHandle::StaticTexture(handle) => {
                 Self::StaticTexture(StaticTextureViewState { handle })
             }
+            TextureHandle::VideoPath(path) => Self::VideoPath(VideoPathViewState::new(path)),
         }
     }
 }
@@ -351,6 +359,26 @@ impl AnimatedTextureViewState {
 
     pub fn frame(&self) -> &TextureFrameHandle {
         &self.handles.items()[self.index]
+    }
+}
+
+pub struct VideoPathViewState {
+    path: std::path::PathBuf,
+    filename: String,
+    thread: Option<std::thread::JoinHandle<()>>,
+}
+
+impl VideoPathViewState {
+    pub fn new(path: std::path::PathBuf) -> Self {
+        Self {
+            filename: path
+                .file_name()
+                .map(|it| it.to_string_lossy())
+                .unwrap_or_else(|| path.to_string_lossy())
+                .to_string(),
+            path,
+            thread: None,
+        }
     }
 }
 
@@ -424,7 +452,27 @@ impl<'a> TextureView<'a> {
 
                 response
             }
+            TextureViewState::VideoPath(state) => {
+                if state.thread.is_none() {
+                    let path = state.path.clone();
+                    state.thread = Some(std::thread::spawn(|| {
+                        std::process::Command::new("mpv")
+                            .arg(path)
+                            .output()
+                            .unwrap();
+                    }));
+                }
 
+                let size = ui.available_size();
+
+                ui.allocate_ui(size, |ui| {
+                    ui.centered_and_justified(|ui| {
+                        ui.add(egui::Label::new(format!("Playing {}", state.filename)));
+                        // ui.add(egui::Spinner::new().size(loading.size() as f32));
+                    })
+                })
+                .response
+            }
             TextureViewState::Loading(loading) => {
                 let size = [
                     ui.available_width().max(loading.size_2()[0] as f32),
@@ -432,7 +480,10 @@ impl<'a> TextureView<'a> {
                 ];
                 ui.allocate_ui(size.into(), |ui| {
                     ui.centered_and_justified(|ui| {
-                        ui.add(egui::Label::new(format!("Loading {}", loading.name())));
+                        ui.add(
+                            egui::Label::new(format!("Loading {}", loading.name()))
+                                .selectable(false),
+                        );
                         // ui.add(egui::Spinner::new().size(loading.size() as f32));
                     })
                 })
