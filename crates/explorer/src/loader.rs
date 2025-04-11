@@ -37,6 +37,7 @@ pub struct ExplorerLoader {
     pub path: PathBuf,
     pub selected_entry: Option<PathBuf>,
     pub setting_receiver: watch::Receiver<ExplorerLoaderSetting>,
+    pub show_hidden: bool,
     pub cache: ExplorerLoaderCache,
     #[derivative(Debug = "ignore")]
     pub sorter: PathSorterType,
@@ -64,6 +65,7 @@ impl ExplorerLoader {
             path,
             selected_entry,
             mut setting_receiver,
+            show_hidden,
             sorter,
             ctx,
             cache: _,
@@ -77,6 +79,14 @@ impl ExplorerLoader {
         let mut content = vec![];
 
         for it in dir.flatten() {
+            if !show_hidden {
+                // let path = it.path();
+                let file_name = it.file_name();
+                if file_name.to_str().map_or(false, |s| s.starts_with('.')) {
+                    // skip if file name starts with .
+                    continue;
+                }
+            }
             content.push(it);
         }
 
@@ -152,6 +162,7 @@ impl ExplorerLoader {
             path: _,
             selected_entry: _,
             setting_receiver: _,
+            show_hidden: _,
         } = self.clone();
 
         let it = PathExplorerItem::new(entry.path())?;
@@ -393,6 +404,7 @@ where
         if self.path.exists() {
             let dir = walkdir::WalkDir::new(&self.path)
                 .same_file_system(true)
+                .follow_links(true)
                 .sort_by(|a, b| fmr_core::path::compare_natural(a.file_name(), b.file_name()));
 
             let dir = dir.into_iter().filter_map(|it| it.ok());

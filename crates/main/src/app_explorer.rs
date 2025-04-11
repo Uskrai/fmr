@@ -8,7 +8,10 @@ use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
 use tokio::sync::watch;
 
-use fmr_core::{path::{compare_natural, PathSorterType}, AbortOnDropHandle};
+use fmr_core::{
+    path::{compare_natural, PathSorterType},
+    AbortOnDropHandle,
+};
 use fmr_explorer::{
     Explorer, ExplorerEntryLoaderSetting, ExplorerLoader, ExplorerLoaderCache,
     ExplorerLoaderSetting, ExplorerOutput, ExplorerSetting, ExplorerView, PathExplorerItem,
@@ -33,6 +36,8 @@ pub struct AppExplorerSetting {
     pub cache: ExplorerLoaderCache,
     #[serde(default)]
     pub entry: ExplorerEntryLoaderSetting,
+    #[serde(default)]
+    pub show_hidden: bool,
     #[serde(skip)]
     pub sorter: ExplorerSorter,
 }
@@ -80,6 +85,7 @@ impl AppExplorer {
             setting_receiver,
             cache: setting.cache,
             sorter: setting.sorter.0,
+            show_hidden: setting.show_hidden,
             ctx,
         };
 
