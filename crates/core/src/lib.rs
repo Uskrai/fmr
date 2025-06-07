@@ -15,6 +15,12 @@ impl<T> std::future::Future for AbortOnDropHandle<T> {
     }
 }
 
+impl<T> Drop for AbortOnDropHandle<T> {
+    fn drop(&mut self) {
+        self.0.abort();
+    }
+}
+
 pub fn spawn_and_abort_on_drop<F>(fut: F) -> AbortOnDropHandle<F::Output>
 where
     F: std::future::Future + Send + 'static,
