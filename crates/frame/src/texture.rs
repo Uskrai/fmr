@@ -410,11 +410,21 @@ impl LoadingTexture {
 
 pub struct TextureView<'a> {
     state: &'a mut TextureViewState,
+
+    show_video: bool,
 }
 
 impl<'a> TextureView<'a> {
     pub fn new(state: &'a mut TextureViewState) -> Self {
-        Self { state }
+        Self {
+            state,
+            show_video: true,
+        }
+    }
+
+    pub fn without_video(mut self) -> Self {
+        self.show_video = false;
+        self
     }
 
     pub fn show(
@@ -425,12 +435,13 @@ impl<'a> TextureView<'a> {
             &'c crate::SplittedTextureHandle,
         ) -> crate::SplittedTextureWidget<'c>,
     ) -> egui::Response {
-        Self::show_state(self.state, ui, show_image)
+        Self::show_state(self.state, ui, self.show_video, show_image)
     }
 
     fn show_state(
         state: &mut TextureViewState,
         ui: &mut egui::Ui,
+        show_video: bool,
         show_image: impl for<'b, 'c> Fn(
             &'b mut egui::Ui,
             &'c crate::SplittedTextureHandle,
@@ -452,7 +463,7 @@ impl<'a> TextureView<'a> {
 
                 response
             }
-            TextureViewState::VideoPath(state) => {
+            TextureViewState::VideoPath(state) if show_video => {
                 if state.thread.is_none() {
                     let path = state.path.clone();
                     state.thread = Some(std::thread::spawn(|| {
@@ -468,6 +479,22 @@ impl<'a> TextureView<'a> {
                 ui.allocate_ui(size, |ui| {
                     ui.centered_and_justified(|ui| {
                         ui.add(egui::Label::new(format!("Playing {}", state.filename)));
+                        // ui.add(egui::Spinner::new().size(loading.size() as f32));
+                    })
+                })
+                .response
+            }
+            TextureViewState::VideoPath(v) => {
+                // let size = [
+                //     ui.available_width().max(loading.size_2()[0] as f32),
+                //     loading.size_2()[1] as f32,
+                // ];
+                ui.allocate_ui(ui.available_size(), |ui| {
+                    ui.centered_and_justified(|ui| {
+                        ui.add(
+                            egui::Label::new(format!("Not Showing Video\n{:?}", v.path))
+                                .selectable(false),
+                        );
                         // ui.add(egui::Spinner::new().size(loading.size() as f32));
                     })
                 })
@@ -489,7 +516,9 @@ impl<'a> TextureView<'a> {
                 })
                 .response
             }
-            TextureViewState::Mutable(state) => Self::show_state(&mut state.lock(), ui, show_image),
+            TextureViewState::Mutable(state) => {
+                Self::show_state(&mut state.lock(), ui, show_video, show_image)
+            }
         }
     }
 }
