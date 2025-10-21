@@ -26,7 +26,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: Swatinem/rust-cache@v1
+    - uses: Swatinem/rust-cache@v2
 
     # - name: Restore artifacts, or setup vcpkg (do not install any package)
     #   uses: lukka/run-vcpkg@v10
